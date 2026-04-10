@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maven Pro";
+  src: url("/fonts/MavenPro-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Evium brand colors */
+  --color-evium-green: #2DC856;
+  --color-evium-dark: #1A2F3A;
+  --color-evium-dark-light: #243847;
+
+  /* Typography */
+  --font-sans: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-evium-dark);
+  color: white;
+}
