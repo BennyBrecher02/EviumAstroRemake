@@ -16,3 +16,13 @@ node_modules/
 # Source reference materials (large binary files — keep local only)
 CopyOfZippedEviumDataFromGoogleToInspect/
 ExistingEviumContextMedia/
+
+# Local-only markdown notes and context files
+markdowns/
+
+# AI tooling — local only, not needed for deployment
+.claude/
+AGENTS.md
+
+# Asset evaluation reference materials
+public/AssetAssessment/

@@ -1,0 +1,61 @@
+---
+// Hero C: "Centered Power" — editorial centered layout, multiple chargers, big numbers
+---
+<section class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#111e26] text-center px-6 py-24">
+
+  <!-- Background grid texture -->
+  <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
+    style="background-image: linear-gradient(rgba(45,200,86,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,1) 1px, transparent 1px); background-size: 48px 48px;">
+  </div>
+
+  <!-- Top label -->
+  <div class="relative z-10 flex items-center gap-3 mb-8">
+    <div class="w-12 h-[1px] bg-[#2DC856]/40"></div>
+    <span class="text-[#2DC856] text-xs tracking-[0.3em] uppercase font-bold">Northeast's #1 Turnkey EV Installer</span>
+    <div class="w-12 h-[1px] bg-[#2DC856]/40"></div>
+  </div>
+
+  <!-- Headline -->
+  <h1 class="relative z-10 text-white font-black leading-[1.0] mb-6 max-w-3xl" style="font-size: clamp(3rem, 7vw, 6rem);">
+    The Easiest EV<br/>
+    Charging Decision<br/>
+    <span class="text-[#2DC856]">You'll Ever Make.</span>
+  </h1>
+
+  <p class="relative z-10 text-white/50 text-lg max-w-xl mb-10 leading-relaxed">
+    Free installation. Turnkey management. Revenue sharing. We do it all — you just say yes.
+  </p>
+
+  <div class="relative z-10 flex flex-wrap gap-4 justify-center mb-16">
+    <a href="/contact/quote"
+      class="bg-[#2DC856] text-[#111e26] font-black text-sm tracking-widest uppercase px-10 py-4 hover:bg-white transition-colors">
+      Get Your Free Quote
+    </a>
+    <a href="/how-it-works"
+      class="text-white/60 font-semibold text-sm tracking-widest uppercase px-10 py-4 border border-white/15 hover:border-[#2DC856] hover:text-[#2DC856] transition-colors">
+      Learn More
+    </a>
+  </div>
+
+  <!-- Charger trio -->
+  <div class="relative z-10 flex items-end justify-center gap-0 w-full max-w-2xl">
+    <img src="/images/tellus-dc-fast-300kw.png" alt="" class="h-56 object-contain opacity-40 -mr-4 drop-shadow-[0_0_30px_rgba(45,200,86,0.15)]" />
+    <img src="/images/evium-evocharge-l2-wallmount.png" alt="Evium Charger" class="h-80 object-contain z-10 drop-shadow-[0_0_60px_rgba(45,200,86,0.4)]" />
+    <img src="/images/maxicharger-dc-fast-60-240kw.png" alt="" class="h-60 object-contain opacity-40 -ml-4 drop-shadow-[0_0_30px_rgba(45,200,86,0.15)]" />
+  </div>
+
+  <!-- Bottom fade -->
+  <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#111e26] to-transparent pointer-events-none z-20"></div>
+
+  <!-- Floating stat strip -->
+  <div class="absolute bottom-8 left-0 right-0 z-30 flex justify-center">
+    <div class="flex divide-x divide-white/10 border border-white/10 bg-white/5 backdrop-blur-sm">
+      {[['500+','Chargers Active'],['$0','Upfront Cost'],['NEVI','Grant Ready'],['All Types','Residential · Commercial']].map(([n,l]) => (
+        <div class="px-8 py-4 text-center">
+          <div class="text-[#2DC856] font-black text-2xl leading-none">{n}</div>
+          <div class="text-white/35 text-[10px] tracking-widest uppercase mt-1">{l}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

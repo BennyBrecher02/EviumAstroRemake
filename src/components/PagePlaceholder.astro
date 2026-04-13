@@ -1,0 +1,30 @@
+---
+/**
+ * Default placeholder used by every page until real content is built.
+ * Shows the Evium logo centred on the brand dark-teal background.
+ */
+interface Props { title?: string; }
+const { title } = Astro.props;
+---
+<section
+  style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%);
+  "
+>
+  <div style="text-align:center; pointer-events:none; user-select:none;">
+    <img
+      src="/images/logo.webp"
+      alt="Evium Charging"
+      style="height:72px; margin:0 auto; display:block; opacity:0.92;"
+    />
+    {title && (
+      <p style="margin-top:18px; font-family:'Maven Pro',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.25);">
+        {title}
+      </p>
+    )}
+  </div>
+</section>

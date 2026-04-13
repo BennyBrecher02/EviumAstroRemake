@@ -1,0 +1,60 @@
+---
+// Hero A: "Full Bleed" — dramatic full-height, charger dominates right side, bold left copy
+---
+<section class="relative min-h-screen flex items-center overflow-hidden bg-[#0f1e27]">
+
+  <!-- Green radial glow behind charger -->
+  <div class="absolute right-0 top-0 w-[65%] h-full pointer-events-none">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_70%_50%,rgba(45,200,86,0.12),transparent)]"></div>
+  </div>
+
+  <!-- Charger image, right-anchored -->
+  <img
+    src="/images/evium-evocharge-l2-wallmount.png"
+    alt="Evium Level 2 Charger"
+    class="absolute right-0 bottom-0 h-[90%] object-contain object-bottom drop-shadow-[0_0_60px_rgba(45,200,86,0.25)] pointer-events-none select-none"
+  />
+
+  <!-- Diagonal slice accent -->
+  <div class="absolute inset-0 pointer-events-none"
+    style="background: linear-gradient(105deg, #0f1e27 52%, transparent 52%);">
+  </div>
+
+  <!-- Left content -->
+  <div class="relative z-10 max-w-[900px] mx-auto w-full px-8 md:px-12 py-24">
+    <p class="text-[#2DC856] text-sm font-bold tracking-[0.2em] uppercase mb-6">Turnkey EV Charging Infrastructure</p>
+    <h1 class="text-white font-black leading-[1.05] mb-6" style="font-size: clamp(2.8rem, 6vw, 5.5rem);">
+      Your Property.<br />
+      <span class="text-[#2DC856]">Fully Charged.</span>
+    </h1>
+    <p class="text-white/60 text-lg max-w-md mb-10 leading-relaxed">
+      We handle everything — permits, installation, hardware, and software. Zero cost to you. 500+ chargers deployed across the Northeast.
+    </p>
+    <div class="flex flex-wrap gap-4 items-center">
+      <a href="/contact/quote"
+        class="inline-block bg-[#2DC856] text-[#0f1e27] font-black text-sm tracking-widest uppercase px-8 py-4 hover:bg-white transition-colors duration-200">
+        Get a Free Quote
+      </a>
+      <a href="/how-it-works"
+        class="inline-block text-white/70 font-semibold text-sm tracking-widest uppercase px-8 py-4 border border-white/20 hover:border-[#2DC856] hover:text-[#2DC856] transition-colors duration-200">
+        See How It Works
+      </a>
+    </div>
+
+    <!-- Stats row -->
+    <div class="flex gap-10 mt-16 pt-8 border-t border-white/10">
+      <div>
+        <div class="text-[#2DC856] font-black text-3xl">500+</div>
+        <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Chargers Deployed</div>
+      </div>
+      <div>
+        <div class="text-[#2DC856] font-black text-3xl">$0</div>
+        <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Cost to Property</div>
+      </div>
+      <div>
+        <div class="text-[#2DC856] font-black text-3xl">48hr</div>
+        <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Quote Turnaround</div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,302 @@
+---
+const SKEW_OFFSET = 16;
+const SKEW_DEG = -18;
+
+// Battery order: Solutions · Products · Blog · How It Works · Contact
+const navItems = [
+  {
+    label: 'Solutions',
+    href: '/solutions',
+    sub: [
+      { label: 'Multifamily', href: '/solutions/multifamily' },
+      { label: 'Commercial',  href: '/solutions/commercial'  },
+      { label: 'Retail',      href: '/solutions/retail'      },
+      { label: 'Parking',     href: '/solutions/parking'     },
+      { label: 'Medical',     href: '/solutions/medical'     },
+    ],
+  },
+  {
+    label: 'Products',
+    href: '/products',
+    sub: [
+      { label: 'Level 2',    href: '/products/level-2'  },
+      { label: 'DC Fast',    href: '/products/dc-fast'  },
+      { label: 'Software',   href: '/products/software' },
+      { label: 'Driver App', href: '/products/app'      },
+    ],
+  },
+  {
+    label: 'Blog',
+    href: '/blog',
+    sub: [
+      { label: 'All Posts',     href: '/blog'                },
+      { label: 'News',          href: '/blog/news'           },
+      { label: 'Case Studies',  href: '/blog/case-studies'   },
+      { label: 'Newsletter',    href: '/blog/newsletter'     },
+    ],
+  },
+  {
+    label: 'How It Works',
+    href: '/how-it-works',
+    sub: [
+      { label: 'Overview',    href: '/how-it-works/overview' },
+      { label: 'Our Process', href: '/how-it-works/process'  },
+      { label: 'Financing',   href: '/how-it-works/models'   },
+      { label: 'Rebates',     href: '/how-it-works/rebates'  },
+      { label: 'FAQ',         href: '/how-it-works/faq'      },
+    ],
+  },
+  {
+    label: 'Contact',
+    href: '/contact',
+    sub: [
+      { label: 'Get a Quote',     href: '/contact/quote'    },
+      { label: 'Schedule a Call', href: '/contact/schedule' },
+      { label: 'Support',         href: '/contact/support'  },
+      { label: 'Referral Program',href: '/contact/referral' },
+    ],
+  },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-center px-6 py-4">
+  <div class="flex items-center w-full max-w-[900px]">
+
+    <nav class="battery-body">
+
+      <!-- Logo → home -->
+      <a href="/" class="group relative flex items-center px-5 shrink-0">
+        <span
+          class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+          style={`clip-path: polygon(0% 0%, 100% 0%, calc(100% - ${SKEW_OFFSET}px) 100%, 0% 100%); background: rgba(45,200,86,0.1);`}
+        ></span>
+        <!-- Logo: slightly larger than before -->
+        <img src="/images/logo.webp" alt="Evium Charging" class="relative z-10" style="height:32px;width:auto;" />
+      </a>
+
+      {navItems.map((item) => (
+        <>
+          <span class="divider" aria-hidden="true" />
+          <div class="nav-item-wrap" data-nav-item>
+            <button
+              type="button"
+              class:list={[
+                'nav-trigger group relative flex flex-1 items-center justify-center px-2 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap w-full h-full',
+                currentPath.startsWith(item.href) ? 'is-active' : ''
+              ]}
+              aria-expanded="false"
+            >
+              <span
+                class:list={[
+                  'absolute inset-0 transition-opacity duration-150 pointer-events-none',
+                  currentPath.startsWith(item.href) ? 'opacity-100' : 'opacity-0'
+                ]}
+                style={`clip-path: polygon(${SKEW_OFFSET}px 0%, 100% 0%, calc(100% - ${SKEW_OFFSET}px) 100%, 0% 100%); background: rgba(45,200,86,${currentPath.startsWith(item.href) ? '0.13' : '0.09'});`}
+              ></span>
+              <span class="relative z-10">{item.label}</span>
+            </button>
+
+            <!-- Dropdown -->
+            <div class="nav-dropdown" aria-hidden="true">
+              <div class="dropdown-inner">
+                {item.sub.map((sub) => (
+                  <a href={sub.href} class="dropdown-item">
+                    <span>{sub.label}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      ))}
+
+    </nav>
+
+    <div class="battery-nub" aria-hidden="true" />
+  </div>
+</header>
+
+<style>
+  /* ── Battery shell ─────────────────────────────────────────── */
+  .battery-body {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    height: 48px;
+    border: 2px solid var(--nav-border);
+    border-radius: 4px 0 0 4px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(var(--nav-blur));
+  }
+
+  .battery-nub {
+    width: 8px;
+    height: 22px;
+    background: var(--nav-border);
+    border-radius: 0 3px 3px 0;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .divider {
+    display: block;
+    width: 2px;
+    background: var(--nav-border);
+    flex-shrink: 0;
+    transform: skewX(-18deg);
+    opacity: var(--nav-divider-alpha);
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: stretch;
+  }
+
+  .nav-item-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+  }
+
+  .nav-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--nav-text);
+  }
+  .nav-trigger.is-active {
+    color: var(--nav-text-active);
+  }
+
+  .nav-trigger:hover,
+  .nav-trigger[aria-expanded="true"] {
+    color: var(--nav-text-active);
+  }
+
+  .nav-trigger:hover .absolute,
+  .nav-trigger[aria-expanded="true"] .absolute {
+    opacity: 1 !important;
+  }
+
+  /* ── Dropdown ──────────────────────────────────────────────── */
+  .nav-dropdown {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    clip-path: inset(0 0 100% -80px);
+    transition: clip-path 0.22s ease;
+  }
+
+  .nav-dropdown.is-open {
+    clip-path: inset(0 0 -20px -80px);
+    pointer-events: auto;
+  }
+
+  .dropdown-inner {
+    transform: skewX(-18deg);
+    transform-origin: top left;
+    background: var(--nav-drop-bg);
+    border: 2px solid var(--nav-border);
+    border-top: 2px solid rgba(45,200,86,0.35);
+    padding: 6px 0 10px;
+    backdrop-filter: blur(var(--nav-drop-blur));
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  }
+
+  .dropdown-item {
+    display: block;
+    transform: skewX(18deg);
+    padding: 10px 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--nav-drop-text);
+    text-decoration: none;
+    transition: color 0.1s, background 0.1s;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    color: var(--nav-drop-hover);
+    background: var(--nav-drop-hover-bg);
+  }
+</style>
+
+<script>
+  const items = document.querySelectorAll<HTMLElement>('[data-nav-item]');
+  const batteryBody = document.querySelector<HTMLElement>('.battery-body')!;
+
+  // ── Position a dropdown flush below its trigger button ──────
+  function positionDrop(btn: HTMLElement, drop: HTMLElement) {
+    const r     = btn.getBoundingClientRect();
+    const bRect = batteryBody.getBoundingClientRect();
+    const w     = Math.round(r.width);
+
+    // Geometry: continue the slanted divider lines through the gap.
+    const GAP      = 3;
+    const tanSkew  = Math.tan(18 * Math.PI / 180);
+    const innerH   = bRect.height - 4;
+    const lineShift = Math.round((innerH / 2 + 2 + GAP) * tanSkew);
+
+    drop.style.top   = (bRect.height + GAP) + 'px';
+    drop.style.left  = (Math.round(r.left) - bRect.left - lineShift) + 'px';
+    drop.style.width = w + 'px';
+  }
+
+  function closeAll(except?: HTMLElement) {
+    items.forEach((item) => {
+      if (item === except) return;
+      item.querySelector<HTMLElement>('.nav-trigger')?.setAttribute('aria-expanded', 'false');
+      item.querySelector<HTMLElement>('.nav-dropdown')?.classList.remove('is-open');
+    });
+  }
+
+  items.forEach((item) => {
+    const btn  = item.querySelector<HTMLElement>('.nav-trigger')!;
+    const drop = item.querySelector<HTMLElement>('.nav-dropdown')!;
+    if (!btn || !drop) return;
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function openItem() {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      closeAll(item);
+      positionDrop(btn, drop);
+      btn.setAttribute('aria-expanded', 'true');
+      drop.classList.add('is-open');
+    }
+
+    function scheduleClose() {
+      closeTimer = setTimeout(() => {
+        btn.setAttribute('aria-expanded', 'false');
+        drop.classList.remove('is-open');
+        closeTimer = null;
+      }, 180);  // 180 ms gap tolerance — enough to cross the 3 px gap to the dropdown
+    }
+
+    function cancelClose() {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    }
+
+    // ── Hover to open ──
+    btn.addEventListener('mouseenter', openItem);
+
+    // Schedule close when leaving the battery cell …
+    item.addEventListener('mouseleave', scheduleClose);
+    // … but cancel if mouse re-enters the cell …
+    item.addEventListener('mouseenter', cancelClose);
+    // … or enters the dropdown panel itself
+    drop.addEventListener('mouseenter', cancelClose);
+    drop.addEventListener('mouseleave', scheduleClose);
+
+    // Click also works (touch support + keyboard)
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.getAttribute('aria-expanded') === 'true' ? scheduleClose() : openItem();
+    });
+  });
+
+  document.addEventListener('click', () => closeAll());
+</script>

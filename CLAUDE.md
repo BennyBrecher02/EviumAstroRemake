@@ -3,6 +3,10 @@
 ## Project
 Full website redesign for Evium Charging (https://eviumcharging.com), a turnkey EV charging infrastructure company. Built in Astro + Tailwind, deployed to Vercel via GitHub.
 
+## Quality Standard — NON-NEGOTIABLE
+**This site must look premium, expensive, and professional at all times.**
+Never ship anything that looks cheap, rough, or unfinished. Every animation, image, shadow, blend, spacing, and interaction must feel intentional and polished. If an asset, effect, or layout doesn't meet that bar, fix it before moving on — do not leave visible artifacts, clipped images, white halos, mis-aligned elements, or janky transitions.
+
 ## Stack
 - **Framework:** Astro (static site, no SSR unless needed)
 - **Styling:** Tailwind CSS v4 (`@theme` in global.css, no tailwind.config.js)

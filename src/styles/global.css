@@ -58,3 +58,35 @@ html {
   background-color: var(--color-evium-dark);
   color: white;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   THEME TOKENS  (3 modes, toggled via data-theme on <html>)
+   ═══════════════════════════════════════════════════════════
+   (none)           → Dark mode  +  Dark navbar   (default)
+   dark-light       → Dark mode  +  Light navbar
+   light            → Apple-white light mode
+   ─────────────────────────────────────────────────────── */
+:root {
+  /* Navbar */
+  --nav-bg:            rgba(15, 28, 38, 0.97);
+  --nav-blur:          4px;
+  --nav-drop-bg:       rgba(12, 24, 32, 0.98);
+  --nav-drop-blur:     8px;
+  --nav-border:        #2DC856;
+  --nav-divider-alpha: 0.7;
+  --nav-text:          rgba(255,255,255,0.75);
+  --nav-text-active:   #2DC856;
+  --nav-drop-text:     rgba(255,255,255,0.65);
+  --nav-drop-hover-bg: rgba(45,200,86,0.08);
+  --nav-drop-hover:    #2DC856;
+}
+
+/* ── Dark + Light Navbar ───────────────────────────────── */
+html[data-theme="dark-light"] {
+  --nav-bg:            rgba(26, 47, 58, 0.85);
+  --nav-blur:          8px;
+  --nav-drop-bg:       rgba(18, 35, 45, 0.97);
+  --nav-drop-blur:     16px;
+}
+
+

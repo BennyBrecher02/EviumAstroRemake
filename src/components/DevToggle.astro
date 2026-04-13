@@ -1,0 +1,129 @@
+---
+/**
+ * Dev-only floating toggle — swaps between Dark navbar and Light navbar.
+ * Apple Glass pill style. Persists choice in localStorage.
+ */
+---
+
+<div id="dev-toggle" role="button" tabindex="0" aria-label="Toggle navbar theme">
+  <span class="track">
+    <span class="thumb"></span>
+  </span>
+  <span class="label" id="dev-toggle-label">DARK NAV</span>
+</div>
+
+<style>
+  #dev-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 14px 8px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 4px 32px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+
+  #dev-toggle:hover {
+    box-shadow:
+      0 6px 40px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+  }
+
+  #dev-toggle:active { transform: translateY(0); }
+
+  .track {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+  }
+
+  .thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.3s ease;
+  }
+
+  .label {
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.70);
+    transition: color 0.2s;
+    min-width: 52px;
+  }
+
+  /* Light-nav state */
+  #dev-toggle.is-light-nav .track {
+    background: rgba(45, 200, 86, 0.28);
+    border-color: rgba(45, 200, 86, 0.5);
+  }
+  #dev-toggle.is-light-nav .thumb {
+    transform: translateX(16px);
+    background: #2DC856;
+  }
+  #dev-toggle.is-light-nav .label {
+    color: rgba(45, 200, 86, 0.9);
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('dev-toggle')!;
+  const label  = document.getElementById('dev-toggle-label')!;
+  const html   = document.documentElement;
+
+  function applyTheme(theme: 'dark' | 'dark-light') {
+    if (theme === 'dark-light') {
+      html.setAttribute('data-theme', 'dark-light');
+      toggle.classList.add('is-light-nav');
+      label.textContent = 'LIGHT NAV';
+    } else {
+      html.removeAttribute('data-theme');
+      toggle.classList.remove('is-light-nav');
+      label.textContent = 'DARK NAV';
+    }
+    localStorage.setItem('evium-theme', theme);
+  }
+
+  const saved = localStorage.getItem('evium-theme');
+  applyTheme(saved === 'dark-light' ? 'dark-light' : 'dark');
+
+  toggle.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme') === 'dark-light' ? 'dark-light' : 'dark';
+    applyTheme(current === 'dark' ? 'dark-light' : 'dark');
+  });
+
+  toggle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle.click();
+    }
+  });
+</script>
