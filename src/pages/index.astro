@@ -1,60 +1,68 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import HeroPlaceholder from '../components/heroes/HeroPlaceholder.astro';
-import HeroA from '../components/heroes/HeroA.astro';
-import HeroB from '../components/heroes/HeroB.astro';
-import HeroC from '../components/heroes/HeroC.astro';
-import HeroD from '../components/heroes/HeroD.astro';
-import HeroE from '../components/heroes/HeroE.astro';
 ---
+<Layout title="Evium Charging">
+  <main class="relative min-h-screen overflow-hidden bg-[#081420]">
+    <video
+      class="absolute inset-0 h-full w-full object-cover"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      aria-label="Abstract dark electric energy background"
+    >
+      <source src="/images/tesla-hero-vids/dark-electricity.mp4" type="video/mp4" />
+    </video>
 
-<Layout>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(8,20,32,0.1)_0%,rgba(8,20,32,0.42)_62%,rgba(8,20,32,0.72)_100%)]"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(6,14,22,0.48)_0%,rgba(6,14,22,0.14)_28%,rgba(6,14,22,0.32)_100%)]"></div>
+
+    <section class="relative flex min-h-screen items-center justify-center px-6">
+      <div class="pointer-events-none select-none text-center relative">
+        <img
+          src="/images/logo.webp"
+          alt="Evium Charging"
+          class="hero-logo mx-auto h-[72px] w-auto md:h-[88px]"
+        />
+        <div
+          class="hero-text absolute inset-0 flex flex-col items-center justify-center font-maven text-[2.25rem] md:text-[3rem] font-semibold uppercase text-white/90 leading-tight"
+        >
+          <span class="tracking-[0.22em]">Coming</span>
+          <span class="tracking-[0.42em]">Soon</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <style>
-    .hero-label {
-      position: sticky;
-      top: 64px;
-      z-index: 100;
-      background: rgba(45,200,86,0.92);
-      color: #0d1a22;
-      font-family: 'Maven Pro', sans-serif;
-      font-weight: 900;
-      font-size: 0.68rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      width: fit-content;
-      margin-left: 24px;
-      transform: translateY(-50%);
-      pointer-events: none;
+    /*
+      Pure CSS loop — 10s total cycle, no JS.
+      Timeline:
+        0%–40%   logo visible
+       40%–48%   logo fades out
+       48%–56%   text fades in
+       56%–84%   text visible
+       84%–92%   text fades out
+       92%–100%  logo fades in (loops back to 0%)
+    */
+    .hero-logo {
+      animation: logoLoop 10s ease-in-out infinite;
+    }
+    .hero-text {
+      animation: textLoop 10s ease-in-out infinite;
+    }
+
+    @keyframes logoLoop {
+      0%, 40%   { opacity: 0.95; filter: blur(0);   transform: translateY(0); }
+      48%, 92%  { opacity: 0;    filter: blur(6px);  transform: translateY(-8px); }
+      100%      { opacity: 0.95; filter: blur(0);    transform: translateY(0); }
+    }
+
+    @keyframes textLoop {
+      0%, 48%   { opacity: 0;    filter: blur(6px);  transform: translateY(8px); }
+      56%, 84%  { opacity: 0.9;  filter: blur(0);    transform: translateY(0); }
+      92%, 100% { opacity: 0;    filter: blur(6px);  transform: translateY(-8px); }
     }
   </style>
-
-  <!-- ── Current placeholder (top of page) ─────── -->
-  <HeroPlaceholder />
-
-  <!-- ── Hero options ───────────────────────────── -->
-  <div class="relative">
-    <div class="hero-label">Option A — Full Bleed</div>
-    <HeroA />
-  </div>
-
-  <div class="relative">
-    <div class="hero-label">Option B — Split Slant</div>
-    <HeroB />
-  </div>
-
-  <div class="relative">
-    <div class="hero-label">Option C — Centered Power</div>
-    <HeroC />
-  </div>
-
-  <div class="relative">
-    <div class="hero-label">Option D — Branded Charge</div>
-    <HeroD />
-  </div>
-
-  <div class="relative">
-    <div class="hero-label">Option E — Slideshow</div>
-    <HeroE />
-  </div>
 </Layout>

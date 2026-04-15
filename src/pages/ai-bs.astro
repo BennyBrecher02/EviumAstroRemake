@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HeroA from '../components/heroes/HeroA.astro';
+import HeroB from '../components/heroes/HeroB.astro';
+import HeroC from '../components/heroes/HeroC.astro';
+import HeroD from '../components/heroes/HeroD.astro';
+import HeroE from '../components/heroes/HeroE.astro';
+---
+
+<Layout title="AI BS — Evium Charging">
+  <style>
+    .hero-label {
+      position: sticky;
+      top: 64px;
+      z-index: 100;
+      background: rgba(45,200,86,0.92);
+      color: #0d1a22;
+      font-family: 'Maven Pro', sans-serif;
+      font-weight: 900;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      width: fit-content;
+      margin-left: 24px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+  </style>
+
+  <div class="relative">
+    <div class="hero-label">Option A — Full Bleed</div>
+    <HeroA />
+  </div>
+
+  <div class="relative">
+    <div class="hero-label">Option B — Split Slant</div>
+    <HeroB />
+  </div>
+
+  <div class="relative">
+    <div class="hero-label">Option C — Centered Power</div>
+    <HeroC />
+  </div>
+
+  <div class="relative">
+    <div class="hero-label">Option D — Branded Charge</div>
+    <HeroD />
+  </div>
+
+  <div class="relative">
+    <div class="hero-label">Option E — Slideshow</div>
+    <HeroE />
+  </div>
+</Layout>

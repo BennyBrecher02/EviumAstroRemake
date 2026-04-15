@@ -1,7 +1,765 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
 ---
-<Layout title="Retail — Evium Charging">
-  <PagePlaceholder title="Retail" />
+
+<Layout
+  title="Retail EV Charging Solutions — Evium Charging"
+  description="Turn your parking lot into a destination. Evium delivers turnkey EV charging for retail properties — no capital investment, managed end-to-end, drives foot traffic and dwell time."
+>
+
+  <!-- ═══════════════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════════════ -->
+  <section class="relative min-h-screen flex items-center bg-evium-dark overflow-hidden pt-20">
+    <!-- Background gradient orbs -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-evium-green/5 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-evium-green/4 rounded-full blur-[140px]"></div>
+    </div>
+    <!-- Grid texture -->
+    <div class="absolute inset-0 opacity-[0.03]"
+         style="background-image: linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px); background-size: 60px 60px;">
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-24 lg:py-32">
+      <div class="max-w-4xl">
+        <!-- Eyebrow -->
+        <div class="inline-flex items-center gap-3 mb-8">
+          <span class="w-8 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold uppercase tracking-widest">Retail Solutions</span>
+        </div>
+
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-none tracking-tight text-white mb-8">
+          Your Parking Lot Is&nbsp;a<br />
+          <span class="text-evium-green">Competitive Advantage.</span><br />
+          Use&nbsp;It.
+        </h1>
+
+        <p class="text-xl md:text-2xl text-white/60 leading-relaxed max-w-2xl mb-12">
+          EV drivers choose where to shop based on where they can charge. Evium installs, manages, and maintains your charging infrastructure — at no cost to you — so your property becomes the destination they keep coming back to.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/contact/quote"
+             class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold text-base px-8 py-4 rounded-lg hover:bg-white transition-colors duration-200">
+            Get a Free Site Assessment
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+          <a href="#opportunity"
+             class="inline-flex items-center justify-center gap-2 border border-white/20 text-white font-semibold text-base px-8 py-4 rounded-lg hover:border-evium-green hover:text-evium-green transition-colors duration-200">
+            See How It Works
+          </a>
+        </div>
+
+        <!-- Stat bar -->
+        <div class="mt-20 grid grid-cols-3 gap-8 border-t border-white/10 pt-12 max-w-2xl">
+          <div>
+            <div class="text-3xl font-black text-evium-green">500+</div>
+            <div class="text-sm text-white/50 mt-1">Chargers Deployed</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-evium-green">$0</div>
+            <div class="text-sm text-white/50 mt-1">Owner Investment Required</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-evium-green">100%</div>
+            <div class="text-sm text-white/50 mt-1">Managed by Evium</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       THE RETAIL CHARGING OPPORTUNITY
+  ════════════════════════════════════════════════════ -->
+  <section id="opportunity" class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-20 items-center">
+        <div>
+          <div class="inline-flex items-center gap-3 mb-6">
+            <span class="w-6 h-px bg-evium-green"></span>
+            <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">The Opportunity</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-black text-white leading-tight mb-8">
+            EV Drivers Pick<br />
+            <span class="text-evium-green">Where to Shop</span><br />
+            Based on Where<br />
+            They Can Charge.
+          </h2>
+          <p class="text-lg text-white/60 leading-relaxed mb-6">
+            The U.S. has tens of millions of EVs on the road — and that number is growing every year. These drivers are actively searching for charging destinations. The retail property with chargers wins the visit.
+          </p>
+          <p class="text-lg text-white/60 leading-relaxed">
+            It's not just about attracting new customers. Charging extends dwell time. A shopper who plugs in while they browse stays longer, spends more, and comes back because your location fits their routine.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+          <div class="bg-evium-dark rounded-2xl p-8 border border-white/5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/10 flex items-center justify-center mb-5">
+              <svg class="w-6 h-6 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Destination Routing</h3>
+            <p class="text-white/55 text-sm leading-relaxed">EV navigation apps and charging networks surface your property to nearby drivers actively looking for a place to charge. Visibility you can't buy any other way.</p>
+          </div>
+          <div class="bg-evium-dark rounded-2xl p-8 border border-white/5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/10 flex items-center justify-center mb-5">
+              <svg class="w-6 h-6 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Extended Dwell Time</h3>
+            <p class="text-white/55 text-sm leading-relaxed">A plugged-in customer is a captive audience. They're not leaving until the charge is done — and while they wait, they browse, eat, and spend. Charging is a revenue multiplier.</p>
+          </div>
+          <div class="bg-evium-dark rounded-2xl p-8 border border-white/5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/10 flex items-center justify-center mb-5">
+              <svg class="w-6 h-6 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">First-Mover Advantage</h3>
+            <p class="text-white/55 text-sm leading-relaxed">Most retail lots in your market don't have EV charging yet. The property that installs first captures the habit — and habitual customers are the most valuable customers you have.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       L2 VS DCFC FOR RETAIL
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Choosing the Right Hardware</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
+          Level 2 or DC Fast?<br />
+          <span class="text-evium-green">The Answer Depends on Your Format.</span>
+        </h2>
+        <p class="mt-6 text-lg text-white/55 max-w-2xl mx-auto">
+          Evium assesses your property type, traffic patterns, and customer dwell time to recommend the right mix — then designs the layout for maximum utilization.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- L2 Card -->
+        <div class="bg-evium-dark-light rounded-2xl p-10 border border-white/5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-evium-green/5 rounded-full blur-3xl"></div>
+          <div class="relative">
+            <div class="inline-flex items-center gap-2 bg-evium-green/10 text-evium-green text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6">
+              Level 2 — Up to 19.2 kW
+            </div>
+            <h3 class="text-2xl font-black text-white mb-4">Best for Longer Dwell Formats</h3>
+            <p class="text-white/55 leading-relaxed mb-8">
+              Grocery anchors, big-box stores, lifestyle centers, and strip malls with 1–3 hour average visits are ideal for Level 2. Customers arrive, plug in, shop their list, and leave with meaningful charge added — typically 20–40 miles per hour of session.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">Grocery, big-box, lifestyle, strip centers</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">1–3 hour average customer visits</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">Lower infrastructure cost, more stalls per dollar</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">Wall-mount or pedestal configurations</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- DCFC Card -->
+        <div class="bg-evium-dark-light rounded-2xl p-10 border border-evium-green/20 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-evium-green/8 rounded-full blur-3xl"></div>
+          <div class="relative">
+            <div class="inline-flex items-center gap-2 bg-evium-green/15 text-evium-green text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6">
+              DC Fast — 60–240 kW
+            </div>
+            <h3 class="text-2xl font-black text-white mb-4">Best for High-Turnover Locations</h3>
+            <p class="text-white/55 leading-relaxed mb-8">
+              Quick-service retail, convenience-anchored centers, or high-visibility pad sites benefit from DC fast charging. A 30-minute session delivers 60–100+ miles — matching the typical quick-stop visit and commanding premium session pricing.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">Quick-service, convenience, pad site retail</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">15–45 minute session durations</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">High revenue per session, higher stall turns</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-evium-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/70 text-sm">Outdoor kiosk format, dual-port CCS/CHAdeMO</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-evium-dark-light rounded-2xl p-8 border border-white/5 text-center">
+        <p class="text-white/70 text-base">
+          <span class="text-evium-green font-semibold">Most retail properties benefit from a mix.</span> Evium designs the right combination based on your lot layout, electrical capacity, and customer profile — then handles every aspect of delivery.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       WHAT EVIUM DELIVERS
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Turnkey Delivery</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-black text-white">
+          Everything Done for You.<br />
+          <span class="text-evium-green">Nothing Left to Manage.</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>`,
+            title: "Site Assessment & Design",
+            desc: "Evium engineers evaluate your electrical infrastructure, lot layout, and customer traffic patterns to design a deployment built for maximum impact."
+          },
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>`,
+            title: "Hardware Selection",
+            desc: "We source and configure commercial-grade Level 2 and DC fast chargers matched to your format — wall-mount, pedestal, or outdoor kiosk as needed."
+          },
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>`,
+            title: "Permits & Compliance",
+            desc: "Evium manages all permitting, utility coordination, and code compliance so you don't have to navigate a single municipal process or inspection."
+          },
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 8v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+            title: "Payment Processing Integration",
+            desc: "QR code tap-to-pay, RFID card, and the Evium driver app — all integrated at installation. Customers pay instantly, and revenue flows to your account automatically."
+          },
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>`,
+            title: "Real-Time Monitoring & Reporting",
+            desc: "The Evium owner portal gives you live visibility into session data, revenue, uptime, and usage trends — accessible from any device, any time."
+          },
+          {
+            icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>`,
+            title: "Ongoing Maintenance",
+            desc: "Hardware faults, connectivity issues, and routine servicing are Evium's responsibility. If a charger goes down, we fix it — not your facilities team."
+          }
+        ].map(item => (
+          <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 hover:border-evium-green/30 transition-colors duration-300">
+            <div class="w-11 h-11 rounded-xl bg-evium-green/10 flex items-center justify-center mb-5">
+              <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" set:html={item.icon}></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-3">{item.title}</h3>
+            <p class="text-white/55 text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       REVENUE & MONETIZATION
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-20 items-center">
+        <div>
+          <div class="inline-flex items-center gap-3 mb-6">
+            <span class="w-6 h-px bg-evium-green"></span>
+            <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Revenue & Monetization</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-black text-white leading-tight mb-8">
+            Your Parking Lot<br />
+            <span class="text-evium-green">Generates Revenue.</span>
+          </h2>
+          <p class="text-lg text-white/60 leading-relaxed mb-6">
+            Every charging session puts money in your pocket. Evium's software lets you set custom pricing — per kWh, per hour, or a flat session fee — so you control the economics for your market and customer mix.
+          </p>
+          <p class="text-lg text-white/60 leading-relaxed mb-10">
+            Under Evium's no-cost model, we cover the full capital investment and you receive passive income from day one. No upfront spend, no ongoing overhead — just revenue deposited automatically into your account.
+          </p>
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70">Custom pricing: per kWh, per hour, or flat session fee</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70">Revenue reporting dashboard with session-level detail</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70">Automatic revenue distribution — no manual reconciliation</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70">Idle fee configuration to encourage stall turnover</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing model visual -->
+        <div class="space-y-4">
+          <div class="bg-evium-dark-light rounded-2xl p-7 border border-evium-green/20">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="text-evium-green font-bold text-sm uppercase tracking-wider mb-1">Per kWh Pricing</div>
+                <div class="text-white font-black text-3xl">$0.35 <span class="text-white/40 text-lg font-normal">/ kWh</span></div>
+              </div>
+              <div class="text-xs text-white/40 bg-white/5 px-3 py-1.5 rounded-full">Most common</div>
+            </div>
+            <p class="text-white/50 text-sm">Customers pay for what they use. Transparent, familiar, and scales with actual energy delivered.</p>
+          </div>
+          <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/5">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="text-white/50 font-bold text-sm uppercase tracking-wider mb-1">Per Hour Pricing</div>
+                <div class="text-white font-black text-3xl">$2.50 <span class="text-white/40 text-lg font-normal">/ hr</span></div>
+              </div>
+              <div class="text-xs text-white/40 bg-white/5 px-3 py-1.5 rounded-full">High-dwell formats</div>
+            </div>
+            <p class="text-white/50 text-sm">Ideal for properties where sessions consistently run 2–3 hours and you want predictable per-stall revenue.</p>
+          </div>
+          <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/5">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="text-white/50 font-bold text-sm uppercase tracking-wider mb-1">Flat Session Fee</div>
+                <div class="text-white font-black text-3xl">$5.00 <span class="text-white/40 text-lg font-normal">/ session</span></div>
+              </div>
+              <div class="text-xs text-white/40 bg-white/5 px-3 py-1.5 rounded-full">Quick-stop retail</div>
+            </div>
+            <p class="text-white/50 text-sm">Simple, no-math pricing for customers. Works well for DC fast locations with short, high-value sessions.</p>
+          </div>
+          <p class="text-xs text-white/30 text-center pt-2">Sample pricing shown for illustration. Your Evium advisor will model revenue projections for your specific property.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       PAYMENT & ACCESS
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-14">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Payment & Access</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl font-black text-white">
+          No Friction.<br />
+          <span class="text-evium-green">Customers Just Charge.</span>
+        </h2>
+        <p class="mt-5 text-lg text-white/55 max-w-xl mx-auto">
+          Evium supports every payment and access method your customers expect — so no one gets turned away from your chargers because of a missing app or incompatible card.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-evium-green/10 flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">QR Code</h3>
+          <p class="text-white/55 text-sm leading-relaxed">Scan, pay, and start charging in under 30 seconds. Works on any smartphone — no app download required for first-time users.</p>
+        </div>
+
+        <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-evium-green/10 flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">RFID Card</h3>
+          <p class="text-white/55 text-sm leading-relaxed">Contactless RFID tap for fleet accounts, frequent visitors, or tenant programs. Supports major network cards and custom-issued credentials.</p>
+        </div>
+
+        <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-evium-green/10 flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Evium Driver App</h3>
+          <p class="text-white/55 text-sm leading-relaxed">Find available chargers, start and stop sessions, receive notifications, and review charging history — all from the Evium app, available on iOS and Android.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       HARDWARE FOR RETAIL
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Hardware</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-black text-white">
+          Commercial-Grade Hardware<br />
+          <span class="text-evium-green">Built for Retail Environments.</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- L2 Wall Mount -->
+        <div class="bg-evium-dark-light rounded-2xl overflow-hidden border border-white/5 hover:border-evium-green/25 transition-colors duration-300 flex flex-col">
+          <div class="bg-evium-dark p-10 flex items-center justify-center h-64">
+            <img src="/images/evium-evocharge-l2-wallmount.png"
+                 alt="Evium EvoCharge L2 Wall Mount Charger"
+                 class="max-h-full max-w-full object-contain drop-shadow-2xl" />
+          </div>
+          <div class="p-8 flex flex-col flex-1">
+            <div class="text-evium-green text-xs font-bold uppercase tracking-widest mb-2">Level 2 — Wall Mount</div>
+            <h3 class="text-white font-black text-xl mb-3">EvoCharge L2 Wall-Mount</h3>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+              Ideal for smaller lots, structured parking, or properties with walls adjacent to stalls. Compact footprint, clean install, up to 19.2 kW output per port.
+            </p>
+            <ul class="space-y-2 text-sm text-white/50">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>Up to 19.2 kW output</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>OCPP 1.6+ connectivity</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>ENERGY STAR certified</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- MaxiCharger DCFC -->
+        <div class="bg-evium-dark-light rounded-2xl overflow-hidden border border-evium-green/20 hover:border-evium-green/40 transition-colors duration-300 flex flex-col relative">
+          <div class="absolute top-4 right-4 z-10 bg-evium-green text-evium-dark text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full">Most Popular</div>
+          <div class="bg-evium-dark p-10 flex items-center justify-center h-64">
+            <img src="/images/maxicharger-dc-fast-60-240kw.png"
+                 alt="MaxiCharger DC Fast Charger 60–240 kW"
+                 class="max-h-full max-w-full object-contain drop-shadow-2xl" />
+          </div>
+          <div class="p-8 flex flex-col flex-1">
+            <div class="text-evium-green text-xs font-bold uppercase tracking-wider mb-2">DC Fast Charge</div>
+            <h3 class="text-white font-black text-xl mb-3">MaxiCharger DC Fast</h3>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+              60–240 kW scalable output. Ideal for anchor positions and high-visibility entrances. Handles high daily session volume with premium uptime reliability.
+            </p>
+            <ul class="space-y-2 text-sm text-white/50">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>60–240 kW configurable</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>CCS + CHAdeMO dual-port</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>NEVI compliant</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Outdoor DC Kiosk -->
+        <div class="bg-evium-dark-light rounded-2xl overflow-hidden border border-white/5 hover:border-evium-green/25 transition-colors duration-300 flex flex-col">
+          <div class="bg-evium-dark p-10 flex items-center justify-center h-64">
+            <img src="/images/evium-dc-fast-outdoor-kiosk-combo.png"
+                 alt="Evium DC Fast Outdoor Kiosk"
+                 class="max-h-full max-w-full object-contain drop-shadow-2xl" />
+          </div>
+          <div class="p-8 flex flex-col flex-1">
+            <div class="text-evium-green text-xs font-bold uppercase tracking-wider mb-2">DC Fast — Outdoor Kiosk</div>
+            <h3 class="text-white font-black text-xl mb-3">DC Fast Outdoor Kiosk</h3>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+              Freestanding outdoor kiosk for open lots, drive-thru islands, or pad sites. High-visibility format with dual-port access for two vehicles simultaneously.
+            </p>
+            <ul class="space-y-2 text-sm text-white/50">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>Weatherproof IP65 rated</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>Dual-port simultaneous charging</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>Integrated display & lighting</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FINANCIAL MODELS
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">Financial Models</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-black text-white">
+          Structured to Fit<br />
+          <span class="text-evium-green">Your Investment Appetite.</span>
+        </h2>
+        <p class="mt-6 text-lg text-white/55 max-w-2xl mx-auto">
+          Whether you want to invest and own the upside or participate with zero capital, Evium has a model that works for your property.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- No Cost -->
+        <div class="bg-evium-dark rounded-2xl p-8 border border-evium-green/20 flex flex-col">
+          <div class="inline-flex items-center gap-2 bg-evium-green/15 text-evium-green text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6 self-start">
+            Most Popular
+          </div>
+          <h3 class="text-white font-black text-2xl mb-4">No-Cost Model</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+            Evium covers 100% of hardware, installation, and ongoing maintenance. You receive approximately 10% of session revenue — zero investment, pure passive income from day one.
+          </p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>$0 owner investment</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>~10% revenue share to property</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>All maintenance included</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Rebates processed by Evium</li>
+          </ul>
+        </div>
+
+        <!-- Client Investment -->
+        <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 flex flex-col">
+          <div class="inline-flex items-center gap-2 bg-white/5 text-white/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6 self-start">
+            Maximum Upside
+          </div>
+          <h3 class="text-white font-black text-2xl mb-4">Client Investment</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+            You fund the infrastructure, you own 100% of session revenue. Evium handles installation, management, and maintenance — you keep the full economics, often recovering investment within 2–4 years.
+          </p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>100% revenue to property</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Rebates reduce net cost significantly</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Full ownership of equipment</li>
+          </ul>
+        </div>
+
+        <!-- Hybrid -->
+        <div class="bg-evium-dark rounded-2xl p-8 border border-white/5 flex flex-col">
+          <div class="inline-flex items-center gap-2 bg-white/5 text-white/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6 self-start">
+            Balanced
+          </div>
+          <h3 class="text-white font-black text-2xl mb-4">Hybrid Model</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
+            Share the capital investment and split the revenue. Designed for partners who want meaningful ownership economics without carrying the full cost. Structure is customized to your situation.
+          </p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Shared capital outlay</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Negotiated revenue split</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Custom structure per property</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 bg-evium-dark rounded-2xl p-8 border border-white/5 flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div class="flex-1">
+          <div class="text-evium-green font-bold mb-1">Rebate Processing Included</div>
+          <p class="text-white/55 text-sm">Federal, state, and utility rebate programs can reduce your net cost by 30–80%. Evium identifies applicable programs and handles all paperwork — you just collect the check.</p>
+        </div>
+        <a href="/contact/quote" class="flex-shrink-0 bg-evium-green text-evium-dark font-bold text-sm px-6 py-3 rounded-lg hover:bg-white transition-colors duration-200 whitespace-nowrap">
+          Model My Revenue
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       TRUST & PROOF
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/5 text-center">
+          <div class="text-5xl font-black text-evium-green mb-3">500+</div>
+          <div class="text-white font-semibold text-lg mb-2">Chargers Deployed</div>
+          <p class="text-white/50 text-sm">Across commercial, retail, multifamily, and fleet properties nationwide. Every installation backed by the same process and the same support team.</p>
+        </div>
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/5 text-center">
+          <div class="mb-5">
+            <img src="/images/siemens-versicharge-ac-variants.png" alt="Siemens Partnership" class="h-16 object-contain mx-auto opacity-80" />
+          </div>
+          <div class="text-white font-semibold text-lg mb-2">Siemens Technology Partner</div>
+          <p class="text-white/50 text-sm">Evium's hardware portfolio includes Siemens VersiCharge — enterprise-grade reliability backed by one of the world's most trusted electrical manufacturers.</p>
+        </div>
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/5 text-center">
+          <div class="text-5xl font-black text-evium-green mb-3">
+            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="text-white font-semibold text-lg mb-2">National Presence</div>
+          <p class="text-white/50 text-sm">From regional strip centers to multi-state retail portfolios — Evium operates nationally with the local expertise to handle permitting and utility coordination in any market.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FAQ
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="w-6 h-px bg-evium-green"></span>
+          <span class="text-evium-green text-xs font-semibold uppercase tracking-widest">FAQ</span>
+          <span class="w-6 h-px bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl font-black text-white">
+          Common Questions From<br />
+          <span class="text-evium-green">Retail Property Owners.</span>
+        </h2>
+      </div>
+
+      <div class="space-y-4" id="faq-list">
+        {[
+          {
+            q: "Does EV charging actually bring more customers to my property?",
+            a: "Yes — and the data supports it. EV drivers actively filter shopping destinations by charging availability in navigation apps and EV network maps. Properties with chargers appear as destinations for drivers with range concerns. Beyond discovery, charging extends dwell time: customers who plug in while they shop stay 20–40% longer on average, which correlates directly with higher spend per visit."
+          },
+          {
+            q: "Who pays for the electricity used during charging sessions?",
+            a: "That depends on your financial model. Under Evium's no-cost model, Evium covers all operating costs including electricity and maintenance. The session revenue pays for energy costs, and approximately 10% of net revenue flows to you as the property owner. Under the client investment model, you cover electricity costs as the property owner — but you also keep 100% of session revenue, which typically results in significantly higher net income."
+          },
+          {
+            q: "How do my customers pay for charging?",
+            a: "Customers can pay via QR code scan (no app required), RFID card tap, or through the Evium driver app on iOS or Android. All major credit and debit cards are accepted. Sessions can be started in under 30 seconds — there's no barrier or friction that would discourage use."
+          },
+          {
+            q: "What maintenance is required on my end?",
+            a: "None. Evium's team handles all hardware maintenance, software updates, connectivity monitoring, and repair. If a charger goes offline, Evium's monitoring system flags it automatically and dispatches service. Your facilities team doesn't need to learn anything new or respond to charger issues."
+          },
+          {
+            q: "Should I install Level 2 or DC fast charging at my property?",
+            a: "It depends on your format and average customer dwell time. Grocery stores, big-box anchors, and lifestyle centers — where customers typically spend 1–3 hours — are ideal for Level 2, which delivers 20–40 miles of range per hour of charging. Quick-service retail, convenience-anchored properties, or high-visibility pad sites benefit more from DC fast charging, which delivers 60–100+ miles in 15–30 minutes. Many properties benefit from a mix. Evium will model the right configuration for your specific lot during your free site assessment."
+          },
+          {
+            q: "How long does the installation process take?",
+            a: "From signed agreement to operational chargers, most retail installations complete in 6–12 weeks. The timeline depends on permit processing in your municipality and utility interconnection lead times — both of which Evium manages. Your Evium advisor will give you a project timeline specific to your location at the time of site assessment."
+          }
+        ].map((item, i) => (
+          <div class="faq-item bg-evium-dark rounded-2xl border border-white/5 overflow-hidden">
+            <button class="faq-trigger w-full text-left px-8 py-6 flex items-start justify-between gap-4 group">
+              <span class="text-white font-semibold text-base leading-snug group-hover:text-evium-green transition-colors duration-200">{item.q}</span>
+              <svg class="faq-icon w-5 h-5 text-evium-green flex-shrink-0 mt-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div class="faq-body overflow-hidden max-h-0 transition-all duration-300 ease-in-out">
+              <p class="px-8 pb-6 text-white/55 text-sm leading-relaxed">{item.a}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       CTA
+  ════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-evium-green/5 rounded-full blur-[150px]"></div>
+    </div>
+    <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-3 mb-8">
+        <span class="w-8 h-px bg-evium-green"></span>
+        <span class="text-evium-green text-sm font-semibold uppercase tracking-widest">Get Started</span>
+        <span class="w-8 h-px bg-evium-green"></span>
+      </div>
+      <h2 class="text-5xl md:text-6xl font-black text-white leading-none mb-6">
+        Transform Your Parking Lot<br />
+        <span class="text-evium-green">Into a Destination.</span>
+      </h2>
+      <p class="text-xl text-white/55 leading-relaxed max-w-2xl mx-auto mb-12">
+        Your site assessment is free. In 30 minutes, Evium will evaluate your property, recommend the right hardware mix, model your revenue projections, and outline your path to installation.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact/quote"
+           class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-black text-lg px-10 py-5 rounded-xl hover:bg-white transition-colors duration-200">
+          Get a Free Site Assessment
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+        <a href="/contact/schedule"
+           class="inline-flex items-center justify-center gap-2 border border-white/20 text-white font-semibold text-lg px-10 py-5 rounded-xl hover:border-evium-green hover:text-evium-green transition-colors duration-200">
+          Schedule a Call
+        </a>
+      </div>
+      <p class="mt-8 text-white/30 text-sm">No commitment required. Most property owners are operational within 90 days.</p>
+    </div>
+  </section>
+
 </Layout>
+
+<script>
+  document.querySelectorAll('.faq-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      if (!item) return;
+      const body = item.querySelector('.faq-body') as HTMLElement | null;
+      const icon = btn.querySelector('.faq-icon');
+      if (!body) return;
+      const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+      if (isOpen) {
+        body.style.maxHeight = '0px';
+        icon?.classList.remove('rotate-180');
+      } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        icon?.classList.add('rotate-180');
+      }
+    });
+  });
+</script>

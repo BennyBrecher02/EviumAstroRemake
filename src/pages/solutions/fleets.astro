@@ -1,0 +1,866 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Fleet Charging Solutions — Evium Charging"
+  description="Turnkey EV fleet charging infrastructure. Depot design, load management, phased rollout, and 24/7 monitoring — engineered for fleets that can't afford downtime."
+>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════════════ -->
+  <section class="relative min-h-screen flex items-center overflow-hidden bg-[#0a1822]">
+
+    <!-- Background atmosphere -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_65%_50%,rgba(45,200,86,0.10),transparent)]"></div>
+      <div class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+    </div>
+
+    <!-- Charger image -->
+    <div class="absolute right-0 bottom-0 w-[52%] h-full pointer-events-none select-none flex items-end justify-end">
+      <img
+        src="/images/maxicharger-dc-fast-60-240kw.png"
+        alt="MaxiCharger DC Fast Charger for Fleet Depots"
+        class="h-[88%] object-contain object-bottom drop-shadow-[0_0_80px_rgba(45,200,86,0.20)]"
+      />
+    </div>
+
+    <!-- Diagonal dark overlay so left text stays readable -->
+    <div
+      class="absolute inset-0 pointer-events-none"
+      style="background: linear-gradient(100deg, #0a1822 50%, transparent 72%);"
+    ></div>
+
+    <!-- Left content -->
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24">
+      <div class="max-w-xl">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-5">Fleet Charging Infrastructure</p>
+        <h1 class="text-white font-black leading-[1.06] mb-6" style="font-size: clamp(2.6rem, 5.5vw, 5rem);">
+          Every Vehicle.<br />
+          Mission-Ready.<br />
+          <span class="text-evium-green">Every Morning.</span>
+        </h1>
+        <p class="text-white/60 text-lg leading-relaxed mb-10 max-w-md">
+          Fleet electrification isn't a product — it's a strategy. Evium designs, deploys, and operates depot charging infrastructure built around your vehicles, your shifts, and your grid.
+        </p>
+        <div class="flex flex-wrap gap-4 items-center">
+          <a
+            href="/contact/quote"
+            class="inline-block bg-evium-green text-[#0a1822] font-black text-xs tracking-[0.18em] uppercase px-8 py-4 hover:bg-white transition-colors duration-200"
+          >
+            Talk to a Fleet Specialist
+          </a>
+          <a
+            href="#fleet-challenge"
+            class="inline-block text-white/65 font-semibold text-xs tracking-[0.15em] uppercase px-8 py-4 border border-white/20 hover:border-evium-green hover:text-evium-green transition-colors duration-200"
+          >
+            See What We Build
+          </a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="flex flex-wrap gap-10 mt-16 pt-8 border-t border-white/10">
+          <div>
+            <div class="text-evium-green font-black text-3xl">500+</div>
+            <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Chargers Deployed</div>
+          </div>
+          <div>
+            <div class="text-evium-green font-black text-3xl">24/7</div>
+            <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Remote Monitoring</div>
+          </div>
+          <div>
+            <div class="text-evium-green font-black text-3xl">$6MM+</div>
+            <div class="text-white/40 text-xs uppercase tracking-widest mt-1">Grants Secured</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       THE FLEET ELECTRIFICATION CHALLENGE
+  ═══════════════════════════════════════════════════════ -->
+  <section id="fleet-challenge" class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="max-w-2xl mb-16">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Why Most Fleet Programs Stall</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+          You Can't Just Buy Chargers<br />Off a Shelf.
+        </h2>
+        <p class="text-white/55 text-lg leading-relaxed">
+          Fleet depots have unique electrical constraints, operational rhythms, and uptime requirements that off-the-shelf charging products aren't designed for. Getting it wrong means stranded vehicles, angry drivers, and a budget hole.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Electrical Capacity Limits</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Most depot sites weren't built for simultaneous high-draw charging. Without load management and infrastructure upgrades, you'll trip breakers before you charge half your fleet.
+          </p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Shift Scheduling Complexity</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Multi-shift operations need vehicles charged at specific windows — not whenever a charger happens to be free. Smart scheduling and prioritization must be built into the system from day one.
+          </p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Depot Layout & Cable Run</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Physical placement of chargers affects usability, throughput, and cost. Poor depot design leads to cable hazards, congested lanes, and wasted infrastructure spend.
+          </p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Grid Demand Charges</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Unmanaged charging creates peak demand spikes that show up as punishing demand charges on your utility bill. Open ADR 2.0b integration and smart load spreading eliminate this risk.
+          </p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Maintenance & Uptime Risk</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            A broken charger at a public station is an inconvenience. At a fleet depot, it's a vehicle that doesn't leave the yard. Proactive maintenance and remote diagnostics aren't optional — they're table stakes.
+          </p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8 group hover:border-evium-green/40 transition-colors duration-300">
+          <div class="w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center mb-6 group-hover:bg-evium-green/20 transition-colors duration-300">
+            <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-bold text-lg mb-3">Capital & Budget Pressure</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Upfront infrastructure investment competes with vehicle acquisition, facility costs, and operations budgets. Available financial models — including no-cost and leasing — let you electrify without a capital commitment.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       WHAT EVIUM DESIGNS FOR FLEETS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+
+        <div>
+          <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Engineered for Your Operation</p>
+          <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+            A Charging Strategy.<br />Not Just Hardware.
+          </h2>
+          <p class="text-white/55 text-lg leading-relaxed mb-10">
+            Evium starts with your fleet — its size, vehicle types, shift patterns, and depot layout — and works backward to design an infrastructure solution that fits. Every depot is different. Every solution we deliver is built for that depot.
+          </p>
+
+          <div class="space-y-6">
+
+            <div class="flex gap-5 items-start">
+              <div class="w-8 h-8 rounded bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-white font-bold text-base mb-1">Depot Site Assessment & Layout Design</h4>
+                <p class="text-white/50 text-sm leading-relaxed">Full electrical survey, cable run planning, charger placement, and capacity upgrade roadmap before a single shovel hits the ground.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-5 items-start">
+              <div class="w-8 h-8 rounded bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-white font-bold text-base mb-1">Smart Load Management (Open ADR 2.0b)</h4>
+                <p class="text-white/50 text-sm leading-relaxed">Dynamic load balancing distributes available power across all active chargers, avoiding demand spikes while ensuring every vehicle charges on schedule.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-5 items-start">
+              <div class="w-8 h-8 rounded bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-white font-bold text-base mb-1">Mixed L2 + DCFC Configurations</h4>
+                <p class="text-white/50 text-sm leading-relaxed">Overnight depot charging with Level 2 for standard dwell times, DC fast charging for vehicles that need a quick turn between runs.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-5 items-start">
+              <div class="w-8 h-8 rounded bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-white font-bold text-base mb-1">Phased Rollout Capability</h4>
+                <p class="text-white/50 text-sm leading-relaxed">Start with a pilot group of vehicles and scale incrementally as your fleet electrifies — no need to build the full depot on day one.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-5 items-start">
+              <div class="w-8 h-8 rounded bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-white font-bold text-base mb-1">Permit, Utility & Compliance Management</h4>
+                <p class="text-white/50 text-sm leading-relaxed">Evium handles every permit, utility interconnection application, and regulatory requirement — so your team doesn't have to become EV infrastructure experts.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: image + accent -->
+        <div class="relative">
+          <div class="absolute -inset-4 bg-evium-green/5 blur-3xl rounded-full pointer-events-none"></div>
+          <img
+            src="/images/evium-dc-fast-outdoor-kiosk-combo.png"
+            alt="Evium DC Fast Charging Outdoor Kiosk"
+            class="relative w-full max-w-md mx-auto object-contain drop-shadow-[0_0_60px_rgba(45,200,86,0.18)]"
+          />
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       HARDWARE FOR FLEET DEPOTS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Proven Fleet Hardware</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+          The Right Charger<br />for Every Role.
+        </h2>
+        <p class="text-white/55 text-lg leading-relaxed">
+          Fleet depots typically require a mix of charging speeds. Evium sources, installs, and integrates hardware from GSA-approved manufacturers — including Siemens eMobility partners — built for commercial duty cycles.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- L2 Card -->
+        <div class="bg-evium-dark-light border border-white/8 p-10 flex flex-col md:flex-row gap-8 items-start group hover:border-evium-green/30 transition-colors duration-300">
+          <div class="flex-shrink-0">
+            <img
+              src="/images/evium-evocharge-l2-wallmount.png"
+              alt="Level 2 Wall-Mount Charger"
+              class="w-28 h-40 object-contain drop-shadow-[0_0_24px_rgba(45,200,86,0.15)]"
+            />
+          </div>
+          <div>
+            <div class="inline-block text-evium-green text-[10px] font-black tracking-[0.2em] uppercase bg-evium-green/10 px-3 py-1 mb-4">Level 2 · Overnight Depot</div>
+            <h3 class="text-white font-black text-2xl mb-3">L2 Wall-Mount & Pedestal</h3>
+            <p class="text-white/50 text-sm leading-relaxed mb-5">
+              Ideal for vehicles with standard dwell times — last vehicle in at night, first vehicle out in the morning. 7.2–19.2 kW output charges most light-duty and medium-duty EVs overnight. Lowest infrastructure cost per port.
+            </p>
+            <ul class="space-y-2">
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                7.2 kW – 19.2 kW output
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                OCPP 1.6+ compatible
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                Integrated load management
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                Best for: vans, passenger EVs, light trucks
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- DCFC Card -->
+        <div class="bg-evium-dark-light border border-white/8 p-10 flex flex-col md:flex-row gap-8 items-start group hover:border-evium-green/30 transition-colors duration-300">
+          <div class="flex-shrink-0">
+            <img
+              src="/images/maxicharger-dc-fast-60-240kw.png"
+              alt="MaxiCharger DC Fast Charger 60-240kW"
+              class="w-28 h-40 object-contain drop-shadow-[0_0_24px_rgba(45,200,86,0.15)]"
+            />
+          </div>
+          <div>
+            <div class="inline-block text-evium-green text-[10px] font-black tracking-[0.2em] uppercase bg-evium-green/10 px-3 py-1 mb-4">DC Fast · Quick-Turn</div>
+            <h3 class="text-white font-black text-2xl mb-3">MaxiCharger DC Fast 60–240kW</h3>
+            <p class="text-white/50 text-sm leading-relaxed mb-5">
+              For vehicles that return mid-shift or need range replenishment before a second run. 60–240 kW DC fast charging adds meaningful range in 20–45 minutes. Critical for transit, delivery, and emergency fleets.
+            </p>
+            <ul class="space-y-2">
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                60 kW – 240 kW configurable output
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                CCS / CHAdeMO / NACS compatible
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                Remote diagnostics, OTA firmware
+              </li>
+              <li class="flex items-center gap-2 text-white/50 text-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                Best for: transit, logistics, emergency services
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Siemens badge -->
+      <div class="mt-10 flex items-center gap-4 p-6 border border-white/8 bg-evium-dark-light max-w-lg">
+        <div class="w-8 h-8 rounded-full bg-evium-green/10 flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <p class="text-white/55 text-sm">
+          <span class="text-white font-semibold">Siemens eMobility Partner.</span> All hardware sourced through GSA-approved manufacturers, ensuring federal program eligibility and commercial-grade reliability.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       SOFTWARE & MONITORING
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+
+        <!-- Left: terminal-style UI mock -->
+        <div class="relative order-2 lg:order-1">
+          <div class="bg-[#0a1520] border border-evium-green/20 rounded-sm overflow-hidden">
+            <!-- Window bar -->
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/8 bg-[#0c1b28]">
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <span class="text-white/30 text-xs ml-2 font-mono">Evium Fleet Portal — Live Status</span>
+            </div>
+            <!-- Mock data rows -->
+            <div class="p-6 space-y-3 font-mono text-xs">
+              <div class="flex justify-between items-center py-2 border-b border-white/5">
+                <span class="text-white/40">PORT</span>
+                <span class="text-white/40">VEHICLE</span>
+                <span class="text-white/40">STATUS</span>
+                <span class="text-white/40">SOC</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-01</span>
+                <span class="text-white/50">VAN-004</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">74%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-02</span>
+                <span class="text-white/50">VAN-011</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">52%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-03</span>
+                <span class="text-white/50">TRUCK-02</span>
+                <span class="text-yellow-400 font-bold">SCHEDULED</span>
+                <span class="text-white/70">88%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">DCFC-01</span>
+                <span class="text-white/50">BUS-07</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">31%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">DCFC-02</span>
+                <span class="text-white/50">—</span>
+                <span class="text-white/35 font-bold">AVAILABLE</span>
+                <span class="text-white/35">—</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-04</span>
+                <span class="text-white/50">VAN-008</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">97%</span>
+              </div>
+              <div class="mt-4 pt-4 border-t border-white/8 flex justify-between text-white/30">
+                <span>Grid load: <span class="text-evium-green">68%</span></span>
+                <span>Peak demand: <span class="text-white/60">142 kW</span></span>
+                <span>Updated: <span class="text-white/60">live</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: copy -->
+        <div class="order-1 lg:order-2">
+          <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">OCPP Fleet Platform</p>
+          <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+            Total Visibility.<br />Zero Surprises.
+          </h2>
+          <p class="text-white/55 text-lg leading-relaxed mb-10">
+            The Evium owner portal gives fleet managers a live view of every charger, every vehicle, and every kilowatt. Alerts surface before problems compound. Usage data informs fleet planning. The system runs — you supervise.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Real-Time Charger Status</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Live port-by-port status, charge rates, and session data. Any fault or anomaly triggers immediate alerts.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Fleet-Level Load Management</h4>
+              <p class="text-white/45 text-xs leading-relaxed">OCPP 1.6+ load balancing dynamically distributes power. Set charging windows and priority levels by vehicle or group.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Maintenance Alerts & Remote Diagnostics</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Proactive fault detection with remote stop/start and OTA firmware updates. Most issues resolved without a truck roll.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Utilization & Energy Reporting</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Session history, kWh delivered, demand peaks, and utilization rates — exportable for fleet accounting and sustainability reporting.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Remote Start / Stop</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Dispatch can initiate or halt charging sessions remotely. Full access control by user role.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">24/7 Operations Support</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Evium's team monitors your depot and responds to critical events around the clock — no additional staffing required on your end.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       PHASED ROLLOUT
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Start Small. Scale Right.</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+          Phased Rollout Built<br />Into the Plan.
+        </h2>
+        <p class="text-white/55 text-lg leading-relaxed">
+          Most fleets don't electrify all at once. Evium's approach is designed for phased deployment — pilot, evaluate, scale. The infrastructure you install in Phase 1 is the foundation Phase 2 builds on.
+        </p>
+      </div>
+
+      <div class="relative">
+
+        <!-- Connecting line -->
+        <div class="hidden lg:block absolute top-9 left-[calc(16.67%-20px)] right-[calc(16.67%-20px)] h-px bg-gradient-to-r from-evium-green/40 via-evium-green/20 to-evium-green/40"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="relative bg-evium-dark-light border border-white/8 p-8 text-center group hover:border-evium-green/40 transition-colors duration-300">
+            <div class="w-10 h-10 rounded-full bg-evium-green text-[#0a1822] font-black text-sm flex items-center justify-center mx-auto mb-6 relative z-10">1</div>
+            <h3 class="text-white font-bold text-lg mb-3">Assessment & Design</h3>
+            <p class="text-white/45 text-sm leading-relaxed">Site survey, load analysis, depot design, equipment specification, and permit strategy. Delivered before any commitment.</p>
+          </div>
+
+          <div class="relative bg-evium-dark-light border border-white/8 p-8 text-center group hover:border-evium-green/40 transition-colors duration-300">
+            <div class="w-10 h-10 rounded-full bg-evium-green text-[#0a1822] font-black text-sm flex items-center justify-center mx-auto mb-6 relative z-10">2</div>
+            <h3 class="text-white font-bold text-lg mb-3">Pilot Deployment</h3>
+            <p class="text-white/45 text-sm leading-relaxed">Install chargers for your first group of vehicles. Validate throughput, load performance, and driver workflow before scaling.</p>
+          </div>
+
+          <div class="relative bg-evium-dark-light border border-white/8 p-8 text-center group hover:border-evium-green/40 transition-colors duration-300">
+            <div class="w-10 h-10 rounded-full bg-evium-green text-[#0a1822] font-black text-sm flex items-center justify-center mx-auto mb-6 relative z-10">3</div>
+            <h3 class="text-white font-bold text-lg mb-3">Data-Driven Expansion</h3>
+            <p class="text-white/45 text-sm leading-relaxed">Use real session data and utilization reporting from Phase 1 to right-size Phase 2 — more ports, higher speeds, or additional depot zones.</p>
+          </div>
+
+          <div class="relative bg-evium-dark-light border border-white/8 p-8 text-center group hover:border-evium-green/40 transition-colors duration-300">
+            <div class="w-10 h-10 rounded-full bg-evium-green text-[#0a1822] font-black text-sm flex items-center justify-center mx-auto mb-6 relative z-10">4</div>
+            <h3 class="text-white font-bold text-lg mb-3">Full Fleet Electrification</h3>
+            <p class="text-white/45 text-sm leading-relaxed">Complete depot build-out with ongoing Evium operations support — maintenance, monitoring, and software — as your long-term infrastructure partner.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <p class="text-center text-white/40 text-sm mt-10">
+        Evium manages the full process at every phase — permits, installation, utility coordination, and operations.
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FINANCIAL MODELS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="max-w-2xl mb-16">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Flexible Fleet Financing</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+          Infrastructure That Fits<br />Your Budget Model.
+        </h2>
+        <p class="text-white/55 text-lg leading-relaxed">
+          Fleet electrification doesn't have to compete with your vehicle acquisition budget. Evium offers financial structures designed for fleet operators — from zero-capital deployments to full ownership models.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
+        <div class="bg-evium-dark border border-white/8 p-8 hover:border-evium-green/30 transition-colors duration-300">
+          <div class="text-evium-green font-black text-xs tracking-[0.18em] uppercase mb-5">No-Cost Model</div>
+          <h3 class="text-white font-bold text-xl mb-4">Zero Capital Required</h3>
+          <p class="text-white/50 text-sm leading-relaxed mb-6">
+            Evium covers 100% of hardware and installation costs. Revenue generated at the depot is split approximately 90/10 in Evium's favor. Your fleet charges at no infrastructure cost.
+          </p>
+          <div class="text-evium-green text-xs font-semibold">Best for: Fleets with budget constraints</div>
+        </div>
+
+        <div class="bg-evium-dark border border-evium-green/30 p-8 relative">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-evium-green"></div>
+          <div class="text-evium-green font-black text-xs tracking-[0.18em] uppercase mb-5">Leasing Model</div>
+          <h3 class="text-white font-bold text-xl mb-4">Fixed Monthly Cost</h3>
+          <p class="text-white/50 text-sm leading-relaxed mb-6">
+            Predictable monthly or annual lease payments. You retain full operational control and all charging revenue. Simple budgeting, no large capital event.
+          </p>
+          <div class="text-evium-green text-xs font-semibold">Best for: Municipal & corporate fleets</div>
+        </div>
+
+        <div class="bg-evium-dark border border-white/8 p-8 hover:border-evium-green/30 transition-colors duration-300">
+          <div class="text-evium-green font-black text-xs tracking-[0.18em] uppercase mb-5">Hybrid Model</div>
+          <h3 class="text-white font-bold text-xl mb-4">Shared Investment</h3>
+          <p class="text-white/50 text-sm leading-relaxed mb-6">
+            Shared upfront cost between Evium and the fleet operator, with proportional revenue sharing. Reduces your capital outlay while giving you equity in the infrastructure.
+          </p>
+          <div class="text-evium-green text-xs font-semibold">Best for: Fleets wanting partial ownership</div>
+        </div>
+
+        <div class="bg-evium-dark border border-white/8 p-8 hover:border-evium-green/30 transition-colors duration-300">
+          <div class="text-evium-green font-black text-xs tracking-[0.18em] uppercase mb-5">Full Ownership</div>
+          <h3 class="text-white font-bold text-xl mb-4">Own the Infrastructure</h3>
+          <p class="text-white/50 text-sm leading-relaxed mb-6">
+            Fleet operator finances 100% of hardware and installation. Evium handles operations, maintenance, and software. You keep 100% of any charging revenue generated.
+          </p>
+          <div class="text-evium-green text-xs font-semibold">Best for: Fleets maximizing long-term ROI</div>
+        </div>
+
+      </div>
+
+      <!-- Rebates callout -->
+      <div class="mt-10 bg-evium-dark-light border border-evium-green/20 p-8 flex flex-col md:flex-row gap-6 items-start md:items-center">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-evium-green/10 flex items-center justify-center">
+          <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-lg mb-2">Evium Handles Rebate Processing</h4>
+          <p class="text-white/55 text-sm leading-relaxed">
+            State utility rebates, federal tax incentives, NEVI program funding, and grants like the CEC ($6MM+ secured) can significantly offset fleet infrastructure costs. Evium identifies, applies for, and processes all applicable programs on your behalf.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TRUST & PROOF
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="text-center mb-14">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Why Fleets Choose Evium</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight">
+          Infrastructure-Grade.<br />Nationally Proven.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/8">
+        <div class="bg-evium-dark p-10 text-center">
+          <div class="text-evium-green font-black text-4xl mb-2">500+</div>
+          <div class="text-white/40 text-xs uppercase tracking-widest leading-tight">Chargers<br />Deployed</div>
+        </div>
+        <div class="bg-evium-dark p-10 text-center">
+          <div class="text-evium-green font-black text-4xl mb-2">$6MM+</div>
+          <div class="text-white/40 text-xs uppercase tracking-widest leading-tight">CEC Grant<br />Awarded</div>
+        </div>
+        <div class="bg-evium-dark p-10 text-center">
+          <div class="text-evium-green font-black text-4xl mb-2">NEVI</div>
+          <div class="text-white/40 text-xs uppercase tracking-widest leading-tight">Federal Program<br />Award (NM)</div>
+        </div>
+        <div class="bg-evium-dark p-10 text-center">
+          <div class="text-evium-green font-black text-4xl mb-2">24/7</div>
+          <div class="text-white/40 text-xs uppercase tracking-widest leading-tight">Operations<br />Coverage</div>
+        </div>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="bg-evium-dark-light border border-white/8 p-8">
+          <div class="flex items-center gap-2 mb-5">
+            <div class="w-5 h-5 rounded-full bg-evium-green/20 flex items-center justify-center">
+              <svg class="w-3 h-3 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="text-white/40 text-xs uppercase tracking-widest font-semibold">Federal Program Experience</span>
+          </div>
+          <p class="text-white/65 text-sm leading-relaxed">NEVI-awarded operator with direct experience navigating federal EV infrastructure funding, compliance requirements, and reporting obligations.</p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8">
+          <div class="flex items-center gap-2 mb-5">
+            <div class="w-5 h-5 rounded-full bg-evium-green/20 flex items-center justify-center">
+              <svg class="w-3 h-3 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="text-white/40 text-xs uppercase tracking-widest font-semibold">Siemens eMobility Partner</span>
+          </div>
+          <p class="text-white/65 text-sm leading-relaxed">Access to commercial-grade Siemens hardware with enterprise support channels, extended warranties, and priority parts availability critical for fleet uptime.</p>
+        </div>
+
+        <div class="bg-evium-dark-light border border-white/8 p-8">
+          <div class="flex items-center gap-2 mb-5">
+            <div class="w-5 h-5 rounded-full bg-evium-green/20 flex items-center justify-center">
+              <svg class="w-3 h-3 text-evium-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="text-white/40 text-xs uppercase tracking-widest font-semibold">True Turnkey Operations</span>
+          </div>
+          <p class="text-white/65 text-sm leading-relaxed">From site assessment and permits through installation, software, and ongoing maintenance — Evium manages every layer. No general contractor coordination required.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-4xl mx-auto px-6 md:px-12">
+
+      <div class="text-center mb-14">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Fleet Charging FAQ</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight">
+          Answers for Fleet Managers.
+        </h2>
+      </div>
+
+      <div class="space-y-0 border border-white/8">
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What size fleet depot can Evium handle?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Evium scales from small municipal fleets of 10–20 vehicles up to large commercial depots with 200+ vehicles and multi-megawatt charging loads. Our site assessment process accounts for current fleet size, projected EV adoption timeline, and available electrical capacity — and designs an infrastructure plan that fits all three.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">How does load management actually work?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Our OCPP 1.6+ platform uses real-time demand data to dynamically distribute available electrical capacity across all active chargers. When grid demand rises or a circuit approaches its limit, the system automatically throttles lower-priority sessions and boosts higher-priority ones — without interrupting charging. Open ADR 2.0b integration allows the system to respond to utility demand response signals, which can also generate revenue or credits for your operation.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What does ongoing maintenance look like?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Evium's platform monitors all chargers 24/7 with automated fault detection. Most software-level issues are resolved remotely via OTA firmware updates or remote session management without requiring a site visit. For hardware faults, Evium dispatches a certified technician. Under our operations agreements, we also conduct scheduled preventive maintenance visits to inspect connectors, check electrical connections, and update firmware — before problems affect uptime.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">When should a fleet use L2 vs. DC fast charging?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Level 2 (7–19 kW) is the right choice for vehicles that sit overnight or for extended periods — it's lower cost per port, gentler on batteries, and sufficient for most light and medium-duty EVs. DC fast charging (60–240 kW) is for vehicles that need a meaningful charge in under an hour — quick-turn delivery vehicles, transit buses on layover, or emergency vehicles that must return to service rapidly. Most depot designs use both: L2 as the primary backbone with a small number of DCFC stalls for peak demand.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Does Evium handle permits and utility coordination?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Yes — completely. Evium manages the full permitting process including electrical, building, and ADA permits where required. We also handle all utility company coordination: interconnection applications, service upgrades, demand response enrollment, and rebate applications. This is often the most time-consuming and technically complex part of a depot build, and it's entirely off your plate.
+            </p>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Can we start with a pilot and scale later?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Absolutely — and we recommend it. Evium designs every depot with expansion in mind: conduit runs are sized for future ports, electrical panels are specced with headroom, and software is configured to add new chargers without re-platforming. Starting with 10–20 ports for your first EV cohort lets you validate workflows, collect real utilization data, and build an evidence-based case for full fleet electrification — all while keeping your infrastructure investment right-sized.
+            </p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FINAL CTA
+  ═══════════════════════════════════════════════════════ -->
+  <section class="relative bg-[#0a1822] py-32 overflow-hidden">
+
+    <!-- Atmospheric glow -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(45,200,86,0.08),transparent)]"></div>
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/20 to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-12 text-center">
+      <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-6">Ready to Electrify Your Fleet?</p>
+      <h2 class="text-white font-black leading-tight mb-6" style="font-size: clamp(2.2rem, 5vw, 4.5rem);">
+        Talk to a Fleet<br />Charging Specialist.
+      </h2>
+      <p class="text-white/55 text-xl leading-relaxed mb-12 max-w-2xl mx-auto">
+        Tell us about your fleet — vehicle count, depot layout, shift schedule. We'll come back with a charging strategy, hardware recommendation, and financial model tailored to your operation. No commitment required.
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a
+          href="/contact/quote"
+          class="inline-block bg-evium-green text-[#0a1822] font-black text-xs tracking-[0.18em] uppercase px-10 py-5 hover:bg-white transition-colors duration-200"
+        >
+          Start the Conversation
+        </a>
+        <a
+          href="/solutions"
+          class="inline-block text-white/65 font-semibold text-xs tracking-[0.15em] uppercase px-10 py-5 border border-white/20 hover:border-evium-green hover:text-evium-green transition-colors duration-200"
+        >
+          View All Solutions
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>

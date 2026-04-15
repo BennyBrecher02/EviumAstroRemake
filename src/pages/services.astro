@@ -1,0 +1,667 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const topCards = [
+  {
+    code: 'SITE-REF-01',
+    title: 'Multifamily Real Estate',
+    subtitle: 'Urban residential ecosystems.',
+    href: '/solutions/multifamily',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuByLfilgN7yblv1B6EEK8zlUF1MS9yQVXgvRfzRo6bx5sEBJ2C9Ct-VuA9UbIQ8Lrbo3ekHyldNe0YUgYz_8isUOQtRTolT8Eo089O-Jgl0e9QsVr5VbwePLF-tgiXDr516zrvG3HvE7JuXsiZKo03Z6asApvP1l-7NNP4yBNW6pMYPiaFCktOVVUxMJ0vn8wMs1glAthL_PJFez0ITmg7g__1y_P4R1jqdqwokFTyh-SoCnLeug_-Sl-LbuwXynJ9EcrUR026qkxOi',
+  },
+  {
+    code: 'FLEET-OP-A9',
+    title: 'Fleets',
+    subtitle: 'Zero-emission logistics scaling.',
+    href: '/solutions/fleets',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuB_I1wMSpLGsP2KuSBxuCsJFTtVz-p_h88oUsIqJpQmyiRrGJ1oaN9Su0jB1Y0n7gofgwtzhNk1eflykiDkLF6JRIJZ9-g-1CgG7ZRdvS1ga-MB-eAlM_5DGxCnQxH4wb55iyE1m4WQdQGPFGeD9RiVkklbt_IK8U5_gKoKVJy2R62Ge1sDMlq3Bxpz5D51m-RaovXYQR1AmeyzlDfyrwEu-UtyQFCut8d1W2g6O5y18h0S3q6RGxQjXRICcmLTJ5Dxo4P-xdv5Bjl2',
+  },
+  {
+    code: 'TRANSIT-HUB-X',
+    title: 'Highway Fast Charging',
+    subtitle: 'High-throughput corridor power.',
+    href: '/solutions/highway-fast-charging',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDsurjg_-_gGCe0_Dk7CkOQVNa48Aqaw90TmpCGKDNBOmiEI058gFIQtWdyeK8sIrOxBQWXcTfgV1tcwoEtj0ZbrfWH-erOio059LOcO3SO-7QItFZDEMwdHXl-BYfO9SmBwEnpIyScFHBrvj5IXmTI4mlDuAq48ZhWqymcIGFGz_-pi9GaQDkL38F1n5pAS7n7i1W0XCAw7lQJoOI7JzQJ3_f8gUOhwIuPPhGqIDpRCI2AeVZ8S657cvtcQ1ZwK2l8r02nZ8MUinNM',
+  },
+];
+
+const sideTopCards = [
+  {
+    code: 'PARTNER-CERT',
+    title: 'Electrician Partners',
+    href: '/solutions/electrician-partners',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBAoK5_B73O0OtKaKyz7AWnJ_tpYLy17DFngQNJUWvOY8p7IybXOfQdWV9aGHAsLOKHzHelXpTPeLyQMfUAwhX6LhrTA4qUns7x00LTxJX6abpz28kvAEyLsOXP7XgI42or3VxWb1DAXi-ljrppN84Dwju8rSnrRJyRcvuAxQJy5L3HK3vEk5Aew4RwYaUY9NYoC5QlnoZNbhuw67587otRjKXHhC9p3uRxyFRM0XE75yayZSzVAEh4-elznEYMUGa-ZoKcp_mar9sF',
+  },
+  {
+    code: 'CORP-OFFICE-01',
+    title: 'Commercial',
+    href: '/solutions/commercial',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAvxQ1ygKDwOWotOSoZH83wRAibs-yPmQoGmp-HFHriGZdUkobVVdpd467X5N38CflTzdajOZ-LRCYnaMy4-xV9AbEB4Cz2L4bNnGMT71jWZEKkGLViAB_sii7bffOREIkKSbefG7OjBNR283ND0YpFEz8YPOzFjj0oETE_63RRFNcgFOtfzaHZ7-JUwQliOvcHpLRZ8oHKRrAFj0URkWE2Gy-nmxIU4ViLeZIhsp9fpgB9zHh8OYlLPEzYwvpDyRr4LZMlWnKNXvfL',
+  },
+];
+
+const sideBottomCards = [
+  {
+    code: 'COMM-SITE-5',
+    title: 'Retail',
+    href: '/solutions/retail',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDLq76m30yOIR2ErIFcLC5xmHfXWmiAA_sHItUvl8q0RUttBHtV0Xg5AD-QLBg1Z7PBuUFmhr_0l5uuvW_s4E2DreUvn-asTFp68NwlqbKUp0Od5lAqujGO78XZzz72SF-l2VHj3yYe1IE2eB68e8zAumAvxwYfmpVhawx3JHbgmYNW_rL7FSnAYnNsl7BcxIwlOlTktOQjzEHbI5LSebTVtpU5FABZBVYXq4FN2sMhkDEfaBvuUM2JkPODfUtrITJifV2t_VWWJWVB',
+  },
+  {
+    code: 'PK-INFRA-G',
+    title: 'Parking',
+    href: '/solutions/parking',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuC9YfImnBedsmwzPvIJHxXTqsz5cQayKHLSbht57kkhIm16A6b5pTNUHT0Nw3COZ1KUGYc3pHOcHC70F7aa-skSaBnU3K-qusvzoCgYByU8Q-NjXHm0eSmTvWYtmHgv4BrDidh9yJyF4g8QTZp7900dHLTSOneDEOYVAAbr6PU_DOl2V_hC0B_DV8KZXZrOAwUvUoSv9u4TUtEuL85BpZiiI-b5vsPjtYUBcrLPLCZcb-a6arPL54YP19QKM79fFiMZ7AnszMkRfUOV',
+  },
+  {
+    code: 'HOSPITAL-UNIT',
+    title: 'Medical',
+    href: '/solutions/medical',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCUiM-CTM2hwZdEYiq3JkaDgrT5BYQRYaSJQeKJGlrSOuH4hPQ_B1aOM4pHjqR1ujTtGDz2Pj2P2J2sar_iogETLaySrEmYiZ76dcsUYSOfxoGJ8snFPkvP1NdxEqt9RrU_-t2A6Cd77Q-DIyquypsfEOGedh7IEcwv7R5zUG4QLw7Ww6a4jGNpmjtvdTFidN4Ch-iTQV_z0xreV7sLYZWkNTbvNj-N1H2uHw9VZ5f76KvJn1Vbb74pNG-hCcxH-e4DL6kn8xmNXSqE',
+  },
+];
+
+const standards = [
+  {
+    code: 'STANDARD_CODE_01',
+    title: 'Turnkey Delivery',
+    body:
+      'From site assessment and load analysis to utility coordination, permitting, installation, commissioning, and support, Evium runs the full deployment lifecycle.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuB9xVljZBC6P5zm8kbbF4XlUilEXZv77_EcUShYGMSqFEmDwfyrT5ujegr0HxFyhszS9LCucW0Q3nU2P4U5XjOjORPBU3xwQXazif9piS1900ewuFIyQdFoAa5PRKE2iOgH0EesnZMqgphz0Kfp2_slZCM8JaT86V35HeTDILfhVYjCtaVEqmFL-dPKWum62IufUIY9c_1YZpWVv6x2V-QYkHSfoouuOXrkuh3odSyw2vA_K7YwjURpQIcHaR62aEST6ffbV20Liqys',
+    bullets: [
+      'Utility grid integration and site coordination',
+      'Permitting, rebates, and compliance management',
+      '24/7 monitoring and remote diagnostics',
+    ],
+  },
+  {
+    code: 'FISCAL_CORE_02',
+    title: 'Zero Upfront Cost',
+    body:
+      'Evium’s primary no-cost model removes capital friction for qualified properties while preserving a credible revenue share and long-term operating support structure.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuA0QQ4RLdtpOVx2V246bN_iJ2gJ23_rGHGpD8r8QGKGHmYDt-bM1y5FfiiF-atHwTtlWBGr-lJfEXev0nZ4F-zCybQXrU_8VO_0oZezZCsq1geTsMIMn8HbVGs4E3L7X2fyXNhEzMd1E4QWMtpYN3CyqoXvoIdYU9nwDbZQVQ39m_j00TnH2EdPebwmsGcjA2qy6N6IyYUZ9NOXsLewk8SJxlqUgEISQLwbaivjjD9Tn7eMr7Eat_LbgCRaPUg0gutfNbKHoiHAdQmB',
+    bullets: [
+      '100% CAPEX funded by Evium under the flagship model',
+      'Shared revenue structures built around site economics',
+      'Maintenance and operating support included',
+    ],
+  },
+];
+---
+
+<Layout
+  title="Services — Evium Charging"
+  description="Explore Evium Charging's service verticals across multifamily, fleets, highway fast charging, commercial, retail, parking, medical, and more."
+>
+  <main class="services-page text-[#182126]">
+    <section class="services-hero relative overflow-hidden pt-28 md:pt-36">
+      <div class="absolute inset-0 hero-base-bg"></div>
+
+      <!-- Refined ambient lighting -->
+      <div class="hero-glow hero-glow-primary"></div>
+      <div class="hero-glow hero-glow-secondary"></div>
+      <div class="hero-glow hero-glow-accent"></div>
+
+      <!-- SVG geometric network -->
+      <svg class="hero-network-svg" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2DC856" stop-opacity="0.35" />
+            <stop offset="50%" stop-color="#2DC856" stop-opacity="0.08" />
+            <stop offset="100%" stop-color="#2DC856" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nodeGlowWhite" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="white" stop-opacity="0.12" />
+            <stop offset="100%" stop-color="white" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+
+        <!-- Diagonal grid lines — structured tech depth -->
+        <line x1="0" y1="180" x2="1440" y2="60" stroke="rgba(255,255,255,0.04)" stroke-width="0.7" />
+        <line x1="0" y1="320" x2="1440" y2="200" stroke="rgba(255,255,255,0.035)" stroke-width="0.7" />
+        <line x1="0" y1="480" x2="1440" y2="360" stroke="rgba(255,255,255,0.03)" stroke-width="0.7" />
+        <line x1="0" y1="100" x2="1440" y2="500" stroke="rgba(255,255,255,0.03)" stroke-width="0.7" />
+        <line x1="200" y1="0" x2="1440" y2="520" stroke="rgba(255,255,255,0.025)" stroke-width="0.7" />
+        <line x1="600" y1="0" x2="1440" y2="350" stroke="rgba(255,255,255,0.03)" stroke-width="0.7" />
+
+        <!-- Primary network connection lines — green tint -->
+        <line x1="120" y1="140" x2="380" y2="90" stroke="rgba(45,200,86,0.14)" stroke-width="1" />
+        <line x1="380" y1="90" x2="620" y2="200" stroke="rgba(45,200,86,0.12)" stroke-width="1" />
+        <line x1="620" y1="200" x2="900" y2="120" stroke="rgba(45,200,86,0.09)" stroke-width="0.8" />
+        <line x1="900" y1="120" x2="1180" y2="180" stroke="rgba(255,255,255,0.07)" stroke-width="0.8" />
+        <line x1="1180" y1="180" x2="1350" y2="80" stroke="rgba(255,255,255,0.05)" stroke-width="0.8" />
+
+        <!-- Secondary network paths -->
+        <line x1="200" y1="400" x2="500" y2="340" stroke="rgba(255,255,255,0.05)" stroke-width="0.7" />
+        <line x1="500" y1="340" x2="780" y2="430" stroke="rgba(255,255,255,0.045)" stroke-width="0.7" />
+        <line x1="780" y1="430" x2="1100" y2="350" stroke="rgba(255,255,255,0.04)" stroke-width="0.7" />
+
+        <!-- Cross connections -->
+        <line x1="380" y1="90" x2="500" y2="340" stroke="rgba(255,255,255,0.035)" stroke-width="0.6" />
+        <line x1="620" y1="200" x2="780" y2="430" stroke="rgba(255,255,255,0.03)" stroke-width="0.6" />
+        <line x1="900" y1="120" x2="1100" y2="350" stroke="rgba(255,255,255,0.035)" stroke-width="0.6" />
+
+        <!-- Node points — large soft glow + small crisp center -->
+        <circle cx="120" cy="140" r="22" fill="url(#nodeGlow)" />
+        <circle cx="120" cy="140" r="2" fill="rgba(45,200,86,0.55)" />
+
+        <circle cx="380" cy="90" r="28" fill="url(#nodeGlow)" />
+        <circle cx="380" cy="90" r="2.5" fill="rgba(45,200,86,0.65)" />
+
+        <circle cx="620" cy="200" r="20" fill="url(#nodeGlow)" />
+        <circle cx="620" cy="200" r="2" fill="rgba(45,200,86,0.45)" />
+
+        <circle cx="900" cy="120" r="24" fill="url(#nodeGlowWhite)" />
+        <circle cx="900" cy="120" r="2" fill="rgba(255,255,255,0.22)" />
+
+        <circle cx="1180" cy="180" r="18" fill="url(#nodeGlowWhite)" />
+        <circle cx="1180" cy="180" r="1.8" fill="rgba(255,255,255,0.18)" />
+
+        <circle cx="1350" cy="80" r="14" fill="url(#nodeGlowWhite)" />
+        <circle cx="1350" cy="80" r="1.5" fill="rgba(255,255,255,0.14)" />
+
+        <!-- Secondary nodes -->
+        <circle cx="200" cy="400" r="14" fill="url(#nodeGlowWhite)" />
+        <circle cx="200" cy="400" r="1.5" fill="rgba(255,255,255,0.14)" />
+
+        <circle cx="500" cy="340" r="18" fill="url(#nodeGlow)" />
+        <circle cx="500" cy="340" r="1.8" fill="rgba(45,200,86,0.35)" />
+
+        <circle cx="780" cy="430" r="14" fill="url(#nodeGlowWhite)" />
+        <circle cx="780" cy="430" r="1.5" fill="rgba(255,255,255,0.12)" />
+
+        <circle cx="1100" cy="350" r="16" fill="url(#nodeGlowWhite)" />
+        <circle cx="1100" cy="350" r="1.5" fill="rgba(255,255,255,0.14)" />
+
+        <!-- Accent hexagons -->
+        <polygon points="1280,280 1296,270 1312,280 1312,298 1296,308 1280,298" fill="none" stroke="rgba(45,200,86,0.08)" stroke-width="0.8" />
+        <polygon points="160,480 172,472 184,480 184,494 172,502 160,494" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.7" />
+        <polygon points="720,50 736,40 752,50 752,68 736,78 720,68" fill="none" stroke="rgba(45,200,86,0.06)" stroke-width="0.7" />
+      </svg>
+
+      <!-- Top edge light streak -->
+      <div class="hero-edge-light"></div>
+
+      <div class="relative mx-auto max-w-[1440px] px-4 pb-28 md:px-8 md:pb-36">
+      <div class="grid items-end gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(18rem,24rem)]">
+        <div>
+          <div class="mb-6 flex items-center gap-3">
+            <span class="h-px w-12 bg-[#2DC856]/65"></span>
+            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7DDEA1]">
+              Service Architecture v2.4
+            </span>
+          </div>
+
+          <h1 class="max-w-[9ch] text-[3.5rem] font-black leading-[0.9] tracking-[-0.055em] text-white md:text-[5.75rem]">
+            Infrastructure as a Service
+          </h1>
+
+          <p class="mt-8 max-w-xl text-lg leading-8 text-white/64">
+            Evium deploys and operates charging ecosystems for real estate, fleets, public corridors, and commercial sites without pushing owners into hardware, permitting, or operational complexity.
+          </p>
+        </div>
+
+        <div class="flex flex-col items-start gap-4 md:items-end">
+          <div class="uptime-panel w-full max-w-[24rem] border border-white/12 px-7 py-6">
+            <div class="flex items-center justify-between gap-4">
+              <div class="text-[10px] font-medium uppercase tracking-[0.16em] text-white/44">
+                Network Reliability
+              </div>
+              <div class="w-[8.9rem] text-center text-[10px] font-medium uppercase tracking-[0.16em] text-white/34">
+                Status
+              </div>
+            </div>
+
+            <div class="mt-7 grid grid-cols-[minmax(0,1fr)_8.9rem] gap-8 items-center">
+              <div class="flex min-w-0 flex-col items-center">
+                <div class="meter-track" aria-hidden="true">
+                  <svg viewBox="0 0 180 108" class="meter-svg" role="presentation">
+                    <defs>
+                      <linearGradient id="eviumReliabilityArc" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#7f2f35" />
+                        <stop offset="18%" stop-color="#b04937" />
+                        <stop offset="40%" stop-color="#d87d32" />
+                        <stop offset="58%" stop-color="#e2c233" />
+                        <stop offset="78%" stop-color="#7cb446" />
+                        <stop offset="100%" stop-color="#2DC856" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M24 86 A66 66 0 0 1 156 86"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.08)"
+                      stroke-width="18"
+                      stroke-linecap="round"
+                      opacity="0.35"
+                    />
+                    <path
+                      d="M24 86 A66 66 0 0 1 156 86"
+                      fill="none"
+                      stroke="url(#eviumReliabilityArc)"
+                      stroke-width="14"
+                      stroke-linecap="round"
+                    />
+                    <line x1="90" y1="86" x2="154" y2="64" stroke="#ecf6ef" stroke-width="3.5" stroke-linecap="round" />
+                    <circle cx="90" cy="86" r="6.5" fill="#ecf6ef" />
+                    <circle cx="90" cy="86" r="2.4" fill="#1A2F3A" />
+                  </svg>
+                </div>
+                <span class="uptime-value mt-1 block text-[2.7rem] leading-none text-white">99.2%</span>
+                <span class="mt-2 block text-center text-[11px] font-medium uppercase tracking-[0.14em] text-white/38">
+                  Rolling 30-day uptime
+                </span>
+              </div>
+
+              <div class="border-l border-white/10 pl-6">
+                <div class="space-y-3 text-left">
+                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/66">
+                    <span class="status-light status-green is-on"></span>
+                    Online
+                  </span>
+                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/42">
+                    <span class="status-light status-yellow is-off"></span>
+                    Under Maintenance
+                  </span>
+                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/42">
+                    <span class="status-light status-red is-off"></span>
+                    Offline
+                  </span>
+                </div>
+
+                <div class="mt-5 border-t border-white/10 pt-4">
+                  <div class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Current State</div>
+                  <div class="mt-1 text-sm font-semibold tracking-[0.01em] text-white/76">Nominal</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 h-px w-full bg-white/10"></div>
+
+            <dl class="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-left">
+              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Monitoring</dt>
+              <dd class="text-sm font-semibold text-right text-white/72">24/7 active</dd>
+
+              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Last outage</dt>
+              <dd class="text-sm font-semibold text-right text-white/72">17 days ago</dd>
+
+              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Open exceptions</dt>
+              <dd class="text-sm font-semibold text-right text-white/72">0</dd>
+            </dl>
+          </div>
+          <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/40">
+            Est. 2024 Precision Unit
+          </span>
+        </div>
+      </div>
+      </div>
+
+      <div class="services-transition-panel pointer-events-none absolute inset-x-0 bottom-[-1px] h-32"></div>
+    </section>
+
+    <section class="relative z-10 mx-auto -mt-10 max-w-[1440px] px-4 pb-24 md:-mt-14 md:px-8 md:pb-32">
+      <div class="services-content-shell rounded-t-[2rem] bg-[#f7f7f4] px-0 pt-6 shadow-[0_-24px_60px_rgba(12,20,28,0.08)] md:rounded-t-[2.5rem] md:pt-8">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-12 md:auto-rows-[255px]">
+        {topCards.map((card) => (
+          <a
+            href={card.href}
+            class="group relative overflow-hidden rounded-2xl md:col-span-4"
+          >
+            <img
+              src={card.image}
+              alt={card.title}
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.82),rgba(16,24,29,0.18))]"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+            <div class="relative flex h-full flex-col justify-between p-5">
+              <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
+              <div>
+                <h2 class="text-[1.72rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
+                <p class="mt-1 text-sm font-medium text-white/72">{card.subtitle}</p>
+              </div>
+            </div>
+          </a>
+        ))}
+
+        <a
+          href="/solutions/generate-profits"
+          class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white px-6 py-7 shadow-[0_28px_60px_rgba(10,20,28,0.08)] md:col-span-6 md:row-span-2 md:px-10 md:py-9"
+        >
+          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#ededec] text-[#a7aaaa] transition-colors duration-300 group-hover:bg-[#dfe8e1] group-hover:text-[#17883c] md:right-8 md:top-8 md:h-16 md:w-16">
+            <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" aria-hidden="true">
+              <rect x="5" y="4.5" width="14" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"></rect>
+              <path d="M8.5 8h7M8.5 11.5h2.2M13.2 11.5h2.3M8.5 15h2.2M13.2 15h2.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+            </svg>
+          </div>
+
+          <div class="max-w-md">
+            <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
+              Profitability Terminal
+            </span>
+            <h2 class="mt-5 text-[2.1rem] font-bold leading-[1.02] tracking-[-0.04em] text-[#11181d] md:text-[2.45rem]">
+              Calculate Generated Profits
+            </h2>
+
+            <div class="mt-9 max-w-sm space-y-8">
+              <div>
+                <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
+                  <span>Station Count</span>
+                  <span class="font-bold text-[#182126]">12 Units</span>
+                </div>
+                <div class="mt-3 h-[2px] overflow-hidden bg-[#dce1de]">
+                  <div class="h-full w-[34%] bg-[#17883c]"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
+                  <span>Average Utilization</span>
+                  <span class="font-bold text-[#182126]">4.5 Hrs / Day</span>
+                </div>
+                <div class="mt-3 h-[2px] overflow-hidden bg-[#dce1de]">
+                  <div class="h-full w-[64%] bg-[#17883c]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12 flex flex-col gap-6 border-t border-[#e5e8e6] pt-8 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
+                Est. Annual Net Revenue
+              </span>
+              <span class="mt-2 block text-[2.15rem] font-black tracking-[-0.05em] text-[#11181d]">$142,800.00</span>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-[4px] bg-[#12191e] px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white">
+              Run Simulation
+            </span>
+          </div>
+        </a>
+
+        {sideTopCards.map((card) => (
+          <a
+            href={card.href}
+            class="group relative overflow-hidden rounded-2xl md:col-span-3"
+          >
+            <img
+              src={card.image}
+              alt={card.title}
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.16))]"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+            <div class="relative flex h-full flex-col justify-between p-5">
+              <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
+              <h2 class="max-w-[12ch] text-[1.65rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
+            </div>
+          </a>
+        ))}
+
+        {sideBottomCards.map((card) => (
+          <a
+            href={card.href}
+            class="group relative overflow-hidden rounded-2xl md:col-span-2"
+          >
+            <img
+              src={card.image}
+              alt={card.title}
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.12))]"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+            <div class="relative flex h-full flex-col justify-between p-4">
+              <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
+              <h2 class="text-[1.35rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
+            </div>
+          </a>
+        ))}
+      </div>
+      </div>
+    </section>
+
+    <section class="bg-[#efefed] py-24 md:py-32">
+      <div class="mx-auto max-w-[1440px] px-4 md:px-8">
+        <div class="mb-16">
+          <span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#496b56]">
+            Strategic Delivery Model
+          </span>
+          <h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-[#11181d] md:text-[3.35rem]">
+            Engineered Service Standards
+          </h2>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          {standards.map((item) => (
+            <div class="bg-[#f8f8f7] p-5 shadow-[0_18px_45px_rgba(10,20,28,0.03)] md:p-8">
+              <div class="relative aspect-[1.7/1] overflow-hidden rounded-lg bg-[#dfdfdd]">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  class="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-500 hover:grayscale-0"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 ring-1 ring-inset ring-[#11181d]/8"></div>
+              </div>
+
+              <div class="mt-7">
+                <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-[#8b989c]">{item.code}</span>
+                <h3 class="mt-3 text-[2rem] font-semibold italic leading-none tracking-[-0.04em] text-[#11181d]">
+                  {item.title}
+                </h3>
+                <p class="mt-6 max-w-xl text-base leading-7 text-[#55656d]">{item.body}</p>
+
+                <ul class="mt-8 space-y-4">
+                  {item.bullets.map((bullet) => (
+                    <li class="flex items-start gap-3 text-sm font-medium text-[#243137]">
+                      <span class="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#17883c] text-[10px] font-bold text-white">•</span>
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1440px] px-4 py-24 text-center md:px-8 md:py-32">
+      <h2 class="text-5xl font-black leading-[0.95] tracking-[-0.05em] text-[#11181d] md:text-[4.4rem]">
+        Ready to architect your
+        <span class="block italic text-[#17883c]">charging future?</span>
+      </h2>
+
+      <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a
+          href="/contact/quote"
+          class="inline-flex items-center justify-center bg-[#17883c] px-10 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors duration-200 hover:bg-[#0f6e30]"
+        >
+          Begin Site Analysis
+        </a>
+        <a
+          href="/how-it-works"
+          class="inline-flex items-center justify-center border border-[#11181d]/20 px-10 py-4 text-xs font-bold uppercase tracking-[0.16em] text-[#11181d] transition-colors duration-200 hover:bg-[#11181d] hover:text-white"
+        >
+          Explore How It Works
+        </a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .services-page {
+    background: #f7f7f4;
+  }
+
+  .services-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(112deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.018) 24%, transparent 30%),
+      linear-gradient(180deg, rgba(6,14,20,0) 48%, rgba(6,14,20,0.12) 82%, rgba(6,14,20,0.18) 100%);
+    pointer-events: none;
+  }
+
+  .services-hero::before {
+    content: none;
+  }
+
+  .services-transition-panel {
+    background: #f7f7f4;
+    clip-path: polygon(0 100%, 0 62%, 18% 54%, 34% 60%, 53% 42%, 71% 51%, 86% 32%, 100% 18%, 100% 100%);
+  }
+
+  .services-content-shell {
+    position: relative;
+  }
+
+  .services-content-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(17,24,29,0.04), rgba(17,24,29,0.12), rgba(17,24,29,0.04));
+  }
+
+  .uptime-panel {
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .hero-base-bg {
+    background:
+      radial-gradient(ellipse 130% 100% at 20% 30%, rgba(22,60,75,1) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 80% at 85% 15%, rgba(18,48,62,0.9) 0%, transparent 45%),
+      radial-gradient(ellipse 60% 50% at 60% 80%, rgba(16,42,54,0.6) 0%, transparent 50%),
+      #1A2F3A;
+  }
+
+  .hero-glow {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+  }
+
+  .hero-glow-primary {
+    left: -8%;
+    top: -20%;
+    width: 50%;
+    height: 120%;
+    background: radial-gradient(ellipse at center, rgba(45,200,86,0.07) 0%, rgba(45,200,86,0.025) 35%, transparent 65%);
+    filter: blur(100px);
+  }
+
+  .hero-glow-secondary {
+    right: -5%;
+    top: 10%;
+    width: 40%;
+    height: 70%;
+    background: radial-gradient(ellipse at center, rgba(45,200,86,0.04) 0%, rgba(45,200,86,0.015) 40%, transparent 65%);
+    filter: blur(110px);
+  }
+
+  .hero-glow-accent {
+    left: 25%;
+    bottom: -15%;
+    width: 50%;
+    height: 45%;
+    background: radial-gradient(ellipse at center, rgba(45,200,86,0.05) 0%, transparent 60%);
+    filter: blur(90px);
+  }
+
+  .hero-network-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 1;
+  }
+
+  .hero-edge-light {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(45,200,86,0.15) 30%, rgba(45,200,86,0.25) 50%, rgba(45,200,86,0.15) 70%, transparent);
+    filter: blur(0.5px);
+  }
+
+  .meter-track {
+    width: 11rem;
+    height: 5.5rem;
+  }
+
+  .meter-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .status-light {
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    position: relative;
+  }
+
+  .status-green {
+    background: #2DC856;
+    color: #2DC856;
+  }
+
+  .status-yellow {
+    background: #E0B84F;
+    color: #E0B84F;
+  }
+
+  .status-red {
+    background: #B64A4A;
+    color: #B64A4A;
+  }
+
+  .status-light.is-on {
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.28),
+      inset 0 -1px 2px rgba(0,0,0,0.24),
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 0 12px color-mix(in srgb, currentColor 45%, transparent);
+    filter: saturate(1.15) brightness(1.08);
+  }
+
+  .status-light.is-off {
+    opacity: 0.95;
+    background-image:
+      radial-gradient(circle at 30% 28%, rgba(255,255,255,0.26), rgba(255,255,255,0.08) 26%, transparent 42%),
+      radial-gradient(circle at 50% 58%, color-mix(in srgb, currentColor 52%, #0d1419 48%) 0%, color-mix(in srgb, currentColor 32%, #0d1419 68%) 55%, rgba(6,10,14,0.88) 100%);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.14),
+      inset 0 -1px 2px rgba(0,0,0,0.38),
+      0 0 0 1px rgba(255,255,255,0.05);
+    filter: saturate(0.92) brightness(0.76);
+  }
+
+  .uptime-value {
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+</style>

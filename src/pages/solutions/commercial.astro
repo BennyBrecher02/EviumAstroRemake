@@ -1,7 +1,786 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
 ---
-<Layout title="Commercial — Evium Charging">
-  <PagePlaceholder title="Commercial" />
+
+<Layout
+  title="Commercial EV Charging — Evium Charging"
+  description="Turn your commercial property's parking into a competitive advantage. Evium delivers zero-cost, fully managed EV charging infrastructure for office buildings, mixed-use properties, and corporate campuses."
+>
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════ -->
+  <section class="relative min-h-screen flex items-center overflow-hidden bg-evium-dark pt-20">
+    <!-- Background grid pattern -->
+    <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(rgba(45,200,86,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,0.4) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+    <!-- Radial glow -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] rounded-full opacity-10 pointer-events-none" style="background: radial-gradient(ellipse, #2DC856 0%, transparent 70%);"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
+      <div class="max-w-4xl">
+        <!-- Eyebrow label -->
+        <div class="inline-flex items-center gap-3 mb-8">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Commercial Solutions</span>
+        </div>
+
+        <h1 class="text-5xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white mb-8">
+          Your Building.<br />
+          Their Mandate.<br />
+          <span class="text-evium-green">Your Advantage.</span>
+        </h1>
+
+        <p class="text-xl lg:text-2xl text-white/60 font-medium leading-relaxed max-w-2xl mb-12">
+          Corporate tenants now expect EV charging as a baseline amenity. Evium delivers a fully managed, zero-capital charging infrastructure — so your building wins the lease negotiation before the tour begins.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/contact/quote"
+            class="inline-flex items-center justify-center gap-3 bg-evium-green text-evium-dark font-bold text-base px-8 py-4 rounded-lg hover:brightness-110 transition-all duration-200 group"
+          >
+            Get a Free Site Assessment
+            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <a
+            href="#shift"
+            class="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold text-base px-8 py-4 rounded-lg hover:border-evium-green hover:text-evium-green transition-all duration-200"
+          >
+            See How It Works
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat strip pinned to bottom -->
+    <div class="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/20 backdrop-blur-sm">
+      <div class="max-w-7xl mx-auto px-6 lg:px-12 py-6 grid grid-cols-3 gap-6 text-center">
+        <div>
+          <p class="text-3xl font-black text-evium-green">500+</p>
+          <p class="text-xs text-white/50 uppercase tracking-widest mt-1">Chargers Deployed</p>
+        </div>
+        <div>
+          <p class="text-3xl font-black text-evium-green">$0</p>
+          <p class="text-xs text-white/50 uppercase tracking-widest mt-1">Upfront Capital</p>
+        </div>
+        <div>
+          <p class="text-3xl font-black text-evium-green">24/7</p>
+          <p class="text-xs text-white/50 uppercase tracking-widest mt-1">Managed Support</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       THE COMMERCIAL CHARGING SHIFT
+       ═══════════════════════════════════════════ -->
+  <section id="shift" class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="inline-flex items-center gap-3 mb-6">
+            <span class="h-px w-10 bg-evium-green"></span>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">The Market Shift</span>
+          </div>
+          <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-8">
+            EV Charging Is Now a Lease Requirement — Not a Perk
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-6">
+            Fortune 500 tenants, law firms, tech companies, and financial institutions have internal sustainability mandates that govern real estate decisions. Charging infrastructure is increasingly a line item in RFPs and lease negotiations — and properties without it are being filtered out before the first showing.
+          </p>
+          <p class="text-white/60 text-lg leading-relaxed mb-10">
+            Buildings that offer managed EV charging signal forward-thinking operations, attract higher-quality tenants, and command stronger lease terms. It's no longer a differentiator — it's table stakes. The question is whether your building is ready.
+          </p>
+          <div class="flex flex-col gap-4">
+            {[
+              "Corporate tenants with ESG mandates now require charging in RFP criteria",
+              "Properties with charging infrastructure report higher tenant retention",
+              "EV adoption among executives and professional staff is accelerating"
+            ].map(item => (
+              <div class="flex items-start gap-3">
+                <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-evium-green/15 border border-evium-green/40 flex items-center justify-center">
+                  <svg class="w-3 h-3 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <p class="text-white/70 text-base">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Visual callout card -->
+        <div class="relative">
+          <div class="rounded-2xl border border-white/10 bg-evium-dark p-10">
+            <div class="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-evium-green/60 to-transparent"></div>
+            <p class="text-white/40 text-sm font-semibold uppercase tracking-widest mb-6">The Competitive Landscape</p>
+            <div class="space-y-6">
+              <div class="flex items-center justify-between py-4 border-b border-white/8">
+                <span class="text-white/70 font-medium">Buildings with Evium charging</span>
+                <span class="text-evium-green font-bold text-sm uppercase tracking-wide">Wins RFP</span>
+              </div>
+              <div class="flex items-center justify-between py-4 border-b border-white/8">
+                <span class="text-white/70 font-medium">Buildings with self-managed charging</span>
+                <span class="text-yellow-400/80 font-bold text-sm uppercase tracking-wide">Mixed Result</span>
+              </div>
+              <div class="flex items-center justify-between py-4">
+                <span class="text-white/70 font-medium">Buildings with no EV charging</span>
+                <span class="text-red-400/80 font-bold text-sm uppercase tracking-wide">Filtered Out</span>
+              </div>
+            </div>
+            <div class="mt-8 p-5 rounded-xl bg-evium-green/8 border border-evium-green/20">
+              <p class="text-white/80 text-sm leading-relaxed italic">
+                "The ROI exceeded our projections. We had three tenants ask about the charging infrastructure during lease renewal discussions."
+              </p>
+              <p class="text-evium-green text-sm font-semibold mt-3">— Vin Gureeno, Commercial Property, New England</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       PAIN POINTS
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">What Holds Buildings Back</span>
+          <span class="h-px w-10 bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight max-w-3xl mx-auto">
+          Every Concern. Addressed Before You Ask.
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          {
+            icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+            title: "Capital Expenditure",
+            body: "Charging infrastructure can run six figures. Evium's no-cost model eliminates upfront spend entirely — hardware, installation, and electrical work are fully covered."
+          },
+          {
+            icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+            title: "Multi-Tenant Complexity",
+            body: "Multiple tenants with different needs, billing structures, and access rights. Evium's portal handles tenant group segmentation, custom pricing, and per-group revenue reporting."
+          },
+          {
+            icon: "M13 10V3L4 14h7v7l9-11h-7z",
+            title: "Electrical Infrastructure",
+            body: "Load management, panel capacity, permits — it's complex. Evium handles the full electrical assessment, design, permit pull, and utility coordination."
+          },
+          {
+            icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+            title: "Ongoing Maintenance",
+            body: "Who do you call when a charger goes offline? Evium monitors every unit 24/7 and dispatches service remotely or on-site — property management has nothing to do."
+          },
+          {
+            icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+            title: "Revenue & Billing Tracking",
+            body: "Charging revenue is distributed across dozens of sessions per day. Evium's portal aggregates all billing, provides transparent revenue reports, and handles driver payment collection."
+          },
+          {
+            icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+            title: "Timeline & Disruption",
+            body: "Most commercial deployments complete in weeks, not months. Evium coordinates installation to minimize disruption to tenants and daily operations."
+          }
+        ].map(item => (
+          <div class="group rounded-xl border border-white/8 bg-evium-dark-light p-8 hover:border-evium-green/30 transition-all duration-300">
+            <div class="w-12 h-12 rounded-lg bg-evium-green/10 border border-evium-green/20 flex items-center justify-center mb-6 group-hover:bg-evium-green/15 transition-colors duration-300">
+              <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
+              </svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-3">{item.title}</h3>
+            <p class="text-white/55 text-sm leading-relaxed">{item.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       WHAT EVIUM DELIVERS — 5-STAGE PROCESS
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="grid lg:grid-cols-2 gap-20 items-start">
+        <div class="lg:sticky lg:top-28">
+          <div class="inline-flex items-center gap-3 mb-6">
+            <span class="h-px w-10 bg-evium-green"></span>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">What We Deliver</span>
+          </div>
+          <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-8">
+            Turnkey Means We Handle All of It
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            From the first site walk to year-five maintenance, Evium manages the entire lifecycle. Building management signs off at key milestones — that's it. No contractor coordination, no vendor management, no software configuration.
+          </p>
+          <a
+            href="/contact/quote"
+            class="inline-flex items-center gap-3 bg-evium-green text-evium-dark font-bold text-sm px-7 py-3.5 rounded-lg hover:brightness-110 transition-all duration-200 group"
+          >
+            Start Your Assessment
+            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="space-y-4">
+          {[
+            {
+              step: "01",
+              title: "Site Assessment",
+              body: "Evium's team evaluates your parking layout, electrical infrastructure, load capacity, and tenant mix. We model the optimal hardware configuration and identify available utility rebates."
+            },
+            {
+              step: "02",
+              title: "Planning & Hardware Selection",
+              body: "We specify charger types, quantities, and locations based on your building's needs — mix of L2 wall-mounted units for dedicated tenant parking and pedestal-style for visitor and surface lots."
+            },
+            {
+              step: "03",
+              title: "Agreement, Permits & Compliance",
+              body: "Evium handles the financial agreement, pulls all required electrical permits, and manages utility interconnection paperwork. You review and sign — we do the rest."
+            },
+            {
+              step: "04",
+              title: "Installation & Software Setup",
+              body: "Licensed electricians install hardware to code. We configure the OCPP-compliant software portal, set up tenant access groups, pricing rules, and connect payment processing."
+            },
+            {
+              step: "05",
+              title: "Ongoing Support & Management",
+              body: "24/7 remote monitoring, proactive fault detection, on-site dispatch when needed, and monthly revenue reporting. Your charging infrastructure runs itself."
+            }
+          ].map(item => (
+            <div class="group flex gap-6 p-7 rounded-xl border border-white/8 bg-evium-dark hover:border-evium-green/25 transition-all duration-300">
+              <span class="flex-shrink-0 text-evium-green/30 font-black text-4xl leading-none group-hover:text-evium-green/50 transition-colors duration-300">{item.step}</span>
+              <div>
+                <h3 class="text-white font-bold text-lg mb-2">{item.title}</h3>
+                <p class="text-white/55 text-sm leading-relaxed">{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       ACCESS CONTROL & MULTI-TENANT MANAGEMENT
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Owner Portal</span>
+          <span class="h-px w-10 bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight max-w-3xl mx-auto">
+          One Building. Many Tenants. Total Control.
+        </h2>
+        <p class="text-white/55 text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
+          Commercial properties have complex access needs. Evium's portal gives building managers granular control over every charging session — segmented by tenant, user group, and vehicle type.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8 mb-12">
+        {[
+          {
+            title: "Tenant Group Segmentation",
+            body: "Create distinct access groups for each tenant company. Set individual pricing tiers, usage limits, and access schedules per group. Employees of Tenant A see different rates than Tenant B's staff.",
+            icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          },
+          {
+            title: "Visitor & Public Access",
+            body: "Define open-access chargers for building visitors with credit card pay-as-you-go. Separate from employee-dedicated units. Manage session time limits to keep stalls turning over.",
+            icon: "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+          },
+          {
+            title: "Revenue Reporting by Group",
+            body: "Monthly reports break down charging revenue by tenant group, individual user, and time of day. Export data for property accounting. Full audit trail for every session.",
+            icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          }
+        ].map(item => (
+          <div class="rounded-xl border border-white/8 bg-evium-dark-light p-8">
+            <div class="w-12 h-12 rounded-lg bg-evium-green/10 border border-evium-green/20 flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
+              </svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-3">{item.title}</h3>
+            <p class="text-white/55 text-sm leading-relaxed">{item.body}</p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Portal feature list -->
+      <div class="rounded-2xl border border-white/8 bg-evium-dark-light p-10">
+        <p class="text-white/40 text-xs font-semibold uppercase tracking-widest mb-8">Full Portal Feature Set</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            "OCPP 1.6+ compliant platform",
+            "Custom access codes & RFID",
+            "Real-time session monitoring",
+            "Remote start / stop / reboot",
+            "Driver app for tenants",
+            "Automated billing & receipts",
+            "Load balancing controls",
+            "Peak demand management",
+            "API integration available",
+            "White-label portal option",
+            "Usage analytics dashboard",
+            "Fault alert notifications"
+          ].map(feature => (
+            <div class="flex items-center gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+              <span class="text-white/65 text-sm">{feature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       HARDWARE FOR COMMERCIAL
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Hardware</span>
+          <span class="h-px w-10 bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight max-w-2xl mx-auto">
+          Purpose-Specified Hardware for Every Parking Environment
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- EVOCHARGE L2 Wall Mount -->
+        <div class="group relative rounded-2xl border border-white/10 bg-evium-dark overflow-hidden hover:border-evium-green/30 transition-all duration-300">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(ellipse at top, rgba(45,200,86,0.04) 0%, transparent 60%);"></div>
+          <div class="p-8 pb-0">
+            <div class="inline-flex items-center gap-2 bg-evium-green/10 border border-evium-green/20 rounded-full px-4 py-1.5 mb-6">
+              <span class="w-2 h-2 rounded-full bg-evium-green"></span>
+              <span class="text-evium-green text-xs font-semibold uppercase tracking-wider">Dedicated Tenant Parking</span>
+            </div>
+            <h3 class="text-white font-black text-2xl mb-3">EVOCHARGE L2 Wall-Mount</h3>
+            <p class="text-white/55 text-sm leading-relaxed mb-6">
+              Sleek, compact wall-mounted Level 2 chargers ideal for structured parking garages and dedicated tenant stalls. RFID and app access control built in. Networked for real-time monitoring.
+            </p>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              {[
+                ["Output", "7.2 – 11.5 kW"],
+                ["Connector", "SAE J1772 / CCS"],
+                ["Access", "RFID + App"],
+                ["Mounting", "Wall / Pedestal"]
+              ].map(([label, value]) => (
+                <div class="rounded-lg bg-white/5 p-3">
+                  <p class="text-white/40 text-xs uppercase tracking-wider mb-1">{label}</p>
+                  <p class="text-white font-semibold text-sm">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-end justify-center h-56 px-8">
+            <img
+              src="/images/evium-evocharge-l2-wallmount.png"
+              alt="EVOCHARGE L2 Wall-Mount Charger"
+              class="max-h-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        </div>
+
+        <!-- Siemens VersiCharge AC -->
+        <div class="group relative rounded-2xl border border-white/10 bg-evium-dark overflow-hidden hover:border-evium-green/30 transition-all duration-300">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(ellipse at top, rgba(45,200,86,0.04) 0%, transparent 60%);"></div>
+          <div class="p-8 pb-0">
+            <div class="inline-flex items-center gap-2 bg-white/5 border border-white/15 rounded-full px-4 py-1.5 mb-6">
+              <span class="w-2 h-2 rounded-full bg-white/40"></span>
+              <span class="text-white/60 text-xs font-semibold uppercase tracking-wider">Visitor &amp; Surface Parking</span>
+            </div>
+            <h3 class="text-white font-black text-2xl mb-3">Siemens VersiCharge AC</h3>
+            <p class="text-white/55 text-sm leading-relaxed mb-6">
+              Robust AC charging units available in wall-mount and pedestal configurations. Ideal for surface lots, visitor areas, and mixed-use zones requiring flexible placement and open or card-controlled access.
+            </p>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              {[
+                ["Output", "7.2 – 19.2 kW"],
+                ["Connector", "SAE J1772"],
+                ["Access", "Open / RFID"],
+                ["Mounting", "Wall / Pedestal"]
+              ].map(([label, value]) => (
+                <div class="rounded-lg bg-white/5 p-3">
+                  <p class="text-white/40 text-xs uppercase tracking-wider mb-1">{label}</p>
+                  <p class="text-white font-semibold text-sm">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-end justify-center h-56 px-8">
+            <img
+              src="/images/siemens-versicharge-ac-variants.png"
+              alt="Siemens VersiCharge AC Variants"
+              class="max-h-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p class="text-center text-white/40 text-sm mt-8">
+        Evium specifies hardware based on your site's electrical capacity, parking type, and tenant profile — not a one-size-fits-all catalog approach.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       ESG & SUSTAINABILITY
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <!-- Left: ESG credential cards -->
+        <div class="grid grid-cols-2 gap-4">
+          {[
+            { label: "LEED v4", desc: "Alternative Transportation credits for EV infrastructure contribute directly to LEED certification points." },
+            { label: "BREEAM", desc: "EV charging supports Transport category scoring in BREEAM assessments for commercial buildings." },
+            { label: "ENERGY STAR", desc: "Networked charging with load management supports energy efficiency benchmarking requirements." },
+            { label: "ESG Reporting", desc: "Generate data for Scope 3 emissions reporting and corporate sustainability disclosures for tenants." },
+            { label: "GRESB", desc: "EV infrastructure contributes positively to GRESB Real Estate Assessment scoring for investors." },
+            { label: "GRI Standards", desc: "Charging data supports GRI 302 (Energy) and GRI 305 (Emissions) reporting for tenant companies." }
+          ].map(item => (
+            <div class="rounded-xl border border-white/8 bg-evium-dark-light p-6 hover:border-evium-green/25 transition-colors duration-300">
+              <p class="text-evium-green font-black text-lg mb-2">{item.label}</p>
+              <p class="text-white/50 text-xs leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div class="inline-flex items-center gap-3 mb-6">
+            <span class="h-px w-10 bg-evium-green"></span>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">ESG & Sustainability</span>
+          </div>
+          <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-8">
+            Charging Infrastructure Counts Toward Certification
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-6">
+            EV charging infrastructure is a scoring input for LEED, BREEAM, GRESB, and ENERGY STAR certifications. Installing managed charging strengthens your building's sustainability credentials and supports your tenants' own ESG reporting obligations.
+          </p>
+          <p class="text-white/60 text-lg leading-relaxed mb-10">
+            Evium provides session-level data exports and reporting summaries that feed directly into building certification applications and tenant ESG disclosures — reducing the reporting burden for everyone.
+          </p>
+          <div class="p-6 rounded-xl border border-evium-green/20 bg-evium-green/5">
+            <p class="text-evium-green font-bold text-sm uppercase tracking-wider mb-2">For Corporate Tenants</p>
+            <p class="text-white/70 text-sm leading-relaxed">
+              Tenants with Scope 3 emission reduction targets can use Evium's per-session data in their own ESG reporting. This makes buildings with Evium charging directly useful to tenant sustainability teams — a retention driver that shows up at renewal time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       FINANCIAL MODELS
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Financial Models</span>
+          <span class="h-px w-10 bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight max-w-2xl mx-auto">
+          Structure That Fits Your Capital Strategy
+        </h2>
+        <p class="text-white/55 text-lg mt-6 max-w-xl mx-auto">
+          Every building has a different appetite for capital deployment and revenue participation. Evium offers four models — all include full management and rebate processing.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- No-Cost Model — featured -->
+        <div class="relative rounded-2xl border border-evium-green/40 bg-evium-dark p-8 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/60 to-transparent"></div>
+          <div class="absolute top-4 right-4">
+            <span class="bg-evium-green/15 border border-evium-green/30 text-evium-green text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">Most Popular</span>
+          </div>
+          <div class="w-12 h-12 rounded-lg bg-evium-green/15 border border-evium-green/30 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-black text-xl mb-2">No-Cost Model</h3>
+          <p class="text-evium-green font-semibold text-sm mb-5">Zero capital. Revenue share. Full management.</p>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Evium covers all hardware, installation, and electrical costs. You receive approximately 10% of charging revenue. Zero upfront. Zero operating burden. Best for buildings that want charging without capital allocation.
+          </p>
+          <ul class="space-y-2.5">
+            {["$0 upfront investment", "~10% charging revenue to owner", "All maintenance covered by Evium", "Rebates processed and retained by Evium"].map(pt => (
+              <li class="flex items-center gap-3 text-sm text-white/65">
+                <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
+                {pt}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Client Investment Model -->
+        <div class="rounded-2xl border border-white/10 bg-evium-dark p-8">
+          <div class="w-12 h-12 rounded-lg bg-white/5 border border-white/15 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <h3 class="text-white font-black text-xl mb-2">Client Investment Model</h3>
+          <p class="text-white/40 font-semibold text-sm mb-5">Owner funds. 100% revenue. Evium manages.</p>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Owner purchases hardware and installation. In return, 100% of charging revenue flows to the property. Evium handles all management, software, and maintenance. Rebates can offset most upfront costs.
+          </p>
+          <ul class="space-y-2.5">
+            {["Owner funds hardware + installation", "100% charging revenue to owner", "Rebates typically offset 30–60% of costs", "Full Evium management platform included"].map(pt => (
+              <li class="flex items-center gap-3 text-sm text-white/65">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/30 flex-shrink-0"></span>
+                {pt}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Hybrid Model -->
+        <div class="rounded-2xl border border-white/10 bg-evium-dark p-8">
+          <div class="w-12 h-12 rounded-lg bg-white/5 border border-white/15 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h3 class="text-white font-black text-xl mb-2">Hybrid Model</h3>
+          <p class="text-white/40 font-semibold text-sm mb-5">Shared cost. Negotiated revenue split.</p>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Cost and revenue shared between Evium and the property owner. Split is structured to reflect each party's contribution. Good for buildings that want partial upside without full capital commitment.
+          </p>
+          <ul class="space-y-2.5">
+            {["Cost split negotiated per project", "Revenue share proportional to investment", "Rebate allocation included in agreement", "Evium management included"].map(pt => (
+              <li class="flex items-center gap-3 text-sm text-white/65">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/30 flex-shrink-0"></span>
+                {pt}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Leasing Model -->
+        <div class="rounded-2xl border border-white/10 bg-evium-dark p-8">
+          <div class="w-12 h-12 rounded-lg bg-white/5 border border-white/15 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-black text-xl mb-2">Equipment Leasing</h3>
+          <p class="text-white/40 font-semibold text-sm mb-5">Predictable monthly cost. No capital.</p>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Lease the charging hardware through structured financing with predictable monthly payments. Keeps infrastructure off the capital budget while retaining revenue. Suitable for portfolios with OpEx-only mandates.
+          </p>
+          <ul class="space-y-2.5">
+            {["Monthly lease payments, no large capex", "Revenue offsets lease cost", "Hardware ownership path available", "All management included"].map(pt => (
+              <li class="flex items-center gap-3 text-sm text-white/65">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/30 flex-shrink-0"></span>
+                {pt}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <p class="text-white/40 text-sm">All models include rebate processing, OCPP software platform, and Evium's managed support program.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       SOCIAL PROOF
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Testimonial -->
+        <div class="relative rounded-2xl border border-white/10 bg-evium-dark-light p-10 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/50 to-transparent"></div>
+          <svg class="w-10 h-10 text-evium-green/25 mb-8" fill="currentColor" viewBox="0 0 32 32">
+            <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
+          </svg>
+          <p class="text-white/80 text-xl leading-relaxed font-medium mb-8 italic">
+            "The ROI exceeded our projections. We had three tenants specifically mention the charging infrastructure during their lease renewal discussions — it's become a selling point we didn't expect."
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+              <span class="text-evium-green font-black text-lg">VG</span>
+            </div>
+            <div>
+              <p class="text-white font-bold">Vin Gureeno</p>
+              <p class="text-white/50 text-sm">Commercial Property Owner, New England</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats block -->
+        <div class="space-y-6">
+          <div class="rounded-xl border border-white/8 bg-evium-dark-light p-8">
+            <p class="text-6xl font-black text-evium-green mb-3">500+</p>
+            <p class="text-white font-bold text-lg mb-2">Chargers Deployed</p>
+            <p class="text-white/50 text-sm leading-relaxed">Across commercial, multifamily, municipal, and corporate campus properties throughout the Northeast — and growing.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-6">
+            <div class="rounded-xl border border-white/8 bg-evium-dark-light p-6">
+              <p class="text-4xl font-black text-evium-green mb-2">100%</p>
+              <p class="text-white/60 text-sm leading-relaxed">Managed maintenance with zero ongoing burden on building management</p>
+            </div>
+            <div class="rounded-xl border border-white/8 bg-evium-dark-light p-6">
+              <p class="text-4xl font-black text-evium-green mb-2">$0</p>
+              <p class="text-white/60 text-sm leading-relaxed">Upfront cost required under Evium's no-cost program — hardware, install, and permits included</p>
+            </div>
+          </div>
+          <div class="rounded-xl border border-white/8 bg-evium-dark-light p-6">
+            <p class="text-white/50 text-xs uppercase tracking-wider mb-3">Trusted by</p>
+            <p class="text-white font-bold text-base">RJ Block Properties and hundreds of commercial properties across New England</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       FAQ
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-28">
+    <div class="max-w-4xl mx-auto px-6 lg:px-12">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <span class="h-px w-10 bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">FAQ</span>
+          <span class="h-px w-10 bg-evium-green"></span>
+        </div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight">
+          Common Questions
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        {[
+          {
+            q: "Who manages driver billing and payment collection?",
+            a: "Evium handles all driver-facing payment processing. Drivers pay via the Evium app or credit card depending on the charger configuration. Revenue is collected, aggregated, and reported to property owners on a monthly basis. You never touch billing."
+          },
+          {
+            q: "Can different tenant companies have different pricing and access rules?",
+            a: "Yes. The Evium owner portal allows you to create distinct access groups for each tenant. Each group can have independent pricing (including free charging for employees, or cost-recovery rates), access hours, and usage limits. Visitors can be handled with a separate open-access configuration."
+          },
+          {
+            q: "What's the impact on our electrical infrastructure?",
+            a: "Evium's assessment includes a full electrical load analysis. We specify hardware appropriate to your panel capacity and can incorporate dynamic load management to prevent demand spikes. In some cases, panel upgrades are required — Evium coordinates and manages this as part of the project."
+          },
+          {
+            q: "Who is responsible for maintenance and repairs?",
+            a: "Evium monitors all networked chargers 24/7. When a fault is detected, our team troubleshoots remotely first. If on-site service is required, Evium dispatches a technician. Building management has no maintenance responsibility — this is included in all Evium programs."
+          },
+          {
+            q: "Can I track revenue broken down by individual tenant or group?",
+            a: "Yes. The owner portal provides revenue reporting by tenant group, individual user, time period, and charger unit. You can export reports for property accounting. Data can also feed into LEED or ESG reporting documentation."
+          },
+          {
+            q: "How long does installation typically take?",
+            a: "Most commercial deployments complete within 4–8 weeks from signed agreement to live chargers. This includes permit pull, electrical work, hardware installation, and software configuration. Timeline varies based on building complexity and permit jurisdiction."
+          }
+        ].map(item => (
+          <details class="group rounded-xl border border-white/8 bg-evium-dark overflow-hidden open:border-evium-green/25 transition-colors duration-300">
+            <summary class="flex items-center justify-between gap-6 px-8 py-6 cursor-pointer list-none select-none">
+              <span class="text-white font-semibold text-base">{item.q}</span>
+              <span class="flex-shrink-0 w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-open:border-evium-green/40 group-open:bg-evium-green/10 transition-all duration-300">
+                <svg class="w-3.5 h-3.5 text-white/50 group-open:text-evium-green group-open:rotate-45 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </span>
+            </summary>
+            <div class="px-8 pb-7">
+              <p class="text-white/60 text-sm leading-relaxed">{item.a}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       FINAL CTA
+       ═══════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-32 relative overflow-hidden">
+    <!-- Subtle glow -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div class="w-[800px] h-[400px] rounded-full opacity-8" style="background: radial-gradient(ellipse, #2DC856 0%, transparent 70%);"></div>
+    </div>
+    <!-- Grid lines -->
+    <div class="absolute inset-0 opacity-4" style="background-image: linear-gradient(rgba(45,200,86,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,0.5) 1px, transparent 1px); background-size: 80px 80px;"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center">
+      <div class="inline-flex items-center gap-3 mb-8">
+        <span class="h-px w-10 bg-evium-green"></span>
+        <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Get Started</span>
+        <span class="h-px w-10 bg-evium-green"></span>
+      </div>
+      <h2 class="text-5xl lg:text-6xl font-black text-white leading-tight mb-8">
+        Modernize Your Building.<br />
+        <span class="text-evium-green">Start with a Free Assessment.</span>
+      </h2>
+      <p class="text-white/60 text-xl leading-relaxed mb-12 max-w-2xl mx-auto">
+        Evium's site assessment is free, non-binding, and typically completed within a week. We'll map your parking, model your electrical capacity, and present a zero-cost program proposal — no obligation.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/contact/quote"
+          class="inline-flex items-center justify-center gap-3 bg-evium-green text-evium-dark font-bold text-lg px-10 py-5 rounded-xl hover:brightness-110 transition-all duration-200 group"
+        >
+          Request a Site Assessment
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href="/products"
+          class="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold text-lg px-10 py-5 rounded-xl hover:border-evium-green hover:text-evium-green transition-all duration-200"
+        >
+          View Hardware Lineup
+        </a>
+      </div>
+      <p class="text-white/30 text-sm mt-8">
+        No commitment required. Most assessments complete in 5–7 business days.
+      </p>
+    </div>
+  </section>
+
 </Layout>

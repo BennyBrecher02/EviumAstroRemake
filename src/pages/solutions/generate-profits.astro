@@ -1,0 +1,814 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Calculate Generated Profits — Evium Charging"
+  description="Turn idle parking into a passive revenue stream. Evium's no-cost EV charging model generates real income for property owners — zero capital required."
+>
+
+  <!-- ═══════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════ -->
+  <section class="relative min-h-screen flex items-center overflow-hidden bg-evium-dark pt-20">
+    <!-- Background grid lines -->
+    <div
+      class="absolute inset-0 opacity-[0.04]"
+      style="background-image: linear-gradient(#2DC856 1px, transparent 1px), linear-gradient(90deg, #2DC856 1px, transparent 1px); background-size: 60px 60px;"
+    ></div>
+
+    <!-- Radial glow -->
+    <div
+      class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] rounded-full opacity-10"
+      style="background: radial-gradient(ellipse at center, #2DC856 0%, transparent 70%);"
+    ></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+      <div class="max-w-4xl">
+        <div class="inline-flex items-center gap-2 bg-evium-green/10 border border-evium-green/30 rounded-full px-4 py-1.5 mb-8">
+          <span class="w-1.5 h-1.5 rounded-full bg-evium-green"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Revenue Intelligence</span>
+        </div>
+
+        <h1 class="text-5xl lg:text-7xl font-black leading-[1.05] tracking-tight mb-8">
+          Your parking lot is<br />
+          <span class="text-evium-green">already an asset.</span><br />
+          Time it paid like one.
+        </h1>
+
+        <p class="text-xl lg:text-2xl text-white/60 leading-relaxed max-w-2xl mb-12">
+          EV charging infrastructure turns idle pavement into a recurring revenue stream. With Evium's no-cost model, your property earns passive income from day one — no capital investment, no operational overhead.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/contact/quote"
+            class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold text-base px-8 py-4 rounded-lg hover:bg-evium-green/90 transition-colors"
+          >
+            Get My Revenue Estimate
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <a
+            href="#revenue-projection"
+            class="inline-flex items-center justify-center gap-2 border border-white/20 text-white font-semibold text-base px-8 py-4 rounded-lg hover:border-evium-green/50 hover:text-evium-green transition-colors"
+          >
+            See Revenue Projections
+          </a>
+        </div>
+      </div>
+
+      <!-- Stat strip -->
+      <div class="mt-20 pt-10 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div>
+          <p class="text-4xl font-black text-evium-green">500+</p>
+          <p class="text-white/50 text-sm mt-1">Chargers installed</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-evium-green">$0</p>
+          <p class="text-white/50 text-sm mt-1">Capital required (no-cost model)</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-evium-green">$126K</p>
+          <p class="text-white/50 text-sm mt-1">5-yr potential per fast charger</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-evium-green">100%</p>
+          <p class="text-white/50 text-sm mt-1">Rebates handled by Evium</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       THE REVENUE OPPORTUNITY
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark-light">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">The Opportunity</p>
+          <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-6">
+            EV drivers are paying customers. Every session generates revenue.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            Unlike a bike rack or a park bench, an EV charging station collects real dollars every time it's used. As EV adoption accelerates nationally, utilization rates rise — and so does your return.
+          </p>
+          <p class="text-white/60 text-lg leading-relaxed">
+            This isn't a speculative amenity play. It's measurable infrastructure with a documented revenue curve, backed by Evium's network of 500+ deployed chargers and real-world utilization data from commercial properties across the Northeast and beyond.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5">
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-white mb-1">Rising Utilization Over Time</h3>
+                <p class="text-white/55 text-sm leading-relaxed">EV adoption is compounding. Properties that install today capture early users and build loyalty — meaning utilization (and revenue) grows year over year.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-white mb-1">Passive by Design</h3>
+                <p class="text-white/55 text-sm leading-relaxed">Evium manages everything — installation, software, maintenance, billing, and rebates. You collect revenue without managing operations.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-white mb-1">Property Value Multiplier</h3>
+                <p class="text-white/55 text-sm leading-relaxed">Charging infrastructure is increasingly expected by commercial tenants and residential buyers. Properties with EV charging command higher rents and better occupancy.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       REVENUE PROJECTION EXAMPLES
+  ═══════════════════════════════════════════════ -->
+  <section id="revenue-projection" class="py-28 bg-evium-dark">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">By the Numbers</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-5">Revenue Projection Ranges</h2>
+        <p class="text-white/55 text-lg max-w-2xl mx-auto">
+          Based on real deployment data from Evium's NEVI-funded installations. Figures reflect a single 180kW DC Fast charger. Actual results vary by location, traffic, and pricing.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <!-- Low utilization -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-white/10 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-white/20 rounded-t-2xl"></div>
+          <div class="mb-6">
+            <span class="text-xs font-bold tracking-widest uppercase text-white/40">Conservative</span>
+            <h3 class="text-2xl font-black mt-1">Low Utilization</h3>
+          </div>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per month</span>
+              <span class="text-2xl font-bold text-white">$900</span>
+            </div>
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per year</span>
+              <span class="text-xl font-semibold text-white">$10,800</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-white/55 text-sm">Over 5 years</span>
+              <span class="text-xl font-semibold text-white">$54,000</span>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs leading-relaxed">Approx. 8–12 sessions/day. Suitable for moderate-traffic lots with limited EV saturation today.</p>
+        </div>
+
+        <!-- Medium utilization — featured -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-evium-green/40 overflow-hidden shadow-lg shadow-evium-green/5">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-evium-green rounded-t-2xl"></div>
+          <div class="absolute top-5 right-5">
+            <span class="bg-evium-green/15 text-evium-green text-xs font-bold tracking-wider uppercase px-3 py-1 rounded-full border border-evium-green/30">Most Common</span>
+          </div>
+          <div class="mb-6">
+            <span class="text-xs font-bold tracking-widest uppercase text-evium-green/70">Projected</span>
+            <h3 class="text-2xl font-black mt-1">Medium Utilization</h3>
+          </div>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per month</span>
+              <span class="text-2xl font-bold text-evium-green">$1,500</span>
+            </div>
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per year</span>
+              <span class="text-xl font-semibold text-evium-green">$18,000</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-white/55 text-sm">Over 5 years</span>
+              <span class="text-xl font-semibold text-evium-green">$90,000</span>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs leading-relaxed">Approx. 15–20 sessions/day. Represents the median across Evium's active deployment portfolio.</p>
+        </div>
+
+        <!-- High utilization -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-white/10 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-evium-green/60 rounded-t-2xl"></div>
+          <div class="mb-6">
+            <span class="text-xs font-bold tracking-widest uppercase text-white/40">Optimized</span>
+            <h3 class="text-2xl font-black mt-1">High Utilization</h3>
+          </div>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per month</span>
+              <span class="text-2xl font-bold text-white">$2,100</span>
+            </div>
+            <div class="flex justify-between items-baseline border-b border-white/10 pb-3">
+              <span class="text-white/55 text-sm">Per year</span>
+              <span class="text-xl font-semibold text-white">$25,200</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-white/55 text-sm">Over 5 years</span>
+              <span class="text-xl font-semibold text-white">$126,000</span>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs leading-relaxed">Approx. 25–30 sessions/day. Achieved in high-traffic highway corridors and major commercial destinations.</p>
+        </div>
+      </div>
+
+      <p class="text-center text-white/30 text-xs">
+        Figures are illustrative projections based on Evium NEVI deployment data for a single 180kW DC Fast charger. Revenue varies based on location, pricing strategy, and traffic volume. Multiple charger installations multiply revenue proportionally.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       HOW REVENUE IS CALCULATED
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark-light">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Formula visual -->
+        <div class="bg-evium-dark rounded-2xl p-10 border border-white/10">
+          <p class="text-evium-green font-semibold text-xs tracking-widest uppercase mb-8">The Revenue Formula</p>
+
+          <div class="space-y-5">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-lg flex-shrink-0">U</div>
+              <div>
+                <p class="font-bold text-white">Utilization Rate</p>
+                <p class="text-white/50 text-sm">% of time the charger is actively in use. Grows with EV market share and property traffic.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-center text-white/30 text-2xl font-light">×</div>
+
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-lg flex-shrink-0">P</div>
+              <div>
+                <p class="font-bold text-white">Session Price</p>
+                <p class="text-white/50 text-sm">Per kWh or flat session rate. Set by owner or Evium — dynamic pricing available via software.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-center text-white/30 text-2xl font-light">×</div>
+
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-lg flex-shrink-0">V</div>
+              <div>
+                <p class="font-bold text-white">Daily Volume</p>
+                <p class="text-white/50 text-sm">Sessions per day, driven by site traffic, charger count, and visibility.</p>
+              </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/10 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-evium-green flex items-center justify-center text-evium-dark font-black text-lg flex-shrink-0">$</div>
+              <div>
+                <p class="font-bold text-white text-lg">Monthly Revenue</p>
+                <p class="text-white/50 text-sm">Reported in real time via Evium's owner portal.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">How It Works</p>
+          <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-6">
+            Three levers. One clean revenue line.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-6">
+            Revenue is the product of how often the charger is used, what each session costs, and how many sessions happen each day. Evium's platform gives you visibility and control over each lever.
+          </p>
+          <ul class="space-y-4 text-white/60 text-base">
+            <li class="flex items-start gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2.5 flex-shrink-0"></span>
+              <span>Dynamic pricing tools let you charge peak rates during high-demand periods and lower rates to incentivize off-peak usage.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2.5 flex-shrink-0"></span>
+              <span>Load management software prevents grid demand spikes and optimizes the number of concurrent sessions you can support.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2.5 flex-shrink-0"></span>
+              <span>Revenue reports, session logs, and station health data are available 24/7 in your owner portal.</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       FINANCIAL MODEL COMPARISON
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Your Options</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-5">Choose Your Financial Model</h2>
+        <p class="text-white/55 text-lg max-w-2xl mx-auto">
+          Evium offers four distinct arrangements. The right model depends on your capital availability, risk tolerance, and revenue goals.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- No-Cost -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-evium-green/30 overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 opacity-5" style="background: radial-gradient(circle at top right, #2DC856, transparent 70%);"></div>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-evium-green flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-evium-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold tracking-widest uppercase text-evium-green/70">Zero Capital Required</span>
+              <h3 class="text-xl font-black text-white">No-Cost Model</h3>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Evium covers 100% of equipment, installation, and operational costs. You provide the parking space. Evium retains ~90% of charging revenue; you receive ~10% as passive income. No investment, no liability — just returns.
+          </p>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your capital outlay</p>
+              <p class="text-white font-bold">$0</p>
+            </div>
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your revenue share</p>
+              <p class="text-evium-green font-bold">~10%</p>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs">Best for: Property owners who want zero risk and zero overhead. Ideal first deployment or supplementary income.</p>
+        </div>
+
+        <!-- Client Investment -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-white/10 overflow-hidden">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold tracking-widest uppercase text-white/40">Maximum Returns</span>
+              <h3 class="text-xl font-black text-white">Client Investment</h3>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            You finance and own the equipment. You capture 100% of charging revenue. Evium handles rebate processing, installation, maintenance, and software — turning your capital investment into a high-yielding asset.
+          </p>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your capital outlay</p>
+              <p class="text-white font-bold">Variable</p>
+            </div>
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your revenue share</p>
+              <p class="text-white font-bold">100%</p>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs">Best for: Owners with available capital who want full ownership and maximum long-term returns.</p>
+        </div>
+
+        <!-- Hybrid -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-white/10 overflow-hidden">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold tracking-widest uppercase text-white/40">Flexible Terms</span>
+              <h3 class="text-xl font-black text-white">Hybrid Model</h3>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            A shared investment with proportional revenue split. You and Evium each contribute to capital costs, and revenue is divided according to agreed terms. Fully customized to your situation.
+          </p>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your capital outlay</p>
+              <p class="text-white font-bold">Shared</p>
+            </div>
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your revenue share</p>
+              <p class="text-white font-bold">Negotiated</p>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs">Best for: Portfolio operators who want a tailored arrangement across multiple properties or phased rollouts.</p>
+        </div>
+
+        <!-- Leasing -->
+        <div class="relative bg-evium-dark-light rounded-2xl p-8 border border-white/10 overflow-hidden">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold tracking-widest uppercase text-white/40">Predictable Cost</span>
+              <h3 class="text-xl font-black text-white">Leasing</h3>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed mb-6">
+            Monthly or annual lease terms give you access to commercial-grade EV charging equipment without ownership commitment. You set charging prices and keep session revenue. Predictable cost structure for budget-conscious operators.
+          </p>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your capital outlay</p>
+              <p class="text-white font-bold">Lease fee</p>
+            </div>
+            <div class="bg-evium-dark rounded-lg p-3">
+              <p class="text-white/40 text-xs mb-1">Your revenue share</p>
+              <p class="text-white font-bold">100%</p>
+            </div>
+          </div>
+          <p class="text-white/40 text-xs">Best for: Organizations that prefer operating expenses over capital expenditure — retail chains, municipalities, hospitality groups.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       REBATES & INCENTIVES
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark-light">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Government Incentives</p>
+          <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-6">
+            Federal and state programs can eliminate your equipment costs entirely.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            Substantial rebates exist at the federal, state, and utility level for EV charging infrastructure. For investment-model clients, these programs can dramatically compress payback periods — or offset capital costs entirely.
+          </p>
+          <p class="text-white/60 text-base leading-relaxed">
+            Evium handles every rebate application on your behalf. We have deep experience with NEVI, CEC, BPU NJ, and utility incentive programs. You don't need to navigate the bureaucracy — we do it for you.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10 flex items-start gap-5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-white mb-1">NEVI — National Electric Vehicle Infrastructure</h3>
+              <p class="text-white/55 text-sm leading-relaxed">Federal highway charging program covering up to 80% of eligible project costs. Evium is an experienced NEVI applicant with funded deployments.</p>
+            </div>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10 flex items-start gap-5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-white mb-1">CEC Grant — California Energy Commission</h3>
+              <p class="text-white/55 text-sm leading-relaxed">Evium has received $6MM+ in CEC grant funding for EV infrastructure projects across eligible California sites.</p>
+            </div>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10 flex items-start gap-5">
+            <div class="w-12 h-12 rounded-xl bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-white mb-1">State & Utility Rebates</h3>
+              <p class="text-white/55 text-sm leading-relaxed">BPU New Jersey, utility-specific incentives, and state-level EV programs available across Evium's operating footprint. Evium handles all applications.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       WHY ZERO-COST STILL PAYS
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">The No-Cost Case</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-5">Why 10% of something beats 100% of nothing.</h2>
+        <p class="text-white/55 text-lg max-w-2xl mx-auto">
+          Skeptical about the revenue split? Here's why the no-cost model is still an exceptional deal for property owners.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/10">
+          <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Pure Passive Income</h3>
+          <p class="text-white/55 text-sm leading-relaxed">At medium utilization, a 10% share on a single fast charger generates ~$150/month — on infrastructure you paid zero dollars to install. Multiply across a multi-charger deployment and the numbers compound quickly.</p>
+        </div>
+
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/10">
+          <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Tenant & Customer Attraction</h3>
+          <p class="text-white/55 text-sm leading-relaxed">One Evium property owner reported three new tenants in the first month following installation. EV charging is increasingly a leasing requirement — having it closes deals that competitors can't.</p>
+        </div>
+
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/10">
+          <div class="w-12 h-12 rounded-xl bg-evium-green/10 border border-evium-green/20 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Property Value Appreciation</h3>
+          <p class="text-white/55 text-sm leading-relaxed">EV-ready properties are increasingly valued at a premium in commercial real estate appraisals. Infrastructure that costs you nothing today creates lasting asset value on your balance sheet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SOFTWARE-DRIVEN OPTIMIZATION
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark-light">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Owner Portal</p>
+          <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-6">
+            Real-time revenue data. Full transparency. Always.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            Evium's owner portal isn't an afterthought — it's a revenue management tool. Every charging session is logged, every dollar is attributed, and every trend is visible so you can make informed decisions about your infrastructure.
+          </p>
+          <a href="/products" class="inline-flex items-center gap-2 text-evium-green font-semibold hover:gap-3 transition-all">
+            Explore the Platform
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Revenue Tracking</h4>
+            <p class="text-white/50 text-xs">Daily, weekly, and monthly revenue broken down by station, port, and time of day.</p>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Session Analytics</h4>
+            <p class="text-white/50 text-xs">Utilization trends, average session duration, peak usage windows, and driver return rates.</p>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Pricing Controls</h4>
+            <p class="text-white/50 text-xs">Set per-kWh or flat session rates. Adjust in real time without hardware changes.</p>
+          </div>
+
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Load Management</h4>
+            <p class="text-white/50 text-xs">Automated demand balancing prevents grid spikes and keeps operating costs predictable.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SOCIAL PROOF
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Proven Results</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight">Results that speak for themselves.</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Testimonial 1 -->
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/10 flex flex-col">
+          <div class="flex gap-1 mb-6">
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <blockquote class="text-white/75 text-base leading-relaxed flex-1 mb-6">
+            "The ROI on our Evium installation exceeded projections. I didn't expect it to perform this well this quickly."
+          </blockquote>
+          <footer>
+            <p class="font-semibold text-white text-sm">Vin Gureeno</p>
+            <p class="text-white/40 text-xs">Commercial Property Owner, Northeast</p>
+          </footer>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/10 flex flex-col">
+          <div class="flex gap-1 mb-6">
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-4 h-4 text-evium-green" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <blockquote class="text-white/75 text-base leading-relaxed flex-1 mb-6">
+            "We signed three new tenants in the first month. They specifically cited the EV charging as a reason for choosing our building."
+          </blockquote>
+          <footer>
+            <p class="font-semibold text-white text-sm">Oakmark Property Client</p>
+            <p class="text-white/40 text-xs">Commercial Real Estate</p>
+          </footer>
+        </div>
+
+        <!-- Stat card -->
+        <div class="bg-evium-green/10 rounded-2xl p-8 border border-evium-green/25 flex flex-col justify-between">
+          <div>
+            <p class="text-evium-green/70 text-xs font-bold tracking-widest uppercase mb-8">Portfolio Scale</p>
+            <p class="text-6xl font-black text-white mb-3">500+</p>
+            <p class="text-white/55 text-base leading-relaxed">Chargers deployed across commercial, residential, and highway locations — including a deep partnership with RJ Block Properties across their full portfolio.</p>
+          </div>
+          <div class="mt-8 pt-6 border-t border-evium-green/20">
+            <p class="text-evium-green text-sm font-semibold">Trusted by property operators</p>
+            <p class="text-white/40 text-xs mt-1">across the Northeast and expanding nationally</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark-light">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Common Questions</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight">Straight answers.</h2>
+      </div>
+
+      <div class="space-y-4">
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">How much can I realistically make from EV charging?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Based on Evium's deployment data, a single 180kW DC Fast charger generates between $900 and $2,100 per month depending on utilization. Over five years, that's $54,000 to $126,000 per charger. Properties with higher traffic and better visibility skew toward the upper range. A revenue estimate tailored to your property is available at no cost — we'll model it based on your location, traffic profile, and charger configuration.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">What does "no-cost" actually mean? What's the catch?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            No-cost means Evium covers 100% of hardware, installation, and ongoing operational costs — including maintenance, software, and rebate processing. There is no hidden fee or deferred cost. In exchange, Evium retains the majority of charging revenue (~90%), and the property owner receives approximately 10%. That trade-off is the entire business model. If you want full revenue ownership, the investment model gives you that — but requires capital outlay.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">Can I switch financial models after deployment?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Yes, in many cases. Transitioning from a no-cost model to an investment model — effectively buying out the equipment — is something Evium has structured for existing clients. Terms depend on the original agreement, remaining contract period, and equipment value at the time of transition. Speak with your Evium account manager about a structured pathway if your goals change.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">How do I track my revenue and station performance?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Through Evium's owner portal, accessible via web browser or mobile app. The portal provides real-time session data, cumulative revenue by station and time period, charger health status, and utilization trend reports. Revenue settlements are processed according to your agreement terms, with full transaction logs available on demand.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">What if utilization is low — does it cost me anything?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Under the no-cost model, low utilization costs you nothing. Evium absorbs all operational costs regardless of session volume. Your 10% share simply reflects lower activity — but you're not out of pocket. In investment or leasing models, you carry more financial exposure, which is why Evium provides detailed pre-deployment revenue modeling to help you make an informed decision before committing capital.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">Is EV charging revenue taxable?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Generally, yes — revenue from EV charging sessions is taxable business income. However, equipment depreciation, rebates, and infrastructure investments may have favorable tax treatment depending on your structure and jurisdiction. Evium provides clear documentation of all revenue and grants for your accountant. We recommend consulting with your tax advisor as part of your pre-deployment planning.
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       CTA
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark relative overflow-hidden">
+    <!-- Background glow -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div
+        class="w-[700px] h-[400px] rounded-full opacity-[0.07]"
+        style="background: radial-gradient(ellipse at center, #2DC856 0%, transparent 70%);"
+      ></div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-8 text-center">
+      <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-5">Get Started</p>
+      <h2 class="text-4xl lg:text-6xl font-black leading-tight mb-6">
+        Get a revenue estimate<br class="hidden lg:block" /> for your property.
+      </h2>
+      <p class="text-white/55 text-xl leading-relaxed mb-12 max-w-2xl mx-auto">
+        Tell us about your property and we'll model the revenue potential — by charger type, utilization scenario, and financial model. No commitment required.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href="/contact/quote"
+          class="inline-flex items-center gap-2 bg-evium-green text-evium-dark font-bold text-base px-10 py-4 rounded-lg hover:bg-evium-green/90 transition-colors"
+        >
+          Request My Revenue Estimate
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a href="/solutions" class="text-white/50 font-medium text-sm hover:text-white transition-colors">
+          Explore other solutions →
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>

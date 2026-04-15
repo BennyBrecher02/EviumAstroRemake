@@ -8,12 +8,21 @@ const navItems = [
     label: 'Solutions',
     href: '/solutions',
     sub: [
-      { label: 'Multifamily', href: '/solutions/multifamily' },
-      { label: 'Commercial',  href: '/solutions/commercial'  },
-      { label: 'Retail',      href: '/solutions/retail'      },
-      { label: 'Parking',     href: '/solutions/parking'     },
-      { label: 'Medical',     href: '/solutions/medical'     },
+      { label: 'Multifamily Real Estate', href: '/solutions/multifamily'          },
+      { label: 'Fleets',                  href: '/solutions/fleets'               },
+      { label: 'Highway Fast Charging',   href: '/solutions/highway-fast-charging'},
+      { label: 'Calculate Profits',         href: '/solutions/generate-profits'     },
+      { label: 'Electrician Partners',    href: '/solutions/electrician-partners' },
+      { label: 'Commercial',              href: '/solutions/commercial'           },
+      { label: 'Retail',                  href: '/solutions/retail'               },
+      { label: 'Parking',                 href: '/solutions/parking'              },
+      { label: 'Medical',                 href: '/solutions/medical'              },
     ],
+  },
+  {
+    label: 'Services',
+    href: '/services',
+    sub: [],
   },
   {
     label: 'Products',
@@ -34,6 +43,11 @@ const navItems = [
       { label: 'Case Studies',  href: '/blog/case-studies'   },
       { label: 'Newsletter',    href: '/blog/newsletter'     },
     ],
+  },
+  {
+    label: 'AI BS',
+    href: '/ai-bs',
+    sub: [],
   },
   {
     label: 'How It Works',
@@ -80,10 +94,10 @@ const currentPath = Astro.url.pathname;
         <>
           <span class="divider" aria-hidden="true" />
           <div class="nav-item-wrap" data-nav-item>
-            <button
-              type="button"
+            <a
+              href={item.href}
               class:list={[
-                'nav-trigger group relative flex flex-1 items-center justify-center px-2 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap w-full h-full',
+                'nav-trigger group relative flex flex-1 items-center justify-center px-2 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap w-full h-full no-underline',
                 currentPath.startsWith(item.href) ? 'is-active' : ''
               ]}
               aria-expanded="false"
@@ -96,18 +110,20 @@ const currentPath = Astro.url.pathname;
                 style={`clip-path: polygon(${SKEW_OFFSET}px 0%, 100% 0%, calc(100% - ${SKEW_OFFSET}px) 100%, 0% 100%); background: rgba(45,200,86,${currentPath.startsWith(item.href) ? '0.13' : '0.09'});`}
               ></span>
               <span class="relative z-10">{item.label}</span>
-            </button>
+            </a>
 
-            <!-- Dropdown -->
-            <div class="nav-dropdown" aria-hidden="true">
-              <div class="dropdown-inner">
-                {item.sub.map((sub) => (
-                  <a href={sub.href} class="dropdown-item">
-                    <span>{sub.label}</span>
-                  </a>
-                ))}
+            <!-- Dropdown (only rendered if there are sub-items) -->
+            {item.sub.length > 0 && (
+              <div class="nav-dropdown" aria-hidden="true">
+                <div class="dropdown-inner">
+                  {item.sub.map((sub) => (
+                    <a href={sub.href} class="dropdown-item">
+                      <span>{sub.label}</span>
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </>
       ))}
@@ -164,6 +180,7 @@ const currentPath = Astro.url.pathname;
     cursor: pointer;
     font-family: inherit;
     color: var(--nav-text);
+    text-decoration: none;
   }
   .nav-trigger.is-active {
     color: var(--nav-text-active);
@@ -184,12 +201,14 @@ const currentPath = Astro.url.pathname;
     position: fixed;
     z-index: 9999;
     pointer-events: none;
-    clip-path: inset(0 0 100% -80px);
+    /* -400px right + bottom bleed: content can never be clipped no matter
+       how wide or tall the list grows */
+    clip-path: inset(0 -400px 100% -400px);
     transition: clip-path 0.22s ease;
   }
 
   .nav-dropdown.is-open {
-    clip-path: inset(0 0 -20px -80px);
+    clip-path: inset(0 -400px -400px -400px);
     pointer-events: auto;
   }
 
@@ -206,7 +225,6 @@ const currentPath = Astro.url.pathname;
 
   .dropdown-item {
     display: block;
-    transform: skewX(18deg);
     padding: 10px 16px;
     font-size: 0.78rem;
     font-weight: 600;
@@ -216,6 +234,13 @@ const currentPath = Astro.url.pathname;
     text-decoration: none;
     transition: color 0.1s, background 0.1s;
     white-space: nowrap;
+  }
+
+  /* Counter-skew only the text, not the row itself — this lets the
+     hover background fill the full parallelogram shape of the dropdown */
+  .dropdown-item span {
+    display: inline-block;
+    transform: skewX(18deg);
   }
 
   .dropdown-item:hover {
@@ -233,16 +258,44 @@ const currentPath = Astro.url.pathname;
     const r     = btn.getBoundingClientRect();
     const bRect = batteryBody.getBoundingClientRect();
     const w     = Math.round(r.width);
+    const GAP   = 3;
 
-    // Geometry: continue the slanted divider lines through the gap.
-    const GAP      = 3;
-    const tanSkew  = Math.tan(18 * Math.PI / 180);
-    const innerH   = bRect.height - 4;
+    // Align the dropdown's left slant with the button's left divider line —
+    // the same geometry the dividers use so the slant continues through the gap.
+    const tanSkew   = Math.tan(18 * Math.PI / 180);
+    const innerH    = bRect.height - 4;
     const lineShift = Math.round((innerH / 2 + 2 + GAP) * tanSkew);
 
-    drop.style.top   = (bRect.height + GAP) + 'px';
-    drop.style.left  = (Math.round(r.left) - bRect.left - lineShift) + 'px';
-    drop.style.width = w + 'px';
+    drop.style.top       = (bRect.height + GAP) + 'px';
+    drop.style.left      = (Math.round(r.left) - bRect.left - lineShift) + 'px';
+    drop.style.transform = '';
+    drop.style.width     = 'max-content';
+    drop.style.minWidth  = w + 'px';
+
+    // If the dropdown rendered wider than its button (e.g. Solutions with many
+    // long items), re-centre it under the button's midpoint so it's not
+    // ambiguous which tab it belongs to. Normal-width dropdowns are untouched.
+    requestAnimationFrame(() => {
+      const dRect = drop.getBoundingClientRect();
+      if (dRect.width <= w) return; // already fits — leave original alignment
+
+      const tanSkew = Math.tan(18 * Math.PI / 180);
+      const H       = dRect.height;
+      const MARGIN  = 8;
+
+      // Align the top edge of the dropdown centred under the button — the top
+      // is the visual "attachment point" that tells the user which tab owns the dropdown.
+      const btnCenterLocal = Math.round(r.left - bRect.left + w / 2);
+      let newLeft = btnCenterLocal - Math.round(dRect.width / 2);
+
+      // Clamp: visual left is the bottom-left corner (drifts furthest left)
+      const visualLeftVp  = bRect.left + newLeft - H * tanSkew;
+      const visualRightVp = bRect.left + newLeft + dRect.width;
+      if (visualLeftVp < MARGIN)                          newLeft += MARGIN - visualLeftVp;
+      else if (visualRightVp > window.innerWidth - MARGIN) newLeft -= visualRightVp - (window.innerWidth - MARGIN);
+
+      drop.style.left = newLeft + 'px';
+    });
   }
 
   function closeAll(except?: HTMLElement) {
@@ -255,7 +308,7 @@ const currentPath = Astro.url.pathname;
 
   items.forEach((item) => {
     const btn  = item.querySelector<HTMLElement>('.nav-trigger')!;
-    const drop = item.querySelector<HTMLElement>('.nav-dropdown')!;
+    const drop = item.querySelector<HTMLElement>('.nav-dropdown');
     if (!btn || !drop) return;
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -290,12 +343,6 @@ const currentPath = Astro.url.pathname;
     // … or enters the dropdown panel itself
     drop.addEventListener('mouseenter', cancelClose);
     drop.addEventListener('mouseleave', scheduleClose);
-
-    // Click also works (touch support + keyboard)
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      btn.getAttribute('aria-expanded') === 'true' ? scheduleClose() : openItem();
-    });
   });
 
   document.addEventListener('click', () => closeAll());

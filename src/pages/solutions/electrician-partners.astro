@@ -1,0 +1,570 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Electrician Partners — Evium Charging"
+  description="Partner with Evium Charging to access a consistent pipeline of commercial EV charging installation projects. Evium handles sales, permits, and equipment — you handle the installation."
+>
+
+  <!-- ═══════════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════════ -->
+  <section class="relative bg-evium-dark overflow-hidden pt-32 pb-24">
+    <!-- Background grid pattern -->
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(rgba(45,200,86,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,1) 1px, transparent 1px); background-size: 60px 60px;"></div>
+    <!-- Green glow -->
+    <div class="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-evium-green opacity-[0.06] blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 right-0 w-[400px] h-[400px] rounded-full bg-evium-green opacity-[0.04] blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <!-- Label -->
+        <div class="inline-flex items-center gap-2 mb-6">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Installation Partners</span>
+        </div>
+
+        <h1 class="text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight text-white mb-6">
+          Grow Your Business.<br />
+          <span class="text-evium-green">Power the Future.</span>
+        </h1>
+
+        <p class="text-xl text-white/70 leading-relaxed max-w-2xl mb-10">
+          EV charging infrastructure is one of the fastest-growing segments in commercial electrical work. Evium is expanding nationally — and we're looking for qualified electrical contractors to grow with us. You bring the expertise. We bring the projects.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/contact/quote"
+            class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-8 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200"
+          >
+            Apply to Partner With Us
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+          <a
+            href="#how-it-works"
+            class="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold px-8 py-4 rounded-lg text-base hover:border-evium-green hover:text-evium-green transition-colors duration-200"
+          >
+            See How It Works
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { number: "500+", label: "Chargers Installed" },
+          { number: "NEVI", label: "Federal Award Winner" },
+          { number: "$6MM+", label: "CEC Grant Recipient" },
+          { number: "NJ · NY · CA", label: "Active Markets" },
+        ].map((stat) => (
+          <div class="border border-white/10 rounded-xl p-5 bg-evium-dark-light/40">
+            <div class="text-3xl font-black text-evium-green mb-1">{stat.number}</div>
+            <div class="text-sm text-white/50 font-medium">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       WHY PARTNER WITH EVIUM
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="max-w-2xl mb-14">
+        <div class="inline-flex items-center gap-2 mb-4">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Why Evium</span>
+        </div>
+        <h2 class="text-4xl font-black text-white mb-4">Less Overhead. More Work.</h2>
+        <p class="text-white/60 text-lg leading-relaxed">
+          We handle everything that isn't installation. That means you spend your time doing what you're actually good at — and we keep the projects coming.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>`,
+            title: "We Handle All Permitting",
+            body: "Evium manages every permit application, AHJ coordination, and compliance requirement. You show up ready to work.",
+          },
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>`,
+            title: "Equipment Is Pre-Supplied",
+            body: "All chargers, mounting hardware, and components arrive on-site before you do. No procurement, no sourcing — just installation.",
+          },
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>`,
+            title: "We Own the Customer Relationship",
+            body: "Evium manages all client communication before, during, and after the project. No sales calls, no invoicing disputes.",
+          },
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"/></svg>`,
+            title: "Consistent, Repeat Work",
+            body: "Evium's portfolio is growing fast. High-performing partners are prioritized for ongoing work — this isn't a one-off gig.",
+          },
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>`,
+            title: "Clear Scope Every Time",
+            body: "You receive Evium's installation specs and site assessment data before mobilizing. No surprises when you get on-site.",
+          },
+          {
+            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>`,
+            title: "Reliable Payment",
+            body: "Milestone-based payment structure. You complete the work, we pay on schedule — no chasing invoices.",
+          },
+        ].map((card) => (
+          <div class="bg-evium-dark rounded-xl p-6 border border-white/[0.07] hover:border-evium-green/30 transition-colors duration-300 group">
+            <div class="w-11 h-11 rounded-lg bg-evium-green/10 text-evium-green flex items-center justify-center mb-4 group-hover:bg-evium-green/20 transition-colors duration-300" set:html={card.icon} />
+            <h3 class="text-white font-bold text-base mb-2">{card.title}</h3>
+            <p class="text-white/55 text-sm leading-relaxed">{card.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       WHAT YOU'LL WORK ON
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 mb-4">
+            <div class="h-px w-8 bg-evium-green"></div>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Scope of Work</span>
+          </div>
+          <h2 class="text-4xl font-black text-white mb-5">Commercial-Grade Installations.</h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            Evium works across a range of property types and project sizes — from single-unit residential add-ons to large multi-stall commercial deployments. Partners are matched to projects that fit their capacity and geography.
+          </p>
+          <p class="text-white/60 leading-relaxed">
+            All installations follow Evium's engineering specifications and NEC code requirements. If you're new to EV-specific work, we provide installation guidelines and pre-project briefings.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+          {[
+            { label: "Level 2 Wall-Mount Installs", detail: "Residential and commercial surface or flush-mount EVSE, 208/240V circuits" },
+            { label: "Commercial Pedestal Units", detail: "Dual-port pedestal chargers for parking lots, garages, and retail properties" },
+            { label: "DC Fast Charging (DCFC)", detail: "Outdoor DCFC installations including conduit runs, panel work, and commissioning" },
+            { label: "Panel Upgrades & Service Expansion", detail: "Load calculations, sub-panel additions, and main service upgrades to support EV load" },
+            { label: "Conduit & Trenching Runs", detail: "Long conduit pulls and underground trenching for multi-stall or remote charge point layouts" },
+            { label: "Multi-Stall Deployments", detail: "4–20+ charger commercial installations across parking structures, fleets, and apartment complexes" },
+          ].map((item) => (
+            <div class="flex gap-4 items-start bg-evium-dark-light/60 border border-white/[0.07] rounded-lg px-5 py-4">
+              <div class="mt-1 w-5 h-5 rounded-full bg-evium-green/15 flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-evium-green"></div>
+              </div>
+              <div>
+                <div class="text-white font-semibold text-sm mb-0.5">{item.label}</div>
+                <div class="text-white/50 text-sm leading-relaxed">{item.detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       DIVISION OF RESPONSIBILITY
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <div class="inline-flex items-center gap-2 mb-4 justify-center">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Roles & Responsibilities</span>
+          <div class="h-px w-8 bg-evium-green"></div>
+        </div>
+        <h2 class="text-4xl font-black text-white mb-4">Clear Division. No Ambiguity.</h2>
+        <p class="text-white/60 text-lg">
+          A successful partnership depends on each party knowing exactly what they own. Here's how we split it.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Evium column -->
+        <div class="bg-evium-dark rounded-2xl border border-white/[0.08] overflow-hidden">
+          <div class="bg-evium-green/10 border-b border-evium-green/20 px-7 py-5 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-evium-green/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-evium-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+            </div>
+            <div>
+              <div class="text-evium-green font-bold text-sm tracking-wide uppercase">Evium Handles</div>
+              <div class="text-white/50 text-xs mt-0.5">Project-side operations</div>
+            </div>
+          </div>
+          <ul class="divide-y divide-white/[0.06]">
+            {[
+              "Customer acquisition and sales",
+              "Site assessment and engineering design",
+              "Permit applications and AHJ coordination",
+              "Equipment procurement and delivery",
+              "Rebate and incentive management (NEVI, CEC, utility programs)",
+              "Charging software setup, network configuration, and activation",
+              "Ongoing remote monitoring and maintenance",
+              "Warranty claims and hardware support",
+              "Billing, invoicing, and client management",
+            ].map((item) => (
+              <li class="flex items-start gap-3 px-7 py-4">
+                <svg class="w-4 h-4 text-evium-green mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70 text-sm leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Partner column -->
+        <div class="bg-evium-dark rounded-2xl border border-white/[0.08] overflow-hidden">
+          <div class="bg-white/[0.04] border-b border-white/10 px-7 py-5 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm tracking-wide uppercase">You Handle</div>
+              <div class="text-white/50 text-xs mt-0.5">Installation and on-site execution</div>
+            </div>
+          </div>
+          <ul class="divide-y divide-white/[0.06]">
+            {[
+              "Electrical installation per Evium's design and specs",
+              "Conduit runs, trenching, and raceway installation",
+              "Panel and sub-panel work as scoped",
+              "Equipment mounting and physical assembly",
+              "Commissioning support (power-on verification with Evium)",
+              "On-site coordination with property representatives",
+              "Compliance with local code, NEC, and OSHA requirements",
+              "Clean, professional job-site conduct at all times",
+              "Scheduling coordination and milestone communication",
+            ].map((item) => (
+              <li class="flex items-start gap-3 px-7 py-4">
+                <svg class="w-4 h-4 text-white/40 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70 text-sm leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       IDEAL PARTNER PROFILE
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-5 gap-14 items-start">
+        <div class="lg:col-span-2">
+          <div class="inline-flex items-center gap-2 mb-4">
+            <div class="h-px w-8 bg-evium-green"></div>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Who We Work With</span>
+          </div>
+          <h2 class="text-4xl font-black text-white mb-5">The Ideal Partner.</h2>
+          <p class="text-white/60 leading-relaxed mb-6">
+            We don't need the biggest firm — we need the right one. Evium's best partners are quality-focused contractors who run tight crews, communicate clearly, and take pride in the work.
+          </p>
+          <p class="text-white/60 leading-relaxed">
+            If you're new to EV charging specifically, that's fine. The electrical fundamentals are what matter — we provide the EV-specific context and installation guidelines.
+          </p>
+        </div>
+
+        <div class="lg:col-span-3 space-y-4">
+          {[
+            {
+              title: "Licensed Electrical Contractor",
+              body: "State-licensed EC or master electrician with active credentials. You must be able to pull permits and sign off on work in your operating state.",
+            },
+            {
+              title: "Commercial or Multi-Unit Experience",
+              body: "Comfortable with 3-phase panels, service upgrades, commercial conduit runs, and coordinating with property managers or general contractors.",
+            },
+            {
+              title: "Quality-First Mindset",
+              body: "Evium's clients are commercial property owners and operators. Every job is a reflection of both your company and ours. We expect work that holds up to inspection — and to scrutiny.",
+            },
+            {
+              title: "Reliable Scheduling",
+              body: "When Evium commits an installation date to a client, that date needs to hold. Partners who show up on time and hit milestones get priority for the best projects.",
+            },
+            {
+              title: "Willing to Learn EV Specifics",
+              body: "EV charger installation isn't dramatically different from any other commercial electrical work — but there are nuances. We provide training materials, pre-project briefings, and spec sheets to get any qualified electrician up to speed.",
+            },
+          ].map((item, i) => (
+            <div class="flex gap-5 bg-evium-dark-light/50 border border-white/[0.07] rounded-xl px-6 py-5">
+              <div class="w-8 h-8 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green font-black text-sm flex-shrink-0 mt-0.5">
+                {i + 1}
+              </div>
+              <div>
+                <h3 class="text-white font-bold mb-1">{item.title}</h3>
+                <p class="text-white/55 text-sm leading-relaxed">{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       HOW THE PARTNERSHIP WORKS
+  ═══════════════════════════════════════════════════ -->
+  <section id="how-it-works" class="bg-evium-dark-light py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 mb-4 justify-center">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">The Process</span>
+          <div class="h-px w-8 bg-evium-green"></div>
+        </div>
+        <h2 class="text-4xl font-black text-white mb-4">How It Works.</h2>
+        <p class="text-white/60 text-lg">Simple process, clear expectations, ongoing relationship.</p>
+      </div>
+
+      <div class="relative">
+        <div class="hidden lg:block absolute top-10 left-[calc(10%+2rem)] right-[calc(10%+2rem)] h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {[
+            {
+              step: "01",
+              title: "Apply",
+              body: "Submit your contractor profile — license info, service area, crew size, and relevant experience.",
+            },
+            {
+              step: "02",
+              title: "Get Vetted",
+              body: "Evium reviews your credentials and conducts a brief introductory call to discuss scope and expectations.",
+            },
+            {
+              step: "03",
+              title: "Get Matched",
+              body: "Once approved, you're matched to upcoming projects in your geography that fit your capacity.",
+            },
+            {
+              step: "04",
+              title: "Install",
+              body: "Receive site specs and materials, mobilize, execute the installation, and coordinate commissioning with Evium.",
+            },
+            {
+              step: "05",
+              title: "Get Paid. Repeat.",
+              body: "Milestone-based payment on completion. Strong performers get early access to the next pipeline.",
+            },
+          ].map((s) => (
+            <div class="relative flex flex-col items-center text-center">
+              <div class="relative z-10 w-20 h-20 rounded-full bg-evium-dark border-2 border-evium-green/40 flex items-center justify-center mb-5">
+                <span class="text-evium-green font-black text-lg">{s.step}</span>
+              </div>
+              <h3 class="text-white font-bold text-base mb-2">{s.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       SCALE & GROWTH / TRUST
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 mb-4">
+            <div class="h-px w-8 bg-evium-green"></div>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Growth Opportunity</span>
+          </div>
+          <h2 class="text-4xl font-black text-white mb-5">
+            Grow With a Company That's Already Moving.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-6">
+            Evium's installation volume is scaling rapidly. We've deployed 500+ chargers across the Northeast and California, with active NEVI program contracts and new market expansion underway. That means more projects, more consistently, across more geographies.
+          </p>
+          <p class="text-white/60 leading-relaxed mb-8">
+            Partners who deliver quality work and reliable scheduling are moved to priority status in our project queue. As Evium wins new contracts — multi-property portfolios, fleet programs, NEVI highway corridors — our top-tier installation partners are the first call we make.
+          </p>
+          <div class="flex flex-col gap-3">
+            {[
+              "Access to federal NEVI and state-funded projects",
+              "Multi-property portfolio deployments with RJ Block and similar partners",
+              "Fleet charging programs — high-volume, repeatable scope",
+              "Highway fast-charging (DCFC) corridors",
+            ].map((item) => (
+              <div class="flex items-center gap-3">
+                <svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70 text-sm">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          {[
+            {
+              label: "500+ Chargers Installed",
+              sub: "Operational across NJ, NY, and CA",
+              pct: 100,
+            },
+            {
+              label: "NEVI Federal Program",
+              sub: "Highway charging infrastructure award",
+              pct: 85,
+            },
+            {
+              label: "$6MM+ CEC Grant",
+              sub: "California Energy Commission recipient",
+              pct: 75,
+            },
+            {
+              label: "Multi-Property Portfolios",
+              sub: "Hundreds of units with RJ Block Properties",
+              pct: 90,
+            },
+          ].map((bar) => (
+            <div class="bg-evium-dark-light/60 border border-white/[0.07] rounded-xl p-5">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <div class="text-white font-semibold text-sm">{bar.label}</div>
+                  <div class="text-white/45 text-xs mt-0.5">{bar.sub}</div>
+                </div>
+                <div class="text-evium-green font-black text-sm">{bar.pct}%</div>
+              </div>
+              <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-evium-green rounded-full"
+                  style={`width: ${bar.pct}%`}
+                ></div>
+              </div>
+            </div>
+          ))}
+
+          <div class="bg-evium-green/10 border border-evium-green/25 rounded-xl p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-evium-green/20 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm">Siemens Technology Partner</div>
+              <div class="text-white/50 text-xs mt-0.5">Certified installer network — commercial-grade hardware standard</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-24">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <div class="inline-flex items-center gap-2 mb-4 justify-center">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Common Questions</span>
+          <div class="h-px w-8 bg-evium-green"></div>
+        </div>
+        <h2 class="text-4xl font-black text-white">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="space-y-4">
+        {[
+          {
+            q: "How do I join the Evium partner network?",
+            a: "Click the 'Apply to Partner With Us' button on this page and fill out the partner application. We'll review your credentials and reach out within a few business days to schedule an introductory call. If there's a fit, we'll add you to our active partner list for your region.",
+          },
+          {
+            q: "What licenses or certifications do I need?",
+            a: "At minimum, you need to be a state-licensed electrical contractor (or hold a master electrician license) in the state where you want to perform installations. If you operate across state lines, we'll need credentials for each relevant jurisdiction. OSHA 10/30 and NEC familiarity are expected.",
+          },
+          {
+            q: "Who supplies the equipment?",
+            a: "Evium handles all equipment procurement and coordinates delivery to the job site before your mobilization date. You do not source, purchase, or own the hardware — your scope is purely labor and installation.",
+          },
+          {
+            q: "How is payment structured?",
+            a: "Payment is milestone-based, tied to key installation phases (typically: mobilization, rough-in completion, and commissioning sign-off). Payment terms are outlined in the subcontractor agreement before any project begins. We do not run net-60 or net-90 cycles — electricians who deliver get paid promptly.",
+          },
+          {
+            q: "Do you provide EV charger installation training?",
+            a: "Yes. Evium provides installation specification packages, pre-project briefings, and access to manufacturer documentation for every project. If you have strong commercial electrical fundamentals but limited EV charging experience, we'll bring you up to speed before your first project.",
+          },
+          {
+            q: "How much work can I realistically expect?",
+            a: "That depends on your geography, crew size, and performance. Some partners work on one or two Evium projects a month; others — especially those in our fastest-growing markets — are engaged much more frequently. High-performing partners receive early pipeline access and are prioritized for larger, multi-stall deployments.",
+          },
+        ].map((faq) => (
+          <details class="group bg-evium-dark border border-white/[0.08] rounded-xl overflow-hidden">
+            <summary class="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer list-none hover:bg-white/[0.02] transition-colors duration-200">
+              <span class="text-white font-semibold text-sm leading-relaxed">{faq.q}</span>
+              <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform duration-200 group-open:rotate-45" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </summary>
+            <div class="px-6 pb-5 pt-1 border-t border-white/[0.06]">
+              <p class="text-white/60 text-sm leading-relaxed">{faq.a}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       CTA
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div class="w-96 h-96 rounded-full bg-evium-green opacity-[0.07] blur-3xl"></div>
+        </div>
+
+        <div class="relative">
+          <div class="inline-flex items-center gap-2 mb-6 justify-center">
+            <div class="h-px w-8 bg-evium-green"></div>
+            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Join the Network</span>
+            <div class="h-px w-8 bg-evium-green"></div>
+          </div>
+
+          <h2 class="text-5xl font-black text-white mb-5 leading-tight">
+            Ready to Build Something<br />
+            <span class="text-evium-green">That Lasts?</span>
+          </h2>
+
+          <p class="text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
+            Evium is growing fast, and our installation partner network grows with us. If you run a quality electrical operation and want consistent commercial EV charging work, apply today. We'll be in touch.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/contact/quote"
+              class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-10 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200"
+            >
+              Apply to Become a Partner
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+          </div>
+
+          <p class="text-white/35 text-sm mt-6">
+            Have questions before applying? Email us at <span class="text-white/60">partners@eviumcharging.com</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</Layout>
