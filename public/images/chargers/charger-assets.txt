@@ -1,0 +1,98 @@
+EVIUM CHARGER IMAGE ASSETS
+==========================
+
+All charger product images organized by manufacturer.
+Status indicates whether the image is currently used in the
+product page portal (whisp) animation.
+
+
+── EVOCHARGE ──────────────────────────────────────────────────
+
+[IN ANIMATION]  evocharge/evium-evocharge-l2-wallmount.png
+                EvoCharge L2 wall-mount (used in existing portal set)
+
+[NOT IN ANIM]   evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png
+                EvoCharge 32A L2 — pedestal mount
+
+[NOT IN ANIM]   evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png
+                EvoCharge 40A L2 — wall mount
+
+
+── MAXICHARGER ────────────────────────────────────────────────
+
+[IN ANIMATION]  maxicharger/maxicharger-dc-fast-60-240kw.png
+                MaxiCharger DC Fast 60–240kW
+
+
+── SIEMENS ────────────────────────────────────────────────────
+
+[IN ANIMATION]  siemens/siemens-versicharge-ac-variants.png
+                Siemens VersiCharge AC variants
+
+[IN ANIMATION]  siemens/siemens-versicharge-l2-wallmount.png
+                Siemens eMobility L2 wall-mount
+
+[NOT IN ANIM]   siemens/Evium---Pedestal-Wallmount-AC-charger.png
+                Siemens VersiCharge AC — two black pedestal units
+
+
+── TELLUS ─────────────────────────────────────────────────────
+
+[IN ANIMATION]  tellus/tellus-dc-fast-180kw.png
+                Tellus DC Fast 180kW
+
+[IN ANIMATION]  tellus/tellus-dc-fast-300kw.png
+                Tellus DC Fast 300kW
+
+[IN ANIMATION]  tellus/evium-dc-fast-outdoor-kiosk-combo.png
+                DC Fast Outdoor Station (kiosk combo)
+
+[NOT IN ANIM]   tellus/evium-dcfc-120kw.png
+                Evium DCFC 120kW — large kiosk with screen
+
+[NOT IN ANIM]   tellus/Evium---AC-48A.png
+                Evium AC 48A — sleek white/black wall unit
+
+[NOT IN ANIM]   tellus/Evium---DC-Fast-Charger-60kw.png
+                Evium DC Fast 60kW — dual-cable (CCS + CHAdeMO)
+
+[NOT IN ANIM]   tellus/Evium---IC80A-Gen-2.png
+                Evium AC 19.2kW 80A Gen 2 — compact wall unit with RFID
+
+[NOT IN ANIM]   tellus/Evium---Wall-mount-AC-charger.png
+                Evium Wall-mount AC — dual-port white unit
+
+
+── SUMMARY ────────────────────────────────────────────────────
+
+Total assets:        15
+In animation:         7
+Not yet in animation: 8
+
+
+── LEVEL 2 vs LEVEL 3 BREAKDOWN ───────────────────────────────
+
+Level 2 (AC, 240V — residential/workplace, 5-7 hr full charge)
+--------------------------------------------------------------
+1.  evocharge/evium-evocharge-l2-wallmount.png          — EvoCharge L2 wall-mount
+2.  evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png
+                                                        — EvoCharge 32A L2 pedestal (7.4kW)
+3.  evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png
+                                                        — EvoCharge 40A L2 wall-mount (9.6kW)
+4.  siemens/siemens-versicharge-ac-variants.png         — Siemens VersiCharge AC variants
+5.  siemens/siemens-versicharge-l2-wallmount.png        — Siemens eMobility L2 wall-mount
+6.  siemens/Evium---Pedestal-Wallmount-AC-charger.png   — Siemens VersiCharge AC pedestal units
+7.  tellus/Evium---AC-48A.png                           — Evium AC 48A wall unit (11kW)
+8.  tellus/Evium---IC80A-Gen-2.png                      — Evium AC 80A Gen 2 (19.2kW)
+9.  tellus/Evium---Wall-mount-AC-charger.png            — Evium Wall-mount AC dual-port
+
+Level 3 (DC Fast Charging — commercial/highway, 15-90 min to 80%)
+-----------------------------------------------------------------
+10. maxicharger/maxicharger-dc-fast-60-240kw.png        — MaxiCharger DC Fast 60–240kW
+11. tellus/tellus-dc-fast-180kw.png                     — Tellus DC Fast 180kW
+12. tellus/tellus-dc-fast-300kw.png                     — Tellus DC Fast 300kW
+13. tellus/evium-dc-fast-outdoor-kiosk-combo.png        — DC Fast Outdoor Station (30kW kiosk)
+14. tellus/Evium---DC-Fast-Charger-60kw.png             — Evium DC Fast 60kW dual-cable
+15. tellus/evium-dcfc-120kw.png                         — Evium DCFC 120kW large kiosk
+
+Totals: 9 Level 2, 6 Level 3

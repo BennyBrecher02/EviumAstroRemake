@@ -1,7 +1,638 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import HeroPlaceholder from '../../components/heroes/HeroPlaceholder.astro';
+
+const l2Products = [
+  // ── EvoCharge 32A ─────────────────────────────────────
+  {
+    id: 'evocharge-32a',
+    title: 'EvoCharge 32A Level 2',
+    subtitle: 'Compact wall-mount EVSE with OCPP 1.6 networking, Wi-Fi, and optional 4G LTE + RFID.',
+    image: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png',
+    specs: [
+      { label: 'Output Capacity', value: '32 Amps' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '7.68 kW' },
+      { label: 'Mounting', value: 'Wall or Pedestal' },
+      { label: 'Warranty', value: 'UL/cUL Listed' },
+      { label: 'Dimensions', value: '11" x 7.5" x 3.2"' },
+      { label: 'Cable Management', value: '18 or 25 ft cable, EvoReel optional' },
+    ],
+  },
+  // ── EvoCharge 40A ─────────────────────────────────────
+  {
+    id: 'evocharge-40a',
+    title: 'EvoCharge 40A Level 2',
+    subtitle: 'Modern compact design, NEMA 4 rated for indoor/outdoor use with smart Wi-Fi charging.',
+    image: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',
+    specs: [
+      { label: 'Output Capacity', value: '40 Amps' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '9.6 kW' },
+      { label: 'Mounting', value: 'Wall or Pedestal' },
+      { label: 'Enclosure', value: 'NEMA 4, UL/cUL Listed' },
+      { label: 'Dimensions', value: '11" x 7.5" x 3.2"' },
+      { label: 'Cable Management', value: '25 ft cable, Retractor optional' },
+    ],
+  },
+  // ── EvoCharge Concealed Pedestal ──────────────────────
+  {
+    id: 'evocharge-pedestal',
+    title: 'EvoCharge Concealed Pedestal',
+    subtitle: 'Weather-resistant mounting pedestal with concealed raceway, supports up to 4 charging ports.',
+    image: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',
+    specs: [
+      { label: 'Ports Supported', value: '4" model: 2 ports, 6" model: 4 ports' },
+      { label: 'Connector Type', value: 'SAE J1772 (via mounted EVSE)' },
+      { label: 'Construction', value: 'Powder-coated corrosion protection' },
+      { label: 'Mounting', value: 'Ground-based, 4 anchor bolts' },
+      { label: 'Certification', value: 'ADA Compliant' },
+      { label: 'Dimensions', value: '52" x 4" x 4" (4") or 52" x 6" x 6" (6")' },
+      { label: 'Features', value: 'Concealed raceway, water-resistant panel' },
+    ],
+  },
+  // ── MaxiCharger AC Elite Business ─────────────────────
+  {
+    id: 'maxicharger-ac',
+    title: 'MaxiCharger AC Elite Business',
+    subtitle: 'Commercial 240V 50A Level 2 charger with 5" LCD touchscreen and Energy Star certification.',
+    image: '/images/chargers/tellus/Evium---IC80A-Gen-2.png',
+    specs: [
+      { label: 'Output Capacity', value: '50 Amps' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '12 kW' },
+      { label: 'Mounting', value: 'Wall or Pedestal' },
+      { label: 'Warranty', value: '36 Months' },
+      { label: 'Dimensions', value: '13.23" x 7.36" x 3.35"' },
+      { label: 'Cable Management', value: '25 ft cable' },
+    ],
+  },
+  // ── VersiCharge AC 40A/48A ────────────────────────────
+  {
+    id: 'versicharge-ac',
+    title: 'VersiCharge AC Series',
+    subtitle: 'Third-generation smart charger with RFID, Wi-Fi, LTE/4G, and Energy Star 1.2 certification.',
+    image: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',
+    specs: [
+      { label: 'Output Capacity', value: '40A or 48A' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '9.6 kW (40A) or 11.5 kW (48A)' },
+      { label: 'Mounting', value: 'Wall or Post' },
+      { label: 'Warranty', value: '3 Years (5 Years for Blue)' },
+      { label: 'Dimensions', value: '16.10" x 7.09" x 3.78"' },
+      { label: 'Cable Management', value: '20 ft (25 ft Buy American), integrated' },
+    ],
+  },
+  // ── VersiCharge AC Pedestal/Wallmount ─────────────────
+  {
+    id: 'versicharge-pedestal',
+    title: 'VersiCharge AC Pedestal System',
+    subtitle: 'Dual-post pedestal configuration with cable retraction system for commercial deployments.',
+    image: '/images/chargers/siemens/Evium---Pedestal-Wallmount-AC-charger.png',
+    specs: [
+      { label: 'Output Capacity', value: '48 Amps per unit' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '11.5 kW per unit' },
+      { label: 'Mounting', value: 'Single or Dual Post (72" or 95")' },
+      { label: 'Enclosure', value: 'NEMA 4, Indoor/Outdoor' },
+      { label: 'Connectivity', value: 'Wi-Fi, Ethernet, LTE/4G, OCPP 1.6' },
+      { label: 'Cable Management', value: '20 or 25 ft, cable retraction system' },
+    ],
+  },
+  // ── VersiCharge L2 Wall-Mount ─────────────────────────
+  {
+    id: 'versicharge-l2',
+    title: 'VersiCharge eMobility L2',
+    subtitle: 'Single-unit wall-mount configuration with RFID authentication and embedded metering.',
+    image: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',
+    specs: [
+      { label: 'Output Capacity', value: '40A or 48A' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: 'Up to 11.5 kW' },
+      { label: 'Mounting', value: 'Wall' },
+      { label: 'Enclosure', value: 'NEMA 4, IK 8' },
+      { label: 'Dimensions', value: '16.10" x 7.09" x 3.78"' },
+      { label: 'Cable Management', value: '20 ft cable, integrated management' },
+    ],
+  },
+  // ── Evium AC 48A ──────────────────────────────────────
+  {
+    id: 'evium-ac-50a',
+    title: 'Evium AC 12kW 50A',
+    subtitle: 'Dual-port smart wall charger with 5" touchscreen, RFID, and OCPP 1.6J connectivity.',
+    image: '/images/chargers/tellus/Evium---AC-48A.png',
+    specs: [
+      { label: 'Output Capacity', value: '50 Amps per connector' },
+      { label: 'Connector Type', value: 'SAE J1772 (Dual)' },
+      { label: 'Output Power', value: '2 x 12 kW' },
+      { label: 'Mounting', value: 'Wall (Pedestal optional)' },
+      { label: 'Enclosure', value: 'NEMA 3R' },
+      { label: 'Dimensions', value: '12" x 17" x 7"' },
+      { label: 'Cable Management', value: '16 ft Standard (24 ft Optional)' },
+    ],
+  },
+  // ── Evium AC 19.2kW 80A ───────────────────────────────
+  {
+    id: 'evium-ac-80a',
+    title: 'Evium AC 19.2kW 80A',
+    subtitle: 'High-power single-port wall charger with 5" touchscreen and RFID for demanding applications.',
+    image: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',
+    specs: [
+      { label: 'Output Capacity', value: '80 Amps' },
+      { label: 'Connector Type', value: 'SAE J1772' },
+      { label: 'Output Power', value: '19.2 kW' },
+      { label: 'Mounting', value: 'Wall (Pedestal optional)' },
+      { label: 'Enclosure', value: 'IP54' },
+      { label: 'Dimensions', value: '12" x 17" x 7"' },
+      { label: 'Cable Management', value: '16 ft Standard (24 ft Optional)' },
+    ],
+  },
+];
+
+const l3Products = [
+  // ── Evium DC Fast 60kW ────────────────────────────────
+  {
+    id: 'evium-60kw',
+    title: 'Evium DC Fast 60kW',
+    subtitle: 'Compact all-in-one dual-port charger with air-cooled power modules and 10" touchscreen.',
+    image: '/images/chargers/tellus/Evium---DC-Fast-Charger-60kw.png',
+    specs: [
+      { label: 'Output Current', value: 'Up to 150A' },
+      { label: 'Connector Options', value: 'CCS1, CCS1+CCS1, or CCS1+CHAdeMO' },
+      { label: 'Output Power', value: '60 kW (30 kW per port)' },
+      { label: 'Mounting', value: 'Free-Standing Pedestal' },
+      { label: 'Enclosure', value: 'NEMA 3S (IP54), IK10' },
+      { label: 'Dimensions', value: '29" x 19" x 72"' },
+      { label: 'Cable Management', value: '16 ft (5m), Cable Retractor Included' },
+    ],
+  },
+  // ── Evium DCFC 120kW ──────────────────────────────────
+  {
+    id: 'evium-120kw',
+    title: 'Evium DCFC 120kW',
+    subtitle: 'Powerful compact dual-port DC charger with 1000VDC output and air-cooled modules.',
+    image: '/images/chargers/tellus/evium-dcfc-120kw.png',
+    specs: [
+      { label: 'Output Current', value: 'Up to 200A' },
+      { label: 'Connector Options', value: 'CCS1 and CCS1' },
+      { label: 'Output Power', value: '120 kW' },
+      { label: 'Mounting', value: 'Free-Standing Pedestal' },
+      { label: 'Enclosure', value: 'NEMA 3S (IP54), IK10' },
+      { label: 'Dimensions', value: '29" x 26.5" x 72"' },
+      { label: 'Cable Management', value: '16 ft (5m), Cable Retractor Included' },
+    ],
+  },
+  // ── Evium DC Fast 180kW ───────────────────────────────
+  {
+    id: 'evium-180kw',
+    title: 'Evium DC Fast 180kW',
+    subtitle: 'High-power compact charger with 1000VDC HPC system and liquid-cooled CCS cables.',
+    image: '/images/chargers/tellus/tellus-dc-fast-180kw.png',
+    specs: [
+      { label: 'Output Current', value: 'Up to 500A' },
+      { label: 'Connector Options', value: 'CCS1, CCS1+CCS1, or CCS1+CHAdeMO' },
+      { label: 'Output Power', value: '180 kW (2 x 90 kW parallel)' },
+      { label: 'Mounting', value: 'Free-Standing Pedestal' },
+      { label: 'Enclosure', value: 'NEMA 3S (IP54), IK10' },
+      { label: 'Dimensions', value: '29.5" x 26.5" x 73"' },
+      { label: 'Cable Management', value: 'CCS 13 ft, CHAdeMO 16 ft, Retractor Included' },
+    ],
+  },
+  // ── Evium DC Fast 300kW ───────────────────────────────
+  {
+    id: 'evium-300kw',
+    title: 'Evium DC Fast 300kW',
+    subtitle: 'Ultra-high-power charger with 1000VDC HPC system and liquid-cooled 500A CCS cables.',
+    image: '/images/chargers/tellus/tellus-dc-fast-300kw.png',
+    specs: [
+      { label: 'Output Current', value: 'Up to 500A' },
+      { label: 'Connector Options', value: 'CCS1+CCS1 or CCS1+CHAdeMO' },
+      { label: 'Output Power', value: '300 kW (2 x 150 kW parallel)' },
+      { label: 'Mounting', value: 'Free-Standing Pedestal' },
+      { label: 'Enclosure', value: 'NEMA 3S (IP54), IK10' },
+      { label: 'Dimensions', value: '41" x 35.5" x 90"' },
+      { label: 'Cable Management', value: 'CCS 13 ft, CHAdeMO 16 ft, Retractor Included' },
+    ],
+  },
+  // ── Evium DC Fast Outdoor Kiosk ───────────────────────
+  {
+    id: 'evium-outdoor',
+    title: 'Evium DC Fast Outdoor Station',
+    subtitle: 'Compact outdoor kiosk-style DC fast charger for space-constrained commercial sites.',
+    image: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png',
+    specs: [
+      { label: 'Output Current', value: 'Up to 150A' },
+      { label: 'Connector Options', value: 'CCS1 or CCS1+CHAdeMO' },
+      { label: 'Output Power', value: '60 kW (30 kW per port)' },
+      { label: 'Mounting', value: 'Free-Standing Cabinet' },
+      { label: 'Enclosure', value: 'NEMA 3S (IP54), IK10' },
+      { label: 'Dimensions', value: '29" x 19" x 72"' },
+      { label: 'Cable Management', value: '16 ft (5m), Cable Retractor Included' },
+    ],
+  },
+  // ── MaxiCharger DC Fast 60–240kW ──────────────────────
+  {
+    id: 'maxicharger-dc',
+    title: 'MaxiCharger DC Fast 60–240kW',
+    subtitle: 'Modular DC fast charger scalable in 20kW increments with 27" touchscreen and ISO 15118.',
+    image: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',
+    specs: [
+      { label: 'Output Current', value: '91A (60kW) to 365A (240kW)' },
+      { label: 'Connector Options', value: 'Dual CCS1, or CCS1+CHAdeMO' },
+      { label: 'Output Power', value: '60–240 kW (20 kW increments)' },
+      { label: 'Mounting', value: 'Free-Standing Cabinet' },
+      { label: 'Warranty', value: '24 Months' },
+      { label: 'Dimensions', value: '76.8" x 32.3" x 23.6"' },
+      { label: 'Cable Management', value: '15 ft (Optional: 20 or 25 ft)' },
+    ],
+  },
+];
 ---
+
 <Layout title="Products — Evium Charging">
   <HeroPlaceholder />
+
+  <!-- Product Catalog -->
+  <section class="product-catalog">
+    <div class="catalog-inner">
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn is-active" data-tab="l2">Level 2 Charger</button>
+        <button class="tab-btn" data-tab="l3">Level 3 Charger</button>
+      </div>
+
+      <!-- L2 Section -->
+      <div class="tab-panel is-visible" id="panel-l2">
+        <div class="tab-intro">
+          <p class="intro-question">What is a Level 2 Charger?</p>
+          <p class="intro-answer">A Level 2 EV charging station (L2) is the optimal charging solution for daily to weekly use. On average, L2s will charge an EV from 10% to full battery in 5-7 hours.</p>
+        </div>
+
+        <div class="product-cards">
+          {l2Products.map((product, i) => (
+            <div id={product.id} data-product-tab="l2" class={`product-card ${i % 2 !== 0 ? 'card-reversed' : ''}`}>
+              <div class="card-image-col">
+                <img src={product.image} alt={product.title} class="card-product-img" loading="lazy" />
+              </div>
+              <div class="card-content-col">
+                <h3 class="card-title">{product.title}</h3>
+                <p class="card-subtitle">{product.subtitle}</p>
+                <div class="card-specs">
+                  {product.specs.map((spec) => (
+                    <div class="spec-item">
+                      <span class="spec-label">{spec.label}</span>
+                      <span class="spec-value">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <a href="/" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- L3 Section -->
+      <div class="tab-panel" id="panel-l3">
+        <div class="tab-intro">
+          <p class="intro-question">What is a Level 3 Charger?</p>
+          <p class="intro-answer">A Level 3 EV charging station (L3) is the optimal charging solution for daily to weekly use. On average, L3s will charge an EV from 10% to 90% of battery capacity in 15-90 minutes depending on power.</p>
+        </div>
+
+        <div class="product-cards">
+          {l3Products.map((product, i) => (
+            <div id={product.id} data-product-tab="l3" class={`product-card ${i % 2 !== 0 ? 'card-reversed' : ''}`}>
+              <div class="card-image-col">
+                <img src={product.image} alt={product.title} class="card-product-img" loading="lazy" />
+              </div>
+              <div class="card-content-col">
+                <h3 class="card-title">{product.title}</h3>
+                <p class="card-subtitle">{product.subtitle}</p>
+                <div class="card-specs">
+                  {product.specs.map((spec) => (
+                    <div class="spec-item">
+                      <span class="spec-label">{spec.label}</span>
+                      <span class="spec-value">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <a href="/" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </section>
 </Layout>
+
+<style>
+  /* ── Catalog section ───────────────────────────────────── */
+  .product-catalog {
+    background: #f7f7f4;
+    padding: 4rem 1rem 5rem;
+  }
+
+  .catalog-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── Tab bar ───────────────────────────────────────────── */
+  .tab-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-bottom: 1px solid #d4d7d5;
+    margin-bottom: 3rem;
+  }
+
+  .tab-btn {
+    flex: 1;
+    max-width: 320px;
+    padding: 1rem 2rem;
+    background: none;
+    border: none;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8b989c;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.25s ease;
+  }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.25s ease;
+  }
+
+  .tab-btn.is-active {
+    color: #2DC856;
+  }
+
+  .tab-btn.is-active::after {
+    background: #2DC856;
+  }
+
+  .tab-btn:hover:not(.is-active) {
+    color: #55656d;
+  }
+
+  /* ── Tab panels ────────────────────────────────────────── */
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.is-visible {
+    display: block;
+  }
+
+  /* ── Intro ─────────────────────────────────────────────── */
+  .tab-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    padding: 0 0.5rem;
+  }
+
+  .intro-question {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #33444c;
+  }
+
+  .intro-answer {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #55656d;
+  }
+
+  /* ── Product cards ─────────────────────────────────────── */
+  .product-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .product-card {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    background: #1a2a34;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    min-height: 380px;
+  }
+
+  .product-card.card-reversed {
+    direction: rtl;
+  }
+
+  .product-card.card-reversed > * {
+    direction: ltr;
+  }
+
+  /* ── Image column ──────────────────────────────────────── */
+  .card-image-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .card-product-img {
+    max-height: 300px;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
+  }
+
+  /* ── Content column ────────────────────────────────────── */
+  .card-content-col {
+    padding: 2.5rem 2.5rem 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .product-card.card-reversed .card-content-col {
+    padding: 2.5rem 1.5rem 2.5rem 2.5rem;
+  }
+
+  .card-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .card-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.5;
+  }
+
+  /* ── Specs grid ────────────────────────────────────────── */
+  .card-specs {
+    margin-top: 1.75rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem 1.5rem;
+  }
+
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .spec-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .spec-value {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: white;
+    line-height: 1.35;
+  }
+
+  /* ── CTA button ────────────────────────────────────────── */
+  .card-cta {
+    margin-top: 2rem;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background: #2DC856;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-cta:hover {
+    background: #24a848;
+    transform: translateY(-1px);
+  }
+
+  .cta-arrow {
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+  }
+
+  .card-cta:hover .cta-arrow {
+    transform: translateX(3px);
+  }
+
+  /* ── Mobile ────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .product-catalog {
+      padding: 2.5rem 1rem 3rem;
+    }
+
+    .tab-intro {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .product-card,
+    .product-card.card-reversed {
+      grid-template-columns: 1fr;
+      direction: ltr;
+    }
+
+    .product-card.card-reversed > * {
+      direction: ltr;
+    }
+
+    .card-image-col {
+      padding: 2rem 1.5rem 0.5rem;
+    }
+
+    .card-product-img {
+      max-height: 220px;
+    }
+
+    .card-content-col,
+    .product-card.card-reversed .card-content-col {
+      padding: 1.5rem;
+    }
+
+    .card-specs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+    const panels = document.querySelectorAll<HTMLElement>('.tab-panel');
+
+    function activateTab(target: string) {
+      tabs.forEach((t) => t.classList.toggle('is-active', t.getAttribute('data-tab') === target));
+      panels.forEach((p) => p.classList.remove('is-visible'));
+      document.getElementById(`panel-${target}`)?.classList.add('is-visible');
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+        if (target) activateTab(target);
+      });
+    });
+
+    // ── Deep-link support: scroll to product and auto-switch tab ──
+    // Portals on /testing link here via /products#<product-id>.
+    // We read the hash, look up the card, switch to its L2/L3 tab,
+    // then smooth-scroll the card into view.
+    function handleHash() {
+      const id = window.location.hash.slice(1);
+      if (!id) return;
+      const card = document.getElementById(id);
+      if (!card) return;
+      const tab = card.getAttribute('data-product-tab');
+      if (tab) activateTab(tab);
+      // Wait for the panel to become visible AND override the browser's
+      // default hash-scroll. We double-rAF so layout is committed, then
+      // manually center the card in the viewport.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const absoluteTop = window.pageYOffset + rect.top;
+          const targetScroll = absoluteTop - (window.innerHeight - rect.height) / 2;
+          window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+        });
+      });
+    }
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+  });
+</script>

@@ -16,6 +16,7 @@ node_modules/
 # Source reference materials (large binary files — keep local only)
 CopyOfZippedEviumDataFromGoogleToInspect/
 ExistingEviumContextMedia/
+NewEviumAssets/
 
 # Local-only markdown notes and context files
 markdowns/

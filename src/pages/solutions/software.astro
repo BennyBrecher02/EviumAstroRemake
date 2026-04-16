@@ -1,0 +1,35 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Software — Evium Charging">
+  <section
+    style="
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%);
+    "
+  >
+    <div style="text-align:center;">
+      <a
+        href="https://apps.apple.com/us/app/evium-charging/id1671750712"
+        target="_blank"
+        rel="noopener noreferrer"
+        style="display:inline-block; transition: opacity 0.2s ease;"
+        onmouseenter="this.style.opacity='0.75'"
+        onmouseleave="this.style.opacity='1'"
+      >
+        <img
+          src="/images/logo.webp"
+          alt="Evium Charging"
+          style="height:72px; margin:0 auto; display:block; opacity:0.92; cursor:pointer;"
+        />
+      </a>
+      <p style="margin-top:18px; font-family:'Maven Pro',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.25);">
+        Click to Download the App
+      </p>
+    </div>
+  </section>
+</Layout>

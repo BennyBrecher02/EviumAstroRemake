@@ -9,25 +9,35 @@
  * Then the next gust comes from the opposite side.
  */
 const portals = [
-  { x: 12, y: 38, side: 'left',  img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',     label: 'EvoCharge Level 2'         },
-  { x: 78, y: 52, side: 'right', img: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png', label: 'MaxiCharger DC 60–240kW'   },
-  { x: 24, y: 62, side: 'left',  img: '/images/chargers/tellus/tellus-dc-fast-180kw.png',              label: 'Tellus DC Fast 180kW'      },
-  { x: 68, y: 34, side: 'right', img: '/images/chargers/tellus/tellus-dc-fast-300kw.png',              label: 'Tellus DC Fast 300kW'      },
-  { x: 15, y: 60, side: 'left',  img: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png', label: 'DC Fast Outdoor Station'   },
-  { x: 80, y: 66, side: 'right', img: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',  label: 'Siemens VersiCharge AC'    },
-  { x: 16, y: 76, side: 'left',  img: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png', label: 'Siemens eMobility L2'      },
+  // ── Original 7 ───────────────────────────────────────────────
+  { x: 12, y: 38, side: 'left',  img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',                                  label: 'EvoCharge Level 2',       productId: 'evocharge-40a'       },
+  { x: 78, y: 52, side: 'right', img: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',                               label: 'MaxiCharger DC 60–240kW', productId: 'maxicharger-dc'      },
+  { x: 24, y: 62, side: 'left',  img: '/images/chargers/tellus/tellus-dc-fast-180kw.png',                                            label: 'Tellus DC Fast 180kW',    productId: 'evium-180kw'         },
+  { x: 68, y: 34, side: 'right', img: '/images/chargers/tellus/tellus-dc-fast-300kw.png',                                            label: 'Tellus DC Fast 300kW',    productId: 'evium-300kw'         },
+  { x: 15, y: 60, side: 'left',  img: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png',                               label: 'DC Fast Outdoor Station', productId: 'evium-outdoor'       },
+  { x: 80, y: 66, side: 'right', img: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',                                label: 'Siemens VersiCharge AC',  productId: 'versicharge-ac'      },
+  { x: 16, y: 76, side: 'left',  img: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',                               label: 'Siemens eMobility L2',    productId: 'versicharge-l2'      },
+  // ── 8 new entries ────────────────────────────────────────────
+  { x:  7, y: 22, side: 'left',  img: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png',    label: 'EvoCharge 32A L2',        productId: 'evocharge-32a'       },
+  { x: 23, y: 48, side: 'left',  img: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',       label: 'EvoCharge 40A L2',        productId: 'evocharge-40a'       },
+  { x:  8, y: 85, side: 'left',  img: '/images/chargers/tellus/Evium---AC-48A.png',                                                  label: 'Evium AC 12kW 50A',       productId: 'evium-ac-50a'        },
+  { x: 32, y: 72, side: 'left',  img: '/images/chargers/tellus/Evium---DC-Fast-Charger-60kw.png',                                    label: 'Evium DC Fast 60kW',      productId: 'evium-60kw'          },
+  { x: 86, y: 28, side: 'right', img: '/images/chargers/siemens/Evium---Pedestal-Wallmount-AC-charger.png',                          label: 'VersiCharge AC Pedestal', productId: 'versicharge-pedestal'},
+  { x: 76, y: 42, side: 'right', img: '/images/chargers/tellus/evium-dcfc-120kw.png',                                                label: 'Evium DCFC 120kW',        productId: 'evium-120kw'         },
+  { x: 86, y: 80, side: 'right', img: '/images/chargers/tellus/Evium---IC80A-Gen-2.png',                                             label: 'Evium AC 19.2kW 80A',     productId: 'evium-ac-80a'        },
+  { x: 72, y: 78, side: 'right', img: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',                                   label: 'Evium Wall-mount AC',     productId: 'evium-ac-80a'        },
 ];
 ---
 
 <section
-  id="hero-portal"
+  id="hero-portal-testing"
   class="relative min-h-screen flex items-center justify-center overflow-hidden"
 >
   <!-- Top vignette: fades wind-lines near the fixed navbar so they don't
        visually intrude into the header zone. Sits above wind-field (z:3). -->
   <div style="position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,rgba(6,14,22,0.82) 0%,transparent 100%);pointer-events:none;z-index:4;"></div>
   <!-- Wind field: JS draws all gust lines here -->
-  <div id="wind-field" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3;"></div>
+  <div id="wind-field-testing" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3;"></div>
 
   <!-- Portal groups: slit + charger only -->
   {portals.map((p, pi) => (
@@ -35,6 +45,7 @@ const portals = [
       class="portal-group"
       data-index={pi}
       data-side={p.side}
+      data-product-id={p.productId}
       style={`position:absolute; left:${p.x}%; top:${p.y}%; width:0; height:0; z-index:10;`}
     >
       <div class="portal-slit">
@@ -61,7 +72,7 @@ const portals = [
 
 <style>
   /* ─── Hero background + sizing tokens ────────────────── */
-  #hero-portal {
+  #hero-portal-testing {
     background: radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%);
     /* Single source of truth — change these and everything scales */
     --slit-w: clamp(120px, 20vw, 360px);
@@ -238,6 +249,23 @@ const portals = [
     filter: brightness(1.05) blur(0);
   }
   .portal-group.is-active .portal-label { opacity: 1; }
+
+  /* ─── Clickable state: enable pointer events on active portals
+     so the user can click them to jump to that product. ─────── */
+  .portal-group.is-active .portal-asset,
+  .portal-group.is-active .portal-label {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .portal-group.is-active .portal-asset:hover .asset-img {
+    filter: brightness(1.15);
+    transition: filter 0.15s ease;
+  }
+  .portal-group.is-active .portal-label:hover {
+    text-shadow:
+      0 0 20px rgba(45,200,86,1),
+      0 0 6px  rgba(45,200,86,0.8);
+  }
   .portal-group.is-closing .portal-slit {
     transform: scaleY(0);
     transition: transform 0.3s cubic-bezier(0.7, 0, 0.84, 0);
@@ -253,9 +281,21 @@ const portals = [
 
 <script>
   (() => {
-    const section = document.getElementById('hero-portal')!;
-    const field   = document.getElementById('wind-field')!;
+    const section = document.getElementById('hero-portal-testing')!;
+    const field   = document.getElementById('wind-field-testing')!;
     const groups  = Array.from(section.querySelectorAll<HTMLElement>('.portal-group'));
+
+    // ── Click-to-navigate: only fires while the portal is "active" ──
+    // (CSS gates pointer-events on .is-active; this delegates the clicks
+    //  and sends the user to /products#<productId> which auto-selects
+    //  the correct L2/L3 tab and scrolls to the matching card.)
+    groups.forEach((g) => {
+      g.addEventListener('click', () => {
+        if (!g.classList.contains('is-active')) return;
+        const pid = g.getAttribute('data-product-id');
+        if (pid) window.location.href = `/products#${pid}`;
+      });
+    });
 
     function wait(ms: number) { return new Promise<void>(r => setTimeout(r, ms)); }
     function rnd(lo: number, hi: number) { return lo + Math.random() * (hi - lo); }

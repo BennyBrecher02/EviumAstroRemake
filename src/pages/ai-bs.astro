@@ -5,6 +5,72 @@ import HeroB from '../components/heroes/HeroB.astro';
 import HeroC from '../components/heroes/HeroC.astro';
 import HeroD from '../components/heroes/HeroD.astro';
 import HeroE from '../components/heroes/HeroE.astro';
+
+const solutions = [
+  {
+    num: '01',
+    name: 'Multifamily Real Estate',
+    href: '/solutions/multifamily',
+    tag: 'Apartments & Condos',
+    desc: 'Turn EV charging into a tenant amenity and passive revenue stream — zero capital required.',
+  },
+  {
+    num: '02',
+    name: 'Fleets',
+    href: '/solutions/fleets',
+    tag: 'Depot Electrification',
+    desc: 'Depot charging designed around your vehicles, your shifts, and your grid constraints.',
+  },
+  {
+    num: '03',
+    name: 'Highway Fast Charging',
+    href: '/solutions/highway-fast-charging',
+    tag: 'Corridor Infrastructure',
+    desc: 'Capture highway EV traffic. NEVI-ready CPO deployment with zero cost to site hosts.',
+  },
+  {
+    num: '04',
+    name: 'Calculate Generated Profits',
+    href: '/solutions/generate-profits',
+    tag: 'Revenue Modeling',
+    desc: 'Understand what EV charging can actually earn for your property before you commit to anything.',
+  },
+  {
+    num: '05',
+    name: 'Electrician Partners',
+    href: '/solutions/electrician-partners',
+    tag: 'Trade Partnerships',
+    desc: "Qualified electrical contractors — join Evium's growing installation network.",
+  },
+  {
+    num: '06',
+    name: 'Commercial',
+    href: '/solutions/commercial',
+    tag: 'Office & Mixed-Use',
+    desc: "Meet corporate ESG mandates, win tenant negotiations, and modernize your building's parking.",
+  },
+  {
+    num: '07',
+    name: 'Retail',
+    href: '/solutions/retail',
+    tag: 'Strip Centers & Shopping',
+    desc: 'Turn your lot into a destination. EV drivers choose where to shop based on where they can charge.',
+  },
+  {
+    num: '08',
+    name: 'Parking',
+    href: '/solutions/parking',
+    tag: 'Lots & Garages',
+    desc: 'Activate idle stalls. Manage single sites or full portfolios from one dashboard.',
+  },
+  {
+    num: '09',
+    name: 'Medical',
+    href: '/solutions/medical',
+    tag: 'Hospitals & Clinics',
+    desc: '24/7-monitored infrastructure built for environments where reliability is non-negotiable.',
+  },
+];
 ---
 
 <Layout title="AI BS — Evium Charging">
@@ -51,5 +117,136 @@ import HeroE from '../components/heroes/HeroE.astro';
   <div class="relative">
     <div class="hero-label">Option E — Slideshow</div>
     <HeroE />
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       OLD SOLUTIONS PAGE CONTENT (moved here for reference)
+       ══════════════════════════════════════════════════════════ -->
+  <div class="relative">
+    <div class="hero-label">Old Solutions Page</div>
+
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <section class="relative min-h-[52vh] flex items-end pb-16 pt-32 overflow-hidden">
+      <div class="absolute inset-0 bg-evium-dark"></div>
+      <div class="absolute inset-0 opacity-[0.03]"
+        style="background-image: linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px); background-size: 48px 48px;"></div>
+      <div class="absolute top-0 right-0 w-1/2 h-full opacity-20"
+        style="background: radial-gradient(ellipse at 80% 30%, #2DC856 0%, transparent 65%);"></div>
+
+      <div class="relative w-full max-w-6xl mx-auto px-6 lg:px-12">
+        <p class="text-evium-green text-xs font-semibold tracking-[0.2em] uppercase mb-5 flex items-center gap-2">
+          <span class="inline-block w-6 h-px bg-evium-green"></span>
+          Evium Solutions
+        </p>
+        <h1 class="text-5xl lg:text-7xl font-black leading-[0.95] tracking-tight text-white mb-6 max-w-3xl">
+          Every property<br/>
+          <span class="text-evium-green">type.</span> One partner.
+        </h1>
+        <p class="text-white/55 text-lg max-w-xl leading-relaxed">
+          Hardware, software, installation, rebates, and 24/7 operations — delivered as a single managed service across every segment we serve.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── Divider ────────────────────────────────────────────── -->
+    <div class="max-w-6xl mx-auto px-6 lg:px-12">
+      <div class="h-px bg-white/10"></div>
+    </div>
+
+    <!-- ── Solutions List ─────────────────────────────────────── -->
+    <section class="bg-evium-dark py-4">
+      <div class="max-w-6xl mx-auto px-6 lg:px-12">
+        {solutions.map((s) => (
+          <a
+            href={s.href}
+            class="solution-row group flex items-center gap-6 py-7 border-b border-white/8 hover:border-evium-green/30 transition-all duration-300 relative"
+          >
+            <span class="text-evium-green text-xs font-bold tracking-widest tabular-nums w-8 shrink-0 group-hover:opacity-100 opacity-40 transition-opacity duration-300">
+              {s.num}
+            </span>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span class="text-white text-2xl lg:text-3xl font-bold tracking-tight group-hover:text-evium-green transition-colors duration-300 leading-tight">
+                  {s.name}
+                </span>
+                <span class="text-white/30 text-xs font-medium tracking-widest uppercase border border-white/10 px-2 py-0.5 rounded-sm group-hover:border-evium-green/25 group-hover:text-evium-green/60 transition-all duration-300">
+                  {s.tag}
+                </span>
+              </div>
+              <p class="text-white/45 text-sm mt-1.5 leading-relaxed max-w-xl group-hover:text-white/60 transition-colors duration-300">
+                {s.desc}
+              </p>
+            </div>
+
+            <div class="shrink-0 ml-4 w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-evium-green group-hover:bg-evium-green/10 transition-all duration-300 translate-x-0 group-hover:translate-x-1">
+              <svg class="w-4 h-4 text-white/30 group-hover:text-evium-green transition-colors duration-300" fill="none" viewBox="0 0 16 16">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- ── One Platform Strip ─────────────────────────────────── -->
+    <section class="bg-evium-dark-light border-y border-white/8 py-16">
+      <div class="max-w-6xl mx-auto px-6 lg:px-12">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-20">
+          <div class="flex-1">
+            <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
+              One platform.<br/>
+              <span class="text-evium-green">Every segment.</span>
+            </h2>
+            <p class="text-white/50 text-base leading-relaxed max-w-lg">
+              Whether you manage a single apartment complex or a national portfolio, Evium delivers the same hardware, the same software, and the same 24/7 operational standard — at no upfront cost.
+            </p>
+          </div>
+          <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-6 lg:gap-4 xl:gap-10 shrink-0">
+            <div class="text-center lg:text-left">
+              <div class="text-4xl font-black text-evium-green">500+</div>
+              <div class="text-white/40 text-xs tracking-widest uppercase mt-1">Chargers deployed</div>
+            </div>
+            <div class="hidden sm:block lg:hidden xl:block w-px bg-white/10 self-stretch"></div>
+            <div class="text-center lg:text-left">
+              <div class="text-4xl font-black text-evium-green">$0</div>
+              <div class="text-white/40 text-xs tracking-widest uppercase mt-1">Upfront under no-cost model</div>
+            </div>
+            <div class="hidden sm:block lg:hidden xl:block w-px bg-white/10 self-stretch"></div>
+            <div class="text-center lg:text-left">
+              <div class="text-4xl font-black text-evium-green">24/7</div>
+              <div class="text-white/40 text-xs tracking-widest uppercase mt-1">Monitoring & support</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ───────────────────────────────────────────────── -->
+    <section class="bg-evium-dark py-20 relative overflow-hidden">
+      <div class="absolute inset-0 opacity-15"
+        style="background: radial-gradient(ellipse at 50% 100%, #2DC856 0%, transparent 60%);"></div>
+      <div class="relative max-w-6xl mx-auto px-6 lg:px-12 text-center">
+        <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight mb-4">
+          Not sure which solution fits?
+        </h2>
+        <p class="text-white/50 text-base mb-8 max-w-md mx-auto">
+          Tell us about your property and we'll map out the right approach — hardware, model, and timeline — at no charge.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/contact/quote"
+            class="inline-flex items-center justify-center gap-2 bg-evium-green text-black font-bold text-sm tracking-wide px-7 py-3.5 hover:bg-white transition-colors duration-200">
+            Get a Free Assessment
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 16 16">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="/how-it-works"
+            class="inline-flex items-center justify-center gap-2 border border-white/20 text-white/70 font-medium text-sm px-7 py-3.5 hover:border-white/40 hover:text-white transition-all duration-200">
+            See How It Works
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
 </Layout>
