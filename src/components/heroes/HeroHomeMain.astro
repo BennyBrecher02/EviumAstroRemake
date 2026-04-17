@@ -1,0 +1,462 @@
+---
+// Hero: Home — full-viewport landing hero. Parking-lot charging scene as the
+// background; brand-green accents + bold headline + CTAs on a dark gradient
+// overlay. Scroll cue hints at the portal section below.
+---
+
+<section class="home-hero" aria-label="Evium Charging — home hero">
+
+  <!-- Background photo + dark gradient overlay for text legibility -->
+  <div class="hh-bg" aria-hidden="true">
+    <img
+      src="/images/solutions-placeholder.jpg"
+      alt=""
+      class="hh-bg-img"
+      draggable="false"
+      fetchpriority="high"
+    />
+    <div class="hh-overlay"></div>
+    <div class="hh-accent" aria-hidden="true"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="hh-inner">
+    <h1 class="hh-title">
+      Every property.<br />
+      <span class="hh-accent-word">Fully charged.</span>
+    </h1>
+
+    <p class="hh-sub">
+      Evium designs, installs, and operates EV charging networks for
+      multifamily, fleet, retail, and highway — with zero upfront cost
+      and full revenue share.
+    </p>
+
+    <!-- Eligibility check — primary interaction on the hero.
+         (Mirrors the original Evium site's address-lookup input.) -->
+    <form class="hh-eligibility" id="hh-eligibility" autocomplete="off" novalidate>
+      <div class="hh-eligibility-row">
+        <label class="hh-eligibility-field">
+          <svg class="hh-eligibility-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          <input
+            type="text"
+            name="address"
+            class="hh-eligibility-input"
+            placeholder="Enter your address to check eligibility"
+            aria-label="Enter your address to check eligibility"
+            required
+          />
+        </label>
+        <button type="submit" class="hh-eligibility-btn">
+          <span>Check Eligibility</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-cta-arrow">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </button>
+      </div>
+      <p class="hh-eligibility-hint">Please enter a legal U.S. address.</p>
+    </form>
+
+    <a href="/how-it-works" class="hh-secondary-link">
+      <span>See how it works</span>
+      <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-secondary-arrow">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </a>
+
+    <!-- Stats row -->
+    <ul class="hh-stats" role="list">
+      <li class="hh-stat">
+        <span class="hh-stat-n">500+</span>
+        <span class="hh-stat-l">Chargers deployed</span>
+      </li>
+      <li class="hh-stat">
+        <span class="hh-stat-n">$0</span>
+        <span class="hh-stat-l">Upfront cost</span>
+      </li>
+      <li class="hh-stat">
+        <span class="hh-stat-n">NEVI</span>
+        <span class="hh-stat-l">Grant-ready</span>
+      </li>
+      <li class="hh-stat">
+        <span class="hh-stat-n">24/7</span>
+        <span class="hh-stat-l">Monitored</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Scroll cue -->
+  <a href="#portal-to-solutions" class="hh-scroll" aria-label="Scroll to product portals">
+    <span class="hh-scroll-label">Explore chargers</span>
+    <span class="hh-scroll-icon" aria-hidden="true">
+      <svg viewBox="0 0 16 16">
+        <path d="M8 3v9M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </span>
+  </a>
+
+</section>
+
+<style>
+  /* ── Shell ───────────────────────────────────────────── */
+  .home-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 620px;
+    overflow: hidden;
+    background: #0d1a22;
+    color: #ffffff;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  /* ── Background image + overlays ─────────────────────── */
+  .hh-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hh-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 62%;
+    user-select: none;
+    pointer-events: none;
+    /* Very subtle zoom-in on load — gives the shot life */
+    animation: hh-bg-zoom 18s ease-out forwards;
+  }
+  @keyframes hh-bg-zoom {
+    from { transform: scale(1.05); }
+    to   { transform: scale(1);    }
+  }
+  /* Dark gradient: stronger on the LEFT where the text lives, lighter on
+     the right so the parking-lot scene stays readable. */
+  .hh-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        100deg,
+        rgba(13, 26, 34, 0.92) 0%,
+        rgba(13, 26, 34, 0.82) 28%,
+        rgba(13, 26, 34, 0.55) 55%,
+        rgba(13, 26, 34, 0.30) 80%,
+        rgba(13, 26, 34, 0.45) 100%
+      ),
+      /* Vertical fade at the very bottom so the hero dissolves into the
+         next (dark) section. Lands on solid #0d1a22 at 100 % — the portal
+         section below mirrors this color with its own top fade, so the
+         seam between the two sections disappears. */
+      linear-gradient(
+        to bottom,
+        rgba(13, 26, 34, 0) 58%,
+        rgba(13, 26, 34, 0.35) 78%,
+        rgba(13, 26, 34, 0.80) 92%,
+        #0d1a22 100%
+      );
+  }
+  /* Brand-green side glow — subtle "Evium mark" in the lower-left corner */
+  .hh-accent {
+    position: absolute;
+    left: -10%;
+    bottom: -20%;
+    width: 50%;
+    height: 60%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(45, 200, 86, 0.22) 0%,
+      rgba(45, 200, 86, 0.08) 40%,
+      rgba(45, 200, 86, 0) 70%
+    );
+    filter: blur(18px);
+    /* Fade the glow to zero before it reaches the bottom seam. The glow's
+       center sits ~10 % above the hero bottom (element-local ~50 %); the
+       hero bottom itself maps to element-local ~67 %. We keep 0–56 % fully
+       intact (covers the entire upper half of the glow, including its
+       brightest core) and fade to transparent by 70 %, so the ~10 % green
+       tint that used to reach the seam is wiped out without touching the
+       main glow shape. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 70%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Content ─────────────────────────────────────────── */
+  .hh-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding:
+      clamp(90px, 13vh, 140px)     /* top — clears the fixed nav */
+      clamp(24px, 5vw, 80px)
+      clamp(40px, 8vh, 80px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1200px;
+  }
+
+  /* ── Main headline — scaled up to fill the top of the content block
+       now that the eyebrow is gone. Big & bold, green accent on line 2. */
+  .hh-title {
+    margin: 0 0 clamp(20px, 2.4vw, 32px);
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 0.96;
+    letter-spacing: -0.032em;
+    color: #ffffff;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+  .hh-accent-word {
+    color: #2DC856;
+    /* Subtle green glow so the accent holds presence against the photo */
+    text-shadow:
+      0 2px 28px rgba(45, 200, 86, 0.45),
+      0 0 60px rgba(45, 200, 86, 0.15);
+  }
+
+  /* ── Subtitle ────────────────────────────────────────── */
+  .hh-sub {
+    margin: 0 0 clamp(28px, 3.2vw, 44px);
+    font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 54ch;
+  }
+
+  /* ── Eligibility form — primary hero interaction.
+       A single rounded "field" containing a pin icon, text input, and the
+       submit pill. Inspired by the original Evium site's address lookup. */
+  .hh-eligibility {
+    max-width: 720px;
+    margin: 0 0 clamp(18px, 2.2vw, 26px);
+  }
+  .hh-eligibility-row {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(8px, 0.8vw, 10px);
+    background: rgba(255, 255, 255, 0.96);
+    padding: clamp(6px, 0.55vw, 8px);
+    border-radius: 999px;
+    box-shadow:
+      0 14px 38px rgba(0, 0, 0, 0.32),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .hh-eligibility-row:focus-within {
+    box-shadow:
+      0 16px 42px rgba(45, 200, 86, 0.28),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 2px rgba(45, 200, 86, 0.65);
+  }
+  .hh-eligibility-field {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 0.8vw, 12px);
+    flex: 1 1 auto;
+    min-width: 0; /* allow input to shrink on narrow */
+    padding: 0 clamp(10px, 1vw, 16px);
+  }
+  .hh-eligibility-icon {
+    width: clamp(18px, 1.5vw, 22px);
+    height: clamp(18px, 1.5vw, 22px);
+    display: block;
+    color: rgba(13, 26, 34, 0.48);
+    flex-shrink: 0;
+  }
+  .hh-eligibility-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    padding: clamp(10px, 1vw, 14px) 0;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.9rem, 1.05vw, 1.05rem);
+    font-weight: 500;
+    color: #0d1a22;
+    letter-spacing: 0.005em;
+  }
+  .hh-eligibility-input::placeholder {
+    color: rgba(13, 26, 34, 0.45);
+    font-weight: 500;
+  }
+  .hh-eligibility-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: clamp(10px, 1.1vw, 14px) clamp(18px, 1.8vw, 26px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.72rem, 0.88vw, 0.88rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #0d1a22;
+    background: #2DC856;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px rgba(45, 200, 86, 0.35);
+    transition: background 0.18s ease, gap 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
+  }
+  .hh-eligibility-btn:hover {
+    background: #36e464;
+    gap: 12px;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(45, 200, 86, 0.48);
+  }
+  .hh-eligibility-btn:active {
+    transform: translateY(0);
+  }
+  .hh-eligibility-hint {
+    margin: clamp(10px, 1vw, 14px) 0 0 clamp(18px, 1.5vw, 24px);
+    font-size: clamp(0.66rem, 0.78vw, 0.78rem);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Secondary link ("See how it works") ───────────── */
+  .hh-secondary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 clamp(30px, 4vw, 52px);
+    padding: 6px 0;
+    font-size: clamp(0.7rem, 0.85vw, 0.88rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    transition: color 0.18s ease, gap 0.18s ease;
+    align-self: flex-start;
+  }
+  .hh-secondary-link:hover {
+    color: #2DC856;
+    gap: 12px;
+  }
+  .hh-secondary-arrow {
+    width: 1em;
+    height: 1em;
+    display: block;
+    flex-shrink: 0;
+  }
+  .hh-cta-arrow {
+    width: 1em;
+    height: 1em;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* ── Stats strip ─────────────────────────────────────── */
+  .hh-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(20px, 3vw, 44px);
+    margin: 0;
+    padding: clamp(20px, 2vw, 28px) 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    list-style: none;
+    max-width: 780px;
+  }
+  .hh-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hh-stat-n {
+    font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: #2DC856;
+  }
+  .hh-stat-l {
+    font-size: clamp(0.55rem, 0.65vw, 0.7rem);
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ── Scroll cue ──────────────────────────────────────── */
+  .hh-scroll {
+    position: absolute;
+    bottom: clamp(20px, 3vh, 34px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.68);
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .hh-scroll:hover {
+    color: #2DC856;
+  }
+  .hh-scroll-label {
+    font-size: clamp(0.54rem, 0.64vw, 0.66rem);
+    font-weight: 800;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .hh-scroll-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    animation: hh-bounce 2.2s ease-in-out infinite;
+  }
+  .hh-scroll-icon svg { width: 100%; height: 100%; display: block; }
+  @keyframes hh-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.7; }
+    50%      { transform: translateY(6px); opacity: 1; }
+  }
+
+  /* ── Responsive — keep content readable on narrow screens ── */
+  @media (max-width: 760px) {
+    .hh-title { max-width: 100%; }
+    .hh-stats { gap: 16px 28px; }
+    /* Collapse the eligibility row into a stacked layout on very narrow screens */
+    .hh-eligibility-row {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 8px;
+      border-radius: 20px;
+    }
+    .hh-eligibility-field { padding: 8px 12px; }
+    .hh-eligibility-btn   { justify-content: center; padding: 14px 16px; }
+  }
+  @media (max-height: 620px) {
+    .hh-stats  { display: none; }
+    .hh-scroll { display: none; }
+  }
+</style>
+
+<script>
+  // Eligibility form — no backend wired yet. Prevent default submit and keep
+  // the input's value so the page isn't reloaded with a query string.
+  document.getElementById('hh-eligibility')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+  });
+</script>

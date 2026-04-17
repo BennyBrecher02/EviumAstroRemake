@@ -1,178 +1,29 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-
-const cards = [
-  { label: 'Hardware', href: '/products', image: '/images/solutions-placeholder.jpg', crop: 'left' },
-  { label: 'Software', href: '/solutions/software', image: '/images/solutions-placeholder.jpg', crop: 'center' },
-  { label: 'Services', href: '/services', image: '/images/solutions-placeholder.jpg', crop: 'right' },
-];
+// The standalone /solutions page has been retired — its layout now lives
+// inside the homepage scroll scene (src/components/heroes/HeroPortalSolutionsScene.astro)
+// as the final state of the portal → solutions transition. Clicking
+// "Solutions" in the navbar goes to /#solutions, and the scene's hash
+// handler drops the user into that final state centered in view.
+//
+// This file stays only as a redirect so any direct hits on /solutions
+// (external links, bookmarks) still land on the right content.
 ---
-
-<Layout title="Solutions — Evium Charging">
-  <section class="solutions-hub">
-    <!-- Logo + subtitle pushed to upper area -->
-    <div class="solutions-hub-header">
-      <img
-        src="/images/logo.webp"
-        alt="Evium Charging"
-        class="solutions-hub-logo"
-      />
-      <p class="solutions-hub-subtitle">Solutions</p>
-    </div>
-
-    <!-- 3 card grid -->
-    <div class="solutions-hub-cards">
-      {cards.map((card) => (
-        <a href={card.href} class="solutions-card">
-          <img
-            src={card.image}
-            alt={card.label}
-            class={`solutions-card-img solutions-card-crop-${card.crop}`}
-          />
-          <div class="solutions-card-overlay"></div>
-          <span class="solutions-card-label">{card.label}</span>
-        </a>
-      ))}
-    </div>
-  </section>
-</Layout>
-
-<style>
-  .solutions-hub {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3rem;
-    padding: 8rem 1.5rem 4rem;
-    background: radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%);
-  }
-
-  .solutions-hub-header {
-    text-align: center;
-    user-select: none;
-  }
-
-  .solutions-hub-logo {
-    height: 64px;
-    margin: 0 auto;
-    display: block;
-    opacity: 0.88;
-  }
-
-  .solutions-hub-subtitle {
-    margin-top: 14px;
-    font-family: 'Maven Pro', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.25);
-  }
-
-  .solutions-hub-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    width: 100%;
-    max-width: 56rem;
-  }
-
-  .solutions-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1rem;
-    aspect-ratio: 3 / 4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-  }
-
-  .solutions-card:hover {
-    border-color: rgba(45, 200, 86, 0.35);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 0 24px rgba(45, 200, 86, 0.08);
-  }
-
-  .solutions-card-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .solutions-card:hover .solutions-card-img {
-    transform: scale(1.05);
-  }
-
-  .solutions-card-crop-left {
-    object-position: 15% center;
-  }
-
-  .solutions-card-crop-center {
-    object-position: 50% center;
-  }
-
-  .solutions-card-crop-right {
-    object-position: 85% center;
-  }
-
-  .solutions-card-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to top,
-      rgba(8, 20, 32, 0.85) 0%,
-      rgba(8, 20, 32, 0.5) 40%,
-      rgba(8, 20, 32, 0.35) 100%
-    );
-    transition: background 0.3s ease;
-  }
-
-  .solutions-card:hover .solutions-card-overlay {
-    background: linear-gradient(
-      to top,
-      rgba(8, 20, 32, 0.75) 0%,
-      rgba(8, 20, 32, 0.38) 40%,
-      rgba(8, 20, 32, 0.22) 100%
-    );
-  }
-
-  .solutions-card-label {
-    position: relative;
-    z-index: 1;
-    font-family: 'Maven Pro', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.88);
-    transition: color 0.3s ease;
-  }
-
-  .solutions-card:hover .solutions-card-label {
-    color: #2DC856;
-  }
-
-  @media (max-width: 640px) {
-    .solutions-hub {
-      padding: 7rem 1.25rem 3rem;
-      gap: 2.5rem;
-    }
-
-    .solutions-hub-cards {
-      grid-template-columns: 1fr;
-      max-width: 20rem;
-    }
-
-    .solutions-card {
-      aspect-ratio: 16 / 9;
-    }
-  }
-</style>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Evium Charging — Solutions</title>
+    <meta http-equiv="refresh" content="0; url=/#solutions" />
+    <link rel="canonical" href="/#solutions" />
+    <meta name="robots" content="noindex" />
+    <script is:inline>
+      // Client-side fallback in case meta-refresh is disabled.
+      window.location.replace('/#solutions');
+    </script>
+  </head>
+  <body>
+    <p style="font-family: 'Maven Pro', sans-serif; padding: 2rem; color: #0d1a22;">
+      Redirecting to <a href="/#solutions">Evium Charging — Solutions</a>…
+    </p>
+  </body>
+</html>

@@ -5,9 +5,17 @@ const SKEW_DEG = -18;
 // Battery order: Solutions · Products · Blog · How It Works · Contact
 const navItems = [
   {
+    // Solutions no longer has its own page — clicking navigates to the
+    // homepage and the hash handler inside HeroPortalSolutionsScene scrolls
+    // the user to the end of the pinned-scroll transition, i.e. the final
+    // solutions state centered in view.
     label: 'Solutions',
-    href: '/solutions',
-    sub: [],
+    href: '/#solutions',
+    sub: [
+      { label: 'Hardware', href: '/products'           },
+      { label: 'Software', href: '/solutions/software' },
+      { label: 'Services', href: '/services'           },
+    ],
   },
   {
     label: 'Services',

@@ -7,7 +7,20 @@
  * light ones zip through fast, heavy ones drag slowly. One of them decelerates
  * and stops at a portal position; the slit tears open, charger emerges.
  * Then the next gust comes from the opposite side.
+ *
+ * Props:
+ *   placement:
+ *     'top'   — standalone / first section on the page. Adds a dark top
+ *               vignette so wind-lines don't intrude into the nav zone.
+ *     'below' — placed beneath another dark section (e.g. home hero).
+ *               Swaps the nav vignette for a soft evium-dark blend fade
+ *               that dissolves the seam between the two sections.
  */
+interface Props {
+  placement?: 'top' | 'below';
+}
+const { placement = 'top' } = Astro.props;
+
 const portals = [
   // ── Original 7 ───────────────────────────────────────────────
   { x: 12, y: 38, side: 'left',  img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',                                  label: 'EvoCharge Level 2',       productId: 'evocharge-40a'       },
@@ -35,9 +48,18 @@ const portals = [
   id="hero-portal-testing"
   class="relative min-h-screen flex items-center justify-center overflow-hidden"
 >
-  <!-- Top vignette: fades wind-lines near the fixed navbar so they don't
-       visually intrude into the header zone. Sits above wind-field (z:3). -->
-  <div style="position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,rgba(6,14,22,0.82) 0%,transparent 100%);pointer-events:none;z-index:4;"></div>
+  {placement === 'top' && (
+    <!-- Top vignette (nav zone): fades wind-lines near the fixed navbar so
+         they don't visually intrude into the header. Above wind-field (z:3). -->
+    <div style="position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,rgba(6,14,22,0.82) 0%,transparent 100%);pointer-events:none;z-index:4;"></div>
+  )}
+  {placement === 'below' && (
+    <!-- Seam-blend vignette: a taller, denser band of evium-dark at the top
+         that fades to transparent, so the section above can fade INTO the
+         same color and the boundary disappears. Also masks wind-lines near
+         the top of this section (same job as the nav vignette). -->
+    <div style="position:absolute;top:0;left:0;right:0;height:220px;background:linear-gradient(to bottom,#0d1a22 0%,rgba(13,26,34,0.92) 35%,rgba(13,26,34,0.55) 65%,rgba(13,26,34,0) 100%);pointer-events:none;z-index:4;"></div>
+  )}
   <!-- Wind field: JS draws all gust lines here -->
   <div id="wind-field-testing" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3;"></div>
 
