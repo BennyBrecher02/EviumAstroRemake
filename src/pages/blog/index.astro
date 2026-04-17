@@ -494,19 +494,19 @@ const postsByCat = Object.fromEntries(
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0; width: 0;
-  border-left: 3px solid rgba(255, 255, 255, 0.6);
+  border-left: 3px solid rgba(244, 242, 232, 0.78);
   z-index: 2; pointer-events: none;
 }
 /* Solid white edge line — right shoulder */
 .emerge-col:last-child {
-  border-right: 3px solid rgba(255, 255, 255, 0.6);
+  border-right: 3px solid rgba(244, 242, 232, 0.78);
 }
 /* Lanes 1→2: same direction — white dashed skip line */
 .emerge-col:nth-child(2)::after {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0; width: 0;
-  border-left: 3px dashed rgba(255, 255, 255, 0.55);
+  border-left: 3px dashed rgba(244, 242, 232, 0.78);
   z-index: 2; pointer-events: none;
 }
 /* Lanes 2→3: opposing traffic — double yellow solid center line */
@@ -527,7 +527,7 @@ const postsByCat = Object.fromEntries(
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0; width: 0;
-  border-left: 3px dashed rgba(255, 255, 255, 0.55);
+  border-left: 3px dashed rgba(244, 242, 232, 0.78);
   z-index: 2; pointer-events: none;
 }
 

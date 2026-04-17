@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import HeroPlaceholder from '../../components/heroes/HeroPlaceholder.astro';
+import HeroCarouselPedestal from '../../components/heroes/HeroCarouselPedestal.astro';
 
 const l2Products = [
   // ── EvoCharge 32A ─────────────────────────────────────
@@ -150,6 +150,22 @@ const l2Products = [
 ];
 
 const l3Products = [
+  // ── Evium DC Fast 30kW Single Port ────────────────────
+  {
+    id: 'evium-30kw',
+    title: 'Evium DC Fast 30kW Single Port',
+    subtitle: 'A compact DC Fast Charger for tight spaces that need higher output.',
+    image: '/images/chargers/tellus/evium-dcfc-30kw-single-port.png',
+    specs: [
+      { label: 'Output Capacity', value: 'Up to 100 Amps' },
+      { label: 'Connector Type', value: 'CCS1, NACS, CHAdeMO' },
+      { label: 'Output Power', value: '30 kW' },
+      { label: 'Mounting', value: 'Wall or Pedestal (or dual-mounted pedestal)' },
+      { label: 'Warranty', value: '2 Years' },
+      { label: 'Dimensions', value: '21" x 12" x 27"' },
+      { label: 'Cable Management', value: '16 ft' },
+    ],
+  },
   // ── Evium DC Fast 60kW ────────────────────────────────
   {
     id: 'evium-60kw',
@@ -250,7 +266,7 @@ const l3Products = [
 ---
 
 <Layout title="Products — Evium Charging">
-  <HeroPlaceholder />
+  <HeroCarouselPedestal />
 
   <!-- Product Catalog -->
   <section class="product-catalog">
@@ -265,7 +281,21 @@ const l3Products = [
       <!-- L2 Section -->
       <div class="tab-panel is-visible" id="panel-l2">
         <div class="tab-intro">
-          <p class="intro-question">What is a Level 2 Charger?</p>
+          <p class="intro-question">
+            What is a Level 2 Charger?
+            <button
+              type="button"
+              class="chart-info-btn"
+              aria-label="View charging speed chart"
+              title="View charging speed chart"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8" cy="4.4" r="0.9" fill="currentColor"/>
+                <path d="M8 7v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </p>
           <p class="intro-answer">A Level 2 EV charging station (L2) is the optimal charging solution for daily to weekly use. On average, L2s will charge an EV from 10% to full battery in 5-7 hours.</p>
         </div>
 
@@ -286,7 +316,7 @@ const l3Products = [
                     </div>
                   ))}
                 </div>
-                <a href="/" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
+                <a href="/contact/quote" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
               </div>
             </div>
           ))}
@@ -296,7 +326,21 @@ const l3Products = [
       <!-- L3 Section -->
       <div class="tab-panel" id="panel-l3">
         <div class="tab-intro">
-          <p class="intro-question">What is a Level 3 Charger?</p>
+          <p class="intro-question">
+            What is a Level 3 Charger?
+            <button
+              type="button"
+              class="chart-info-btn"
+              aria-label="View charging speed chart"
+              title="View charging speed chart"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8" cy="4.4" r="0.9" fill="currentColor"/>
+                <path d="M8 7v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </p>
           <p class="intro-answer">A Level 3 EV charging station (L3) is the optimal charging solution for daily to weekly use. On average, L3s will charge an EV from 10% to 90% of battery capacity in 15-90 minutes depending on power.</p>
         </div>
 
@@ -317,7 +361,7 @@ const l3Products = [
                     </div>
                   ))}
                 </div>
-                <a href="/" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
+                <a href="/contact/quote" class="card-cta">Request a Quote <span class="cta-arrow">→</span></a>
               </div>
             </div>
           ))}
@@ -326,6 +370,24 @@ const l3Products = [
 
     </div>
   </section>
+
+  <!-- Charging-speed chart overlay (hidden by default) -->
+  <div class="chart-overlay" id="chart-overlay" role="dialog" aria-modal="true" aria-label="Charging speed chart" hidden>
+    <div class="chart-overlay-backdrop" data-chart-close aria-hidden="true"></div>
+    <div class="chart-overlay-content">
+      <button type="button" class="chart-close" id="chart-close-btn" aria-label="Close chart">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <img
+        src="/images/charging-speed-chart-cropped.png"
+        alt="Charging speed chart: charger amperage, charging speed, battery size, and charging time by vehicle type"
+        class="chart-overlay-img"
+        draggable="false"
+      />
+    </div>
+  </div>
 </Layout>
 
 <style>
@@ -411,6 +473,9 @@ const l3Products = [
     font-size: 1rem;
     font-weight: 500;
     color: #33444c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .intro-answer {
@@ -418,6 +483,136 @@ const l3Products = [
     line-height: 1.7;
     color: #55656d;
   }
+
+  /* ── Chart info icon ─────────────────────────────────────
+     Subtle circular "i" button next to the question text. Clicking opens
+     the charging-speed chart in a modal overlay. ───────────────────── */
+  .chart-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #2DC856;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    flex-shrink: 0;
+  }
+  .chart-info-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  .chart-info-btn:hover {
+    color: #25b048;
+    background: rgba(45, 200, 86, 0.12);
+    transform: scale(1.08);
+  }
+  .chart-info-btn:focus-visible {
+    outline: 2px solid rgba(45, 200, 86, 0.7);
+    outline-offset: 2px;
+  }
+
+  /* ── Chart overlay modal ─────────────────────────────────
+     Full-screen dark backdrop, centered chart image with brand-styled
+     close button. Shown when the info icon is clicked. ──────────────── */
+  .chart-overlay[hidden] { display: none; }
+  .chart-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(20px, 4vw, 60px);
+    /* Fade in */
+    animation: chart-fade-in 0.22s ease-out;
+  }
+  @keyframes chart-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .chart-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 18, 22, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+  }
+  .chart-overlay-content {
+    position: relative;
+    z-index: 1;
+    max-width: min(1100px, 100%);
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Subtle rise-in */
+    animation: chart-rise 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes chart-rise {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  }
+  .chart-overlay-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - clamp(40px, 8vw, 120px));
+    object-fit: contain;
+    border-radius: 14px;
+    box-shadow:
+      0 24px 80px rgba(0, 0, 0, 0.55),
+      0 4px 16px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    user-select: none;
+  }
+  /* Close button — sits in the top-right corner of the chart, using brand
+     tokens so it reads as part of the Evium site. */
+  .chart-close {
+    position: absolute;
+    top: clamp(-12px, -0.6vw, -8px);
+    right: clamp(-12px, -0.6vw, -8px);
+    width: clamp(34px, 3.4vw, 42px);
+    height: clamp(34px, 3.4vw, 42px);
+    padding: 0;
+    border: 0;
+    background: #2DC856;
+    color: #0d1a22;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 6px 18px rgba(45, 200, 86, 0.45),
+      0 0 0 2px rgba(10, 18, 22, 0.75);
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    z-index: 2;
+  }
+  .chart-close svg {
+    width: 52%;
+    height: 52%;
+    display: block;
+  }
+  .chart-close:hover {
+    background: #36e464;
+    transform: scale(1.08) rotate(90deg);
+    box-shadow:
+      0 8px 22px rgba(45, 200, 86, 0.55),
+      0 0 0 2px rgba(10, 18, 22, 0.85);
+  }
+  .chart-close:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+  /* Disable page scroll while the overlay is open */
+  :global(body.chart-overlay-open) { overflow: hidden; }
 
   /* ── Product cards ─────────────────────────────────────── */
   .product-cards {
@@ -609,19 +804,38 @@ const l3Products = [
     });
 
     // ── Deep-link support: scroll to product and auto-switch tab ──
-    // Portals on /testing link here via /products#<product-id>.
-    // We read the hash, look up the card, switch to its L2/L3 tab,
-    // then smooth-scroll the card into view.
+    // Supports two URL-hash shapes:
+    //   • `#panel-l2` / `#panel-l3`  — the nav "Products → Level 2/3" links
+    //     switch the tab and scroll to the top of the catalog.
+    //   • `#<product-id>`            — deep links from the pedestal portal
+    //     carousel — switch to the right tab and center the card.
     function handleHash() {
       const id = window.location.hash.slice(1);
       if (!id) return;
+
+      // Panel-level link: scroll to the catalog section and activate the tab.
+      if (id === 'panel-l2' || id === 'panel-l3') {
+        const tab = id.replace('panel-', '');
+        activateTab(tab);
+        const panel = document.getElementById(id);
+        if (panel) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              const rect = panel.getBoundingClientRect();
+              const absoluteTop = window.pageYOffset + rect.top;
+              // Leave some room for the fixed nav (~80px) above the panel.
+              window.scrollTo({ top: Math.max(0, absoluteTop - 80), behavior: 'smooth' });
+            });
+          });
+        }
+        return;
+      }
+
+      // Product-card deep link.
       const card = document.getElementById(id);
       if (!card) return;
       const tab = card.getAttribute('data-product-tab');
       if (tab) activateTab(tab);
-      // Wait for the panel to become visible AND override the browser's
-      // default hash-scroll. We double-rAF so layout is committed, then
-      // manually center the card in the viewport.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const rect = card.getBoundingClientRect();
@@ -634,5 +848,34 @@ const l3Products = [
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
+
+    // ── Charging-speed chart modal ─────────────────────────
+    // Every `.chart-info-btn` on the page opens the same overlay — both
+    // the L2 and L3 intro sections have one.
+    const chartBtns    = document.querySelectorAll<HTMLButtonElement>('.chart-info-btn');
+    const chartOverlay = document.getElementById('chart-overlay');
+    const chartCloseEls = document.querySelectorAll<HTMLElement>('[data-chart-close], #chart-close-btn');
+    // Remember which trigger opened the overlay so we can return focus there on close
+    let lastChartTrigger: HTMLElement | null = null;
+
+    function openChart(fromEl: HTMLElement | null) {
+      if (!chartOverlay) return;
+      lastChartTrigger = fromEl;
+      chartOverlay.hidden = false;
+      document.body.classList.add('chart-overlay-open');
+      (document.getElementById('chart-close-btn') as HTMLElement | null)?.focus();
+    }
+    function closeChart() {
+      if (!chartOverlay) return;
+      chartOverlay.hidden = true;
+      document.body.classList.remove('chart-overlay-open');
+      lastChartTrigger?.focus();
+    }
+
+    chartBtns.forEach((btn) => btn.addEventListener('click', () => openChart(btn)));
+    chartCloseEls.forEach((el) => el.addEventListener('click', closeChart));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && chartOverlay && !chartOverlay.hidden) closeChart();
+    });
   });
 </script>

@@ -57,6 +57,17 @@ html {
   font-family: var(--font-sans);
   background-color: var(--color-evium-dark);
   color: white;
+  /* Firefox — hide scrollbar while preserving scroll behavior */
+  scrollbar-width: none;
+  /* IE / legacy Edge */
+  -ms-overflow-style: none;
+}
+/* WebKit (Chrome, Safari) — hide scrollbar while preserving scroll behavior */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 /* ═══════════════════════════════════════════════════════════

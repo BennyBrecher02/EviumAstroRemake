@@ -1,0 +1,756 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Full charger lineup — cycles through every charger asset in /public/images/chargers/*
+// `botPad` = % of the PNG's height that is transparent below the charger body.
+// `productId` matches the id used in /products so clicking navigates to that product card.
+const slides = [
+  { img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',                                      label: 'EvoCharge Level 2',                tag: 'L2', botPad: 2.29,  productId: 'evocharge-40a',        desc: 'Modern compact design, NEMA 4 rated for indoor/outdoor use with smart Wi-Fi charging.' },
+  { img: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png',         label: 'EvoCharge 32A L2',                 tag: 'L2', botPad: 5.55,  productId: 'evocharge-32a',        desc: 'Compact wall-mount EVSE with OCPP 1.6 networking, Wi-Fi, and optional 4G LTE + RFID.' },
+  { img: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',            label: 'EvoCharge 40A L2',                 tag: 'L2', botPad: 3.64,  productId: 'evocharge-40a',        desc: 'Modern compact design, NEMA 4 rated for indoor/outdoor use with smart Wi-Fi charging.' },
+  { img: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',                                    label: 'MaxiCharger DC 60–240kW',          tag: 'DC', botPad: 1.14,  productId: 'maxicharger-dc',       desc: 'Modular DC fast charger scalable in 20kW increments with 27" touchscreen and ISO 15118.' },
+  { img: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',                                    label: 'Siemens eMobility L2',             tag: 'L2', botPad: 0.00,  productId: 'versicharge-l2',       desc: 'Single-unit wall-mount configuration with RFID authentication and embedded metering.' },
+  { img: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',                                     label: 'Siemens VersiCharge AC',           tag: 'L2', botPad: 2.57,  productId: 'versicharge-ac',       desc: 'Third-generation smart charger with RFID, Wi-Fi, LTE/4G, and Energy Star 1.2 certification.' },
+  { img: '/images/chargers/siemens/Evium---Pedestal-Wallmount-AC-charger.png',                               label: 'VersiCharge AC Pedestal',          tag: 'L2', botPad: 2.29,  productId: 'versicharge-pedestal', desc: 'Dual-post pedestal configuration with cable retraction system for commercial deployments.' },
+  { img: '/images/chargers/tellus/tellus-dc-fast-180kw.png',                                                 label: 'Evium DC Fast 180kW',              tag: 'DC', botPad: 13.07, productId: 'evium-180kw',          desc: 'High-power compact charger with 1000VDC HPC system and liquid-cooled CCS cables.' },
+  { img: '/images/chargers/tellus/tellus-dc-fast-300kw.png',                                                 label: 'Evium DC Fast 300kW',              tag: 'DC', botPad: 5.14,  productId: 'evium-300kw',          desc: 'Ultra-high-power charger with 1000VDC HPC system and liquid-cooled 500A CCS cables.' },
+  { img: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png',                                    label: 'DC Fast Outdoor Station',          tag: 'DC', botPad: 18.86, productId: 'evium-outdoor',        desc: 'Compact outdoor kiosk-style DC fast charger for space-constrained commercial sites.' },
+  { img: '/images/chargers/tellus/evium-dcfc-120kw.png',                                                     label: 'Evium DCFC 120kW',                 tag: 'DC', botPad: 4.57,  productId: 'evium-120kw',          desc: 'Powerful compact dual-port DC charger with 1000VDC output and air-cooled modules.' },
+  { img: '/images/chargers/tellus/evium-dcfc-30kw-single-port.png',                                          label: 'Evium DC Fast 30kW',               tag: 'DC', botPad: 8.22,  productId: 'evium-30kw',           desc: 'A compact DC Fast Charger for tight spaces that need higher output.' },
+  { img: '/images/chargers/tellus/Evium---DC-Fast-Charger-60kw.png',                                         label: 'Evium DC Fast 60kW',               tag: 'DC', botPad: 6.29,  productId: 'evium-60kw',           desc: 'Compact all-in-one dual-port charger with air-cooled power modules and 10" touchscreen.' },
+  { img: '/images/chargers/tellus/Evium---AC-48A.png',                                                       label: 'Evium AC 12kW 50A',                tag: 'L2', botPad: 6.57,  productId: 'evium-ac-50a',         desc: 'Dual-port smart wall charger with 5" touchscreen, RFID, and OCPP 1.6J connectivity.' },
+  { img: '/images/chargers/tellus/Evium---IC80A-Gen-2.png',                                                  label: 'Evium AC 19.2kW 80A',              tag: 'L2', botPad: 9.71,  productId: 'evium-ac-80a',         desc: 'High-power single-port wall charger with 5" touchscreen and RFID for demanding applications.' },
+  { img: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',                                        label: 'Evium Wall-mount AC',              tag: 'L2', botPad: 8.29,  productId: 'evium-ac-80a',         desc: 'High-power single-port wall charger with 5" touchscreen and RFID for demanding applications.' },
+];
+
+// Pedestal TOP-FACE CENTER coordinates (% of 1536×1024 source image), shifted
+// right from the raw image measurement so the charger BODY (not the image rect,
+// which has off-center cables and hardware) visually sits centered on each pedestal.
+const SLOT_BL = { x: 44.0, y: 66.0 }; // back-left — FEATURED slide (lowered slightly)
+const SLOT_FC = { x: 61.0, y: 75.0 }; // front-center — preview slide (nudged right)
+const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up)
+---
+
+<Layout title="Carousel Pedestal — Testing — Evium Charging">
+  <main class="carousel-root" aria-label="Carousel Pedestal">
+    <!-- Stage: aspect-ratio locked to source image so pedestal positions are exact.
+         Sized to min-cover the viewport (mirrors background-size: cover). -->
+    <div class="pedestal-stage" id="pedestal-stage">
+      <img
+        src="/images/green-pedestals.png"
+        alt="Pedestal backdrop"
+        class="pedestal-img"
+        draggable="false"
+      />
+
+      <!-- Slides: all rendered, positioned by JS into one of the three slots (or hidden). -->
+      {slides.map((s, i) => (
+        <div
+          class="cp-slide"
+          data-index={i}
+          data-label={s.label}
+          data-tag={s.tag}
+          data-desc={s.desc}
+          data-bot-pad={s.botPad}
+          data-product-id={s.productId}
+          style={`--bot-pad:${s.botPad};`}
+        >
+          <img src={s.img} alt={s.label} class="cp-img" draggable="false" />
+        </div>
+      ))}
+
+      <!--
+        Stage header — supporting page title in the upper-left mint wall.
+        Understated: restrained sizing, muted ink so it doesn't compete
+        with the pedestal-carousel main display piece.
+      -->
+      <header class="stage-header">
+        <p class="sh-eyebrow">Evium Product Suite</p>
+        <h1 class="sh-title">Built to power every property.</h1>
+        <p class="sh-sub">
+          From 7.4&#8202;kW wall chargers to 300&#8202;kW DC fast stations,
+          Evium's hardware lineup spans every need — multifamily, fleet,
+          retail, highway. All supported by our turnkey deployment,
+          monitoring, and revenue-share programs.
+        </p>
+      </header>
+
+      <!--
+        In-arch caption — dramatic typographic poster design.
+        Split the charger name into a small uppercase prefix and a MASSIVE
+        green accent (the spec/model/wattage). The huge green mark IS
+        the design — it reads as a featured-charger headline. A lightning
+        bolt mark ties it to the EV/charging brand. Positioned right
+        alongside the featured charger.
+      -->
+      <div class="arch-caption" id="arch-caption" aria-live="polite">
+        <svg class="ac-bolt" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M13 2 L4 14 L11 14 L10 22 L20 10 L13 10 Z"
+                fill="currentColor"/>
+        </svg>
+        <h2 class="ac-name" id="ac-name"></h2>
+        <a class="ac-cta" href="#" id="ac-cta">
+          <svg class="ac-cta-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <span>Full specifications</span>
+        </a>
+      </div>
+
+      <!--
+        Spotlight glow rendered on the back-left pedestal's top surface.
+        This is the visual cue that marks which charger the arch text belongs to.
+        It sits BEHIND the charger (low z-index) and softly highlights just the
+        featured pedestal — making it read as "on display" / "selected".
+      -->
+      <div class="featured-spotlight" aria-hidden="true"></div>
+    </div>
+
+    <!-- Bottom navigation pill: prev arrow + dots + next arrow. -->
+    <div class="cp-hud">
+      <button class="cp-nav cp-prev" id="cp-prev" aria-label="Previous charger">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+      <div class="cp-dots" id="cp-dots">
+        {slides.map((_, i) => (
+          <button
+            class="cp-dot"
+            data-dot={i}
+            aria-label={`Show slide ${i + 1}`}
+          ></button>
+        ))}
+      </div>
+      <button class="cp-nav cp-next" id="cp-next" aria-label="Next charger">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* ── Root: fill entire viewport, clip overflow. ── */
+  .carousel-root {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #0b1518;
+  }
+
+  /* ── Stage: emulates background-size: cover on a 1536×1024 image.
+       Aspect ratio locked; sized to min-cover the viewport. Centered. ── */
+  .pedestal-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    aspect-ratio: 1536 / 1024;
+    width:  max(100vw, calc(100vh * 1536 / 1024));
+    height: max(100vh, calc(100vw * 1024 / 1536));
+  }
+  .pedestal-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* ── Slides: absolutely positioned within stage. Bottom-center anchored to pedestal top. ── */
+  .cp-slide {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* The inline `left:` / `top:` / `transform:` are set by JS for each position. */
+    width: 14%;
+    max-width: 260px;
+    min-width: 80px;
+    /* Scale must pivot around the REAL charger bottom (image rect bottom minus
+       the PNG's transparent bottom-padding) so the charger stays planted on the
+       pedestal even when scaled or with irregular asset padding. */
+    transform-origin: 50% calc(100% - var(--bot-pad, 0) * 1%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      left 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      top  0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s ease;
+    will-change: left, top, transform, opacity;
+    z-index: 5;
+  }
+  /* Back-left (middle-height pedestal) is the FEATURED slide — clickable + focused styling. */
+  .cp-slide.is-bleft  {
+    z-index: 20;
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .cp-slide.is-bleft .cp-img {
+    /* Extra glow + darker drop shadow reinforces that this is the selected item */
+    filter:
+      drop-shadow(0 16px 26px rgba(0, 0, 0, 0.42))
+      drop-shadow(0 0 28px rgba(45, 200, 86, 0.22))
+      drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+  }
+  .cp-slide.is-bleft:hover .cp-img {
+    filter:
+      drop-shadow(0 18px 30px rgba(0, 0, 0, 0.48))
+      drop-shadow(0 0 42px rgba(45, 200, 86, 0.45))
+      drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+    transition: filter 0.18s ease;
+  }
+
+  /* Front-center (newly arrived preview) and back-right (exiting) are dimmer neighbors. */
+  .cp-slide.is-front  { z-index: 10; opacity: 0.70; }
+  .cp-slide.is-bright { z-index: 10; opacity: 0.70; }
+
+  .cp-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter:
+      drop-shadow(0 12px 18px rgba(0, 0, 0, 0.35))
+      drop-shadow(0 3px 6px  rgba(0, 0, 0, 0.25));
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* ── Arch caption — the featured charger's name + description,
+       placed INSIDE the white semicircle backdrop and anchored above the
+       back-left (featured) pedestal. A green accent bar + number reinforce
+       the connection to the charger on that pedestal. ───────────────── */
+  /* ── Arch caption — a TALL rounded leaf-form tracing the left side of the
+       arch. Narrow width (just the left corridor of the arch); its tapered
+       top-right follows the arch's upper curve; its body stretches DOWN
+       along the arch's vertical left wall. No horizontal stretching. */
+  /* ── Arch caption — centered text on the white arch backdrop.
+       Positioned at the arch's horizontal center (~61% of stage) where the
+       arch is widest. Narrow enough to stay fully inside the arch walls
+       with ~3% padding on both sides at every y-level it occupies. */
+  /* ── Arch caption — poster-style composition alongside the featured
+       charger. Lightning bolt brand mark → small uppercase brand prefix
+       → HUGE green spec accent → pill CTA. Dramatic type hierarchy IS
+       the design. */
+  .arch-caption {
+    position: absolute;
+    left: 52%;
+    top:  26%;
+    width: 20.5%;
+    max-width: 320px;
+    min-width: 195px;
+    z-index: 15;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 0.45s ease 0.1s, transform 0.45s ease 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(9px, 1.1vw, 15px);
+    text-align: left;
+  }
+  .arch-caption.is-ready {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* ── Lightning bolt — scaled up, keeps the brand-mark prominence. */
+  .ac-bolt {
+    width: clamp(36px, 3.8vw, 52px);
+    height: clamp(36px, 3.8vw, 52px);
+    color: #2DC856;
+    filter: drop-shadow(0 3px 10px rgba(45, 200, 86, 0.5));
+    display: block;
+    margin-bottom: clamp(2px, 0.3vw, 6px);
+  }
+  /* ── Name — dramatic poster hierarchy: small uppercase prefix + MASSIVE
+       green accent. Base font bumped so both scale up together while keeping
+       the original proportions. */
+  .ac-name {
+    font-family: 'Maven Pro', sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.45vw, 7px);
+    margin: 0;
+    font-size: clamp(1.35rem, 1.9vw, 2.05rem);  /* base size for em calcs */
+    line-height: 1;
+  }
+  /* :global() — these spans are injected via JS (innerHTML) so they bypass
+     Astro's default style-scoping. */
+  :global(.ac-name-prefix) {
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(13, 26, 34, 0.55);
+    line-height: 1.12;
+    display: block;
+  }
+  :global(.ac-name-accent) {
+    font-size: 1.6em;
+    font-weight: 900;
+    line-height: 0.94;
+    letter-spacing: -0.025em;
+    color: #2DC856;
+    text-shadow: 0 2px 14px rgba(45, 200, 86, 0.28);
+    display: block;
+  }
+  /* ── CTA — scaled up to match the larger headline. */
+  .ac-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.66rem, 0.82vw, 0.84rem);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-decoration: none;
+    padding: clamp(8px, 0.95vw, 13px) clamp(15px, 1.7vw, 22px);
+    background: #2DC856;
+    border-radius: 999px;
+    transition: gap 0.18s ease, background 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
+    pointer-events: auto;
+    box-shadow: 0 5px 16px rgba(45, 200, 86, 0.42);
+    margin-top: clamp(5px, 0.7vw, 12px);
+  }
+  .ac-cta:hover {
+    gap: 12px;
+    background: #25b048;
+    transform: translateX(-2px);
+    box-shadow: 0 6px 18px rgba(45, 200, 86, 0.5);
+  }
+  .ac-cta-arrow {
+    width: 0.95em;
+    height: 0.95em;
+    display: block;
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+  }
+  /* Arrow slides LEFT on hover — pointing toward the featured charger */
+  .ac-cta:hover .ac-cta-arrow {
+    transform: translateX(-3px);
+  }
+
+  /* ── Featured-pedestal spotlight: the visual cue that marks which charger
+       the arch text belongs to. A soft radial green glow placed on the
+       back-left pedestal's top surface, sitting BEHIND the charger (low z).
+       Only the featured pedestal gets this treatment, so the viewer instantly
+       reads "this one is on display". No tacky lines. ────────────────── */
+  /* ── Stage header — page intro on the upper-left mint wall. Styled to
+       complement the arch caption without competing with it. A subtle dash
+       leads the eyebrow and a thin divider separates title from description
+       for editorial rhythm. */
+  .stage-header {
+    position: absolute;
+    left: 5.5%;
+    top:  19%;
+    width: 28%;
+    max-width: 440px;
+    min-width: 230px;
+    z-index: 4;
+    pointer-events: none;
+    font-family: 'Maven Pro', sans-serif;
+    color: #0d1a22;
+  }
+  /* Eyebrow with a leading green dash — matches the visual language of
+     the carousel's green accents without shouting. */
+  .sh-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: clamp(9px, 1vw, 14px);
+    margin: 0 0 clamp(14px, 1.5vw, 20px);
+    font-size: clamp(0.54rem, 0.68vw, 0.7rem);
+    font-weight: 900;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: #2DC856;
+    line-height: 1;
+  }
+  .sh-eyebrow::before {
+    content: '';
+    flex: 0 0 auto;
+    width: clamp(22px, 2.4vw, 32px);
+    height: 2px;
+    background: currentColor;
+  }
+  /* Title — elegant but not dominating. Capped width so it breaks into
+     balanced lines rather than running across the whole mint wall. */
+  .sh-title {
+    margin: 0 0 clamp(16px, 1.7vw, 24px);
+    font-size: clamp(1.3rem, 2.25vw, 2.3rem);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    color: #0d1a22;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+  /* Subtitle — refined body copy. Slightly looser leading, cleaner color. */
+  .sh-sub {
+    margin: 0;
+    font-size: clamp(0.7rem, 0.88vw, 0.9rem);
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0;
+    color: rgba(13, 26, 34, 0.6);
+    max-width: 42ch;
+    text-wrap: pretty;
+  }
+  @media (max-width: 720px) {
+    .stage-header { display: none; }
+  }
+
+  .featured-spotlight {
+    position: absolute;
+    /* Centered on the back-left pedestal's top-face (44%, 66%) */
+    left: 44%;
+    top:  66%;
+    /* Size it so the glow fans out over most of the pedestal's top surface */
+    width: 18%;
+    height: 9%;
+    transform: translate(-50%, -50%);
+    z-index: 3; /* above pedestal image (1), below charger slides (5+) */
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(45, 200, 86, 0.42) 0%,
+      rgba(45, 200, 86, 0.18) 40%,
+      rgba(45, 200, 86, 0) 78%
+    );
+    filter: blur(6px);
+    opacity: 0;
+    animation: featured-pulse 3.2s ease-in-out infinite;
+  }
+  .carousel-root .featured-spotlight { opacity: 1; }
+  @keyframes featured-pulse {
+    0%, 100% {
+      opacity: 0.75;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+  }
+
+  /* ── Bottom HUD — horizontal pill with prev arrow, dots, and next arrow. ── */
+  .cp-hud {
+    position: fixed;
+    bottom: clamp(18px, 3.5vh, 44px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(10px, 1.2vw, 18px);
+    padding: clamp(8px, 0.9vw, 12px) clamp(10px, 1.2vw, 16px);
+    background: rgba(10, 18, 22, 0.66);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 2px solid rgba(45, 200, 86, 0.55);
+    max-width: calc(100vw - 32px);
+  }
+  /* Prev / next nav arrows — inherit the same dark pill aesthetic. */
+  .cp-nav {
+    background: transparent;
+    border: 0;
+    padding: 4px 6px;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.55);
+    transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    border-radius: 999px;
+    line-height: 0;
+  }
+  .cp-nav svg {
+    width: clamp(16px, 1.3vw, 20px);
+    height: clamp(16px, 1.3vw, 20px);
+    display: block;
+  }
+  .cp-nav:hover {
+    color: #2DC856;
+    background: rgba(45, 200, 86, 0.1);
+  }
+  .cp-prev:hover { transform: translateX(-2px); }
+  .cp-next:hover { transform: translateX(2px); }
+  .cp-nav:active { transform: scale(0.94); }
+  .cp-nav:focus-visible {
+    outline: 2px solid rgba(45, 200, 86, 0.65);
+    outline-offset: 2px;
+  }
+
+  .cp-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cp-dot {
+    width: 8px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: width 0.25s ease, background 0.25s ease;
+  }
+  .cp-dot.is-active {
+    width: 22px;
+    background: #2DC856;
+  }
+
+  /* ── Responsive: keep caption within the arch on all viewports. ── */
+  @media (max-width: 900px) {
+    .arch-caption { width: 17%; }
+  }
+  @media (max-width: 600px) {
+    .arch-caption { width: 18%; }
+  }
+  @media (max-height: 560px) {
+    .cp-hud { bottom: 10px; padding: 8px 14px; }
+  }
+</style>
+
+<script>
+  (() => {
+    const root   = document.querySelector<HTMLElement>('.carousel-root');
+    if (!root) return;
+    const slides     = Array.from(root.querySelectorAll<HTMLElement>('.cp-slide'));
+    const dots       = Array.from(root.querySelectorAll<HTMLButtonElement>('.cp-dot'));
+    const captionEl  = root.querySelector<HTMLElement>('#arch-caption');
+    const acName     = root.querySelector<HTMLElement>('#ac-name');
+    const acCta      = root.querySelector<HTMLAnchorElement>('#ac-cta');
+    if (!slides.length) return;
+
+    // Pedestal top-face center coordinates in stage % (match the Astro template).
+    // Scales: the FEATURED slide (back-left, middle-height pedestal) is full size;
+    // the front-center (newly arrived, preview) and back-right (exiting) are smaller.
+    const POS = {
+      bleft:  { x: 44.0, y: 66.0, scale: 1.00 },
+      front:  { x: 61.0, y: 75.0, scale: 0.78 },
+      bright: { x: 74.0, y: 60.0, scale: 0.78 },
+    };
+
+    const n = slides.length;
+    let current = 0;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    // Set by the swipe handler to block the ensuing click — otherwise swiping
+    // on the featured slide would ALSO navigate the user to /products.
+    let suppressNextClick = false;
+
+    // `calc(-100% + var(--bot-pad) * 1%)` shifts the element DOWN by its bottom-padding,
+    // so the real charger bottom (not the image rect) lands on the pedestal top.
+    const anchor = 'calc(-100% + var(--bot-pad, 0) * 1%)';
+
+    // Flow: a charger enters at front-center (pos +1, the newly-arrived preview),
+    // becomes the FEATURED slide at back-left (pos 0), then moves to back-right
+    // (pos -1, last stop), then exits. `current` refers to the featured slide so
+    // clicking a dot or tapping the featured charger always acts on the focused one.
+    function styleForPosition(pos: number): { cls: string; css: string } {
+      if (pos === 1) {
+        // Pre-feature — newly arrived on the front-center (shortest) pedestal
+        return {
+          cls: 'is-front',
+          css: `left:${POS.front.x}%;top:${POS.front.y}%;transform:translate(-50%,${anchor}) scale(${POS.front.scale});`,
+        };
+      }
+      if (pos === 0) {
+        // FEATURED — back-left (middle-height) pedestal, clickable
+        return {
+          cls: 'is-bleft',
+          css: `left:${POS.bleft.x}%;top:${POS.bleft.y}%;transform:translate(-50%,${anchor}) scale(${POS.bleft.scale});`,
+        };
+      }
+      if (pos === -1) {
+        // Post-feature — back-right (tallest) pedestal, exiting next
+        return {
+          cls: 'is-bright',
+          css: `left:${POS.bright.x}%;top:${POS.bright.y}%;transform:translate(-50%,${anchor}) scale(${POS.bright.scale});`,
+        };
+      }
+      // Pre-arrival (pos >= 2): park invisibly at front-center for a clean fade-in
+      if (pos >= 2) {
+        return {
+          cls: '',
+          css: `left:${POS.front.x}%;top:${POS.front.y}%;transform:translate(-50%,${anchor}) scale(0.3);`,
+        };
+      }
+      // Post-exit (pos <= -2): park invisibly at back-right so the exit is an in-place fade-out
+      return {
+        cls: '',
+        css: `left:${POS.bright.x}%;top:${POS.bright.y}%;transform:translate(-50%,${anchor}) scale(0.3);`,
+      };
+    }
+
+    function update() {
+      slides.forEach((el, i) => {
+        let pos = ((i - current) % n + n) % n;
+        if (pos > n / 2) pos -= n;
+        const { cls, css } = styleForPosition(pos);
+        el.className = 'cp-slide' + (cls ? ' ' + cls : '');
+        // Preserve the --bot-pad CSS variable (set per-slide from the template)
+        // when replacing inline styles. Without this, scale/anchor would use bot-pad=0
+        // and chargers would float above their pedestals.
+        const botPad = el.dataset.botPad ?? '0';
+        el.style.cssText = `--bot-pad:${botPad};${css}`;
+      });
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+      // Populate the in-arch caption from the CURRENT (featured) slide.
+      const active = slides[current];
+      if (acName) {
+        const name = active.dataset.label ?? '';
+        // Split on the LAST whitespace — everything before becomes the small
+        // uppercase PREFIX, the final segment becomes the HUGE green ACCENT
+        // (the poster headline). Creates dramatic type-size hierarchy.
+        const idx = name.lastIndexOf(' ');
+        if (idx > 0) {
+          const prefix = name.slice(0, idx);
+          const accent = name.slice(idx + 1);
+          acName.innerHTML =
+            `<span class="ac-name-prefix">${prefix}</span>` +
+            `<span class="ac-name-accent">${accent}</span>`;
+        } else {
+          acName.innerHTML = `<span class="ac-name-accent">${name}</span>`;
+        }
+      }
+      const pid = active.dataset.productId ?? '';
+      if (acCta && pid) acCta.setAttribute('href', `/products#${pid}`);
+      // Reveal the caption once first update has run (avoids initial flash
+      // of the static template content before JS syncs).
+      captionEl?.classList.add('is-ready');
+    }
+
+    function goTo(i: number) {
+      current = ((i % n) + n) % n;
+      update();
+    }
+
+    function startAuto() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => goTo(current + 1), 3600);
+    }
+
+    dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); startAuto(); }));
+
+    // ── Prev / next arrow buttons in the bottom HUD ──
+    root.querySelector<HTMLButtonElement>('#cp-prev')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goTo(current - 1);
+      startAuto();
+    });
+    root.querySelector<HTMLButtonElement>('#cp-next')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goTo(current + 1);
+      startAuto();
+    });
+
+    // ── Click the FEATURED charger (back-left pedestal) to jump to its product ──
+    //    Only the focused/featured slide is clickable. Matches the portal behavior.
+    root.addEventListener('click', (e) => {
+      const slide = (e.target as HTMLElement).closest<HTMLElement>('.cp-slide.is-bleft');
+      if (!slide) return;
+      // Skip if the click came from a swipe (see touch handlers below)
+      if (suppressNextClick) { suppressNextClick = false; return; }
+      const pid = slide.dataset.productId;
+      if (pid) window.location.href = `/products#${pid}`;
+    });
+
+    // ── Swipe handling (touch + mouse drag) ──
+    //    Swipe LEFT (finger/mouse moves right→left) = next slide
+    //    Swipe RIGHT (finger/mouse moves left→right) = previous slide
+    //    We track pointer movement continuously AND record the end position from
+    //    the touchend/mouseup event itself (not just the last move) so short/fast
+    //    swipes don't get missed in one direction.
+    const SWIPE_THRESHOLD = 30;   // horizontal px to commit a swipe
+    const SWIPE_CANCEL_Y  = 80;   // vertical px that cancels the gesture
+    let startX = 0, startY = 0;
+    let lastX = 0, lastY = 0;
+    let tracking = false;
+
+    function swipeStart(clientX: number, clientY: number) {
+      startX = lastX = clientX;
+      startY = lastY = clientY;
+      tracking = true;
+    }
+    function swipeMove(clientX: number, clientY: number) {
+      if (!tracking) return;
+      lastX = clientX;
+      lastY = clientY;
+    }
+    function swipeEnd(endX?: number, endY?: number) {
+      if (!tracking) return;
+      tracking = false;
+      // Prefer the final end event's position (most accurate) over the last move.
+      if (typeof endX === 'number') lastX = endX;
+      if (typeof endY === 'number') lastY = endY;
+      const dx = lastX - startX;
+      const dy = lastY - startY;
+      // Vertical cancel — only if the gesture is MORE vertical than horizontal
+      if (Math.abs(dy) > SWIPE_CANCEL_Y && Math.abs(dy) > Math.abs(dx) * 1.5) return;
+      // Too short — not a swipe
+      if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+      // Swipe committed — navigate and block the ensuing click-to-products
+      suppressNextClick = true;
+      if (dx > 0) goTo(current - 1); // dragged right → previous slide
+      else        goTo(current + 1); // dragged left → next slide
+      startAuto();
+    }
+
+    // ── Touch events (mobile + tablet) ──
+    root.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      if (t) swipeStart(t.clientX, t.clientY);
+    }, { passive: true });
+    root.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (t) swipeMove(t.clientX, t.clientY);
+    }, { passive: true });
+    root.addEventListener('touchend', (e) => {
+      // Use changedTouches[0] which has the FINAL position at lift-off.
+      const t = e.changedTouches[0];
+      swipeEnd(t?.clientX, t?.clientY);
+    }, { passive: true });
+    root.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+
+    // ── Mouse drag (desktop) ──
+    //    window-level move/up so a drag that ends outside the root still finishes.
+    root.addEventListener('mousedown', (e) => swipeStart(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => swipeMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup',   (e) => swipeEnd(e.clientX, e.clientY));
+
+    // Trackpad horizontal wheel scroll = swipe
+    let wheelDebounce: ReturnType<typeof setTimeout> | null = null;
+    let wheelAccum = 0;
+    root.addEventListener('wheel', (e) => {
+      // Only react to clearly-horizontal wheel motion (trackpad two-finger swipe)
+      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+      wheelAccum += e.deltaX;
+      if (wheelDebounce) clearTimeout(wheelDebounce);
+      wheelDebounce = setTimeout(() => {
+        if (Math.abs(wheelAccum) > 60) {
+          if (wheelAccum > 0) goTo(current + 1);
+          else                goTo(current - 1);
+          startAuto();
+        }
+        wheelAccum = 0;
+      }, 80);
+    }, { passive: true });
+
+    // Keyboard arrows
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft')  { goTo(current - 1); startAuto(); }
+      if (e.key === 'ArrowRight') { goTo(current + 1); startAuto(); }
+    });
+
+    update();
+    startAuto();
+  })();
+</script>

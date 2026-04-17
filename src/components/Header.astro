@@ -28,10 +28,8 @@ const navItems = [
     label: 'Products',
     href: '/products',
     sub: [
-      { label: 'Level 2',    href: '/products/level-2'  },
-      { label: 'DC Fast',    href: '/products/dc-fast'  },
-      { label: 'Software',   href: '/products/software' },
-      { label: 'Driver App', href: '/products/app'      },
+      { label: 'Level 2', href: '/products#panel-l2' },
+      { label: 'Level 3', href: '/products#panel-l3' },
     ],
   },
   {
@@ -52,7 +50,12 @@ const navItems = [
   {
     label: 'Testing',
     href: '/testing',
-    sub: [],
+    noNavigate: true,
+    sub: [
+      { label: 'Product Portal',   href: '/testing/product-portal'   },
+      { label: 'Carousel Pedestal', href: '/testing/carousel-pedestal' },
+      { label: 'Footer',           href: '/testing/footer'           },
+    ],
   },
   {
     label: 'How It Works',
@@ -101,6 +104,7 @@ const currentPath = Astro.url.pathname;
           <div class="nav-item-wrap" data-nav-item>
             <a
               href={item.href}
+              data-no-navigate={(item as any).noNavigate ? '' : undefined}
               class:list={[
                 'nav-trigger group relative flex flex-1 items-center justify-center px-2 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap w-full h-full no-underline',
                 currentPath.startsWith(item.href) ? 'is-active' : ''
@@ -340,6 +344,22 @@ const currentPath = Astro.url.pathname;
 
     // ── Hover to open ──
     btn.addEventListener('mouseenter', openItem);
+
+    // ── Click behaviour: items marked data-no-navigate don't go to their
+    //    href — instead they toggle the submenu open/closed. Used for parent
+    //    items that are just group headers (e.g. Testing).
+    if (btn.hasAttribute('data-no-navigate')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // prevent document-level closeAll from firing
+        if (drop.classList.contains('is-open')) {
+          btn.setAttribute('aria-expanded', 'false');
+          drop.classList.remove('is-open');
+        } else {
+          openItem();
+        }
+      });
+    }
 
     // Schedule close when leaving the battery cell …
     item.addEventListener('mouseleave', scheduleClose);

@@ -62,11 +62,15 @@ product page portal (whisp) animation.
 [NOT IN ANIM]   tellus/Evium---Wall-mount-AC-charger.png
                 Evium Wall-mount AC — dual-port white unit
 
+[IN ANIMATION]  tellus/evium-dcfc-30kw-single-port.png
+                Evium DCFC 30kW single-port — compact DC Fast kiosk
+                (testing page only — still [NOT IN ANIM] on /products hero)
+
 
 ── SUMMARY ────────────────────────────────────────────────────
 
-Total assets:        15
-In animation:         7
+Total assets:        16
+In animation:         8  (testing page: 16 | products hero: 7)
 Not yet in animation: 8
 
 
@@ -94,5 +98,6 @@ Level 3 (DC Fast Charging — commercial/highway, 15-90 min to 80%)
 13. tellus/evium-dc-fast-outdoor-kiosk-combo.png        — DC Fast Outdoor Station (30kW kiosk)
 14. tellus/Evium---DC-Fast-Charger-60kw.png             — Evium DC Fast 60kW dual-cable
 15. tellus/evium-dcfc-120kw.png                         — Evium DCFC 120kW large kiosk
+16. tellus/evium-dcfc-30kw-single-port.png              — Evium DCFC 30kW single-port (compact DC Fast)
 
-Totals: 9 Level 2, 6 Level 3
+Totals: 9 Level 2, 7 Level 3
