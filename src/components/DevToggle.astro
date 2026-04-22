@@ -99,6 +99,17 @@
   const label  = document.getElementById('dev-toggle-label')!;
   const html   = document.documentElement;
 
+  // Respect a persisted "hidden" choice set by the AI BS →
+  // "Toggle the toggle" nav item. If the key is present, this
+  // floating pill stays hidden across page navigations until the
+  // user explicitly toggles it back on. No key = visible (default).
+  try {
+    if (localStorage.getItem('ev-devswitch-hidden') === '1') {
+      toggle.style.display = 'none';
+      toggle.setAttribute('data-hidden', 'true');
+    }
+  } catch {}
+
   function applyTheme(theme: 'dark' | 'dark-light') {
     if (theme === 'dark-light') {
       html.setAttribute('data-theme', 'dark-light');

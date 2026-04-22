@@ -87,7 +87,12 @@ const portals = [
   ))}
 
   <div class="relative z-20 text-center select-none pointer-events-none">
-    <img src="/images/logo.webp" alt="Evium Charging" style="height:5rem;margin:0 auto;" />
+    <!-- Non-interactive logo: this component renders on the testing page
+         above live portal animations, so the logo stays decorative only
+         (clicking it would feel wrong next to the portal interactions).
+         Placeholder components without portal animations keep the home
+         link behavior — this one intentionally doesn't. -->
+    <img src="/images/logos/evium/logo.webp" alt="Evium Charging" style="height:5rem;margin:0 auto;" />
     <p style="margin-top:1.25rem;font-size:1.1rem;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:0.04em;">
       Electrifying the future. One property at a time.
     </p>

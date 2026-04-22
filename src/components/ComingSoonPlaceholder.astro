@@ -23,11 +23,20 @@
 
   <section class="relative flex min-h-screen items-center justify-center px-6">
     <div class="pointer-events-none select-none text-center relative">
-      <img
-        src="/images/logo.webp"
-        alt="Evium Charging"
-        class="hero-logo mx-auto h-[72px] w-auto md:h-[88px]"
-      />
+      <!-- Logo is a home link so users hitting a coming-soon page can
+           bail out. pointer-events:auto re-enables clicks just for the
+           anchor (the wrapper div kills them for everything else). -->
+      <a
+        href="/"
+        aria-label="Return to Evium Charging home"
+        class="home-logo-link inline-block cursor-pointer pointer-events-auto"
+      >
+        <img
+          src="/images/logos/evium/logo.webp"
+          alt="Evium Charging"
+          class="hero-logo mx-auto h-[72px] w-auto md:h-[88px]"
+        />
+      </a>
       <div
         class="hero-text absolute inset-0 flex flex-col items-center justify-center font-maven text-[2.25rem] md:text-[3rem] font-semibold uppercase text-white/90 leading-tight"
       >

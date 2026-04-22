@@ -1,7 +1,1490 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+
+/**
+ * How It Works — unified scrollable page.
+ *
+ * Sections:
+ *   1. OVERVIEW   — merged hero + overview block. Page entry point.
+ *                   Big type + 5 pillars + stats + section-jump chips.
+ *   2. PROCESS    — the 3-phase horizontal progress-bar showpiece.
+ *   3. FINANCING  — stacked-row model cards + revenue projection table.
+ *   4. REBATES    — "Backed by" logo strip + program detail cards.
+ *   5. FAQ        — sticky category rail + native accordion.
+ *   6. CTA        — final green call-to-action band.
+ *
+ * Palette: brand dark teal #1A2F3A (NOT #0d1a22 — that was too dark),
+ * with green #2DC856 accents and subtle gradients/washes per section
+ * to create visual rhythm without abandoning cohesion.
+ *
+ * Navbar dropdown deep-links to #overview / #process / #financing /
+ * #rebates / #faq. Every section[id] has scroll-margin-top: 80px so
+ * the fixed navbar doesn't eclipse the target on anchor jumps.
+ */
+
+const chips = [
+  { label: 'Our Process', id: 'process'   },
+  { label: 'Financing',   id: 'financing' },
+  { label: 'Rebates',     id: 'rebates'   },
+  { label: 'FAQ',         id: 'faq'       },
+];
+
+const pillars = [
+  { num: '01', label: 'Hardware',           desc: 'L2 + L3 selection, from 7.4 kW wall-mounts to 300 kW DC fast stations.' },
+  { num: '02', label: 'Software',           desc: 'OCPP 1.6+ platform with owner portal, driver app, remote diagnostics.' },
+  { num: '03', label: 'Installation',       desc: 'Permits, engineering, electrical, utility coordination — end to end.' },
+  { num: '04', label: 'Rebate processing',  desc: 'NEVI, CEC, NJBPU, CALeVIP — authored, filed, and kept compliant.' },
+  { num: '05', label: 'Maintenance + ops',  desc: '24/7 monitored NOC, firmware management, monthly revenue reporting.' },
+];
+
+// Phase icons — clean line-drawings that match the brand's technical feel.
+// Analyze = magnifier over a bar-chart, Plan = blueprint grid with a pin,
+// Implement = power bolt (Evium is EV charging — bolt is on-theme).
+const phaseIcons = {
+  analyze: `<path d="M3 20h18M6 14v3M10 10v7M14 12v5M18 8v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="14" cy="7" r="4" stroke="currentColor" stroke-width="1.6" fill="none"/><line x1="17" y1="10" x2="20.5" y2="13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
+  plan: `<rect x="3" y="4" width="18" height="16" rx="1.5" stroke="currentColor" stroke-width="1.6" fill="none"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="1.6"/><line x1="9" y1="9" x2="9" y2="20" stroke="currentColor" stroke-width="1.6"/><circle cx="15" cy="14.5" r="2.2" fill="currentColor"/><line x1="15" y1="14.5" x2="15" y2="20" stroke="currentColor" stroke-width="1.6"/>`,
+  implement: `<path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z" fill="currentColor" stroke="none"/>`,
+};
+
+const phases = [
+  {
+    num: '01',
+    label: 'Analyze',
+    icon: phaseIcons.analyze,
+    desc: "Evium analyzes your property's power capacity, parking layout, and tenant-or-driver demand to design optimal charging infrastructure. Every site is sized for real-world load balancing and maximum ROI.",
+    bullets: [
+      'Site walk-through and electrical audit',
+      'Load-study + utility coordination',
+      'Traffic + utilization modeling',
+    ],
+  },
+  {
+    num: '02',
+    label: 'Plan',
+    icon: phaseIcons.plan,
+    desc: "Our team handles permits, engineering drawings, hardware selection, rebate paperwork, and utility approvals end-to-end. You stay focused on your property; we future-proof the investment.",
+    bullets: [
+      'Permits + engineering drawings',
+      'Rebate &amp; NEVI / CEC / BPU applications',
+      'Hardware spec + configuration',
+    ],
+  },
+  {
+    num: '03',
+    label: 'Implement',
+    icon: phaseIcons.implement,
+    desc: "Professional installation plus ongoing, 24/7 monitored operations. Drivers get a reliable network, landlords get monthly reporting and a passive-income revenue share — all without lifting a finger.",
+    bullets: [
+      'Turnkey installation &amp; commissioning',
+      '24/7 remote monitoring &amp; support',
+      'Monthly revenue reporting',
+    ],
+  },
+];
+
+const models = [
+  {
+    num: '01', label: 'No-Cost', featured: true,
+    tagline: "Zero capital out, passive income in.",
+    desc: "Evium covers 100% of hardware, installation, permits, rebates, and 24/7 operations. Property gains a charging amenity and a passive revenue share without investing a dollar. This is our primary offer.",
+    specs: [['Capital', '$0'], ['Management', 'Evium'], ['Revenue', '~90 / 10 split']],
+  },
+  {
+    num: '02', label: 'Client Investment',
+    tagline: "Own it outright. Keep 100% of revenue.",
+    desc: "Owner finances and owns the full installation. Evium still assists with rebate processing so grant dollars offset capex. Best fit for owner-operators who want direct revenue capture.",
+    specs: [['Capital', 'Full capex'], ['Management', 'Owner'], ['Revenue', '100% to owner']],
+  },
+  {
+    num: '03', label: 'Hybrid',
+    tagline: "Blend the two. Custom balance.",
+    desc: "A negotiated mix of shared investment and shared revenue. Common when a landlord wants partial involvement or a ramp from no-cost into owned operations over time.",
+    specs: [['Capital', 'Negotiated'], ['Management', 'Shared'], ['Revenue', 'Custom']],
+  },
+  {
+    num: '04', label: 'Leasing',
+    tagline: "Equipment-as-a-service.",
+    desc: "Customizable monthly or annual leasing terms — the property uses Evium hardware without owning it. An alternative to capex or the no-cost revenue share when cash-flow predictability is the priority.",
+    specs: [['Capital', 'Monthly lease'], ['Management', 'Evium-supported'], ['Revenue', 'Host retains']],
+  },
+];
+
+const revenue = [
+  { tier: 'Low utilization',    month: '~$900',   fiveYear: '$54,000'  },
+  { tier: 'Medium utilization', month: '~$1,500', fiveYear: '$90,000'  },
+  { tier: 'High utilization',   month: '~$2,100', fiveYear: '$126,000' },
+];
+
+interface Program { logo: string; name: string; status: string; desc: string; }
+const programs: Program[] = [
+  {
+    logo: '/images/logos/government/nm-dot.png',
+    name: 'NEVI — National EV Infrastructure',
+    status: 'Awarded',
+    desc: "Evium operates as a qualified CPO under the $5B federal NEVI program. Awarded an NM NEVI site in partnership with EV Gateway; actively pursuing corridor sites in OR, TX, CT.",
+  },
+  {
+    logo: '/images/logos/government/cec.png',
+    name: 'REACH 2.0 Grant',
+    status: '$6M+ awarded',
+    desc: "California Energy Commission REACH 2.0 — one of CA's largest state-administered EV infrastructure funding programs.",
+  },
+  {
+    logo: '/images/logos/government/nj-bpu.png',
+    name: 'NJ EV Infrastructure Grant',
+    status: 'Awarded',
+    desc: "Major grant from the New Jersey Board of Public Utilities — enables zero-cost deployments for qualifying property owners across NJ.",
+  },
+  {
+    logo: '/images/logos/government/cal-evip.webp',
+    name: 'CALeVIP Rebates',
+    status: 'Active participant',
+    desc: "California per-charger rebates administered by CALSTART with CEC funding. Evium handles the full application + compliance stack.",
+  },
+];
+
+const backedLogos = [
+  '/images/logos/government/cec.png',
+  '/images/logos/government/cal-evip.webp',
+  '/images/logos/government/nj-bpu.png',
+  '/images/logos/government/nm-dot.png',
+  '/images/logos/government/colorado-cdot.png',
+  '/images/logos/industry/con-edison.webp',
+  '/images/logos/industry/ev-gateway.webp',
+];
+
+interface QA { q: string; a: string; }
+interface FaqGroup { title: string; items: QA[]; }
+const faqGroups: FaqGroup[] = [
+  {
+    title: 'The no-cost model',
+    items: [
+      {
+        q: 'How does "zero upfront cost" actually work?',
+        a: "Evium covers 100% of hardware, installation, permitting, and operations. We're the CPO and hold the utility + driver billing relationships. The property contributes the site and receives a negotiated share of revenue — typically ~10%.",
+      },
+      {
+        q: "What's a typical contract term?",
+        a: "5-year term with a 5-year renewal option (per our NEVI Proposal framework). Long enough to amortize the install; short enough you're never locked in for a generation.",
+      },
+    ],
+  },
+  {
+    title: 'Revenue + financial models',
+    items: [
+      {
+        q: 'What does a single charger earn?',
+        a: "Per Evium's NEVI revenue modeling for a 180 kW DCFC: ~$900/mo low utilization, ~$1,500/mo medium, ~$2,100/mo high. Over five years, $54K–$126K per charger. Most NEVI sites deploy 4-6 chargers.",
+      },
+      {
+        q: 'Can I invest in the buildout myself instead of going no-cost?',
+        a: "Yes — four models: No-Cost, Client Investment, Hybrid, Leasing. Right one depends on capex tolerance and operational burden you're willing to carry.",
+      },
+    ],
+  },
+  {
+    title: 'Operations + uptime',
+    items: [
+      {
+        q: "What does '24/7 monitored' actually mean?",
+        a: "Every charger speaks OCPP 1.6+ to the Evium EV Charging Network (EVCN). That feed reports status, per-port health, hardware faults, firmware, and live session data. Our 24/7 help desk triages remotely first, escalates to on-site only when remote fixes can't close the issue.",
+      },
+      {
+        q: 'Is the hardware vendor-locked?',
+        a: "No. OCPP 1.6+ is the industry standard — Siemens, MaxiCharger, EvoCharge, Tellus all plug into the same backend. You're never locked into one vendor's ecosystem.",
+      },
+    ],
+  },
+  {
+    title: 'Timelines + eligibility',
+    items: [
+      {
+        q: 'How long until the first session?',
+        a: "Multifamily or retail with existing service capacity: 3-6 months signed-to-live. NEVI corridor sites with federal compliance work: typically 6-12 months from award.",
+      },
+      {
+        q: "Does my property qualify?",
+        a: "Depends on electrical service capacity, parking geometry, and (for NEVI) proximity to a designated corridor. Drop your address into the homepage eligibility tool — we'll come back with a yes/no plus a preliminary site profile.",
+      },
+    ],
+  },
+];
 ---
+
 <Layout title="How It Works — Evium Charging">
-  <PagePlaceholder title="How It Works" />
+  <!-- ════════════════════════════════════════════════════════════════
+       1. OVERVIEW — merged hero + overview
+       ════════════════════════════════════════════════════════════════ -->
+  <section id="overview" class="hw-intro">
+    <div class="hw-grid-tx" aria-hidden="true"></div>
+    <div class="hw-intro-glow" aria-hidden="true"></div>
+
+    <div class="hw-container hw-intro-inner">
+      <p class="hw-eyebrow">
+        <span class="hw-eyebrow-dash"></span>
+        How It Works &nbsp;/&nbsp; Overview
+      </p>
+      <h1 class="hw-intro-title">
+        Hardware, software, installation,<br />
+        rebates, operations — <span class="hw-accent">all on us.</span>
+      </h1>
+      <p class="hw-intro-sub">
+        Evium delivers EV charging as a single managed service. The
+        property owner contributes the site. We handle everything
+        between the utility meter and the driver's car.
+      </p>
+
+      <!-- Two-column split: intro copy ⇆ numbered pillars. -->
+      <div class="hw-ov-grid">
+        <div class="hw-ov-copy">
+          <p class="hw-section-kicker">The approach</p>
+          <h2 class="hw-ov-h2">
+            Five pillars.<br />
+            <span class="hw-accent">One team.</span>
+          </h2>
+          <p class="hw-ov-lead">
+            Hardware alone doesn't run a charging network. The unlock
+            is that the same crew engineering the electrical load is
+            also writing the NEVI application, negotiating with
+            ConEdison, and staffing the 24/7 help desk when a station
+            stops talking at 2am on a Tuesday.
+          </p>
+          <p class="hw-ov-lead">
+            That's the service. Everything below is just how it gets delivered.
+          </p>
+        </div>
+
+        <ol class="hw-ov-pillars" role="list">
+          {pillars.map((p) => (
+            <li class="hw-ov-pillar">
+              <span class="hw-ov-pillar-num">{p.num}</span>
+              <div>
+                <p class="hw-ov-pillar-label">{p.label}</p>
+                <p class="hw-ov-pillar-desc">{p.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <!-- Stats strip -->
+      <ul class="hw-ov-stats" role="list">
+        <li><strong>500+</strong> chargers deployed</li>
+        <li><strong>$25M+</strong> public &amp; private funding</li>
+        <li><strong>18</strong> active states</li>
+        <li><strong>NEVI</strong> federal award</li>
+      </ul>
+
+      <!-- Section-jump chips (Process / Financing / Rebates / FAQ). -->
+      <nav class="hw-chips" aria-label="Jump to section">
+        <span class="hw-chips-label">Keep reading</span>
+        {chips.map((c) => (
+          <a href={`#${c.id}`} class="hw-chip">{c.label}</a>
+        ))}
+      </nav>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       2. OUR PROCESS — 3-phase showpiece
+         · Scroll-triggered cascade (phases slide in L→R)
+         · Animated progress bar with segment markers + shimmer
+         · Rightward-flowing diagonal-stripe pattern in the background
+         · Icon per phase + hover micro-interactions
+       ════════════════════════════════════════════════════════════════ -->
+  <section id="process" class="hw-process">
+    <!-- Layered backgrounds:
+         .hw-process-wash   : soft green radial from left-of-center
+         .hw-process-stream : subtle diagonal stripes animating rightward -->
+    <div class="hw-process-wash" aria-hidden="true"></div>
+    <div class="hw-process-stream" aria-hidden="true"></div>
+
+    <div class="hw-container">
+      <div class="hw-process-head">
+        <div>
+          <p class="hw-section-kicker">02 — Our Process</p>
+          <h2 class="hw-section-title hw-section-title--green">Three phases.</h2>
+        </div>
+        <p class="hw-process-kicker">
+          <span class="hw-kicker-dot"></span>
+          The process is simple
+        </p>
+      </div>
+
+      <!-- data-reveal is observed by an IntersectionObserver that adds
+           .is-active when the grid enters the viewport. That triggers
+           the cascade reveal + progress-bar fill + marker pulses. -->
+      <div class="hw-phases" data-reveal>
+        {phases.map((p, i) => (
+          <article class="hw-phase" style={`--col: ${i + 1};`}>
+            <div class="hw-phase-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" set:html={p.icon}></svg>
+            </div>
+            <p class="hw-phase-label">{p.label}</p>
+            <p class="hw-phase-num">{p.num}</p>
+            <div class="hw-phase-body">
+              <p class="hw-phase-desc" set:html={p.desc}></p>
+              <ul class="hw-phase-bullets">
+                {p.bullets.map((b) => <li set:html={b}></li>)}
+              </ul>
+            </div>
+          </article>
+        ))}
+
+        <!-- Progress bar with 4 segment markers. Fill animates in three
+             staged plateaus (0→33→66→100 %) synced with each phase's
+             reveal — gives the bar its own rhythm instead of a single
+             continuous fill. Markers scale in as the fill reaches them. -->
+        <div class="hw-phase-bar" aria-hidden="true">
+          <div class="hw-phase-bar-fill">
+            <span class="hw-phase-bar-shimmer"></span>
+          </div>
+          <span class="hw-phase-bar-marker" style="left: 0%;       --m-delay: 0s;"></span>
+          <span class="hw-phase-bar-marker" style="left: 33.333%;  --m-delay: 1.2s;"></span>
+          <span class="hw-phase-bar-marker" style="left: 66.666%;  --m-delay: 2.4s;"></span>
+          <span class="hw-phase-bar-marker" style="left: 100%;     --m-delay: 3.6s;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observer script — scoped to the Process section -->
+    <script is:inline>
+      (() => {
+        const section = document.getElementById('process');
+        if (!section) return;
+        const target = section.querySelector('[data-reveal]');
+        if (!target) return;
+
+        // Respect reduced-motion preference — show everything immediately.
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          target.classList.add('is-active');
+          return;
+        }
+
+        const obs = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              target.classList.add('is-active');
+              obs.disconnect();
+            }
+          }
+        }, { threshold: 0.22 });
+        obs.observe(target);
+      })();
+    </script>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       3. FINANCING — stacked rows + revenue table
+       ════════════════════════════════════════════════════════════════ -->
+  <section id="financing" class="hw-financing">
+    <div class="hw-container">
+      <div class="hw-fin-head">
+        <p class="hw-section-kicker">03 — Financing</p>
+        <h2 class="hw-section-title">
+          Four ways to<br />
+          <span class="hw-accent">finance the buildout.</span>
+        </h2>
+        <p class="hw-fin-sub">
+          No-cost, owned, hybrid, or leased. Each model includes Evium
+          rebate handling, compliance, and installation — the
+          financing just controls who puts what in and who takes what out.
+        </p>
+      </div>
+
+      <div class="hw-fin-rows">
+        {models.map((m) => (
+          <article class:list={['hw-fin-row', m.featured && 'hw-fin-row--featured']}>
+            <div class="hw-fin-row-lead">
+              <p class="hw-fin-row-num">{m.num}</p>
+              <h3 class="hw-fin-row-label">{m.label}</h3>
+              {m.featured && <span class="hw-fin-flag">Recommended</span>}
+              <p class="hw-fin-row-tagline">{m.tagline}</p>
+            </div>
+            <div class="hw-fin-row-body">
+              <p class="hw-fin-row-desc">{m.desc}</p>
+              <dl class="hw-fin-row-specs">
+                {m.specs.map(([k, v]) => (
+                  <div>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="hw-rev-wrap">
+        <p class="hw-rev-kicker">Revenue modeling · single 180 kW DC fast charger</p>
+        <div class="hw-rev-table">
+          <div class="hw-rev-row hw-rev-head">
+            <span>Utilization</span>
+            <span class="hw-rev-money">Per month</span>
+            <span class="hw-rev-money">Over 5 years</span>
+          </div>
+          {revenue.map((r) => (
+            <div class="hw-rev-row">
+              <span class="hw-rev-tier">{r.tier}</span>
+              <span class="hw-rev-money">{r.month}</span>
+              <span class="hw-rev-money">{r.fiveYear}</span>
+            </div>
+          ))}
+        </div>
+        <p class="hw-rev-note">
+          NEVI corridor sites typically deploy 4–6 chargers; these
+          figures multiply across the site.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       4. REBATES — light panel (palette break) with logos + programs
+       ════════════════════════════════════════════════════════════════ -->
+  <section id="rebates" class="hw-rebates">
+    <div class="hw-container">
+      <div class="hw-rb-head">
+        <p class="hw-section-kicker hw-section-kicker--on-light">04 — Rebates &amp; Incentives</p>
+        <h2 class="hw-rb-title">
+          We write the grants,<br />
+          <span class="hw-accent">so you don't have to.</span>
+        </h2>
+        <p class="hw-rb-sub">
+          Federal and state dollars fund most of what you see on the
+          ground today. Evium is a qualified CPO across these programs
+          — we identify what your site is eligible for, author the
+          application, and handle compliance for the full award period.
+        </p>
+      </div>
+
+      <div class="hw-rb-logos">
+        <p class="hw-rb-logos-label">
+          <span class="hw-rb-logos-bar"></span>
+          Backed by
+          <span class="hw-rb-logos-bar"></span>
+        </p>
+        <div class="hw-rb-logos-row">
+          {backedLogos.map((src) => (
+            <img src={src} alt="" class="hw-rb-logo" loading="lazy" />
+          ))}
+        </div>
+      </div>
+
+      <div class="hw-rb-programs">
+        {programs.map((p) => (
+          <article class="hw-rb-program">
+            <div class="hw-rb-program-logo-wrap">
+              <img src={p.logo} alt={`${p.name} logo`} class="hw-rb-program-logo" loading="lazy" />
+            </div>
+            <div>
+              <div class="hw-rb-program-head">
+                <h3 class="hw-rb-program-name">{p.name}</h3>
+                <span class="hw-rb-program-status">{p.status}</span>
+              </div>
+              <p class="hw-rb-program-desc">{p.desc}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       5. FAQ — sticky category rail + accordion
+       ════════════════════════════════════════════════════════════════ -->
+  <section id="faq" class="hw-faq">
+    <div class="hw-container hw-faq-container">
+      <aside class="hw-faq-rail">
+        <p class="hw-section-kicker">05 — FAQ</p>
+        <h2 class="hw-section-title">
+          Straight answers,<br />
+          <span class="hw-accent">no sales pitch.</span>
+        </h2>
+        <p class="hw-faq-rail-sub">
+          The questions property owners ask before signing. All numbers
+          come from Evium's own revenue modeling — not marketing
+          rounding.
+        </p>
+        <ul class="hw-faq-rail-nav" role="list">
+          {faqGroups.map((g, i) => (
+            <li>
+              <a href={`#faq-group-${i}`} class="hw-faq-rail-link">
+                <span class="hw-faq-rail-dot"></span>
+                {g.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      <div class="hw-faq-groups">
+        {faqGroups.map((g, i) => (
+          <section id={`faq-group-${i}`} class="hw-faq-group">
+            <h3 class="hw-faq-group-title">{g.title}</h3>
+            {g.items.map((item) => (
+              <details class="hw-faq-item">
+                <summary class="hw-faq-q">
+                  <span class="hw-faq-q-text">{item.q}</span>
+                  <span class="hw-faq-q-icon" aria-hidden="true">
+                    <svg viewBox="0 0 14 14">
+                      <path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </summary>
+                <p class="hw-faq-a">{item.a}</p>
+              </details>
+            ))}
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       6. FINAL CTA
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="hw-cta">
+    <div class="hw-container hw-cta-inner">
+      <h2 class="hw-cta-title">
+        Ready to put your property to work?
+      </h2>
+      <p class="hw-cta-sub">
+        Drop your address. We'll come back with a yes/no on eligibility
+        and a preliminary site profile — no obligation, no sales call.
+      </p>
+      <div class="hw-cta-btns">
+        <a href="/contact/quote" class="hw-cta-btn hw-cta-btn--primary">
+          Check eligibility
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="/contact/schedule" class="hw-cta-btn hw-cta-btn--ghost">
+          Schedule a call
+        </a>
+      </div>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  /* ══════════════════════════════════════════════════════════════════
+     GLOBAL TOKENS
+     Brand palette:
+       --teal-1 #1A2F3A : primary section bg (brand dark teal)
+       --teal-2 #21404f : secondary/lighter section bg (mid)
+       --teal-3 #2a4f61 : highlight layer
+       --teal-dark #0d1a22 : deeper accent (used sparingly, CTA & shadows)
+       #2DC856        : brand green
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-container {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 80px);
+    font-family: 'Maven Pro', sans-serif;
+    position: relative; z-index: 1;
+  }
+  .hw-accent { color: #2DC856; }
+
+  section[id] { scroll-margin-top: 80px; }
+
+  .hw-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin: 0 0 clamp(20px, 2.2vw, 28px);
+    font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+    font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(45, 200, 86, 0.95);
+  }
+  .hw-eyebrow-dash { display: inline-block; width: 28px; height: 1px; background: #2DC856; }
+
+  .hw-section-kicker {
+    margin: 0 0 14px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.28em;
+    text-transform: uppercase; color: rgba(45, 200, 86, 0.9);
+    font-variant-numeric: tabular-nums;
+  }
+  .hw-section-kicker--on-light { color: rgba(45, 200, 86, 1); }
+  .hw-section-title {
+    margin: 0 0 clamp(18px, 2vw, 26px);
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    font-weight: 900; line-height: 1; letter-spacing: -0.025em;
+    color: #fff; max-width: 24ch;
+  }
+  .hw-section-title--green { color: #2DC856; }
+
+  /* Subtle grid texture reusable in any dark section */
+  .hw-grid-tx {
+    position: absolute; inset: 0; opacity: 0.05;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
+    background-size: 52px 52px; pointer-events: none; z-index: 0;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     1. OVERVIEW (merged hero + overview)
+     Palette: brand teal gradient with a strong green glow upper-right
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-intro {
+    position: relative;
+    background: linear-gradient(170deg, #21404f 0%, #1A2F3A 55%, #16293a 100%);
+    color: #fff;
+    padding: clamp(140px, 18vh, 200px) 0 clamp(90px, 12vh, 140px);
+    overflow: hidden; isolation: isolate;
+  }
+  .hw-intro-glow {
+    position: absolute; top: -15%; right: -10%; width: 70%; height: 120%;
+    background: radial-gradient(ellipse at center, rgba(45,200,86,0.28) 0%, rgba(45,200,86,0) 60%);
+    filter: blur(30px); pointer-events: none; z-index: 0;
+  }
+  .hw-intro-inner { width: 100%; position: relative; z-index: 1; }
+
+  .hw-intro-title {
+    margin: 0 0 clamp(20px, 2.2vw, 28px);
+    font-size: clamp(2.3rem, 5.2vw, 4.6rem);
+    font-weight: 900; line-height: 0.98; letter-spacing: -0.028em;
+    color: #fff; max-width: 22ch;
+  }
+  .hw-intro-sub {
+    max-width: 58ch; margin: 0 0 clamp(56px, 7vw, 88px);
+    font-size: clamp(0.98rem, 1.18vw, 1.18rem);
+    font-weight: 500; line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  /* Overview 2-column: copy ⇆ pillars */
+  .hw-ov-grid {
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+    padding-top: clamp(28px, 3.5vw, 44px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .hw-ov-copy { max-width: 50ch; }
+  .hw-ov-h2 {
+    margin: 0 0 clamp(16px, 1.8vw, 22px);
+    font-size: clamp(1.8rem, 2.6vw, 2.4rem);
+    font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: #fff;
+  }
+  .hw-ov-lead {
+    margin: 0 0 16px;
+    font-size: clamp(0.95rem, 1.05vw, 1.05rem);
+    line-height: 1.65;
+    color: rgba(255,255,255,0.76);
+  }
+  .hw-ov-lead:last-child { margin-bottom: 0; }
+
+  .hw-ov-pillars {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column;
+  }
+  .hw-ov-pillar {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: clamp(18px, 2vw, 28px);
+    align-items: start;
+    padding: clamp(18px, 2.2vw, 26px) 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .hw-ov-pillar:first-child { border-top: 0; padding-top: 0; }
+  .hw-ov-pillar-num {
+    font-size: clamp(1.4rem, 1.8vw, 1.8rem);
+    font-weight: 900; font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em; color: #2DC856; line-height: 1;
+  }
+  .hw-ov-pillar-label {
+    margin: 0 0 4px;
+    font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+    font-weight: 800; letter-spacing: -0.01em; color: #fff;
+  }
+  .hw-ov-pillar-desc {
+    margin: 0;
+    font-size: clamp(0.88rem, 0.96vw, 0.96rem);
+    line-height: 1.55; color: rgba(255,255,255,0.66);
+    max-width: 54ch;
+  }
+
+  /* Stats strip — pipe-divided inline list */
+  .hw-ov-stats {
+    list-style: none; padding: 0;
+    margin: clamp(48px, 6vw, 72px) 0 clamp(44px, 5vw, 60px);
+    padding: clamp(24px, 3vw, 34px) 0;
+    display: flex; flex-wrap: wrap; gap: 18px 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: clamp(0.9rem, 1.02vw, 1.02rem);
+    color: rgba(255,255,255,0.7);
+  }
+  .hw-ov-stats li {
+    padding: 0 clamp(20px, 2.4vw, 32px);
+    border-right: 1px solid rgba(255,255,255,0.14);
+  }
+  .hw-ov-stats li:first-child { padding-left: 0; }
+  .hw-ov-stats li:last-child  { border-right: 0; }
+  .hw-ov-stats strong {
+    color: #2DC856; font-weight: 900; margin-right: 8px;
+    font-size: clamp(1.05rem, 1.25vw, 1.25rem);
+  }
+
+  /* Section-jump chips */
+  .hw-chips {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 10px 12px;
+  }
+  .hw-chips-label {
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.26em;
+    text-transform: uppercase; color: rgba(255,255,255,0.5);
+    margin-right: 6px;
+  }
+  .hw-chip {
+    display: inline-flex; align-items: center;
+    padding: 11px 22px;
+    font-size: clamp(0.76rem, 0.88vw, 0.88rem);
+    font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.88);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    text-decoration: none;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .hw-chip:hover {
+    color: #2DC856;
+    background: rgba(45,200,86,0.14);
+    border-color: rgba(45,200,86,0.55);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 900px) {
+    .hw-ov-grid { grid-template-columns: 1fr; gap: 44px; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     2. OUR PROCESS — feature section with cascade reveal + moving
+     background + animated progress bar. Designed to feel premium —
+     restrained motion, tight timing, deliberate hierarchy.
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-process {
+    position: relative;
+    background: linear-gradient(180deg, #1c3443 0%, #1A2F3A 100%);
+    color: #fff;
+    padding: clamp(100px, 13vh, 150px) 0 clamp(110px, 14vh, 160px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden; isolation: isolate;
+  }
+  .hw-process-wash {
+    position: absolute; top: -20%; left: 10%; width: 70%; height: 140%;
+    background: radial-gradient(ellipse at center, rgba(45,200,86,0.16) 0%, rgba(45,200,86,0) 60%);
+    filter: blur(40px); pointer-events: none; z-index: 0;
+  }
+  /* Thin diagonal lines slowly drifting rightward — gives the section
+     a sense of forward motion even when the user is stationary. */
+  .hw-process-stream {
+    position: absolute; inset: -20px;
+    background-image: repeating-linear-gradient(
+      -18deg,
+      transparent 0 60px,
+      rgba(45, 200, 86, 0.05) 60px 61px,
+      transparent 61px 120px,
+      rgba(255, 255, 255, 0.025) 120px 121px
+    );
+    animation: hw-stream 26s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.85;
+  }
+  @keyframes hw-stream {
+    from { background-position: 0 0; }
+    to   { background-position: 240px 0; }
+  }
+
+  .hw-process-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+    margin-bottom: clamp(48px, 6vw, 80px);
+    position: relative; z-index: 1;
+  }
+  .hw-process-kicker {
+    margin: 0;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: rgba(255,255,255,0.6);
+  }
+  .hw-kicker-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #2DC856; box-shadow: 0 0 10px rgba(45, 200, 86, 0.6);
+    animation: hw-dot-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes hw-dot-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(45, 200, 86, 0.6); }
+    50%      { box-shadow: 0 0 16px rgba(45, 200, 86, 1); }
+  }
+
+  /* ── Phase grid ────────────────────────────────────────────
+     display: contents on <article> lets each of its children
+     land as direct grid items. CSS vars set on the article
+     (--col) cascade to children for per-column reveal delays. */
+  .hw-phases {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto auto auto;
+    column-gap: clamp(24px, 3.5vw, 56px);
+    row-gap: clamp(18px, 2.2vw, 28px);
+    align-items: start;
+  }
+  .hw-phase { display: contents; }
+
+  /* Phase reveal cadence. Each phase lands 1.2 s AFTER the previous
+     one starts, so the user has time to absorb one step before the
+     next begins building. Within a phase, elements still stagger in
+     tightly (icon → label → num → body over ~0.28 s).
+       Phase 1 starts at 0.2 s, lands at ~1.1 s
+       Phase 2 starts at 1.4 s, lands at ~2.3 s
+       Phase 3 starts at 2.6 s, lands at ~3.5 s
+     Total runway: ~3.6 s. */
+  .hw-phase-icon,
+  .hw-phase-label,
+  .hw-phase-num,
+  .hw-phase-body {
+    opacity: 0;
+    transform: translateX(-28px);
+    transition:
+      opacity 0.9s cubic-bezier(0.22, 0.6, 0.22, 1),
+      transform 0.9s cubic-bezier(0.22, 0.6, 0.22, 1);
+    transition-delay: calc((var(--col, 1) - 1) * 1.2s + 0.2s);
+    will-change: opacity, transform;
+  }
+  /* Intra-phase stagger: icon → label (+0.08) → num (+0.16) → body (+0.28) */
+  .hw-phase-label { transition-delay: calc((var(--col, 1) - 1) * 1.2s + 0.28s); }
+  .hw-phase-num   { transition-delay: calc((var(--col, 1) - 1) * 1.2s + 0.36s); }
+  .hw-phase-body  { transition-delay: calc((var(--col, 1) - 1) * 1.2s + 0.48s); }
+
+  .hw-phases.is-active .hw-phase-icon,
+  .hw-phases.is-active .hw-phase-label,
+  .hw-phases.is-active .hw-phase-num,
+  .hw-phases.is-active .hw-phase-body {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Phase icon — ring + SVG, green tinted */
+  .hw-phase-icon {
+    grid-column: var(--col); grid-row: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(45, 200, 86, 0.1);
+    border: 1px solid rgba(45, 200, 86, 0.3);
+    color: #2DC856;
+    margin-bottom: 2px;
+    transition-property: opacity, transform, background, border-color, box-shadow;
+  }
+  .hw-phase-icon svg { width: 22px; height: 22px; display: block; }
+  .hw-phases.is-active .hw-phase-icon { box-shadow: 0 0 0 0 rgba(45,200,86,0); }
+  .hw-phase-icon:hover {
+    background: rgba(45, 200, 86, 0.18);
+    border-color: rgba(45, 200, 86, 0.55);
+    box-shadow: 0 0 24px rgba(45, 200, 86, 0.35);
+  }
+
+  .hw-phase-label {
+    grid-column: var(--col); grid-row: 2; margin: 0;
+    font-size: clamp(0.82rem, 0.95vw, 0.98rem);
+    font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,255,255,0.92);
+  }
+  .hw-phase-num {
+    grid-column: var(--col); grid-row: 3; margin: 0;
+    font-size: clamp(3rem, 5.8vw, 5.2rem);
+    font-weight: 900; line-height: 0.96; letter-spacing: -0.035em;
+    color: #fff; font-variant-numeric: tabular-nums;
+    /* Sutble green undertone on the big numbers */
+    background: linear-gradient(180deg, #ffffff 0%, #e7f7ec 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 20px rgba(45, 200, 86, 0);
+    transition:
+      opacity 0.9s cubic-bezier(0.22, 0.6, 0.22, 1),
+      transform 0.9s cubic-bezier(0.22, 0.6, 0.22, 1),
+      text-shadow 0.4s ease;
+  }
+
+  /* ── The progress bar ──────────────────────────────────────
+     Track (row 4) with 4 segment markers + a fill that animates
+     from 0 → 62% when .is-active. A shimmer sweeps across the
+     fill every ~4s. */
+  .hw-phase-bar {
+    grid-row: 4; grid-column: 1 / -1;
+    position: relative; height: 8px;
+    margin-top: clamp(16px, 2vw, 24px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.11) 100%);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+    /* Allow the fill to render with overflow clipped to the rounded shape */
+    overflow: hidden;
+  }
+  .hw-phase-bar-fill {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 0;
+    background: linear-gradient(
+      to right,
+      #2DC856 0%,
+      rgba(45,200,86,0.82) 55%,
+      rgba(45,200,86,0.4) 88%,
+      rgba(45,200,86,0.15) 100%
+    );
+    box-shadow:
+      0 0 14px rgba(45,200,86,0.6),
+      0 0 28px rgba(45,200,86,0.3);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  /* Staged fill: bar climbs to 33 → (short hold) → 66 → (short hold) →
+     100, landing each plateau as its phase's content finishes revealing.
+     Timings as % of the 3.8 s animation:
+       36% → 33%  at 1.37 s  (matches Phase 1 body appearing)
+       40% → 33%  hold
+       68% → 66%  at 2.58 s  (matches Phase 2 body appearing)
+       71% → 66%  hold
+      100% → 100% at 3.80 s  (matches Phase 3 body appearing) */
+  .hw-phases.is-active .hw-phase-bar-fill {
+    animation: hw-bar-stage 3.8s cubic-bezier(0.4, 0, 0.2, 1) 0s forwards;
+  }
+  @keyframes hw-bar-stage {
+    0%   { width: 0%;   }
+    36%  { width: 33%;  }
+    40%  { width: 33%;  }
+    68%  { width: 66%;  }
+    71%  { width: 66%;  }
+    100% { width: 100%; }
+  }
+
+  /* Shimmer highlight sweeping across the fill every few seconds.
+     Starts AFTER the staged fill completes (4.3 s delay) so it doesn't
+     compete with the fill animation. */
+  .hw-phase-bar-shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.25) 45%,
+      rgba(255,255,255,0.5) 50%,
+      rgba(255,255,255,0.25) 55%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  .hw-phases.is-active .hw-phase-bar-shimmer {
+    animation: hw-shimmer 3.8s ease-in-out infinite 4.3s;
+  }
+  @keyframes hw-shimmer {
+    0%        { transform: translateX(-100%); }
+    55%, 100% { transform: translateX(220%); }
+  }
+
+  /* Segment markers — scale in with a springy ease-out-back as the bar
+     reaches each position. Per-marker --m-delay values (0, 1.2, 2.4,
+     3.6 s) match the staged fill animation above. Each marker then
+     pulses its box-shadow continuously once it's fully in place. */
+  .hw-phase-bar-marker {
+    position: absolute; top: 50%;
+    width: 14px; height: 14px;
+    transform: translate(-50%, -50%) scale(0);
+    background: #1A2F3A;
+    border: 2px solid #2DC856;
+    border-radius: 50%;
+    z-index: 2;
+    transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--m-delay, 0s) + 0.2s),
+                box-shadow 0.4s ease;
+  }
+  .hw-phases.is-active .hw-phase-bar-marker {
+    transform: translate(-50%, -50%) scale(1);
+    animation: hw-marker-pulse 2.6s ease-out infinite;
+    animation-delay: calc(var(--m-delay, 0s) + 0.8s);
+  }
+  @keyframes hw-marker-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(45,200,86,0.55); }
+    70%  { box-shadow: 0 0 0 10px rgba(45,200,86,0); }
+    100% { box-shadow: 0 0 0 0 rgba(45,200,86,0); }
+  }
+
+  /* ── Body text under each phase ─────────────────────────── */
+  .hw-phase-body { grid-column: var(--col); grid-row: 5; }
+  .hw-phase-desc {
+    margin: clamp(18px, 2vw, 26px) 0 18px;
+    font-size: clamp(0.88rem, 0.98vw, 0.98rem);
+    line-height: 1.6; color: rgba(255,255,255,0.72);
+    max-width: 34ch;
+  }
+  .hw-phase-bullets {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .hw-phase-bullets li {
+    position: relative; padding-left: 22px;
+    font-size: clamp(0.82rem, 0.92vw, 0.92rem);
+    font-weight: 500; line-height: 1.45;
+    color: rgba(255,255,255,0.62);
+  }
+  .hw-phase-bullets li::before {
+    content: ''; position: absolute; left: 0; top: 0.55em;
+    width: 12px; height: 1.5px;
+    background: linear-gradient(90deg, #2DC856 0%, rgba(45,200,86,0.3) 100%);
+    border-radius: 999px;
+  }
+
+  /* ── Mobile: stack phases, drop the spanning progress bar and give
+     each phase its own mini-bar ────────────────────────────── */
+  @media (max-width: 820px) {
+    .hw-phases {
+      display: flex; flex-direction: column;
+      gap: clamp(40px, 5vw, 56px);
+    }
+    .hw-phase { display: flex; flex-direction: column; }
+    .hw-phase-icon,
+    .hw-phase-label,
+    .hw-phase-num,
+    .hw-phase-body {
+      grid-column: auto; grid-row: auto;
+      transform: translateX(0);
+    }
+    .hw-phases.is-active .hw-phase-icon,
+    .hw-phases.is-active .hw-phase-label,
+    .hw-phases.is-active .hw-phase-num,
+    .hw-phases.is-active .hw-phase-body { transform: translateX(0); }
+    .hw-phase-icon   { margin-bottom: 8px; order: 1; }
+    .hw-phase-label  { margin-bottom: 6px; order: 2; }
+    .hw-phase-num    { margin-bottom: 4px; order: 3; }
+    .hw-phase-body   { order: 5; }
+    .hw-phase-bar { display: none; }
+    /* Per-phase mini-bar on mobile */
+    .hw-phase::after {
+      content: ''; display: block; width: 56px; height: 3px;
+      margin: 12px 0 18px; background: #2DC856;
+      border-radius: 999px; opacity: 0.78;
+      order: 4;
+    }
+    .hw-phase-desc { max-width: 100%; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     3. FINANCING — lighter teal. Stacked horizontal rows.
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-financing {
+    position: relative;
+    background: linear-gradient(180deg, #1A2F3A 0%, #23414f 100%);
+    color: #fff;
+    padding: clamp(90px, 12vh, 140px) 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .hw-fin-head {
+    max-width: 58ch;
+    margin-bottom: clamp(48px, 6vw, 72px);
+  }
+  .hw-fin-sub {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.08vw, 1.08rem);
+    line-height: 1.6; color: rgba(255,255,255,0.75);
+  }
+
+  .hw-fin-rows { display: flex; flex-direction: column; gap: clamp(14px, 1.6vw, 20px); }
+  .hw-fin-row {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
+    padding: clamp(24px, 2.6vw, 34px);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+  .hw-fin-row:hover {
+    border-color: rgba(45,200,86,0.45);
+    background: rgba(255,255,255,0.07);
+    transform: translateY(-2px);
+  }
+  .hw-fin-row--featured {
+    background: linear-gradient(180deg, rgba(45,200,86,0.12) 0%, rgba(45,200,86,0.04) 100%);
+    border-color: rgba(45,200,86,0.5);
+  }
+  .hw-fin-row-lead {
+    position: relative;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .hw-fin-row-num {
+    margin: 0;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.3em;
+    text-transform: uppercase; color: #2DC856;
+    font-variant-numeric: tabular-nums;
+  }
+  .hw-fin-row-label {
+    margin: 0;
+    font-size: clamp(1.35rem, 1.7vw, 1.7rem);
+    font-weight: 900; letter-spacing: -0.018em; color: #fff;
+  }
+  .hw-fin-flag {
+    display: inline-block; width: fit-content;
+    font-size: 0.58rem; font-weight: 800; letter-spacing: 0.22em;
+    text-transform: uppercase; color: #0d1a22; background: #2DC856;
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .hw-fin-row-tagline {
+    margin: 0;
+    font-size: clamp(0.88rem, 0.98vw, 0.98rem);
+    font-weight: 600; color: #2DC856;
+  }
+
+  .hw-fin-row-body { display: flex; flex-direction: column; gap: 18px; }
+  .hw-fin-row-desc {
+    margin: 0;
+    font-size: clamp(0.88rem, 0.98vw, 0.98rem);
+    line-height: 1.6; color: rgba(255,255,255,0.72);
+  }
+  .hw-fin-row-specs {
+    list-style: none; padding: 0; margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px 24px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .hw-fin-row-specs > div { display: flex; flex-direction: column; gap: 2px; }
+  .hw-fin-row-specs dt {
+    font-size: 0.64rem; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: rgba(255,255,255,0.55);
+  }
+  .hw-fin-row-specs dd {
+    margin: 0;
+    font-size: 0.9rem; font-weight: 700; color: #fff;
+  }
+
+  @media (max-width: 720px) {
+    .hw-fin-row { grid-template-columns: 1fr; gap: 18px; }
+  }
+
+  /* Revenue table */
+  .hw-rev-wrap { margin-top: clamp(56px, 7vw, 80px); }
+  .hw-rev-kicker {
+    margin: 0 0 18px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: rgba(255,255,255,0.6);
+  }
+  .hw-rev-table {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px; overflow: hidden;
+    background: rgba(255,255,255,0.03);
+  }
+  .hw-rev-row {
+    display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px;
+    padding: 16px clamp(18px, 2vw, 26px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: clamp(0.84rem, 0.92vw, 0.92rem);
+    font-variant-numeric: tabular-nums;
+  }
+  .hw-rev-row:last-child { border-bottom: 0; }
+  .hw-rev-head {
+    background: rgba(255,255,255,0.07);
+    font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+  .hw-rev-tier { color: rgba(255,255,255,0.86); }
+  .hw-rev-money { color: #2DC856; font-weight: 700; }
+  .hw-rev-head .hw-rev-money { color: rgba(255,255,255,0.65); }
+  .hw-rev-note {
+    margin: 14px 0 0; font-size: 0.82rem;
+    color: rgba(255,255,255,0.55); font-style: italic;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     4. REBATES — LIGHT panel. Contrast break from dark sections.
+     White/cream background, dark text, logos render in original color.
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-rebates {
+    background: #eef1f5;
+    color: #1A2F3A;
+    padding: clamp(100px, 13vh, 150px) 0;
+    border-top: 4px solid #2DC856;
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .hw-rb-head {
+    max-width: 58ch;
+    margin-bottom: clamp(48px, 6vw, 72px);
+  }
+  .hw-rb-title {
+    margin: 0 0 clamp(18px, 2vw, 26px);
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    font-weight: 900; line-height: 1; letter-spacing: -0.025em;
+    color: #1A2F3A; max-width: 24ch;
+  }
+  .hw-rb-title .hw-accent { color: #2DC856; }
+  .hw-rb-sub {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.08vw, 1.08rem);
+    line-height: 1.6; color: rgba(26, 47, 58, 0.72);
+  }
+
+  .hw-rb-logos {
+    margin-bottom: clamp(56px, 7vw, 80px);
+    padding: clamp(32px, 4vw, 48px) 0;
+    border-top: 1px solid rgba(26, 47, 58, 0.15);
+    border-bottom: 1px solid rgba(26, 47, 58, 0.15);
+  }
+  .hw-rb-logos-label {
+    margin: 0 0 clamp(28px, 3vw, 40px);
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.28em;
+    text-transform: uppercase; color: rgba(26, 47, 58, 0.48);
+    text-align: center;
+  }
+  .hw-rb-logos-bar {
+    display: inline-block; width: 40px; height: 1px;
+    background: rgba(26, 47, 58, 0.28);
+  }
+  .hw-rb-logos-row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: clamp(32px, 4vw, 56px) clamp(28px, 3.5vw, 48px);
+  }
+  .hw-rb-logo {
+    max-height: 48px; width: auto;
+    filter: saturate(0.88);
+    opacity: 0.82;
+    transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  }
+  .hw-rb-logo:hover {
+    filter: saturate(1);
+    opacity: 1; transform: translateY(-2px);
+  }
+
+  .hw-rb-programs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: clamp(20px, 2.4vw, 28px);
+  }
+  .hw-rb-program {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: clamp(18px, 2vw, 26px);
+    background: #ffffff;
+    border: 1px solid rgba(26, 47, 58, 0.1);
+    border-radius: 14px;
+    padding: clamp(22px, 2.4vw, 30px);
+    box-shadow: 0 6px 20px rgba(26, 47, 58, 0.06);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .hw-rb-program:hover {
+    border-color: rgba(45,200,86,0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(26, 47, 58, 0.1);
+  }
+  .hw-rb-program-logo-wrap {
+    background: #f7f8fa; border-radius: 10px; padding: 14px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 72px;
+    border: 1px solid rgba(26, 47, 58, 0.06);
+  }
+  .hw-rb-program-logo { max-width: 100%; max-height: 56px; width: auto; height: auto; }
+  .hw-rb-program-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .hw-rb-program-name {
+    margin: 0;
+    font-size: clamp(0.98rem, 1.1vw, 1.1rem);
+    font-weight: 800; letter-spacing: -0.01em; color: #1A2F3A;
+    line-height: 1.25;
+  }
+  .hw-rb-program-status {
+    font-size: 0.58rem; font-weight: 800; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #2DC856;
+    border: 1px solid rgba(45,200,86,0.5);
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(45,200,86,0.08);
+    white-space: nowrap;
+  }
+  .hw-rb-program-desc {
+    margin: 0;
+    font-size: clamp(0.84rem, 0.92vw, 0.92rem);
+    line-height: 1.55; color: rgba(26, 47, 58, 0.72);
+  }
+  @media (max-width: 560px) {
+    .hw-rb-program { grid-template-columns: 1fr; }
+    .hw-rb-program-logo-wrap { min-height: 56px; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     5. FAQ — back to dark. Sticky rail + accordion.
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-faq {
+    background: linear-gradient(180deg, #1A2F3A 0%, #1c3443 100%);
+    color: #fff;
+    padding: clamp(90px, 12vh, 140px) 0;
+    border-top: 4px solid #2DC856;
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .hw-faq-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: clamp(40px, 5vw, 80px);
+    align-items: start;
+  }
+  .hw-faq-rail { position: sticky; top: 96px; }
+  .hw-faq-rail-sub {
+    margin: 0 0 clamp(24px, 3vw, 32px);
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    line-height: 1.55; color: rgba(255,255,255,0.68);
+    max-width: 34ch;
+  }
+  .hw-faq-rail-nav {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 4px;
+    border-left: 1px solid rgba(255,255,255,0.18);
+  }
+  .hw-faq-rail-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0 10px 18px;
+    font-size: 0.84rem; font-weight: 600;
+    color: rgba(255,255,255,0.68);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+  }
+  .hw-faq-rail-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: rgba(255,255,255,0.3);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hw-faq-rail-link:hover { color: #2DC856; border-left-color: #2DC856; }
+  .hw-faq-rail-link:hover .hw-faq-rail-dot {
+    background: #2DC856;
+    box-shadow: 0 0 8px rgba(45,200,86,0.6);
+  }
+
+  .hw-faq-groups { display: flex; flex-direction: column; gap: clamp(48px, 6vw, 72px); }
+  .hw-faq-group-title {
+    margin: 0 0 clamp(18px, 2.2vw, 24px);
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: #2DC856;
+    padding-bottom: clamp(10px, 1.2vw, 14px);
+    border-bottom: 1px solid rgba(45,200,86,0.3);
+  }
+  .hw-faq-item {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    transition: border-color 0.25s ease;
+  }
+  .hw-faq-item[open] { border-bottom-color: rgba(45,200,86,0.4); }
+  .hw-faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; padding: clamp(16px, 2vw, 22px) 0;
+    cursor: pointer; list-style: none;
+    font-size: clamp(0.95rem, 1.08vw, 1.08rem);
+    font-weight: 700; letter-spacing: -0.005em;
+    color: #fff;
+    transition: color 0.2s ease;
+  }
+  .hw-faq-q::-webkit-details-marker { display: none; }
+  .hw-faq-q:hover { color: #2DC856; }
+  .hw-faq-q-text { flex: 1 1 auto; line-height: 1.4; }
+  .hw-faq-q-icon {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22);
+    color: rgba(255,255,255,0.75);
+    transition: transform 0.3s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+  .hw-faq-q-icon svg { width: 12px; height: 12px; }
+  .hw-faq-q:hover .hw-faq-q-icon {
+    border-color: #2DC856; color: #2DC856;
+    background: rgba(45,200,86,0.12);
+  }
+  .hw-faq-item[open] .hw-faq-q-icon {
+    transform: rotate(180deg);
+    border-color: #2DC856; color: #2DC856;
+    background: rgba(45,200,86,0.12);
+  }
+  .hw-faq-a {
+    margin: 0;
+    padding: 0 40px clamp(20px, 2.4vw, 28px) 0;
+    font-size: clamp(0.9rem, 0.98vw, 0.98rem);
+    font-weight: 500; line-height: 1.65;
+    color: rgba(255,255,255,0.75);
+    max-width: 68ch;
+  }
+  @media (max-width: 900px) {
+    .hw-faq-container { grid-template-columns: 1fr; gap: 40px; }
+    .hw-faq-rail { position: static; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     6. FINAL CTA — deep teal with big green glow
+     ══════════════════════════════════════════════════════════════════ */
+  .hw-cta {
+    position: relative;
+    background: linear-gradient(180deg, #1c3443 0%, #142633 100%);
+    padding: clamp(100px, 13vh, 140px) 0;
+    overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .hw-cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, rgba(45,200,86,0.3) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hw-cta-inner {
+    position: relative; text-align: center;
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .hw-cta-title {
+    margin: 0 0 clamp(16px, 2vw, 22px);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900; line-height: 1.02; letter-spacing: -0.025em;
+    color: #fff;
+    max-width: 22ch; margin-inline: auto;
+  }
+  .hw-cta-sub {
+    margin: 0 auto clamp(32px, 4vw, 42px);
+    max-width: 52ch;
+    font-size: clamp(0.98rem, 1.12vw, 1.12rem);
+    font-weight: 500; line-height: 1.55; color: rgba(255,255,255,0.76);
+  }
+  .hw-cta-btns {
+    display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+  }
+  .hw-cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: clamp(13px, 1.3vw, 16px) clamp(24px, 2.4vw, 32px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.82rem, 0.92vw, 0.92rem); font-weight: 900;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    border-radius: 999px; text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .hw-cta-btn svg { width: 14px; height: 14px; }
+  .hw-cta-btn--primary {
+    color: #0d1a22; background: #2DC856;
+    box-shadow: 0 10px 26px rgba(45, 200, 86, 0.4);
+  }
+  .hw-cta-btn--primary:hover {
+    background: #36e464; transform: translateY(-1px);
+    box-shadow: 0 14px 32px rgba(45, 200, 86, 0.55);
+  }
+  .hw-cta-btn--ghost {
+    color: rgba(255,255,255,0.82); background: transparent;
+    border: 1px solid rgba(255,255,255,0.28);
+  }
+  .hw-cta-btn--ghost:hover {
+    color: #fff; background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  :global(html) { scroll-behavior: smooth; }
+</style>

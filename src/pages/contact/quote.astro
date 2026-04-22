@@ -1,7 +1,444 @@
 ---
+/**
+ * /contact/quote — "Does My Property Qualify?"
+ * ────────────────────────────────────────────
+ * Property-eligibility + quote-request form, adapted from the legacy
+ * site's form (see screenshot reference). Brought up to Evium's
+ * brand palette with dark cards, green-tracked labels, custom
+ * caret on selects, and inline validation styling.
+ *
+ * Replaces the previous <ComingSoonPlaceholder /> stub. Every page
+ * / component that links to `/contact/quote` (the 22 buttons
+ * scattered across solutions + products + match card + heroes)
+ * now lands here.
+ */
 import Layout from '../../layouts/Layout.astro';
-import ComingSoonPlaceholder from '../../components/ComingSoonPlaceholder.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+// All 50 US states + DC for the state dropdown. Same list shape
+// as the electrician-partners form for consistency.
+const US_STATES: Array<{ abbr: string; name: string }> = [
+  { abbr: 'AL', name: 'Alabama' }, { abbr: 'AK', name: 'Alaska' },
+  { abbr: 'AZ', name: 'Arizona' }, { abbr: 'AR', name: 'Arkansas' },
+  { abbr: 'CA', name: 'California' }, { abbr: 'CO', name: 'Colorado' },
+  { abbr: 'CT', name: 'Connecticut' }, { abbr: 'DE', name: 'Delaware' },
+  { abbr: 'FL', name: 'Florida' }, { abbr: 'GA', name: 'Georgia' },
+  { abbr: 'HI', name: 'Hawaii' }, { abbr: 'ID', name: 'Idaho' },
+  { abbr: 'IL', name: 'Illinois' }, { abbr: 'IN', name: 'Indiana' },
+  { abbr: 'IA', name: 'Iowa' }, { abbr: 'KS', name: 'Kansas' },
+  { abbr: 'KY', name: 'Kentucky' }, { abbr: 'LA', name: 'Louisiana' },
+  { abbr: 'ME', name: 'Maine' }, { abbr: 'MD', name: 'Maryland' },
+  { abbr: 'MA', name: 'Massachusetts' }, { abbr: 'MI', name: 'Michigan' },
+  { abbr: 'MN', name: 'Minnesota' }, { abbr: 'MS', name: 'Mississippi' },
+  { abbr: 'MO', name: 'Missouri' }, { abbr: 'MT', name: 'Montana' },
+  { abbr: 'NE', name: 'Nebraska' }, { abbr: 'NV', name: 'Nevada' },
+  { abbr: 'NH', name: 'New Hampshire' }, { abbr: 'NJ', name: 'New Jersey' },
+  { abbr: 'NM', name: 'New Mexico' }, { abbr: 'NY', name: 'New York' },
+  { abbr: 'NC', name: 'North Carolina' }, { abbr: 'ND', name: 'North Dakota' },
+  { abbr: 'OH', name: 'Ohio' }, { abbr: 'OK', name: 'Oklahoma' },
+  { abbr: 'OR', name: 'Oregon' }, { abbr: 'PA', name: 'Pennsylvania' },
+  { abbr: 'RI', name: 'Rhode Island' }, { abbr: 'SC', name: 'South Carolina' },
+  { abbr: 'SD', name: 'South Dakota' }, { abbr: 'TN', name: 'Tennessee' },
+  { abbr: 'TX', name: 'Texas' }, { abbr: 'UT', name: 'Utah' },
+  { abbr: 'VT', name: 'Vermont' }, { abbr: 'VA', name: 'Virginia' },
+  { abbr: 'WA', name: 'Washington' }, { abbr: 'WV', name: 'West Virginia' },
+  { abbr: 'WI', name: 'Wisconsin' }, { abbr: 'WY', name: 'Wyoming' },
+  { abbr: 'DC', name: 'District of Columbia' },
+];
+
+const PROPERTY_TYPES = [
+  'Multifamily / Apartments',
+  'Hotel / Hospitality',
+  'Retail / Shopping Center',
+  'Office / Commercial',
+  'Parking garage',
+  'Fleet depot',
+  'Highway / Travel center',
+  'Gas station',
+  'Medical / Healthcare',
+  'Municipal / Public',
+  'Other',
+];
+
+const CHARGER_QTY = [
+  '1 – 4',
+  '5 – 10',
+  '11 – 20',
+  '20+',
+  'Not sure yet',
+];
+
+const CHARGER_TYPES = [
+  'Level 2 (AC, 7–19 kW)',
+  'DC Fast (60–180 kW)',
+  'DC Fast (180 kW+ / NEVI-grade)',
+  'Mix of Level 2 + DC Fast',
+  'Not sure — recommend for me',
+];
+
+const ELECTRICITY = [
+  'Yes — existing service on site',
+  'Partial — need service upgrade',
+  'No — new service required',
+  "I'm not sure",
+];
 ---
-<Layout title="Get a Quote — Evium Charging">
-  <ComingSoonPlaceholder />
+
+<Layout
+  title="Request a Quote — Evium Charging"
+  description="Check your property's compatibility with Evium's EV charging solutions. Tell us about your site and we'll come back with a proposal."
+>
+
+  <!-- ═══════════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════════ -->
+  <section class="relative bg-evium-dark overflow-hidden pt-32 pb-20">
+    <!-- Background grid + corner glows matching the electrician-
+         partners hero's visual language so form-driven pages on
+         the site read as a coherent set. -->
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(rgba(45,200,86,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,1) 1px, transparent 1px); background-size: 60px 60px;" aria-hidden="true"></div>
+    <div class="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-evium-green opacity-[0.06] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute top-1/2 right-0 w-[380px] h-[380px] rounded-full bg-evium-green opacity-[0.04] blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 mb-5">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Site Qualification</span>
+        </div>
+        <h1 class="text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white mb-4">
+          Does my property<br/>
+          <span class="text-evium-green">qualify?</span>
+        </h1>
+        <p class="text-lg text-white/70 leading-relaxed max-w-2xl">
+          Check your property's compatibility with Evium's EV charging solutions. Tell us about your site and a specialist will return a tailored proposal within a few business days.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FORM SECTION
+       Two-column layout: site-details card on the left, form card
+       on the right. Form groups required site facts (address,
+       charger preferences, existing electrical service) so a rep
+       can build a real proposal from the submission alone.
+  ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark-light py-20 relative overflow-hidden">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[520px] rounded-full bg-evium-green opacity-[0.05] blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-[1fr_minmax(0,280px)] gap-8 lg:gap-10 items-start">
+
+        {/* Form card */}
+        <form
+          id="eq-quote-form"
+          class="bg-evium-dark border border-white/[0.08] rounded-2xl p-8 lg:p-10"
+          autocomplete="on"
+          novalidate
+        >
+          <div class="mb-8">
+            <h2 class="text-2xl font-black text-white mb-2">Enter the details</h2>
+            <p class="text-white/55 text-sm">Fields marked with <span class="text-evium-green">*</span> are required.</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-5">
+
+            <div class="eq-field">
+              <label for="eq-first-name" class="eq-label">First name <span class="eq-req">*</span></label>
+              <input id="eq-first-name" name="firstName" type="text" required class="eq-input" placeholder="Jamie" />
+            </div>
+            <div class="eq-field">
+              <label for="eq-last-name" class="eq-label">Last name <span class="eq-req">*</span></label>
+              <input id="eq-last-name" name="lastName" type="text" required class="eq-input" placeholder="Patel" />
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-email" class="eq-label">Email <span class="eq-req">*</span></label>
+              <input id="eq-email" name="email" type="email" required class="eq-input" placeholder="jamie@property.com" />
+            </div>
+            <div class="eq-field">
+              <label for="eq-phone" class="eq-label">Phone <span class="eq-req">*</span></label>
+              <input id="eq-phone" name="phone" type="tel" required class="eq-input" placeholder="(555) 123-4567" />
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-property-type" class="eq-label">Property type <span class="eq-req">*</span></label>
+              <select id="eq-property-type" name="propertyType" required class="eq-input eq-select">
+                <option value="">Select an option…</option>
+                {PROPERTY_TYPES.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div class="eq-field">
+              <span class="eq-label">New or existing <span class="eq-req">*</span></span>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <label class="eq-chip">
+                  <input type="radio" name="construction" value="new" required />
+                  <span>New construction</span>
+                </label>
+                <label class="eq-chip">
+                  <input type="radio" name="construction" value="existing" />
+                  <span>Existing</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-qty" class="eq-label">Desired charger quantity <span class="eq-req">*</span></label>
+              <select id="eq-qty" name="chargerQty" required class="eq-input eq-select">
+                <option value="">Select an option…</option>
+                {CHARGER_QTY.map((q) => <option value={q}>{q}</option>)}
+              </select>
+            </div>
+            <div class="eq-field">
+              <label for="eq-type" class="eq-label">Desired charger type <span class="eq-req">*</span></label>
+              <select id="eq-type" name="chargerType" required class="eq-input eq-select">
+                <option value="">Select an option…</option>
+                {CHARGER_TYPES.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-spaces" class="eq-label">Parking spaces on site <span class="eq-req">*</span></label>
+              <input id="eq-spaces" name="parkingSpaces" type="number" min="0" required class="eq-input" placeholder="e.g. 24" />
+            </div>
+            <div class="eq-field">
+              <label for="eq-electricity" class="eq-label">Does the site have electricity? <span class="eq-req">*</span></label>
+              <select id="eq-electricity" name="electricity" required class="eq-input eq-select">
+                <option value="">Select an option…</option>
+                {ELECTRICITY.map((e) => <option value={e}>{e}</option>)}
+              </select>
+            </div>
+
+            <div class="eq-field md:col-span-2">
+              <label for="eq-address" class="eq-label">Property address <span class="eq-req">*</span></label>
+              <input id="eq-address" name="address" type="text" required class="eq-input" placeholder="123 Main Street" />
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-city" class="eq-label">City <span class="eq-req">*</span></label>
+              <input id="eq-city" name="city" type="text" required class="eq-input" placeholder="Jersey City" />
+            </div>
+            <div class="eq-field">
+              <label for="eq-state" class="eq-label">State / region <span class="eq-req">*</span></label>
+              <select id="eq-state" name="state" required class="eq-input eq-select">
+                <option value="">Select state…</option>
+                {US_STATES.map((s) => <option value={s.abbr}>{s.name}</option>)}
+              </select>
+            </div>
+
+            <div class="eq-field">
+              <label for="eq-zip" class="eq-label">ZIP code <span class="eq-req">*</span></label>
+              <input id="eq-zip" name="zip" type="text" required class="eq-input" placeholder="07302" />
+            </div>
+            <div class="eq-field">
+              <label for="eq-country" class="eq-label">Country <span class="eq-opt">(optional)</span></label>
+              <input id="eq-country" name="country" type="text" class="eq-input" placeholder="United States" value="United States" />
+            </div>
+
+            <div class="eq-field md:col-span-2">
+              <label for="eq-notes" class="eq-label">Additional property details <span class="eq-opt">(optional)</span></label>
+              <textarea
+                id="eq-notes"
+                name="notes"
+                rows="4"
+                class="eq-input eq-textarea"
+                placeholder="Anything that'll help us size a proposal — tenant count, peak traffic, utility account status, deadlines, existing infrastructure, etc."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 mt-8 pt-6 border-t border-white/[0.06]">
+            <p class="text-white/40 text-xs max-w-md">
+              By submitting, you agree Evium may contact you about this request. No commitment — the proposal is free.
+            </p>
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-8 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200 whitespace-nowrap"
+            >
+              Request a Quote
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </button>
+          </div>
+
+          <div id="eq-status" class="hidden mt-6 px-5 py-4 rounded-lg text-sm" role="status" aria-live="polite"></div>
+        </form>
+
+        {/* Side panel — what-to-expect copy. Sticky on desktop so
+            it tracks the form while the user scrolls; stacks on
+            mobile. Deliberately lighter visual weight than the
+            form card so the form stays the focus. */}
+        <aside class="bg-evium-dark/60 border border-white/[0.08] rounded-2xl p-7 lg:self-start lg:sticky lg:top-28">
+          <div class="text-evium-green text-xs font-semibold tracking-widest uppercase mb-3">
+            What happens next
+          </div>
+          <ul class="space-y-4 text-sm text-white/70 leading-relaxed">
+            <li class="flex gap-3">
+              <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green text-xs font-black">1</span>
+              <span>Our team reviews your site details within <strong class="text-white font-semibold">2 business days</strong>.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green text-xs font-black">2</span>
+              <span>A specialist schedules a short call to confirm scope, timelines, and financial model.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green text-xs font-black">3</span>
+              <span>You get a tailored proposal — charger mix, install timeline, revenue modeling, and financial model (No-Cost, Investment, Hybrid, or Leasing) recommendation.</span>
+            </li>
+          </ul>
+          <div class="mt-6 pt-6 border-t border-white/[0.06]">
+            <p class="text-xs text-white/50 leading-relaxed">
+              Not the right place? Existing Evium customers with station support needs, call <a href="tel:+19499452000" class="text-evium-green font-semibold hover:text-white transition-colors">(949)&nbsp;945-2000</a>.
+            </p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter />
+
+  <style>
+    /* Label */
+    .eq-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+    }
+    .eq-req { color: #2DC856; margin-left: 2px; }
+    .eq-opt {
+      color: rgba(255, 255, 255, 0.38);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      margin-left: 4px;
+    }
+
+    /* Input base */
+    .eq-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #fff;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .eq-input::placeholder { color: rgba(255, 255, 255, 0.32); }
+    .eq-input:hover { border-color: rgba(255, 255, 255, 0.18); }
+    .eq-input:focus {
+      outline: none;
+      border-color: #2DC856;
+      background: rgba(45, 200, 86, 0.04);
+      box-shadow: 0 0 0 3px rgba(45, 200, 86, 0.15);
+    }
+    .eq-input:invalid:not(:placeholder-shown) {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .eq-textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.5;
+    }
+    .eq-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%232DC856' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+      cursor: pointer;
+    }
+
+    /* Radio chips — new/existing construction */
+    .eq-chip {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+      user-select: none;
+    }
+    .eq-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .eq-chip:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .eq-chip:has(input:checked) {
+      border-color: #2DC856;
+      background: rgba(45, 200, 86, 0.1);
+      color: #2DC856;
+    }
+
+    /* Status banner */
+    #eq-status.is-success {
+      display: block;
+      background: rgba(45, 200, 86, 0.08);
+      border: 1px solid rgba(45, 200, 86, 0.3);
+      color: #2DC856;
+    }
+    #eq-status.is-error {
+      display: block;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: rgb(252, 165, 165);
+    }
+  </style>
+
+  <script>
+    // Client-side validation + success state. No backend wired yet —
+    // swap the setTimeout for a POST to /api/quote-requests (or your
+    // form service of choice) when the endpoint exists.
+    (() => {
+      const form   = document.getElementById('eq-quote-form') as HTMLFormElement | null;
+      const status = document.getElementById('eq-status');
+      if (!form || !status) return;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        status.classList.remove('is-success', 'is-error');
+        status.classList.add('hidden');
+
+        setTimeout(() => {
+          status.classList.remove('hidden');
+          status.classList.add('is-success');
+          status.textContent =
+            "Thanks — your request is in. A specialist will review your details and reach out within 2 business days.";
+          (form.querySelector('button[type=submit]') as HTMLButtonElement).disabled = true;
+          (form.querySelector('button[type=submit]') as HTMLButtonElement).style.opacity = '0.5';
+          form.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 300);
+      });
+    })();
+  </script>
+
 </Layout>

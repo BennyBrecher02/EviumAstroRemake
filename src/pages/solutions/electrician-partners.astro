@@ -1,5 +1,48 @@
 ---
+/**
+ * /solutions/electrician-partners
+ * ───────────────────────────────
+ * Evium's recruiting page for licensed electrical contractors who
+ * want to join the installation partner network. Flow:
+ *   Hero → How It Works → Why Evium → Register form → Who does what → FAQ → Footer.
+ *
+ * The application form anchored at #register is the page's primary
+ * call to action; every CTA on the page scrolls to it.
+ */
 import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+// All 50 US states for the application form's state dropdown. Listed
+// with 2-letter abbr as value (compact for server-side handling) and
+// full name as display label.
+const US_STATES: Array<{ abbr: string; name: string }> = [
+  { abbr: 'AL', name: 'Alabama' }, { abbr: 'AK', name: 'Alaska' },
+  { abbr: 'AZ', name: 'Arizona' }, { abbr: 'AR', name: 'Arkansas' },
+  { abbr: 'CA', name: 'California' }, { abbr: 'CO', name: 'Colorado' },
+  { abbr: 'CT', name: 'Connecticut' }, { abbr: 'DE', name: 'Delaware' },
+  { abbr: 'FL', name: 'Florida' }, { abbr: 'GA', name: 'Georgia' },
+  { abbr: 'HI', name: 'Hawaii' }, { abbr: 'ID', name: 'Idaho' },
+  { abbr: 'IL', name: 'Illinois' }, { abbr: 'IN', name: 'Indiana' },
+  { abbr: 'IA', name: 'Iowa' }, { abbr: 'KS', name: 'Kansas' },
+  { abbr: 'KY', name: 'Kentucky' }, { abbr: 'LA', name: 'Louisiana' },
+  { abbr: 'ME', name: 'Maine' }, { abbr: 'MD', name: 'Maryland' },
+  { abbr: 'MA', name: 'Massachusetts' }, { abbr: 'MI', name: 'Michigan' },
+  { abbr: 'MN', name: 'Minnesota' }, { abbr: 'MS', name: 'Mississippi' },
+  { abbr: 'MO', name: 'Missouri' }, { abbr: 'MT', name: 'Montana' },
+  { abbr: 'NE', name: 'Nebraska' }, { abbr: 'NV', name: 'Nevada' },
+  { abbr: 'NH', name: 'New Hampshire' }, { abbr: 'NJ', name: 'New Jersey' },
+  { abbr: 'NM', name: 'New Mexico' }, { abbr: 'NY', name: 'New York' },
+  { abbr: 'NC', name: 'North Carolina' }, { abbr: 'ND', name: 'North Dakota' },
+  { abbr: 'OH', name: 'Ohio' }, { abbr: 'OK', name: 'Oklahoma' },
+  { abbr: 'OR', name: 'Oregon' }, { abbr: 'PA', name: 'Pennsylvania' },
+  { abbr: 'RI', name: 'Rhode Island' }, { abbr: 'SC', name: 'South Carolina' },
+  { abbr: 'SD', name: 'South Dakota' }, { abbr: 'TN', name: 'Tennessee' },
+  { abbr: 'TX', name: 'Texas' }, { abbr: 'UT', name: 'Utah' },
+  { abbr: 'VT', name: 'Vermont' }, { abbr: 'VA', name: 'Virginia' },
+  { abbr: 'WA', name: 'Washington' }, { abbr: 'WV', name: 'West Virginia' },
+  { abbr: 'WI', name: 'Wisconsin' }, { abbr: 'WY', name: 'Wyoming' },
+  { abbr: 'DC', name: 'District of Columbia' },
+];
 ---
 
 <Layout
@@ -36,7 +79,7 @@ import Layout from '../../layouts/Layout.astro';
 
         <div class="flex flex-col sm:flex-row gap-4">
           <a
-            href="/contact/quote"
+            href="#register"
             class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-8 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200"
           >
             Apply to Partner With Us
@@ -51,29 +94,253 @@ import Layout from '../../layouts/Layout.astro';
         </div>
       </div>
 
-      <!-- Stats bar -->
-      <div class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { number: "500+", label: "Chargers Installed" },
-          { number: "NEVI", label: "Federal Award Winner" },
-          { number: "$6MM+", label: "CEC Grant Recipient" },
-          { number: "NJ · NY · CA", label: "Active Markets" },
-        ].map((stat) => (
-          <div class="border border-white/10 rounded-xl p-5 bg-evium-dark-light/40">
-            <div class="text-3xl font-black text-evium-green mb-1">{stat.number}</div>
-            <div class="text-sm text-white/50 font-medium">{stat.label}</div>
-          </div>
-        ))}
+      {/* Hero stripped down to its essentials — eyebrow + headline +
+          subtitle + two CTAs. The old 4-stat grid (500+ / NEVI /
+          $6MM+ / NJ·NY·CA) and the Siemens + pipeline trust band
+          both lived here; removed entirely. Credibility numbers
+          can come back as a dedicated section later if we want —
+          for now the hero reads as a clean, confident intro. */}
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       HOW THE PARTNERSHIP WORKS  — now FIRST after the hero so
+       the process arc (Apply → Vet → Install → Repeat) sets
+       expectations before the value-prop cards explain why.
+       Includes a scroll-in animation that plays to the 1-2-3-4
+       structure: the connector line draws west-to-east, each step
+       circle fades + scales in on stagger, step numbers pulse on
+       arrival, and a subtle green comet runs along the connector
+       in a slow loop once everything has landed.
+  ═══════════════════════════════════════════════════ -->
+  <section id="how-it-works" class="hiw-section bg-evium-dark-light py-24 relative overflow-hidden" data-hiw>
+    {/* Background atmosphere — faint dot-grid + a soft green
+        radial centered behind the step row so the section reads as
+        a designed stage, not a flat slab of color. */}
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(rgba(45,200,86,1) 1px, transparent 1px); background-size: 28px 28px;" aria-hidden="true"></div>
+    <div class="absolute inset-x-0 top-[58%] -translate-y-1/2 flex justify-center pointer-events-none" aria-hidden="true">
+      <div class="w-[900px] h-[280px] rounded-full bg-evium-green opacity-[0.05] blur-3xl"></div>
+    </div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 mb-4 justify-center">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">The Process</span>
+          <div class="h-px w-8 bg-evium-green"></div>
+        </div>
+        <h2 class="text-4xl font-black text-white mb-4">How It Works.</h2>
+        <p class="text-white/60 text-lg">Simple process, clear expectations, ongoing relationship.</p>
+      </div>
+
+      <div class="relative">
+        {/* Connector line — on desktop, runs west-to-east between
+            the step circles. Pre-animation it has scaleX(0); when
+            .is-revealed lands on the section it draws in fully,
+            then a traveling green comet slides across it forever. */}
+        <div class="hiw-line" aria-hidden="true">
+          <div class="hiw-line-base"></div>
+          <div class="hiw-line-comet"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { step: "01", title: "Apply",            body: "Submit your contractor profile — license info, service area, crew size, and relevant experience." },
+            { step: "02", title: "Get Vetted",       body: "Evium reviews your credentials and conducts a brief introductory call to discuss scope and expectations." },
+            { step: "03", title: "Match & Install",  body: "Get matched to upcoming projects that fit your geography and capacity. Receive site specs and materials, mobilize, and coordinate commissioning with Evium." },
+            { step: "04", title: "Get Paid. Repeat.",body: "Milestone-based payment on completion. Strong performers get early access to the next pipeline." },
+          ].map((s, i) => (
+            <div class="hiw-step relative flex flex-col items-center text-center" style={`--hiw-i: ${i};`}>
+              <div class="hiw-circle relative z-10 w-20 h-20 rounded-full bg-evium-dark border-2 border-evium-green/40 flex items-center justify-center mb-5">
+                <span class="text-evium-green font-black text-lg">{s.step}</span>
+              </div>
+              <h3 class="text-white font-bold text-base mb-2">{s.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{s.body}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
+
+    <style>
+      /* Animated flare — ties into the 1-2-3-4 arc. The whole
+         section starts un-revealed; IntersectionObserver in the
+         script below adds `.is-revealed` when the section enters
+         the viewport, which triggers the choreography:
+           1. Each step's circle + text fades + scales in, staggered
+              via `--hiw-i` so the west-to-east reveal mirrors the
+              left-to-right process arc.
+           2. The connector line draws from left (scaleX 0→1).
+           3. Step circles get a one-off green glow pulse as they
+              arrive.
+           4. A thin green "comet" slides along the connector in a
+              slow infinite loop once the draw-in has finished —
+              the steady-state flourish. */
+      .hiw-section .hiw-step {
+        opacity: 0;
+        transform: translateY(18px) scale(0.94);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition-delay: calc(var(--hiw-i) * 140ms + 200ms);
+      }
+      .hiw-section.is-revealed .hiw-step {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      .hiw-circle {
+        transition:
+          box-shadow 0.4s ease,
+          border-color 0.4s ease;
+      }
+      .hiw-section.is-revealed .hiw-circle {
+        animation: hiw-circle-pulse 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        animation-delay: calc(var(--hiw-i) * 140ms + 400ms);
+      }
+      @keyframes hiw-circle-pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(45, 200, 86, 0.7); border-color: rgba(45, 200, 86, 0.4); }
+        40%  { box-shadow: 0 0 0 14px rgba(45, 200, 86, 0); border-color: rgba(45, 200, 86, 1); }
+        100% { box-shadow: 0 0 0 0 rgba(45, 200, 86, 0);   border-color: rgba(45, 200, 86, 0.4); }
+      }
+
+      /* Connector line — only visible on desktop (where the steps
+         actually sit in a single row). Lives on top of the step
+         circles' top edge (top:40 px to match the 80 px circle).
+         Starts / ends at 4 % from each edge of the grid (was
+         calc(10% + 2rem), which put the endpoints basically flush
+         with the outer two step circles' centers). 4 % leaves a
+         meaningful runway extending past step 01 on the left and
+         past step 04 on the right — the comet travels visibly out
+         beyond the numbered circles on both ends instead of
+         stopping at them. */
+      .hiw-line {
+        display: none;
+        position: absolute;
+        top: 40px;
+        left: 4%;
+        right: 4%;
+        height: 2px;
+        pointer-events: none;
+      }
+      @media (min-width: 1024px) {
+        .hiw-line { display: block; }
+      }
+      .hiw-line-base {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to right,
+          transparent 0%,
+          rgba(45, 200, 86, 0.35) 15%,
+          rgba(45, 200, 86, 0.35) 85%,
+          transparent 100%
+        );
+        transform-origin: left center;
+        transform: scaleX(0);
+        transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        transition-delay: 300ms;
+      }
+      .hiw-section.is-revealed .hiw-line-base {
+        transform: scaleX(1);
+      }
+      /* Traveling comet — starts hidden, reveals once the line has
+         drawn in, then sweeps between the line's ends on a slow
+         infinite ping-pong. Geometry revised:
+           • Previously the comet's keyframes went from `left:-140px`
+             (fully off-screen) to `left:calc(100%+20px)` (fully past
+             the right end). That over-travel caused the comet to
+             visibly "sever" at the line's right endpoint when it
+             hit the turnaround with its body half past the line.
+           • New keyframes: `0: left:0` → `100: left:calc(100%-140px)`.
+             At every point in the cycle the comet's full body sits
+             INSIDE the line's bounds (the comet is 140 px wide;
+             at each endpoint one of its edges is flush with a line
+             endpoint). Never severed, always complete.
+           • Easing switched from `linear` to `ease-in-out` so the
+             comet decelerates into each end and accelerates back
+             out — a soft swing feel instead of a hard bounce.
+           • Duration 7 s → 9 s per direction so the gentler motion
+             gets room to breathe. */
+      .hiw-line-comet {
+        position: absolute;
+        top: -1px;
+        left: 0;
+        width: 140px;
+        height: 4px;
+        border-radius: 4px;
+        background: linear-gradient(
+          to right,
+          rgba(45, 200, 86, 0) 0%,
+          rgba(45, 200, 86, 0.5) 40%,
+          rgba(45, 200, 86, 1) 50%,
+          rgba(45, 200, 86, 0.5) 60%,
+          rgba(45, 200, 86, 0) 100%
+        );
+        filter: drop-shadow(0 0 8px rgba(45, 200, 86, 0.6));
+        opacity: 0;
+      }
+      .hiw-section.is-revealed .hiw-line-comet {
+        opacity: 1;
+        animation: hiw-comet 9s ease-in-out infinite alternate;
+        animation-delay: 1.4s;
+      }
+      @keyframes hiw-comet {
+        0%   { left: 0;                     }
+        100% { left: calc(100% - 140px);    }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hiw-section .hiw-step,
+        .hiw-section.is-revealed .hiw-step {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+        .hiw-section.is-revealed .hiw-circle { animation: none; }
+        .hiw-section.is-revealed .hiw-line-base { transform: scaleX(1); transition: none; }
+        .hiw-section.is-revealed .hiw-line-comet { animation: none; opacity: 0; }
+      }
+    </style>
+
+    <script>
+      // Trigger the How-It-Works reveal choreography the first time
+      // the section comes meaningfully into view. Uses
+      // IntersectionObserver with threshold 0.3 so the animation
+      // doesn't fire before the user can actually see the steps.
+      (() => {
+        const section = document.querySelector<HTMLElement>('[data-hiw]');
+        if (!section) return;
+        if (!('IntersectionObserver' in window)) {
+          section.classList.add('is-revealed');
+          return;
+        }
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              section.classList.add('is-revealed');
+              io.disconnect();
+              break;
+            }
+          }
+        }, { threshold: 0.3, rootMargin: '0px 0px -10% 0px' });
+        io.observe(section);
+      })();
+    </script>
   </section>
 
 
   <!-- ═══════════════════════════════════════════════════
        WHY PARTNER WITH EVIUM
   ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark-light py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+  <section class="bg-evium-dark py-24 relative overflow-hidden">
+    {/* Background atmosphere — diagonal green corner glows (bottom-
+        right + top-left) + faint line-grid overlay matching the
+        hero's visual language, so the two dark sections read as
+        part of the same composition. */}
+    <div class="absolute inset-0 opacity-[0.04] pointer-events-none" style="background-image: linear-gradient(rgba(45,200,86,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,1) 1px, transparent 1px); background-size: 72px 72px;" aria-hidden="true"></div>
+    <div class="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-evium-green opacity-[0.06] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute -top-32 -left-32 w-[380px] h-[380px] rounded-full bg-evium-green opacity-[0.035] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
       <div class="max-w-2xl mb-14">
         <div class="inline-flex items-center gap-2 mb-4">
           <div class="h-px w-8 bg-evium-green"></div>
@@ -85,6 +352,8 @@ import Layout from '../../layouts/Layout.astro';
         </p>
       </div>
 
+      {/* All 6 original value-prop cards restored. Returns to the
+          2-row × 3-col layout from the live page. */}
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
@@ -129,71 +398,436 @@ import Layout from '../../layouts/Layout.astro';
   </section>
 
 
+  {/* "What You'll Work On" section deleted — its 6 scope bullets
+      overlapped with the Partner column of "Who does what" just
+      below. The scope copy's one distinctive line ("Evium works
+      across a range of property types and project sizes — from
+      single-unit residential add-ons to large multi-stall
+      commercial deployments") is preserved in the Partner column
+      intro sentence below. */}
+
+
+  {/* "Ideal Partner Profile" section deleted — its 5 numbered
+      criteria were repeating what the form's required fields
+      already enforce (license, commercial experience). A tighter
+      5-bullet eligibility checklist now lives *next to* the form
+      below so it does double-duty as gating + guidance at the
+      exact moment the user is deciding whether to apply. */}
+
+
+  {/* Original "How It Works" section was moved ABOVE "Why Partner"
+      (see top of file). The Who Does What section below used to
+      sit between the two. */}
+
+
+  {/* "Who does what" section moved — now lives AFTER the Register
+      form. Once a candidate has submitted their application, the
+      scope split is reference material rather than a decision
+      gate. */}
+
+
+  {/* "Scale & Growth / Trust" section deleted in full. Its two
+      key credibility beats — the Siemens Technology Partner badge
+      and the NEVI / RJ Block / Fleet / DCFC pipeline bullets —
+      now live in a compact trust band directly under the hero's
+      stats grid. The % progress bars were the lowest-information
+      density content on the page and were cut. */}
+
+
+  {/* FAQ relocated below the Register form so the form sits at the
+      page's natural decision moment — once users are in, the FAQ
+      becomes a reference for questions that surfaced while filling
+      out the application. */}
+
+
   <!-- ═══════════════════════════════════════════════════
-       WHAT YOU'LL WORK ON
+       REGISTER — partner application form
+       Ported + improved from the legacy Evium site's "Register Now"
+       module. Adds state dropdown (50 US + DC), license-number
+       field, structured experience + crew-size selects, and a
+       textarea for relevant background. Every page CTA that used to
+       route to /contact/quote now scrolls to #register so the form
+       is the single apply path.
   ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <div class="inline-flex items-center gap-2 mb-4">
-            <div class="h-px w-8 bg-evium-green"></div>
-            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Scope of Work</span>
+  <section id="register" class="bg-evium-dark-light py-24 relative overflow-hidden">
+    {/* Background atmosphere — a soft green radial directly behind
+        the form block pulls the eye toward the page's primary CTA. */}
+    <div class="absolute inset-0 opacity-[0.025] pointer-events-none" style="background-image: radial-gradient(rgba(45,200,86,1) 1px, transparent 1px); background-size: 32px 32px;" aria-hidden="true"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[780px] h-[560px] rounded-full bg-evium-green opacity-[0.055] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 mb-4 justify-center">
+          <div class="h-px w-8 bg-evium-green"></div>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Apply Now</span>
+          <div class="h-px w-8 bg-evium-green"></div>
+        </div>
+        <h2 class="text-4xl font-black text-white mb-4">Register as a Partner</h2>
+        <p class="text-white/60 text-lg">
+          Tell us about your operation. We'll review your credentials and reach out within a few business days.
+        </p>
+      </div>
+
+      {/* Two-column layout — eligibility checklist on the left,
+          form card on the right. On narrow widths the checklist
+          stacks above the form. `items-start` keeps each column
+          pinned to the row's top instead of stretching to match
+          the other; the sidebar gets its own `self-start` to stop
+          it growing taller than its content. */}
+      <div class="grid lg:grid-cols-[minmax(0,300px)_1fr] gap-8 lg:gap-10 items-start">
+
+        {/* Eligibility checklist — distilled from the old 5-point
+            "Ideal Partner Profile" section. Sticky on desktop so it
+            stays visible next to the form while the user scrolls
+            through fields. `lg:top-28` clears the fixed nav's
+            height + a small visual gap; `lg:max-h-[calc(100vh-9rem)]`
+            + `overflow-y-auto` guards against a short viewport
+            clipping the checklist's own content. `lg:self-start`
+            prevents the grid from stretching it vertically. Inner
+            padding bumped 6 → 7 to visually pair better with the
+            form card's p-8/lg:p-10. */}
+        <aside class="bg-evium-dark/70 border border-white/[0.08] rounded-2xl p-7 lg:self-start lg:sticky lg:top-28 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
+          <div class="text-evium-green text-xs font-semibold tracking-widest uppercase mb-3">
+            Who we work with
           </div>
-          <h2 class="text-4xl font-black text-white mb-5">Commercial-Grade Installations.</h2>
-          <p class="text-white/60 text-lg leading-relaxed mb-8">
-            Evium works across a range of property types and project sizes — from single-unit residential add-ons to large multi-stall commercial deployments. Partners are matched to projects that fit their capacity and geography.
+          <p class="text-white/60 text-sm leading-relaxed mb-5">
+            We don't need the biggest firm — we need the right one. If these fit, you're a strong candidate:
           </p>
-          <p class="text-white/60 leading-relaxed">
-            All installations follow Evium's engineering specifications and NEC code requirements. If you're new to EV-specific work, we provide installation guidelines and pre-project briefings.
-          </p>
+          <ul class="space-y-3">
+            {[
+              "State-licensed EC or master electrician",
+              "Commercial / multi-unit experience (3-phase, service upgrades)",
+              "Quality-first — work that holds up to inspection",
+              "Reliable scheduling, clear communication",
+              "Willing to learn the EV-specific nuances (we provide training)",
+            ].map((item) => (
+              <li class="flex items-start gap-3">
+                <svg class="w-4 h-4 text-evium-green mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white/75 text-sm leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+      {/* Form card — dark panel with thin white border, 2-col grid
+          on desktop, 1-col on mobile. All fields share common input
+          styling via the `ep-input` utility class defined in the
+          scoped <style> block below. */}
+      <form
+        id="ep-register-form"
+        class="bg-evium-dark border border-white/[0.08] rounded-2xl p-8 lg:p-10"
+        autocomplete="on"
+        novalidate
+      >
+        <div class="grid md:grid-cols-2 gap-5">
+
+          <div class="ep-field">
+            <label for="ep-first-name" class="ep-label">First name <span class="ep-req">*</span></label>
+            <input id="ep-first-name" name="firstName" type="text" required class="ep-input" placeholder="Jamie" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-last-name" class="ep-label">Last name <span class="ep-req">*</span></label>
+            <input id="ep-last-name" name="lastName" type="text" required class="ep-input" placeholder="Rodriguez" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-email" class="ep-label">Email <span class="ep-req">*</span></label>
+            <input id="ep-email" name="email" type="email" required class="ep-input" placeholder="jamie@electriccompany.com" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-phone" class="ep-label">Phone <span class="ep-req">*</span></label>
+            <input id="ep-phone" name="phone" type="tel" required class="ep-input" placeholder="(555) 123-4567" />
+          </div>
+
+          <div class="ep-field md:col-span-2">
+            <label for="ep-company" class="ep-label">
+              Company / operating as <span class="ep-opt">(optional)</span>
+            </label>
+            <input id="ep-company" name="company" type="text" class="ep-input" placeholder="Rodriguez Electrical LLC" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-state" class="ep-label">State of operation <span class="ep-req">*</span></label>
+            <select id="ep-state" name="state" required class="ep-input ep-select">
+              <option value="">Select state…</option>
+              {US_STATES.map((s) => (
+                <option value={s.abbr}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-city" class="ep-label">Primary city <span class="ep-req">*</span></label>
+            <input id="ep-city" name="city" type="text" required class="ep-input" placeholder="Newark" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-license" class="ep-label">Electrician license # <span class="ep-req">*</span></label>
+            <input id="ep-license" name="license" type="text" required class="ep-input" placeholder="NJ-EC-00012345" />
+          </div>
+
+          <div class="ep-field">
+            <label for="ep-experience" class="ep-label">Commercial experience <span class="ep-req">*</span></label>
+            <select id="ep-experience" name="experience" required class="ep-input ep-select">
+              <option value="">Select years…</option>
+              <option value="under-2">Less than 2 years</option>
+              <option value="2-5">2–5 years</option>
+              <option value="5-10">5–10 years</option>
+              <option value="10-plus">10+ years</option>
+            </select>
+          </div>
+
+          <div class="ep-field md:col-span-2">
+            <span class="ep-label">Crew size <span class="ep-opt">(optional)</span></span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+              {['Solo', '2–5', '6–15', '16+'].map((sz) => (
+                <label class="ep-chip">
+                  <input type="radio" name="crewSize" value={sz} />
+                  <span>{sz}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div class="ep-field md:col-span-2">
+            <label for="ep-professional" class="ep-label">
+              Notable projects, EVITP or other certifications, relevant background <span class="ep-req">*</span>
+            </label>
+            <textarea
+              id="ep-professional"
+              name="professional"
+              rows="5"
+              required
+              class="ep-input ep-textarea"
+              placeholder="Share the work that best represents your operation — biggest commercial install, 3-phase + panel upgrade experience, any EV-specific projects, EVITP certification, OSHA 10/30, etc. No need for a full résumé."
+            ></textarea>
+          </div>
+
         </div>
 
-        <div class="grid grid-cols-1 gap-3">
-          {[
-            { label: "Level 2 Wall-Mount Installs", detail: "Residential and commercial surface or flush-mount EVSE, 208/240V circuits" },
-            { label: "Commercial Pedestal Units", detail: "Dual-port pedestal chargers for parking lots, garages, and retail properties" },
-            { label: "DC Fast Charging (DCFC)", detail: "Outdoor DCFC installations including conduit runs, panel work, and commissioning" },
-            { label: "Panel Upgrades & Service Expansion", detail: "Load calculations, sub-panel additions, and main service upgrades to support EV load" },
-            { label: "Conduit & Trenching Runs", detail: "Long conduit pulls and underground trenching for multi-stall or remote charge point layouts" },
-            { label: "Multi-Stall Deployments", detail: "4–20+ charger commercial installations across parking structures, fleets, and apartment complexes" },
-          ].map((item) => (
-            <div class="flex gap-4 items-start bg-evium-dark-light/60 border border-white/[0.07] rounded-lg px-5 py-4">
-              <div class="mt-1 w-5 h-5 rounded-full bg-evium-green/15 flex items-center justify-center flex-shrink-0">
-                <div class="w-2 h-2 rounded-full bg-evium-green"></div>
-              </div>
-              <div>
-                <div class="text-white font-semibold text-sm mb-0.5">{item.label}</div>
-                <div class="text-white/50 text-sm leading-relaxed">{item.detail}</div>
-              </div>
-            </div>
-          ))}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 mt-8 pt-6 border-t border-white/[0.06]">
+          <p class="text-white/40 text-xs max-w-md">
+            By submitting, you agree Evium may contact you about partnership opportunities. We never share your information.
+          </p>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-8 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200 whitespace-nowrap"
+          >
+            Submit application
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </button>
         </div>
+
+        {/* Success / error banner populated by the submit handler below. */}
+        <div id="ep-register-status" class="hidden mt-6 px-5 py-4 rounded-lg text-sm" role="status" aria-live="polite"></div>
+      </form>
+
       </div>
     </div>
   </section>
 
+  <style>
+    /* Form styling — scoped to the register section so nothing else
+       on the page inherits it. Inputs lean into the page's existing
+       palette: dark field with a thin white border, green focus ring,
+       uppercase-tracked label matching the page's eyebrow style. */
+    .ep-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+    }
+    .ep-req { color: #2DC856; margin-left: 2px; }
+    .ep-opt {
+      color: rgba(255, 255, 255, 0.38);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      margin-left: 4px;
+    }
+    .ep-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #fff;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .ep-input::placeholder {
+      color: rgba(255, 255, 255, 0.32);
+    }
+    .ep-input:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    .ep-input:focus {
+      outline: none;
+      border-color: #2DC856;
+      background: rgba(45, 200, 86, 0.04);
+      box-shadow: 0 0 0 3px rgba(45, 200, 86, 0.15);
+    }
+    .ep-input:invalid:not(:placeholder-shown) {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .ep-textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+    /* Native select caret replaced with an inline SVG so the caret
+       stays on-brand (green) and aligns regardless of OS theme. */
+    .ep-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%232DC856' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+      cursor: pointer;
+    }
+
+    /* Crew-size radio chips — styled like pill toggles, visual
+       selection driven by :has-checked / :checked on the hidden
+       <input>. */
+    .ep-chip {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+      user-select: none;
+    }
+    .ep-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ep-chip:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .ep-chip:has(input:checked) {
+      border-color: #2DC856;
+      background: rgba(45, 200, 86, 0.1);
+      color: #2DC856;
+    }
+
+    /* Success / error status banner */
+    #ep-register-status.is-success {
+      display: block;
+      background: rgba(45, 200, 86, 0.08);
+      border: 1px solid rgba(45, 200, 86, 0.3);
+      color: #2DC856;
+    }
+    #ep-register-status.is-error {
+      display: block;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: rgb(252, 165, 165);
+    }
+  </style>
+
+  <script>
+    // Client-side handler — no backend yet. Validates required fields,
+    // surfaces a success banner, and disables the submit button once
+    // a submission succeeds so repeated clicks don't spam. When the
+    // real endpoint is wired up, swap the setTimeout for a fetch().
+    (() => {
+      const form   = document.getElementById('ep-register-form') as HTMLFormElement | null;
+      const status = document.getElementById('ep-register-status');
+      if (!form || !status) return;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Native check for the required fields — browsers handle per-
+        // field focus + messaging. With novalidate on the form we call
+        // reportValidity() ourselves.
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        // Optimistic UI: hide the banner while the pseudo-request runs.
+        status.classList.remove('is-success', 'is-error');
+        status.classList.add('hidden');
+
+        // Simulated success. Replace with a real POST when the
+        // backend endpoint (e.g. /api/partner-applications) is ready.
+        setTimeout(() => {
+          status.classList.remove('hidden');
+          status.classList.add('is-success');
+          status.textContent =
+            "Thanks — your application is in. We review submissions weekly and will reach out within a few business days.";
+          (form.querySelector('button[type=submit]') as HTMLButtonElement).disabled = true;
+          (form.querySelector('button[type=submit]') as HTMLButtonElement).style.opacity = '0.5';
+        }, 300);
+      });
+    })();
+  </script>
+
+
+  {/* Closing CTA section deleted — with the form now sitting near
+      the bottom of the page with its own eligibility checklist
+      and submit button, a second "Apply" CTA below would be pure
+      redundancy. The "Have questions before applying?" copy is
+      absorbed into a single quiet footer line at the end of the
+      register section above if needed in a future pass. */}
+
 
   <!-- ═══════════════════════════════════════════════════
-       DIVISION OF RESPONSIBILITY
+       WHO DOES WHAT  — moved BELOW the application form. The
+       scope split acts as post-submit reference rather than
+       pre-submit qualification criteria (the 5-bullet sidebar
+       next to the form already handles gating). Section bg
+       switched from dark-light → dark so it contrasts with the
+       Register section above (which is dark-light). Inner cards
+       consequently switch from dark → dark-light so they lift
+       off the section background. */
   ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark-light py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+  <section class="bg-evium-dark py-24 relative overflow-hidden">
+    {/* Background atmosphere — dropped the line-grid overlay here;
+        the two-column Evium-vs-Partner cards with their own borders
+        + icon headers are already visually busy, and a grid behind
+        them muddied the read. Kept the vertical center-line accent
+        (naturally separates the two columns) and the soft top-
+        center glow (pulls the eye down into the section). */}
+    <div class="hidden lg:block absolute inset-y-20 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-evium-green/25 to-transparent pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[520px] h-[220px] rounded-full bg-evium-green opacity-[0.05] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
       <div class="text-center max-w-2xl mx-auto mb-14">
         <div class="inline-flex items-center gap-2 mb-4 justify-center">
           <div class="h-px w-8 bg-evium-green"></div>
-          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Roles & Responsibilities</span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Who does what</span>
           <div class="h-px w-8 bg-evium-green"></div>
         </div>
-        <h2 class="text-4xl font-black text-white mb-4">Clear Division. No Ambiguity.</h2>
+        <h2 class="text-4xl font-black text-white mb-4">Clear division. No ambiguity.</h2>
         <p class="text-white/60 text-lg">
-          A successful partnership depends on each party knowing exactly what they own. Here's how we split it.
+          Evium works across a range of property types and project sizes — from single-unit add-ons to large multi-stall commercial deployments. A successful partnership depends on each party knowing exactly what they own. Here's the split.
         </p>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Evium column -->
-        <div class="bg-evium-dark rounded-2xl border border-white/[0.08] overflow-hidden">
+        <div class="bg-evium-dark-light rounded-2xl border border-white/[0.08] overflow-hidden">
           <div class="bg-evium-green/10 border-b border-evium-green/20 px-7 py-5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-evium-green/20 flex items-center justify-center">
               <svg class="w-4 h-4 text-evium-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
@@ -224,7 +858,7 @@ import Layout from '../../layouts/Layout.astro';
         </div>
 
         <!-- Partner column -->
-        <div class="bg-evium-dark rounded-2xl border border-white/[0.08] overflow-hidden">
+        <div class="bg-evium-dark-light rounded-2xl border border-white/[0.08] overflow-hidden">
           <div class="bg-white/[0.04] border-b border-white/10 px-7 py-5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
               <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
@@ -259,219 +893,22 @@ import Layout from '../../layouts/Layout.astro';
 
 
   <!-- ═══════════════════════════════════════════════════
-       IDEAL PARTNER PROFILE
+       FAQ  — moved BELOW the form so submitting the application
+       is the page's primary action; the FAQ becomes a reference
+       for questions that come up while filling out the form.
+       Section bg flipped dark → dark-light so it alternates with
+       the Who Does What (dark) above it and the footer (gradient)
+       below. Inner <details> cards flipped dark-light → dark to
+       keep contrast. */
   ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="grid lg:grid-cols-5 gap-14 items-start">
-        <div class="lg:col-span-2">
-          <div class="inline-flex items-center gap-2 mb-4">
-            <div class="h-px w-8 bg-evium-green"></div>
-            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Who We Work With</span>
-          </div>
-          <h2 class="text-4xl font-black text-white mb-5">The Ideal Partner.</h2>
-          <p class="text-white/60 leading-relaxed mb-6">
-            We don't need the biggest firm — we need the right one. Evium's best partners are quality-focused contractors who run tight crews, communicate clearly, and take pride in the work.
-          </p>
-          <p class="text-white/60 leading-relaxed">
-            If you're new to EV charging specifically, that's fine. The electrical fundamentals are what matter — we provide the EV-specific context and installation guidelines.
-          </p>
-        </div>
-
-        <div class="lg:col-span-3 space-y-4">
-          {[
-            {
-              title: "Licensed Electrical Contractor",
-              body: "State-licensed EC or master electrician with active credentials. You must be able to pull permits and sign off on work in your operating state.",
-            },
-            {
-              title: "Commercial or Multi-Unit Experience",
-              body: "Comfortable with 3-phase panels, service upgrades, commercial conduit runs, and coordinating with property managers or general contractors.",
-            },
-            {
-              title: "Quality-First Mindset",
-              body: "Evium's clients are commercial property owners and operators. Every job is a reflection of both your company and ours. We expect work that holds up to inspection — and to scrutiny.",
-            },
-            {
-              title: "Reliable Scheduling",
-              body: "When Evium commits an installation date to a client, that date needs to hold. Partners who show up on time and hit milestones get priority for the best projects.",
-            },
-            {
-              title: "Willing to Learn EV Specifics",
-              body: "EV charger installation isn't dramatically different from any other commercial electrical work — but there are nuances. We provide training materials, pre-project briefings, and spec sheets to get any qualified electrician up to speed.",
-            },
-          ].map((item, i) => (
-            <div class="flex gap-5 bg-evium-dark-light/50 border border-white/[0.07] rounded-xl px-6 py-5">
-              <div class="w-8 h-8 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green font-black text-sm flex-shrink-0 mt-0.5">
-                {i + 1}
-              </div>
-              <div>
-                <h3 class="text-white font-bold mb-1">{item.title}</h3>
-                <p class="text-white/55 text-sm leading-relaxed">{item.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- ═══════════════════════════════════════════════════
-       HOW THE PARTNERSHIP WORKS
-  ═══════════════════════════════════════════════════ -->
-  <section id="how-it-works" class="bg-evium-dark-light py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <div class="inline-flex items-center gap-2 mb-4 justify-center">
-          <div class="h-px w-8 bg-evium-green"></div>
-          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">The Process</span>
-          <div class="h-px w-8 bg-evium-green"></div>
-        </div>
-        <h2 class="text-4xl font-black text-white mb-4">How It Works.</h2>
-        <p class="text-white/60 text-lg">Simple process, clear expectations, ongoing relationship.</p>
-      </div>
-
-      <div class="relative">
-        <div class="hidden lg:block absolute top-10 left-[calc(10%+2rem)] right-[calc(10%+2rem)] h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {[
-            {
-              step: "01",
-              title: "Apply",
-              body: "Submit your contractor profile — license info, service area, crew size, and relevant experience.",
-            },
-            {
-              step: "02",
-              title: "Get Vetted",
-              body: "Evium reviews your credentials and conducts a brief introductory call to discuss scope and expectations.",
-            },
-            {
-              step: "03",
-              title: "Get Matched",
-              body: "Once approved, you're matched to upcoming projects in your geography that fit your capacity.",
-            },
-            {
-              step: "04",
-              title: "Install",
-              body: "Receive site specs and materials, mobilize, execute the installation, and coordinate commissioning with Evium.",
-            },
-            {
-              step: "05",
-              title: "Get Paid. Repeat.",
-              body: "Milestone-based payment on completion. Strong performers get early access to the next pipeline.",
-            },
-          ].map((s) => (
-            <div class="relative flex flex-col items-center text-center">
-              <div class="relative z-10 w-20 h-20 rounded-full bg-evium-dark border-2 border-evium-green/40 flex items-center justify-center mb-5">
-                <span class="text-evium-green font-black text-lg">{s.step}</span>
-              </div>
-              <h3 class="text-white font-bold text-base mb-2">{s.title}</h3>
-              <p class="text-white/50 text-sm leading-relaxed">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- ═══════════════════════════════════════════════════
-       SCALE & GROWTH / TRUST
-  ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark py-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <div class="inline-flex items-center gap-2 mb-4">
-            <div class="h-px w-8 bg-evium-green"></div>
-            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Growth Opportunity</span>
-          </div>
-          <h2 class="text-4xl font-black text-white mb-5">
-            Grow With a Company That's Already Moving.
-          </h2>
-          <p class="text-white/60 text-lg leading-relaxed mb-6">
-            Evium's installation volume is scaling rapidly. We've deployed 500+ chargers across the Northeast and California, with active NEVI program contracts and new market expansion underway. That means more projects, more consistently, across more geographies.
-          </p>
-          <p class="text-white/60 leading-relaxed mb-8">
-            Partners who deliver quality work and reliable scheduling are moved to priority status in our project queue. As Evium wins new contracts — multi-property portfolios, fleet programs, NEVI highway corridors — our top-tier installation partners are the first call we make.
-          </p>
-          <div class="flex flex-col gap-3">
-            {[
-              "Access to federal NEVI and state-funded projects",
-              "Multi-property portfolio deployments with RJ Block and similar partners",
-              "Fleet charging programs — high-volume, repeatable scope",
-              "Highway fast-charging (DCFC) corridors",
-            ].map((item) => (
-              <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                <span class="text-white/70 text-sm">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div class="space-y-5">
-          {[
-            {
-              label: "500+ Chargers Installed",
-              sub: "Operational across NJ, NY, and CA",
-              pct: 100,
-            },
-            {
-              label: "NEVI Federal Program",
-              sub: "Highway charging infrastructure award",
-              pct: 85,
-            },
-            {
-              label: "$6MM+ CEC Grant",
-              sub: "California Energy Commission recipient",
-              pct: 75,
-            },
-            {
-              label: "Multi-Property Portfolios",
-              sub: "Hundreds of units with RJ Block Properties",
-              pct: 90,
-            },
-          ].map((bar) => (
-            <div class="bg-evium-dark-light/60 border border-white/[0.07] rounded-xl p-5">
-              <div class="flex justify-between items-start mb-3">
-                <div>
-                  <div class="text-white font-semibold text-sm">{bar.label}</div>
-                  <div class="text-white/45 text-xs mt-0.5">{bar.sub}</div>
-                </div>
-                <div class="text-evium-green font-black text-sm">{bar.pct}%</div>
-              </div>
-              <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-evium-green rounded-full"
-                  style={`width: ${bar.pct}%`}
-                ></div>
-              </div>
-            </div>
-          ))}
-
-          <div class="bg-evium-green/10 border border-evium-green/25 rounded-xl p-5 flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-evium-green/20 flex items-center justify-center flex-shrink-0">
-              <svg class="w-5 h-5 text-evium-green" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-              <div class="text-white font-bold text-sm">Siemens Technology Partner</div>
-              <div class="text-white/50 text-xs mt-0.5">Certified installer network — commercial-grade hardware standard</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- ═══════════════════════════════════════════════════
-       FAQ
-  ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark-light py-24">
-    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+  <section class="bg-evium-dark-light py-24 relative overflow-hidden">
+    {/* Background atmosphere — a soft green glow high and centered
+        so the "Common Questions" heading sits inside a subtle
+        spotlight; faint dot-grid behind everything echoes the
+        How-It-Works section's texture language. */}
+    <div class="absolute inset-0 opacity-[0.025] pointer-events-none" style="background-image: radial-gradient(rgba(45,200,86,1) 1px, transparent 1px); background-size: 28px 28px;" aria-hidden="true"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[640px] h-[300px] rounded-full bg-evium-green opacity-[0.045] blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-14">
         <div class="inline-flex items-center gap-2 mb-4 justify-center">
           <div class="h-px w-8 bg-evium-green"></div>
@@ -522,49 +959,6 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </section>
 
-
-  <!-- ═══════════════════════════════════════════════════
-       CTA
-  ═══════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark py-24">
-    <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div class="w-96 h-96 rounded-full bg-evium-green opacity-[0.07] blur-3xl"></div>
-        </div>
-
-        <div class="relative">
-          <div class="inline-flex items-center gap-2 mb-6 justify-center">
-            <div class="h-px w-8 bg-evium-green"></div>
-            <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Join the Network</span>
-            <div class="h-px w-8 bg-evium-green"></div>
-          </div>
-
-          <h2 class="text-5xl font-black text-white mb-5 leading-tight">
-            Ready to Build Something<br />
-            <span class="text-evium-green">That Lasts?</span>
-          </h2>
-
-          <p class="text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
-            Evium is growing fast, and our installation partner network grows with us. If you run a quality electrical operation and want consistent commercial EV charging work, apply today. We'll be in touch.
-          </p>
-
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/contact/quote"
-              class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold px-10 py-4 rounded-lg text-base hover:bg-white transition-colors duration-200"
-            >
-              Apply to Become a Partner
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-          </div>
-
-          <p class="text-white/35 text-sm mt-6">
-            Have questions before applying? Email us at <span class="text-white/60">partners@eviumcharging.com</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <SiteFooter />
 
 </Layout>

@@ -1,0 +1,645 @@
+---
+/*
+ * Hero: Pedestal carousel — MOBILE variant of the /products hero.
+ *
+ * Structure:
+ *   Single full-width hero block, aspect-locked to the 1024×1536
+ *   backdrop image's 2:3 ratio. The image IS the hero background —
+ *   it fills the entire hero rect via absolute+inset:0+object-fit:
+ *   cover (aspect matches the hero, so no cropping). Chargers,
+ *   header text, caption, and HUD all overlay on top of the image
+ *   via absolute % coordinates.
+ *
+ * Fully decoupled from the desktop hero — all class names prefixed
+ * `.mcp-*` and all data is local to this component.
+ */
+
+const slides = [
+  { img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',                                      label: 'EvoCharge Level 2',                tag: 'L2', botPad: 2.29,  productId: 'evocharge-40a',        desc: 'Modern compact design, NEMA 4 rated for indoor/outdoor use with smart Wi-Fi charging.' },
+  { img: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png',         label: 'EvoCharge 32A L2',                 tag: 'L2', botPad: 5.55,  productId: 'evocharge-32a',        desc: 'Compact wall-mount EVSE with OCPP 1.6 networking, Wi-Fi, and optional 4G LTE + RFID.' },
+  { img: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',            label: 'EvoCharge 40A L2',                 tag: 'L2', botPad: 3.64,  productId: 'evocharge-40a',        desc: 'Modern compact design, NEMA 4 rated for indoor/outdoor use with smart Wi-Fi charging.' },
+  { img: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',                                    label: 'MaxiCharger DC 60–240kW',          tag: 'DC', botPad: 1.14,  productId: 'maxicharger-dc',       desc: 'Modular DC fast charger scalable in 20kW increments with 27" touchscreen and ISO 15118.' },
+  { img: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',                                    label: 'Siemens eMobility L2',             tag: 'L2', botPad: 0.00,  productId: 'versicharge-l2',       desc: 'Single-unit wall-mount configuration with RFID authentication and embedded metering.' },
+  { img: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',                                     label: 'Siemens VersiCharge AC',           tag: 'L2', botPad: 2.57,  productId: 'versicharge-ac',       desc: 'Third-generation smart charger with RFID, Wi-Fi, LTE/4G, and Energy Star 1.2 certification.' },
+  { img: '/images/chargers/siemens/Evium---Pedestal-Wallmount-AC-charger.png',                               label: 'VersiCharge AC Pedestal',          tag: 'L2', botPad: 2.29,  productId: 'versicharge-pedestal', desc: 'Dual-post pedestal configuration with cable retraction system for commercial deployments.' },
+  { img: '/images/chargers/tellus/tellus-dc-fast-180kw.png',                                                 label: 'Evium DC Fast 180kW',              tag: 'DC', botPad: 13.07, productId: 'evium-180kw',          desc: 'High-power compact charger with 1000VDC HPC system and liquid-cooled CCS cables.' },
+  { img: '/images/chargers/tellus/tellus-dc-fast-300kw.png',                                                 label: 'Evium DC Fast 300kW',              tag: 'DC', botPad: 5.14,  productId: 'evium-300kw',          desc: 'Ultra-high-power charger with 1000VDC HPC system and liquid-cooled 500A CCS cables.' },
+  { img: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png',                                    label: 'DC Fast Outdoor Station',          tag: 'DC', botPad: 18.86, productId: 'evium-outdoor',        desc: 'Compact outdoor kiosk-style DC fast charger for space-constrained commercial sites.' },
+  { img: '/images/chargers/tellus/evium-dcfc-120kw.png',                                                     label: 'Evium DCFC 120kW',                 tag: 'DC', botPad: 4.57,  productId: 'evium-120kw',          desc: 'Powerful compact dual-port DC charger with 1000VDC output and air-cooled modules.' },
+  { img: '/images/chargers/tellus/evium-dcfc-30kw-single-port.png',                                          label: 'Evium DC Fast 30kW',               tag: 'DC', botPad: 8.22,  productId: 'evium-30kw',           desc: 'A compact DC Fast Charger for tight spaces that need higher output.' },
+  { img: '/images/chargers/tellus/Evium---DC-Fast-Charger-60kw.png',                                         label: 'Evium DC Fast 60kW',               tag: 'DC', botPad: 6.29,  productId: 'evium-60kw',           desc: 'Compact all-in-one dual-port charger with air-cooled power modules and 10" touchscreen.' },
+  { img: '/images/chargers/tellus/Evium---AC-48A.png',                                                       label: 'Evium AC 12kW 50A',                tag: 'L2', botPad: 6.57,  productId: 'evium-ac-50a',         desc: 'Dual-port smart wall charger with 5" touchscreen, RFID, and OCPP 1.6J connectivity.' },
+  { img: '/images/chargers/tellus/Evium---IC80A-Gen-2.png',                                                  label: 'Evium AC 19.2kW 80A',              tag: 'L2', botPad: 9.71,  productId: 'evium-ac-80a',         desc: 'High-power single-port wall charger with 5" touchscreen and RFID for demanding applications.' },
+  { img: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',                                        label: 'Evium Wall-mount AC',              tag: 'L2', botPad: 8.29,  productId: 'evium-ac-80a',         desc: 'High-power single-port wall charger with 5" touchscreen and RFID for demanding applications.' },
+];
+
+/*
+ * Pedestal top-face CENTER coordinates as percentages of the backdrop
+ * image (1024 × 1536 = 2:3 portrait). These map to the three visual
+ * slots in the photo:
+ *   SLOT_BL = left pedestal  (middle-height)  → FEATURED slide
+ *   SLOT_FC = front pedestal (widest/lowest)  → newly-arrived preview
+ *   SLOT_BR = right pedestal (tallest)        → exiting slide
+ * Keep in sync with the matching `POS` object in the script block.
+ */
+const SLOT_BL = { x: 30.0, y: 59.0 };
+const SLOT_FC = { x: 57.0, y: 64.0 };
+const SLOT_BR = { x: 75.0, y: 54.0 };
+---
+
+<section class="mcp-root" aria-label="Charger Showcase">
+  {/*
+    Background image — fills the entire hero rect. The hero's
+    aspect-ratio exactly matches the image (1024/1536 = 2/3), so
+    object-fit: cover is a no-op here and nothing is cropped; the
+    image is the literal backdrop of every element below.
+  */}
+  <img
+    src="/images/mobile-friendly-pedestals.png"
+    alt=""
+    class="mcp-bg"
+    aria-hidden="true"
+    draggable="false"
+  />
+
+  {/* Header — overlaid on the sage wall area at the top of the image.
+      Eyebrow → title → short supporting line. The sub sits in the
+      space between the title and the arch/pedestals, balancing the
+      composition and adding context without crowding the photo. */}
+  <header class="mcp-header">
+    <p class="mcp-eyebrow">Evium Product Suite</p>
+    <h1 class="mcp-title">Built to power every property.</h1>
+    <p class="mcp-sub">Every power level, every property type.</p>
+  </header>
+
+  {/* Charger slides — positioned by JS into the three pedestal slots. */}
+  {slides.map((s, i) => (
+    <div
+      class="mcp-slide"
+      data-index={i}
+      data-label={s.label}
+      data-tag={s.tag}
+      data-desc={s.desc}
+      data-bot-pad={s.botPad}
+      data-product-id={s.productId}
+      style={`--bot-pad:${s.botPad};`}
+    >
+      <img src={s.img} alt={s.label} class="mcp-slide-img" draggable="false" />
+    </div>
+  ))}
+
+  {/* Spotlight glow on the featured pedestal's top surface. */}
+  <div class="mcp-spotlight" aria-hidden="true"></div>
+
+  {/* Caption — overlaid on the floor area at the bottom of the image. */}
+  <div class="mcp-caption" id="mcp-caption" aria-live="polite">
+    <div class="mcp-caption-head">
+      <svg class="mcp-bolt" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M13 2 L4 14 L11 14 L10 22 L20 10 L13 10 Z" fill="currentColor"/>
+      </svg>
+      <h2 class="mcp-name" id="mcp-name"></h2>
+    </div>
+    <a class="mcp-cta" href="#" id="mcp-cta">
+      <svg class="mcp-cta-arrow" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span>Full specifications</span>
+    </a>
+  </div>
+
+  {/*
+    HUD — single-row pill: prev arrow · segmented progress · next arrow.
+    Active bar widens and glows green (desktop-style), others are short
+    neutral pills. No label or counter text.
+  */}
+  <div class="mcp-hud">
+    <button class="mcp-nav mcp-prev" id="mcp-prev" aria-label="Previous charger">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>
+    <div class="mcp-progress" id="mcp-progress" role="tablist" aria-label="Jump to slide">
+      {slides.map((_, i) => (
+        <button class="mcp-seg" data-seg={i} aria-label={`Show slide ${i + 1}`}></button>
+      ))}
+    </div>
+    <button class="mcp-nav mcp-next" id="mcp-next" aria-label="Next charger">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>
+  </div>
+</section>
+
+<style>
+  /*
+   * Root — a single hero block that IS the image.
+   *  - Width: full viewport.
+   *  - Aspect: 1024/1536, matching the backdrop image, so the image
+   *    fills the box exactly and serves as the literal background.
+   *  - Overflow hidden so any absolutely-positioned content that
+   *    extends past the hero edges gets clipped cleanly.
+   *  - No outer coloured wrapper — the image IS the background.
+   */
+  .mcp-root {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1024 / 1536;
+    overflow: hidden;
+    font-family: 'Maven Pro', sans-serif;
+    isolation: isolate;
+  }
+
+  /* Background image — absolute-filled at 100% × 100%. */
+  .mcp-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /*
+   * Header — overlaid on the soft sage wall above the arch. The photo's
+   * top ~10% is relatively clean wall, so the title sits there with
+   * good contrast against the off-white arch below.
+   */
+  /* Header — moved DOWN a touch (top: 5%) so the eyebrow/title/sub
+     block reads as visually centered in the top quarter of the image
+     rather than hugging the very top edge. */
+  .mcp-header {
+    position: absolute;
+    left: 50%;
+    top: 5%;
+    transform: translateX(-50%);
+    width: 88%;
+    text-align: center;
+    color: #0d1a22;
+    z-index: 4;
+    pointer-events: none;
+  }
+  /* Eyebrow — flanked by a leading + trailing green dash for a
+     proper editorial caps treatment. Flex layout keeps the bars
+     centered with the text regardless of its width. */
+  .mcp-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: clamp(0.52rem, 2.1vw, 0.6rem);
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #2DC856;
+    line-height: 1;
+  }
+  .mcp-eyebrow::before,
+  .mcp-eyebrow::after {
+    content: '';
+    flex: 0 0 auto;
+    width: 22px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+  }
+  .mcp-title {
+    margin: 0;
+    font-size: clamp(1.15rem, 4.8vw, 1.55rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    color: #0d1a22;
+    text-wrap: balance;
+  }
+  /* Subtitle — quiet supporting line beneath the title. Key moves:
+     · weight 400 (down from 500) so the bold 900 title stays the
+       clear visual anchor and the sub reads as graceful body copy.
+     · opacity 0.72 (up from 0.62) — muted but still present/legible;
+       the previous value read as washed-out on the sage wall.
+     · line-height 1.5 + slightly looser tracking (0.02em) for the
+       magazine-deck feel without any decorative accents. */
+  .mcp-sub {
+    margin: 10px auto 0;
+    max-width: 30ch;
+    font-size: clamp(0.72rem, 2.7vw, 0.84rem);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: rgba(13, 26, 34, 0.72);
+    text-wrap: balance;
+  }
+
+  /* Charger slides — bottom-anchored to their pedestal's top face. */
+  .mcp-slide {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20%;
+    max-width: 160px;
+    min-width: 70px;
+    transform-origin: 50% calc(100% - var(--bot-pad, 0) * 1%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      left 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      top  0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s ease;
+    will-change: left, top, transform, opacity;
+    z-index: 5;
+  }
+  .mcp-slide.is-bleft {
+    z-index: 20;
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .mcp-slide.is-bleft .mcp-slide-img {
+    filter:
+      drop-shadow(0 14px 22px rgba(0, 0, 0, 0.28))
+      drop-shadow(0 0 26px rgba(45, 200, 86, 0.22))
+      drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+  }
+  .mcp-slide.is-bleft:hover .mcp-slide-img {
+    filter:
+      drop-shadow(0 16px 26px rgba(0, 0, 0, 0.32))
+      drop-shadow(0 0 36px rgba(45, 200, 86, 0.42))
+      drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+    transition: filter 0.18s ease;
+  }
+  .mcp-slide.is-front  { z-index: 10; opacity: 0.70; }
+  .mcp-slide.is-bright { z-index: 10; opacity: 0.70; }
+  .mcp-slide-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter:
+      drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22))
+      drop-shadow(0 3px 6px  rgba(0, 0, 0, 0.18));
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Spotlight — pulses on the featured pedestal. Coords track SLOT_BL. */
+  .mcp-spotlight {
+    position: absolute;
+    left: 30%;
+    top: 59%;
+    width: 22%;
+    height: 4.5%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(45, 200, 86, 0.45) 0%,
+      rgba(45, 200, 86, 0.2) 40%,
+      rgba(45, 200, 86, 0) 78%
+    );
+    filter: blur(5px);
+    animation: mcp-featured-pulse 3.2s ease-in-out infinite;
+  }
+  @keyframes mcp-featured-pulse {
+    0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+    50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.05); }
+  }
+
+  /*
+   * Caption — narrow column INSIDE the arch, beside the featured
+   * charger (same composition desktop uses). Pixel-measured arch:
+   *   · Left wall x=22%, right wall x=73%, walls vertical below y=25%
+   *   · Featured charger body x=20-40%, y=29-59%
+   *   · Back-right dimmed charger body x=67-83%, y=29-54%
+   * Caption sits at left:45%, top:32%, width:25% → right edge 70%.
+   *   · 5% breathing room from featured charger's right edge
+   *   · 3% padding from arch right wall (not "kissing" it)
+   *   · Visually centered between charger and arch right wall
+   *     (column center at 57.5%, mirrors the desktop caption's
+   *     right-of-featured positioning).
+   */
+  .mcp-caption {
+    position: absolute;
+    left: 42%;
+    top: 31%;
+    width: 30%;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.4s ease 0.05s, transform 0.4s ease 0.05s;
+    text-align: left;
+    pointer-events: none;
+  }
+  .mcp-caption.is-ready {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .mcp-caption-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .mcp-bolt {
+    width: 30px;
+    height: 30px;
+    color: #2DC856;
+    filter: drop-shadow(0 3px 10px rgba(45, 200, 86, 0.5));
+    flex-shrink: 0;
+  }
+  .mcp-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin: 0;
+    /* Base font tuned for the 30%-of-viewport caption column (~112px
+       on a 375px phone). Accent at 1.45em renders ~22px — proper
+       headline presence while still fitting long model strings. */
+    font-size: 1rem;
+    line-height: 1;
+    text-align: left;
+  }
+  :global(.mcp-name-prefix) {
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(13, 26, 34, 0.6);
+    line-height: 1.15;
+    display: block;
+    text-wrap: balance;
+  }
+  :global(.mcp-name-accent) {
+    font-size: 1.45em;
+    font-weight: 900;
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    color: #2DC856;
+    text-shadow: 0 2px 14px rgba(45, 200, 86, 0.28);
+    display: block;
+    word-break: break-word;
+  }
+  .mcp-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.47rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 7px 11px;
+    background: #2DC856;
+    border-radius: 999px;
+    box-shadow: 0 5px 16px rgba(45, 200, 86, 0.45);
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    pointer-events: auto;
+    margin-top: 5px;
+    white-space: nowrap;
+  }
+  .mcp-cta:hover {
+    background: #25b048;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(45, 200, 86, 0.5);
+  }
+  .mcp-cta-arrow {
+    width: 0.95em;
+    height: 0.95em;
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+  }
+  /* Arrow slides LEFT on hover — pointing at the featured charger. */
+  .mcp-cta:hover .mcp-cta-arrow { transform: translateX(-3px); }
+
+  /*
+   * HUD — single-row pill: prev arrow · segmented progress · next.
+   * Active segment widens and glows green (desktop-style); others are
+   * short neutral pills. No label/counter text.
+   */
+  .mcp-hud {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: rgba(10, 18, 22, 0.76);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 2px solid rgba(45, 200, 86, 0.55);
+    border-radius: 999px;
+    max-width: calc(100% - 32px);
+    z-index: 30;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Arrow buttons — original transparent style. No box, no border,
+     just the icon with generous padding and a green hover tint. */
+  .mcp-nav {
+    background: transparent;
+    border: 0;
+    padding: 4px 6px;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.78);
+    transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    border-radius: 999px;
+    line-height: 0;
+    flex-shrink: 0;
+  }
+  .mcp-nav svg { width: 16px; height: 16px; display: block; }
+  .mcp-nav:hover { color: #2DC856; background: rgba(45, 200, 86, 0.12); }
+  .mcp-prev:hover { transform: translateX(-2px); }
+  .mcp-next:hover { transform: translateX(2px); }
+  .mcp-nav:active { transform: scale(0.94); }
+
+  /*
+   * Progress indicators — desktop behavior: active is the LONGEST bar
+   * (22px wide, bright green with soft glow); inactive bars are 8px
+   * neutral pills. Single-line row (no wrap) to match desktop; a
+   * shortened inter-bar gap keeps all 16 segments + the active bar
+   * comfortably within the HUD's width on a 320px viewport upward.
+   */
+  .mcp-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .mcp-seg {
+    flex-shrink: 0;
+    width: 8px;
+    height: 3px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.22);
+    cursor: pointer;
+    transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.22s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mcp-seg:hover { background: rgba(255, 255, 255, 0.4); }
+  .mcp-seg.is-active {
+    width: 22px;
+    background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.55);
+  }
+</style>
+
+<script>
+  (() => {
+    const root = document.querySelector<HTMLElement>('.mcp-root');
+    if (!root) return;
+    const slides    = Array.from(root.querySelectorAll<HTMLElement>('.mcp-slide'));
+    const segs      = Array.from(root.querySelectorAll<HTMLButtonElement>('.mcp-seg'));
+    const captionEl = root.querySelector<HTMLElement>('#mcp-caption');
+    const acName    = root.querySelector<HTMLElement>('#mcp-name');
+    const acCta     = root.querySelector<HTMLAnchorElement>('#mcp-cta');
+    if (!slides.length) return;
+
+    // Keep in sync with SLOT_BL / SLOT_FC / SLOT_BR in the frontmatter.
+    const POS = {
+      bleft:  { x: 30.0, y: 59.0, scale: 1.00 },
+      front:  { x: 57.0, y: 64.0, scale: 0.82 },
+      bright: { x: 75.0, y: 54.0, scale: 0.82 },
+    };
+
+    const n = slides.length;
+    let current = 0;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let suppressNextClick = false;
+
+    const anchor = 'calc(-100% + var(--bot-pad, 0) * 1%)';
+
+    function styleForPosition(pos: number): { cls: string; css: string } {
+      if (pos === 1) {
+        return {
+          cls: 'is-front',
+          css: `left:${POS.front.x}%;top:${POS.front.y}%;transform:translate(-50%,${anchor}) scale(${POS.front.scale});`,
+        };
+      }
+      if (pos === 0) {
+        return {
+          cls: 'is-bleft',
+          css: `left:${POS.bleft.x}%;top:${POS.bleft.y}%;transform:translate(-50%,${anchor}) scale(${POS.bleft.scale});`,
+        };
+      }
+      if (pos === -1) {
+        return {
+          cls: 'is-bright',
+          css: `left:${POS.bright.x}%;top:${POS.bright.y}%;transform:translate(-50%,${anchor}) scale(${POS.bright.scale});`,
+        };
+      }
+      if (pos >= 2) {
+        return { cls: '', css: `left:${POS.front.x}%;top:${POS.front.y}%;transform:translate(-50%,${anchor}) scale(0.3);` };
+      }
+      return { cls: '', css: `left:${POS.bright.x}%;top:${POS.bright.y}%;transform:translate(-50%,${anchor}) scale(0.3);` };
+    }
+
+    function update() {
+      slides.forEach((el, i) => {
+        let pos = ((i - current) % n + n) % n;
+        if (pos > n / 2) pos -= n;
+        const { cls, css } = styleForPosition(pos);
+        el.className = 'mcp-slide' + (cls ? ' ' + cls : '');
+        const botPad = el.dataset.botPad ?? '0';
+        el.style.cssText = `--bot-pad:${botPad};${css}`;
+      });
+      // Segmented progress — previous = played, current = active,
+      // upcoming = neutral. Kept as inline classes so transitions stay
+      // cheap (no layout churn, just background-color tweens).
+      segs.forEach((s, i) => {
+        s.classList.toggle('is-active', i === current);
+        s.classList.toggle('is-played', i < current);
+      });
+      const active = slides[current];
+      if (acName) {
+        const name = active.dataset.label ?? '';
+        const idx = name.lastIndexOf(' ');
+        if (idx > 0) {
+          const prefix = name.slice(0, idx);
+          const accent = name.slice(idx + 1);
+          acName.innerHTML =
+            `<span class="mcp-name-prefix">${prefix}</span>` +
+            `<span class="mcp-name-accent">${accent}</span>`;
+        } else {
+          acName.innerHTML = `<span class="mcp-name-accent">${name}</span>`;
+        }
+      }
+      const pid = active.dataset.productId ?? '';
+      if (acCta && pid) acCta.setAttribute('href', `/products#${pid}`);
+      captionEl?.classList.add('is-ready');
+    }
+
+    function goTo(i: number) {
+      current = ((i % n) + n) % n;
+      update();
+    }
+    function startAuto() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => goTo(current + 1), 3600);
+    }
+
+    segs.forEach((s, i) => s.addEventListener('click', () => { goTo(i); startAuto(); }));
+    root.querySelector<HTMLButtonElement>('#mcp-prev')?.addEventListener('click', (e) => {
+      e.stopPropagation(); goTo(current - 1); startAuto();
+    });
+    root.querySelector<HTMLButtonElement>('#mcp-next')?.addEventListener('click', (e) => {
+      e.stopPropagation(); goTo(current + 1); startAuto();
+    });
+
+    // Click the featured charger → jump to its product card below.
+    root.addEventListener('click', (e) => {
+      const slide = (e.target as HTMLElement).closest<HTMLElement>('.mcp-slide.is-bleft');
+      if (!slide) return;
+      if (suppressNextClick) { suppressNextClick = false; return; }
+      const pid = slide.dataset.productId;
+      if (pid) window.location.href = `/products#${pid}`;
+    });
+
+    // Swipe handling — scoped to the root so caption/HUD drags don't
+    // trigger an unintended carousel advance.
+    const SWIPE_THRESHOLD = 30;
+    const SWIPE_CANCEL_Y  = 80;
+    let startX = 0, startY = 0, lastX = 0, lastY = 0, tracking = false;
+
+    const swipeStart = (x: number, y: number) => { startX = lastX = x; startY = lastY = y; tracking = true; };
+    const swipeMove  = (x: number, y: number) => { if (!tracking) return; lastX = x; lastY = y; };
+    const swipeEnd   = (endX?: number, endY?: number) => {
+      if (!tracking) return;
+      tracking = false;
+      if (typeof endX === 'number') lastX = endX;
+      if (typeof endY === 'number') lastY = endY;
+      const dx = lastX - startX;
+      const dy = lastY - startY;
+      if (Math.abs(dy) > SWIPE_CANCEL_Y && Math.abs(dy) > Math.abs(dx) * 1.5) return;
+      if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+      suppressNextClick = true;
+      if (dx > 0) goTo(current - 1);
+      else        goTo(current + 1);
+      startAuto();
+    };
+
+    root.addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) swipeStart(t.clientX, t.clientY); }, { passive: true });
+    root.addEventListener('touchmove',  (e) => { const t = e.touches[0]; if (t) swipeMove(t.clientX, t.clientY); },  { passive: true });
+    root.addEventListener('touchend',   (e) => { const t = e.changedTouches[0]; swipeEnd(t?.clientX, t?.clientY); }, { passive: true });
+    root.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+
+    update();
+    startAuto();
+  })();
+</script>

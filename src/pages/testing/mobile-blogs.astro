@@ -1,0 +1,1218 @@
+---
+/**
+ * /testing/mobile-blogs — standalone sandbox for the mobile blog layout.
+ * Fully decoupled from the live /blog page (desktop 4-bay stays as-is).
+ *
+ * Hero: garage2 photo fills the section as a full background. The door
+ * is positioned PIXEL-PERFECT over the open doorway rectangle in the
+ * base image (via the .mbh-doorway absolute-positioned frame whose
+ * coords match the opening in the photo). Click any door to peek —
+ * same tap-to-lift behavior as the desktop 4-bay version.
+ *
+ * A random 1-of-5 charger appears inside the opening on each load
+ * (Math.random client-side; no tracking across loads).
+ *
+ * List: all posts flat-sorted by date (newest first) + category chips.
+ */
+import Layout from '../../layouts/Layout.astro';
+
+const categories = [
+  { id: 'cost-demand',        label: 'Cost & Demand',      color: '#5BC8DC' },
+  { id: 'market-shifts',      label: 'Market Shifts',      color: '#E8C030' },
+  { id: 'charging-tech',      label: 'Charging Tech',      color: '#E07428' },
+  { id: 'vehicle-efficiency', label: 'Vehicle Efficiency', color: '#D82020' },
+];
+
+interface PostIn { slug: string; title: string; category: string; date: string; excerpt: string; readTime: string | null; image: string; placeholder?: boolean; }
+const posts: PostIn[] = [
+  { slug: 'why-ev-charging-pays-multifamily',       title: 'Why EV Charging Pays for Itself in Multifamily Properties', category: 'cost-demand',        date: 'Apr 2026', excerpt: 'A zero-cost amenity that generates passive income, attracts tenants, and future-proofs your asset.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'real-cost-of-doing-nothing',             title: 'The Real Cost of Not Offering EV Charging',                 category: 'cost-demand',        date: 'Mar 2026', excerpt: 'Properties without charging are already losing lease negotiations. The calculus shifts every month.', readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'revenue-projections-ev-charging',        title: 'What Does an EV Charger Actually Earn?',                    category: 'cost-demand',        date: 'Mar 2026', excerpt: 'From $900 to $2,100 per charger per month. Utilization is the variable. Here is what drives it.', readTime: '6 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ev-adoption-accelerating',               title: 'EV Adoption Is Accelerating — What Property Owners Need to Know', category: 'market-shifts', date: 'Apr 2026', excerpt: 'Regulatory tailwinds, NEVI funding, and shifting buyer demographics are converging fast.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'nevi-funding-reshaping-highway-charging',title: 'How NEVI Funding Is Reshaping Highway Charging Economics',  category: 'market-shifts',      date: 'Feb 2026', excerpt: 'Federal dollars are eliminating the cost barrier for site hosts.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'level2-vs-dcfast-explained',             title: 'Level 2 vs DC Fast Charging: Which Is Right for Your Property?', category: 'charging-tech',  date: 'Apr 2026', excerpt: 'Dwell time is the deciding factor. A clear framework for every property type.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ocpp-open-standards-matter',             title: 'OCPP: Why Open Standards Protect Your Charging Investment', category: 'charging-tech',      date: 'Mar 2026', excerpt: 'Vendor lock-in is a real risk in EV infrastructure. OCPP 1.6 compliance is your insurance policy.', readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ev-infrastructure-next-five-years',      title: 'EV Charging Infrastructure: What to Expect in the Next Five Years', category: 'charging-tech', date: 'Jan 2026', excerpt: 'Smart charging, V2G, and grid integration are reshaping infrastructure investment decisions.', readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'how-modern-evs-change-charging-behavior',title: 'How Longer EV Ranges Are Changing When Drivers Charge',     category: 'vehicle-efficiency', date: 'Apr 2026', excerpt: 'More range means less frequent but longer sessions — and that changes how smart operators should plan.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'battery-tech-trends-infrastructure',     title: 'Battery Tech Trends Every Infrastructure Investor Should Watch', category: 'vehicle-efficiency', date: 'Feb 2026', excerpt: 'Solid-state, faster charge acceptance, V2G — the battery roadmap has direct implications for how you build today.', readTime: '6 min', image: '/images/logos/evium/logo.webp' },
+  { slug: '', title: 'More market coverage on the way',            category: 'market-shifts',      date: 'Coming soon', excerpt: 'More analysis on regulatory changes, NEVI rollout, and EV adoption.', readTime: null, image: '/images/logos/evium/logo.webp', placeholder: true },
+  { slug: '', title: 'More vehicle efficiency coverage on the way',category: 'vehicle-efficiency', date: 'Coming soon', excerpt: 'Battery chemistry, thermal management, and how fast-improving specs change the calculus.', readTime: null, image: '/images/logos/evium/logo.webp', placeholder: true },
+];
+
+const MONTHS: Record<string, number> = { Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6, Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12 };
+const sortedPosts = [...posts].sort((a, b) => {
+  const k = (p: PostIn) => {
+    if (p.placeholder) return 0;
+    const m = p.date.match(/^([A-Za-z]{3})\s+(\d{4})$/);
+    return m ? parseInt(m[2], 10) * 100 + (MONTHS[m[1]] ?? 0) : 0;
+  };
+  return k(b) - k(a);
+});
+
+/*
+ * DOORWAY POSITION — where the open doorway rectangle is in
+ * /images/blog-hero/mobile/garage2-open.png, as percentages of the
+ * base image. Tuned visually to hug the black opening. These can be
+ * nudged later without touching anything else because the door and
+ * charger layers live inside a frame absolute-positioned at these
+ * exact coords.
+ */
+const DOORWAY = { left: 5, top: 21, width: 49, height: 64 };
+
+/*
+ * Charger placements — percentages are RELATIVE TO THE DOORWAY FRAME,
+ * not the whole image. So the 5 chargers all land inside the opening
+ * no matter how the doorway position is tuned. Each charger has its
+ * own (left, bottom, width) because the source PNGs aren't uniform.
+ */
+const heroChargers = [
+  { key: '30kw',       src: '/images/chargers/tellus/evium-dcfc-30kw-single-port.png',                             alt: 'Evium 30 kW DC Fast Charger',       left: 68, bottom: 4,  width: 28 },
+  { key: 'wall-ac',    src: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',                           alt: 'Evium wall-mount AC charger',       left: 74, bottom: 30, width: 18 },
+  { key: 'siemens-ac', src: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',                        alt: 'Siemens VersiCharge AC',            left: 68, bottom: 20, width: 26 },
+  { key: 'maxi-dc',    src: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',                       alt: 'MaxiCharger DC Fast 60–240 kW',     left: 62, bottom: 2,  width: 32 },
+  { key: 'evo-32',     src: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png', alt: 'EvoCharge 32A Level 2',         left: 74, bottom: 30, width: 20 },
+];
+
+const catById = Object.fromEntries(categories.map((c) => [c.id, c]));
+---
+
+<Layout title="Mobile Blogs — Testing — Evium Charging">
+  <main class="mbi-root" aria-label="Mobile blog sandbox">
+
+    {/* ─── HERO ─── garage photo IS the top section's background.
+        Text overlays the brick-wall area to the RIGHT of the door so
+        it never covers the garage opening. ─── */}
+    <header class="mbi-hero" data-mbi-hero>
+      {/* Base photo = whole section's background */}
+      <img
+        src="/images/blog-hero/mobile/garage2-open.png"
+        alt=""
+        class="mbh-base"
+        aria-hidden="true"
+        draggable="false"
+      />
+
+      {/* Doorway frame pinned to the opening in the base photo.
+          Chargers + door live INSIDE so their coords are relative to
+          the opening. */}
+      <div
+        class="mbh-doorway"
+        style={`left:${DOORWAY.left}%; top:${DOORWAY.top}%; width:${DOORWAY.width}%; height:${DOORWAY.height}%;`}
+      >
+        {heroChargers.map((c) => (
+          <img
+            src={c.src}
+            alt={c.alt}
+            class="mbh-charger"
+            data-mbh-charger={c.key}
+            style={`left:${c.left}%; bottom:${c.bottom}%; width:${c.width}%;`}
+            draggable="false"
+            aria-hidden="true"
+          />
+        ))}
+
+        <button
+          type="button"
+          class="mbh-door-btn"
+          data-mbh-door
+          aria-label="Lift the garage door to peek inside"
+        >
+          <img
+            src="/images/blog-hero/mobile/garage2-door.png"
+            alt=""
+            class="mbh-door-img"
+            draggable="false"
+          />
+        </button>
+      </div>
+
+
+      {/* Text overlay anchored to the right of the door (over the
+          brick wall + window). Narrower column so it doesn't touch
+          the door's right edge. */}
+      <div class="mbh-text">
+        <p class="mbh-eyebrow">
+          <span class="mbh-eyebrow-mark" aria-hidden="true"></span>
+          Evium Insights
+        </p>
+        <div class="mbh-titlewrap">
+          <h1 class="mbh-title">
+            <span class="mbt-line">The knowledge</span>
+            <span class="mbt-line">behind every</span>
+            <span class="mbt-line">charging</span>
+            <span class="mbt-line">decision.</span>
+          </h1>
+          <p class="mbh-sub">
+            Economics, trends,<br />&amp; market signals.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    {/* ─── BOARD ───
+        Two-column grid locked to the doorway geometry above: the road
+        occupies the exact same horizontal strip as the garage door
+        (DOORWAY.left → DOORWAY.left + DOORWAY.width), so posts flow
+        straight down out of the opening. The category filters live in
+        the dead space to the right of the road.
+        CSS variables --door-left / --door-width mirror DOORWAY in JS
+        so tuning the doorway re-aligns the road automatically. */}
+    <section
+      class="mbi-board"
+      data-mbi-board
+      style={`--door-left: ${DOORWAY.left}%; --door-width: ${DOORWAY.width}%;`}
+    >
+      {/* ROAD — single-lane one-way. Two solid white shoulders on left
+          and right (::before / ::after), no center divider (it's one
+          lane, one direction). Cards emerge from above (behind the
+          garage) and slide straight down into the road. */}
+      <div class="mbi-road">
+        <ol class="mbi-list" role="list">
+          {sortedPosts.map((post, idx) => {
+            const cat = catById[post.category];
+            const isPlaceholder = post.placeholder === true;
+            return (
+              <li
+                class={`mbi-card ${isPlaceholder ? 'is-placeholder' : ''}`}
+                data-mbi-card
+                data-category={post.category}
+                style={`--card-delay: ${0.15 + idx * 0.09}s;`}
+              >
+                {!isPlaceholder ? (
+                  <a href={`/blog/${post.slug}`} class="mbi-card-link">
+                    <span class="mbi-cat-tag" style={`--cat-color:${cat?.color ?? '#2DC856'};`}>{cat?.label ?? 'Evium'}</span>
+                    <h2 class="mbi-card-title">{post.title}</h2>
+                    <p class="mbi-card-excerpt">{post.excerpt}</p>
+                    <div class="mbi-card-meta">
+                      <span>{post.date}</span>
+                      {post.readTime && (<><span class="mbi-card-dot" aria-hidden="true">·</span><span>{post.readTime} read</span></>)}
+                    </div>
+                  </a>
+                ) : (
+                  <div class="mbi-card-link is-placeholder-link" aria-disabled="true">
+                    <span class="mbi-cat-tag" style={`--cat-color:${cat?.color ?? '#2DC856'};`}>{cat?.label ?? 'Evium'}</span>
+                    <h2 class="mbi-card-title">{post.title}</h2>
+                    <p class="mbi-card-excerpt">{post.excerpt}</p>
+                    <div class="mbi-card-meta"><span>{post.date}</span></div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        <p class="mbi-empty" data-mbi-empty hidden>
+          No posts here. <a href="/contact">Send us a topic →</a>
+        </p>
+      </div>
+
+      {/* SIDEBAR — stacked content blocks right of the road. BROWSE
+          filter list with colored dots + section heading, Editor's
+          Pick teaser for the newest post, and a topic CTA. */}
+      <aside class="mbi-filters-side">
+        <div class="mbi-side-block">
+          <h2 class="mbi-side-head">Browse</h2>
+          <div class="mbi-chip-stack" role="tablist" aria-label="Filter posts by category">
+            <button type="button" class="mbi-chip" role="tab" data-mbi-filter="all" aria-selected="true">
+              <span class="mbi-chip-dot mbi-chip-dot--all" aria-hidden="true"></span>
+              <span class="mbi-chip-label">All</span>
+              <span class="mbi-chip-count">{sortedPosts.length}</span>
+            </button>
+            {categories.map((cat) => {
+              const count = sortedPosts.filter((p) => p.category === cat.id).length;
+              return (
+                <button
+                  type="button"
+                  class="mbi-chip"
+                  role="tab"
+                  data-mbi-filter={cat.id}
+                  aria-selected="false"
+                  style={`--chip-accent:${cat.color};`}
+                >
+                  <span class="mbi-chip-dot" aria-hidden="true"></span>
+                  <span class="mbi-chip-label">{cat.label}</span>
+                  <span class="mbi-chip-count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* I'm Feeling Lucky — picks a random non-placeholder post
+              and navigates to it. Handler wired up in the script
+              below via [data-mbi-lucky]. Dashed border signals it's
+              a "secondary / playful" action, distinct from the
+              selected-state filter chips. */}
+          <button type="button" class="mbi-lucky" data-mbi-lucky>
+            <svg class="mbi-lucky-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+              <circle cx="5" cy="5" r="1.1" fill="currentColor"/>
+              <circle cx="11" cy="5" r="1.1" fill="currentColor"/>
+              <circle cx="8" cy="8" r="1.1" fill="currentColor"/>
+              <circle cx="5" cy="11" r="1.1" fill="currentColor"/>
+              <circle cx="11" cy="11" r="1.1" fill="currentColor"/>
+            </svg>
+            <span>I&apos;m feeling lucky</span>
+          </button>
+        </div>
+
+        {(() => {
+          const pick = sortedPosts.find((p) => !p.placeholder);
+          if (!pick) return null;
+          const pc = catById[pick.category];
+          return (
+            <div class="mbi-side-block">
+              <h2 class="mbi-side-head">Editor&apos;s Pick</h2>
+              <a href={`/blog/${pick.slug}`} class="mbi-pick-link">
+                <span class="mbi-pick-tag" style={`--cat-color:${pc?.color ?? '#2DC856'};`}>
+                  {pc?.label ?? 'Evium'}
+                </span>
+                <h3 class="mbi-pick-title">{pick.title}</h3>
+                <span class="mbi-pick-cta">Read →</span>
+              </a>
+            </div>
+          );
+        })()}
+
+        <div class="mbi-side-block mbi-side-cta">
+          <h2 class="mbi-side-head">Got a topic?</h2>
+          <p class="mbi-side-body">We publish questions from operators and owners.</p>
+          <a href="/contact" class="mbi-side-cta-link">Pitch it →</a>
+        </div>
+      </aside>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .mbi-root {
+    background: #0d1a22;
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    padding: 0 0 clamp(60px, 8vw, 100px);
+    min-height: 100vh;
+  }
+
+  /* ─── Hero: garage photo fills the section; text overlays right side
+     over the brick wall area. Aspect-locked so the doorway % coords
+     stay pixel-perfect across every mobile width. ─── */
+  .mbi-hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    /* No isolation / stacking context — the hero shares the root
+       stacking context with .mbi-board so cards (via board z:1) slot
+       BETWEEN the hero's base image (z:0) and the doorway container
+       (z:2). That positions cards ABOVE the photo but BELOW the door,
+       so a card translated into the doorway is hidden by the closed
+       door and revealed when the door rolls up. */
+    background: #0d1a22;
+  }
+  .mbh-base {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    z-index: 0;
+  }
+
+  /* Text overlay — anchored to the right-hand brick panel. Shifted
+     further right so it breathes clear of the door, and narrow enough
+     that every line of both the title AND the sub fills the column —
+     no orphan words dangling on a short final line. `text-wrap: balance`
+     (on both title + sub) distributes content evenly across lines for
+     a rectangular block that reads as a deliberate typographic panel. */
+  .mbh-text {
+    position: absolute;
+    left: 65%;
+    right: 1.5%;
+    top: 26%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  /* Type color — nearly-white with the faintest warm tint (#FBF9F2)
+     so it reads clean-white against the red brick without the
+     sterile flatness of pure #FFF. Heavy stacked shadow pins the
+     type visually to the brick. */
+
+  /* Eyebrow — one-liner locked via white-space: nowrap. Small brand-
+     green caps with bookended accent dashes (leading .mbh-eyebrow-mark
+     element + trailing ::after pseudo). Sized aggressively small so
+     "━ EVIUM INSIGHTS ━" fits within the narrow right-column width
+     without wrapping. Stands out via brighter green + stacked shadow
+     with soft green ambient glow (no backing box). */
+  .mbh-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: clamp(0.52rem, 1.8vw, 0.6rem);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3AE86E;
+    white-space: nowrap;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 1),
+      0 2px 4px rgba(0, 0, 0, 0.9),
+      0 0 10px rgba(0, 0, 0, 0.85),
+      0 0 18px rgba(45, 200, 86, 0.55),
+      0 0 2px rgba(45, 200, 86, 0.9);
+  }
+  .mbh-eyebrow-mark,
+  .mbh-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 2px;
+    background: #3AE86E;
+    border-radius: 2px;
+    box-shadow:
+      0 0 6px rgba(45, 200, 86, 0.95),
+      0 0 12px rgba(45, 200, 86, 0.4);
+    flex-shrink: 0;
+  }
+
+  /* Title — 4 explicit lines. Instead of stretching each line via
+     letter-spacing (which looked awkward on "charging"), each line
+     GROWS into the column width via its own font-size. Shorter lines
+     use larger fonts so they render at the same horizontal width as
+     the longest line. Multipliers are derived from approximate char
+     widths of Maven Pro bold:
+         Line 1 "The knowledge" — base (longest)
+         Line 2 "behind every"  — +8%  font
+         Line 3 "charging"      — +62% font (8 chars match 13)
+         Line 4 "decision."     — +44% font (9 chars match 13)
+     `align-self: flex-start` + `width: max-content` hugs the box to
+     its own content. Per-line `line-height: 1` keeps each line
+     vertically compact since they're all different sizes. */
+  /* Titlewrap — hugs the width of the title's rectangular block so
+     the sub can right-align to the title's right edge (instead of
+     the whole text column's right edge). */
+  .mbh-titlewrap {
+    align-self: flex-start;
+    width: max-content;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .mbh-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(0.98rem, 3.6vw, 1.18rem);
+    font-weight: 800;
+    letter-spacing: -0.012em;
+    color: #FBF9F2;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 1),
+      0 2px 4px rgba(0, 0, 0, 0.95),
+      0 3px 12px rgba(0, 0, 0, 0.85),
+      0 0 28px rgba(0, 0, 0, 0.6);
+  }
+  .mbt-line {
+    display: block;
+    line-height: 1;
+    padding: 0.04em 0;   /* tiny breathing between mixed-size lines */
+  }
+  /* Per-line font multipliers re-tuned empirically: "charging" has
+     naturally wider letters (c/h/a/g) than chars-per-line suggested,
+     so its scale comes DOWN; "decision." has narrower letters (i/i/.)
+     so its scale goes UP. The goal is all four lines ending at the
+     same left AND right x-coordinates — a proper rectangular block. */
+  .mbt-line:nth-child(1) { font-size: 1em;    }  /* "The knowledge" baseline */
+  .mbt-line:nth-child(2) { font-size: 1.10em; }  /* "behind every" */
+  .mbt-line:nth-child(3) { font-size: 1.60em; }  /* "charging" — extended right to match line 1 */
+  .mbt-line:nth-child(4) { font-size: 1.64em; }  /* "decision." — extended right to match line 1 */
+
+  /* Sub — stretches to the full width of .mbh-titlewrap (which hugs
+     the title's width), right-aligned so every line terminates at
+     exactly the title's right edge. Creates a proper column of type
+     with a shared right margin between title and sub. */
+  .mbh-sub {
+    margin: 10px 0 0;
+    width: 100%;
+    font-size: clamp(0.78rem, 2.5vw, 0.88rem);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    color: rgba(251, 249, 242, 0.92);
+    text-align: right;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 1),
+      0 2px 4px rgba(0, 0, 0, 0.9),
+      0 3px 10px rgba(0, 0, 0, 0.75);
+  }
+
+  /* Doorway frame — pinned to the exact opening in the base photo.
+     Every charger + the door live inside, coords relative to this. */
+  .mbh-doorway {
+    position: absolute;
+    z-index: 2;
+  }
+
+  /* Chargers layer — one gets .is-active on load. */
+  .mbh-charger {
+    position: absolute;
+    height: auto;
+    opacity: 0;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.5s ease 0.9s;
+  }
+  .mbh-charger.is-active { opacity: 1; }
+
+  /* Door overlay — covers the doorway frame exactly. Rolls UP from the
+     top edge. The <button> gives us a proper tap target with a11y
+     semantics; the <img> inside is purely visual (fills the button). */
+  .mbh-door-btn {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transform-origin: top center;
+    transform: scaleY(1);
+    transition: transform 1.4s cubic-bezier(0.42, 0, 0.12, 1);
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mbh-door-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    user-select: none;
+    pointer-events: none;
+  }
+  /* Initial reveal — stage gets .is-open on mount */
+  .mbi-hero.is-open .mbh-door-btn { transform: scaleY(0); }
+  /* Then re-rolls down after cards have landed */
+  .mbi-hero.is-closed .mbh-door-btn {
+    transform: scaleY(1);
+    transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+  }
+  /* Tap to peek: while closed, clicking the door re-lifts it briefly */
+  .mbi-hero.is-closed .mbh-door-btn.peek {
+    transform: scaleY(0);
+    transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+    transition-delay: 0s;
+  }
+  .mbh-door-btn:focus-visible {
+    outline: 2px solid #2DC856;
+    outline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mbh-door-btn,
+    .mbh-charger { transition: none; }
+  }
+
+  /* ─── BOARD ─── grid locked to the garage door geometry.
+     Column 1: left shoulder gap (var(--door-left) — matches door left)
+     Column 2: the road (var(--door-width) — matches door width exactly)
+     Column 3: 1fr — dead space right of the road, houses filters
+     Setting these as vars means tuning DOORWAY in JS auto-aligns the
+     road below. The board also stacks BELOW the hero in z-order so
+     cards translating up from their positions disappear UNDER the
+     garage before sliding back down — the illusion of emergence. */
+  /* NO z-index / isolation on .mbi-hero. The hero needs to share the
+     root stacking context with the board so cards (z:1 via board) can
+     render ABOVE the hero's .mbh-base (z:0) but BELOW .mbh-doorway
+     (z:2, which contains the door). That layering is what lets a card
+     sitting at the doorway position be HIDDEN when the door is down
+     (door covers it) and VISIBLE when the door rolls up (door gone =
+     card shows through). */
+  .mbi-board {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: var(--door-left, 5%) var(--door-width, 49%) 1fr;
+    /* Board surface — neutral-cool slate, cleaner than the warm
+       charcoal that read as muddy. Reads as sidewalk/pavement
+       material next to the asphalt road, distinct from the teal
+       family used throughout the rest of the page, and with enough
+       blue-gray to feel architectural rather than drab. */
+    background: #2f3237;
+    padding: 0 0 clamp(40px, 6vw, 60px);
+  }
+
+  /* ─── ROAD ─── asphalt lane bounded by two solid white shoulders.
+     No center divider: this is a single-lane one-way road (only one
+     direction of traffic = newest posts coming out of the garage).
+     Positioned in grid column 2 so it sits pixel-aligned with the
+     door above. */
+  .mbi-road {
+    grid-column: 2;
+    position: relative;
+    padding: 16px 8px 28px;
+    min-height: 320px;
+    /* Asphalt fill — near-black tarmac, much darker than .mbi-board
+       above, so the road reads as a distinctly darker strip between
+       the shoulder lines. Kept exclusively inside .mbi-road; the grid
+       columns on either side stay at the board's lighter teal-black. */
+    background: #020407;
+  }
+  .mbi-road::before,
+  .mbi-road::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    /* Fully opaque cream — if the shoulders are even slightly
+       translucent, the very dark asphalt bleeds through and the
+       "white lines" read as dim/greyish. At 1.0 alpha the shoulders
+       are crisp and stop the dark from visually leaking. */
+    background: #F5F3E8;
+    box-shadow: 0 0 6px rgba(244, 242, 232, 0.2);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .mbi-road::before { left: 0;  }
+  .mbi-road::after  { right: 0; }
+
+
+  /* ─── SIDEBAR ─── stacked blocks (BROWSE, Editor's Pick, Topic CTA)
+     right of the road. Sticky column stays reachable while the road
+     scrolls. */
+  .mbi-filters-side {
+    grid-column: 3;
+    padding: 14px 14px 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-self: start;
+    position: sticky;
+    top: 64px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .mbi-filters-side::-webkit-scrollbar { display: none; }
+
+  /* Block container for each sidebar section. */
+  .mbi-side-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mbi-side-head {
+    margin: 0;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.48);
+  }
+
+  /* Filter chip stack — bigger, padded chips with a colored category
+     dot, label, and count badge. */
+  .mbi-chip-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mbi-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: inherit;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mbi-chip-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--chip-accent, #2DC856);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--chip-accent, #2DC856) 60%, transparent);
+    flex-shrink: 0;
+  }
+  .mbi-chip-dot--all {
+    background: linear-gradient(135deg, #5BC8DC, #E8C030, #E07428, #D82020);
+    box-shadow: none;
+  }
+  .mbi-chip-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mbi-chip:hover { color: #fff; border-color: rgba(255, 255, 255, 0.28); }
+  .mbi-chip[aria-selected="true"] {
+    background: rgba(45, 200, 86, 0.14);
+    border-color: #2DC856;
+    color: #2DC856;
+  }
+  .mbi-chip-count {
+    font-size: 0.58rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.62);
+    flex-shrink: 0;
+  }
+  .mbi-chip[aria-selected="true"] .mbi-chip-count {
+    background: rgba(45, 200, 86, 0.22);
+    color: #2DC856;
+  }
+
+  /* I'm Feeling Lucky — secondary action below the filter chips.
+     Dashed green border distinguishes it from the selected-chip
+     treatment (which is solid green) so it reads as "surprise me"
+     rather than an active filter state. Dice icon pairs with the
+     playful label. */
+  .mbi-lucky {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+    padding: 10px 10px;
+    background: rgba(45, 200, 86, 0.08);
+    border: 1px dashed rgba(45, 200, 86, 0.42);
+    border-radius: 7px;
+    color: #2DC856;
+    font-family: inherit;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mbi-lucky:hover {
+    background: rgba(45, 200, 86, 0.16);
+    border-color: #2DC856;
+    color: #48E672;
+  }
+  .mbi-lucky:active { transform: scale(0.98); }
+  .mbi-lucky-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(.22, 1, .36, 1);
+  }
+  .mbi-lucky:hover .mbi-lucky-icon { transform: rotate(-18deg); }
+
+  /* Editor's Pick teaser card. */
+  .mbi-pick-link {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 11px 11px 12px;
+    background: #142633;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 3px solid #2DC856;
+    border-radius: 6px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .mbi-pick-link:hover {
+    background: #17303b;
+    border-color: rgba(45, 200, 86, 0.3);
+    border-left-color: #48E672;
+  }
+  .mbi-pick-tag {
+    display: inline-block;
+    width: max-content;
+    padding: 2px 6px;
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cat-color, #2DC856);
+    background: color-mix(in srgb, var(--cat-color, #2DC856) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cat-color, #2DC856) 35%, transparent);
+    border-radius: 3px;
+  }
+  .mbi-pick-title {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mbi-pick-cta {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2DC856;
+  }
+
+  /* Topic CTA block. */
+  .mbi-side-cta {
+    padding: 11px 11px 12px;
+    background: rgba(45, 200, 86, 0.06);
+    border: 1px solid rgba(45, 200, 86, 0.22);
+    border-radius: 7px;
+  }
+  .mbi-side-body {
+    margin: 0 0 10px;
+    font-size: 0.68rem;
+    line-height: 1.38;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .mbi-side-cta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2DC856;
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .mbi-side-cta-link:hover { color: #48E672; }
+
+  /* ─── Card list ─── narrower cards tuned for the road width ─── */
+  .mbi-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .mbi-card { margin: 0; }
+  .mbi-card-link {
+    display: block;
+    padding: 12px 12px 14px;
+    background: #142633;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .mbi-card-link:hover {
+    background: #17303b;
+    border-color: rgba(45, 200, 86, 0.28);
+  }
+  .mbi-card.is-placeholder .mbi-card-link { opacity: 0.55; }
+  .is-placeholder-link { cursor: default; }
+  .mbi-cat-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-bottom: 8px;
+    font-size: 0.54rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cat-color, #2DC856);
+    background: color-mix(in srgb, var(--cat-color, #2DC856) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cat-color, #2DC856) 40%, transparent);
+    border-radius: 3px;
+  }
+  .mbi-card-title {
+    margin: 0 0 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.28;
+    color: #fff;
+  }
+  .mbi-card-excerpt {
+    margin: 0 0 10px;
+    font-size: 0.74rem;
+    line-height: 1.48;
+    color: rgba(255, 255, 255, 0.62);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mbi-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.42);
+    text-transform: uppercase;
+  }
+  .mbi-card-dot { color: rgba(255, 255, 255, 0.22); }
+  .mbi-card[hidden] { display: none; }
+
+  .mbi-empty {
+    margin: 24px 4px 0;
+    text-align: center;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .mbi-empty a {
+    color: #2DC856;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── GARAGE-TO-ROAD ANIMATION ─── Cards start LITERALLY INSIDE
+     the garage. Per-card CSS variables (--tuck-x, --tuck-y, --tuck-rot)
+     are set by JS on mount so each card's resting transform places
+     it inside the doorway rectangle, scaled down and stacked with
+     a small rotation jitter (like a pile of mail waiting to go out).
+     z-index: board sits above .mbh-base (hero photo) but below
+     .mbh-doorway (which contains the door). So while a card is at
+     its tuck position:
+       - door closed → door covers card (inside doorway z:2)
+       - door open  → card shows through the empty opening
+     That's what makes cards appear to be physically inside the
+     garage until the door lifts. */
+  .mbi-card {
+    opacity: 1;
+    transform:
+      translate(var(--tuck-x, 0), var(--tuck-y, -85vh))
+      scale(var(--tuck-scale, 0.16))
+      rotate(var(--tuck-rot, 0deg));
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
+  .mbi-board.is-visible .mbi-card {
+    animation: card-emerge 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--card-delay, 0s);
+  }
+  @keyframes card-emerge {
+    0% {
+      opacity: 1;
+      transform:
+        translate(var(--tuck-x, 0), var(--tuck-y, -85vh))
+        scale(var(--tuck-scale, 0.16))
+        rotate(var(--tuck-rot, 0deg));
+    }
+    88% {
+      opacity: 1;
+      transform: translate(0, 8px) scale(1.015) rotate(0.4deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1) rotate(0);
+    }
+  }
+  /* Reverse animation — cards slide BACK into the garage (to the
+     same per-card tuck position used for emergence). Tighter stagger
+     than the emerge so the hide finishes in a more compact window,
+     and cards visibly land/settle at the tuck position via a small
+     overshoot near the end (88% keyframe). Fill mode `both` pins
+     the end state so cards hold inside the garage after the hide
+     completes. */
+  .mbi-board.is-hiding .mbi-card {
+    animation: card-hide 0.75s cubic-bezier(0.4, 0, 0.25, 1) both;
+    animation-delay: calc(var(--card-delay, 0s) * 0.55);
+  }
+  @keyframes card-hide {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1) rotate(0);
+    }
+    88% {
+      opacity: 1;
+      transform:
+        translate(var(--tuck-x, 0), calc(var(--tuck-y, -85vh) - 4px))
+        scale(calc(var(--tuck-scale, 0.16) * 1.04))
+        rotate(var(--tuck-rot, 0deg));
+    }
+    100% {
+      opacity: 1;
+      transform:
+        translate(var(--tuck-x, 0), var(--tuck-y, -85vh))
+        scale(var(--tuck-scale, 0.16))
+        rotate(var(--tuck-rot, 0deg));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mbi-card {
+      opacity: 1;
+      transform: none;
+    }
+    .mbi-board.is-visible .mbi-card,
+    .mbi-board.is-hiding .mbi-card {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const hero    = document.querySelector<HTMLElement>('[data-mbi-hero]');
+    const doorBtn = document.querySelector<HTMLButtonElement>('[data-mbh-door]');
+    if (!hero || !doorBtn) return;
+
+    // Pick one of the 5 chargers at random on every load; no tracking.
+    const chargers = Array.from(hero.querySelectorAll<HTMLImageElement>('[data-mbh-charger]'));
+    if (chargers.length) {
+      const pick = chargers[Math.floor(Math.random() * chargers.length)];
+      chargers.forEach((c) => c.classList.toggle('is-active', c === pick));
+      pick.setAttribute('aria-hidden', 'false');
+    }
+
+    const board = document.querySelector<HTMLElement>('[data-mbi-board]');
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-mbi-card]'));
+
+    // Compute each card's "tuck inside garage" transform. We measure
+    // the doorway rectangle (via the hero + DOORWAY % constants) and
+    // the card's natural position, then set CSS custom properties
+    // that place the card visually INSIDE the doorway — scaled down
+    // with a small rotation jitter so multiple cards read as a stack
+    // of mail behind the door. CSS keyframes consume these vars as
+    // the starting state for emerge and the ending state for hide.
+    function tuckAllCardsInGarage() {
+      // Phase 1 — temporarily neutralise the tuck transform so
+      // getBoundingClientRect returns each card's NATURAL (layout)
+      // position instead of its already-tucked/scaled position.
+      // `void document.body.offsetHeight` after flips the style flush
+      // synchronously so the measurements in phase 2 reflect the
+      // reset. All three phases happen in one synchronous call, so
+      // the browser never paints the intermediate state.
+      cards.forEach((c) => {
+        c.style.setProperty('--tuck-x',     '0px');
+        c.style.setProperty('--tuck-y',     '0px');
+        c.style.setProperty('--tuck-scale', '1');
+        c.style.setProperty('--tuck-rot',   '0deg');
+      });
+      void document.body.offsetHeight;
+
+      // Phase 2 — measure natural positions + compute the per-card
+      // delta needed to translate each card into the garage doorway.
+      const heroRect     = hero!.getBoundingClientRect();
+      const doorCenterX  = heroRect.left + heroRect.width  * (0.05 + 0.49 / 2);
+      // Stack near the bottom of the doorway — like mail piled on the
+      // garage floor — so the cards read as "resting inside" rather
+      // than floating mid-air.
+      const stackCenterY = heroRect.top  + heroRect.height * (0.21 + 0.64 * 0.78);
+
+      const targets = cards.map((card, idx) => {
+        const rect   = card.getBoundingClientRect();
+        const cardCx = rect.left + rect.width  / 2;
+        const cardCy = rect.top  + rect.height / 2;
+
+        // Deterministic pseudo-random jitter so the stack looks natural
+        // but reruns produce identical positions.
+        const jitterX = ((idx * 73)  % 11 - 5) * 2.2;
+        const jitterY = ((idx * 47)  % 9  - 4) * 1.4;
+        const jitterR = ((idx * 131) % 13 - 6) * 1.1;
+
+        return {
+          x:   (doorCenterX  - cardCx) + jitterX,
+          y:   (stackCenterY - cardCy) + jitterY,
+          rot: jitterR,
+        };
+      });
+
+      // Phase 3 — apply the computed tuck values. Only now does the
+      // browser paint; the user sees the cards go from "not yet
+      // positioned" to "tucked in the garage" in one frame.
+      cards.forEach((c, idx) => {
+        const t = targets[idx];
+        c.style.setProperty('--tuck-x',     `${t.x}px`);
+        c.style.setProperty('--tuck-y',     `${t.y}px`);
+        c.style.setProperty('--tuck-rot',   `${t.rot}deg`);
+        c.style.setProperty('--tuck-scale', '0.15');
+      });
+    }
+
+    // Compute once after layout settles, and again on resize (only
+    // when cards are not mid-animation) or when the filter reflow
+    // explicitly requests a retuck via the custom `mbi-retuck` event.
+    tuckAllCardsInGarage();
+    window.addEventListener('resize', () => {
+      if (!board?.classList.contains('is-visible')) tuckAllCardsInGarage();
+    }, { passive: true });
+    window.addEventListener('mbi-retuck', tuckAllCardsInGarage as EventListener);
+
+    // Open on mount, then trigger the cards-emerge cascade once the
+    // door is mostly up. Cards are ALREADY inside the garage (via
+    // --tuck-* vars above); when door lifts they become visible in
+    // the doorway, then the emerge animation slides them out to
+    // their road positions.
+    //   t=0     : door starts rolling up (1.4s)
+    //   t=0.6s  : cards start emerging from the doorway
+    //   t≈3.0s : last card lands in the road
+    //   t=3.4s  : door rolls back down
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      hero.classList.add('is-open');
+      window.setTimeout(() => board?.classList.add('is-visible'), 600);
+      window.setTimeout(() => {
+        hero.classList.remove('is-open');
+        hero.classList.add('is-closed');
+      }, 3400);
+    }));
+
+    // Tap-to-peek: clicking the door while closed re-lifts it briefly.
+    doorBtn.addEventListener('click', () => {
+      if (!hero.classList.contains('is-closed')) return;
+      if (doorBtn.classList.contains('peek')) return;
+      doorBtn.classList.add('peek');
+      window.setTimeout(() => doorBtn.classList.remove('peek'), 2500);
+    });
+  })();
+
+  // Filter chips — orchestrate a full re-emergence sequence on change:
+  //   1. door opens
+  //   2. currently-visible cards slide back UP into the garage
+  //   3. door closes
+  //   4. filter is applied (non-matching cards become hidden)
+  //   5. door opens again
+  //   6. newly-filtered cards emerge
+  //   7. door closes
+  // A single `isReflowing` guard prevents concurrent runs from
+  // stepping on each other's class swaps.
+  (() => {
+    const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mbi-filter]'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-mbi-card]'));
+    const empty = document.querySelector<HTMLElement>('[data-mbi-empty]');
+    const hero  = document.querySelector<HTMLElement>('[data-mbi-hero]');
+    const board = document.querySelector<HTMLElement>('[data-mbi-board]');
+    if (chips.length === 0 || cards.length === 0 || !hero || !board) return;
+
+    let isReflowing = false;
+
+    const applyFilter = (filter: string) => {
+      let visible = 0;
+      cards.forEach((card) => {
+        const cat = card.getAttribute('data-category') ?? '';
+        const show = filter === 'all' || cat === filter;
+        if (show) { card.removeAttribute('hidden'); visible += 1; }
+        else card.setAttribute('hidden', '');
+      });
+      if (empty) (visible === 0 ? empty.removeAttribute('hidden') : empty.setAttribute('hidden', ''));
+    };
+
+    const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+
+    const openDoor  = () => { hero.classList.remove('is-closed'); hero.classList.add('is-open'); };
+    const closeDoor = () => { hero.classList.remove('is-open');   hero.classList.add('is-closed'); };
+
+    // Animation constants mirrored from CSS (keep in sync with the
+     // `.mbi-board.is-visible .mbi-card` and `.mbi-board.is-hiding
+     // .mbi-card` rules). Used to compute how long each phase of
+     // the reflow actually takes, so we wait for cards to finish
+     // before progressing instead of guessing with a fixed 900ms.
+    const EMERGE_DURATION = 1.5;   // seconds
+    const HIDE_DURATION   = 0.75;  // seconds
+    const CARD_STAGGER    = 0.09;  // per-card delay multiplier
+    const HIDE_STAGGER_MULT = 0.55; // .is-hiding CSS shortens stagger
+    const BASE_DELAY      = 0.15;  // first-card delay
+
+    async function reflow(newFilter: string) {
+      if (isReflowing) return;
+      isReflowing = true;
+      chips.forEach((c) => (c.disabled = true));
+      try {
+        // Count cards currently visible (old filter) — these will hide.
+        const oldVisibleCount = cards.filter((c) => !c.hasAttribute('hidden')).length;
+
+        // 1. Open the door so the garage is "ready" to receive cards.
+        openDoor();
+        await wait(350);
+
+        // 2. Cards slide BACK UP into the garage. Wait for the FULL
+        //    cascade to complete — last card's delay + its duration —
+        //    so every card visibly lands inside the doorway before we
+        //    close the door over them.
+        board.classList.add('is-hiding');
+        const lastHideDelay = (BASE_DELAY + Math.max(0, oldVisibleCount - 1) * CARD_STAGGER) * HIDE_STAGGER_MULT;
+        await wait((lastHideDelay + HIDE_DURATION) * 1000 + 80);
+
+        // 3. Cards are now all visibly tucked in the garage. Remove
+        //    both classes — cards fall back to the default CSS state
+        //    (also the tuck position), so no visual jump.
+        board.classList.remove('is-hiding');
+        board.classList.remove('is-visible');
+
+        // 4. Apply the new filter. Some cards become display:none,
+        //    others come back into layout. Cards' tuck vars are now
+        //    stale for the cards being re-added, so re-tuck below.
+        applyFilter(newFilter);
+
+        // 5. Close the door over the stacked cards — "loading the
+        //    new selection". Cards are inside; door shields them.
+        closeDoor();
+        await wait(1000);
+
+        // 6. Re-open the door, revealing the new set of cards inside.
+        openDoor();
+        await wait(350);
+
+        // 7. Re-measure tuck positions with the new filter applied.
+        //    Uses a dedicated custom event so only the tuck logic
+        //    responds (not every resize handler on the page).
+        window.dispatchEvent(new CustomEvent('mbi-retuck'));
+
+        // 8. Force layout flush, then re-add .is-visible so the
+        //    emerge animation restarts from the (freshly measured)
+        //    tuck position.
+        void board.offsetHeight;
+        board.classList.add('is-visible');
+
+        // Wait for the new cascade to finish before closing the door.
+        const newVisibleCount = cards.filter((c) => !c.hasAttribute('hidden')).length;
+        const lastEmergeDelay = BASE_DELAY + Math.max(0, newVisibleCount - 1) * CARD_STAGGER;
+        await wait((lastEmergeDelay + EMERGE_DURATION) * 1000 + 100);
+
+        // 9. Close the door one more time so tap-to-peek remains active.
+        closeDoor();
+      } finally {
+        isReflowing = false;
+        chips.forEach((c) => (c.disabled = false));
+      }
+    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        if (isReflowing) return;
+        const newFilter = chip.getAttribute('data-mbi-filter') ?? 'all';
+        // No-op if clicking the already-active chip — don't run the
+        // whole reflow for zero visible change.
+        if (chip.getAttribute('aria-selected') === 'true') return;
+
+        chips.forEach((c) => c.setAttribute('aria-selected', c === chip ? 'true' : 'false'));
+        reflow(newFilter);
+      });
+    });
+  })();
+
+  // I'm Feeling Lucky — picks a random REAL post (skipping placeholders
+  // by querying only proper <a> card links) and navigates to it. Uses
+  // the DOM as the source of truth so the button auto-updates when
+  // posts are added or removed.
+  (() => {
+    const lucky = document.querySelector<HTMLButtonElement>('[data-mbi-lucky]');
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a.mbi-card-link'));
+    if (!lucky || links.length === 0) return;
+    lucky.addEventListener('click', () => {
+      const pick = links[Math.floor(Math.random() * links.length)];
+      window.location.href = pick.href;
+    });
+  })();
+</script>

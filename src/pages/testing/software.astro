@@ -1,0 +1,854 @@
+---
+/**
+ * /testing/software — Evium driver app download page (sandbox).
+ *
+ * The live /solutions/software placeholder just linked out to the App
+ * Store. This version presents a proper dual-store choice: Apple on
+ * the left, Google Play on the right, divided by a slanted line that
+ * borrows the visual language of the header battery's skewed nav
+ * dividers. The iPhone mockup rises from the divider on scroll-in
+ * and sits as the centerpiece of the composition.
+ *
+ * Store URLs are placeholders — wire them up to the real App Store /
+ * Play Store listings when the app is published.
+ */
+import Layout from '../../layouts/Layout.astro';
+
+// Placeholder URLs. Swap these out when the real listings go live.
+const APPLE_URL  = 'https://apps.apple.com/app/evium';
+const GOOGLE_URL = 'https://play.google.com/store/apps/details?id=com.evium';
+
+// Skew applied to the Apple|Google divider (the boundary between the
+// two half-fills). Signed OPPOSITE to the white horizontal slant
+// (slant rotates -10°, leaning up-right; this seam tans -30°, leaning
+// up-left) so the two diagonals form a subtle X over the composition.
+const HALF_SKEW_TAN = Math.tan(-30 * Math.PI / 180);
+
+// Bulleted features — same list used on both sides so the user
+// sees consistent value whichever platform they tap.
+const features = [
+  {
+    title: 'Real-time availability',
+    body:  'Green, in-use, or offline — live status on every station across the Evium network.',
+  },
+  {
+    title: 'Instant activation',
+    body:  'Tap to start a session. No RFID cards, no juggling accounts.',
+  },
+  {
+    title: 'Smart route planning',
+    body:  'Find the right charger on your route by power, price, or speed.',
+  },
+  {
+    title: 'Session history + receipts',
+    body:  'Every session logged, every kWh metered, every receipt a tap away.',
+  },
+];
+---
+
+<Layout title="Get the App — Testing — Evium Charging">
+  <main class="sw-root" aria-label="Evium app download">
+
+    {/* ─── TITLE BLOCK ─── above-the-fold intro. */}
+    <header class="sw-header">
+      <p class="sw-eyebrow">
+        <span class="sw-eyebrow-dash" aria-hidden="true"></span>
+        Evium Mobile App
+        <span class="sw-eyebrow-dash" aria-hidden="true"></span>
+      </p>
+      <h1 class="sw-title">Charge smarter with the Evium app.</h1>
+      <p class="sw-sub">
+        Access thousands of stations across the Evium network. Real-time availability,
+        instant activation, and smart routing — on the phone that's already in your pocket.
+      </p>
+    </header>
+
+    {/* ─── SPLIT STAGE ─── Apple ▏Google, divided by a skewed line. */}
+    <section class="sw-stage" data-sw-stage>
+
+      {/* Background halves — divided by a SLANTED seam leaning the
+          opposite direction from the white horizontal slant below.
+          Each half is a solid flat fill (no gradients) so the diagonal
+          seam reads as a single clean dividing line between two
+          distinct solid regions — one blue, one green. The clip-path
+          cuts each half along that diagonal; together they perfectly
+          tile the stage with no gap or overlap. */}
+      <div
+        class="sw-half sw-half--apple"
+        style={`clip-path: polygon(0 0, calc(50% + (50vh * ${HALF_SKEW_TAN})) 0, calc(50% - (50vh * ${HALF_SKEW_TAN})) 100%, 0 100%);`}
+        aria-hidden="true"
+      ></div>
+      <div
+        class="sw-half sw-half--google"
+        style={`clip-path: polygon(calc(50% + (50vh * ${HALF_SKEW_TAN})) 0, 100% 0, 100% 100%, calc(50% - (50vh * ${HALF_SKEW_TAN})) 100%);`}
+        aria-hidden="true"
+      ></div>
+
+      {/* White slant — near-horizontal diagonal rule, the single
+          visible line running across the composition. */}
+      <div class="sw-divider" aria-hidden="true"></div>
+
+      {/* ─── APPLE SIDE ─── clickable link covering the left half. */}
+      <a class="sw-side sw-side--apple" href={APPLE_URL} aria-label="Download on the App Store">
+        <div class="sw-side-inner">
+          <svg class="sw-platform-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.44-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.44C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
+          </svg>
+          <p class="sw-side-platform">iPhone &middot; iPad</p>
+          <h2 class="sw-side-headline">Get it for iOS</h2>
+          <p class="sw-side-note">Requires iOS 13 or later.</p>
+          <div class="sw-badge">
+            <svg class="sw-badge-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.44-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.44C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
+            </svg>
+            <span class="sw-badge-text">
+              <span class="sw-badge-small">Download on the</span>
+              <span class="sw-badge-large">App Store</span>
+            </span>
+          </div>
+          <span class="sw-side-hint">
+            Tap anywhere on this side
+            <svg viewBox="0 0 12 12" aria-hidden="true" class="sw-hint-arrow"><path d="M7 2l4 4-4 4M2 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </span>
+        </div>
+      </a>
+
+      {/* ─── GOOGLE PLAY SIDE ─── clickable link covering the right half. */}
+      <a class="sw-side sw-side--google" href={GOOGLE_URL} aria-label="Get it on Google Play">
+        <div class="sw-side-inner">
+          <svg class="sw-platform-icon" viewBox="0 0 24 24" aria-hidden="true"
+               fill="none" stroke="currentColor" stroke-width="1.2"
+               stroke-linejoin="round" stroke-linecap="round">
+            {/* Google Play — canonical simple-icons geometry, the 4
+                actual shards of the Google Play brand mark, rendered
+                as outlines. With `fill="none"` each shard's interior
+                becomes an empty triangular GAP bounded by stroke:
+                  · Shard 1 — right cap (folded tip)
+                  · Shard 2 — left shard (big pointy-right triangle)
+                  · Shard 3 — top shard (thin wedge along top edge)
+                  · Shard 4 — bottom shard (thin wedge along bottom)
+                Fetched verbatim from the simple-icons repo for the
+                `googleplay` icon — this IS the real brand mark. */}
+            <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z"/>
+            <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z"/>
+            <path d="M13.544 10.989l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z"/>
+            <path d="M13.544 13.056l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/>
+          </svg>
+          <p class="sw-side-platform">Android &middot; Samsung Galaxy</p>
+          <h2 class="sw-side-headline">Get it for Android</h2>
+          <p class="sw-side-note">Requires Android 8 (Oreo) or later.</p>
+          <div class="sw-badge">
+            <svg class="sw-badge-icon" viewBox="0 0 24 24" aria-hidden="true"
+                 fill="none" stroke="currentColor" stroke-width="1.4"
+                 stroke-linejoin="round" stroke-linecap="round">
+              <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z"/>
+              <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z"/>
+              <path d="M13.544 10.989l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z"/>
+              <path d="M13.544 13.056l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/>
+            </svg>
+            <span class="sw-badge-text">
+              <span class="sw-badge-small">Get it on</span>
+              <span class="sw-badge-large">Google Play</span>
+            </span>
+          </div>
+          <span class="sw-side-hint">
+            Tap anywhere on this side
+            <svg viewBox="0 0 12 12" aria-hidden="true" class="sw-hint-arrow"><path d="M7 2l4 4-4 4M2 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </span>
+        </div>
+      </a>
+
+      {/* ─── PHONE CENTERPIECE ─── sits on the divider, rises on scroll-in.
+           The OUTER .sw-phone-area wrapper spans the full stage and
+           uses a hard-cut mask at y=55% (= the slant line). Anything
+           the phone renders BELOW that line is clipped invisibly —
+           so the phone is only ever visible above the white slant,
+           regardless of how tucked/risen it is. `pointer-events:none`
+           keeps clicks flowing through to the half-links behind. */}
+      <div class="sw-phone-area" aria-hidden="true">
+        <div class="sw-phone-wrap">
+          <div class="sw-phone-glow" aria-hidden="true"></div>
+          <img
+            src="/images/iphone.png"
+            alt=""
+            class="sw-phone"
+            draggable="false"
+          />
+        </div>
+      </div>
+
+      {/* ─── OWNER PORTAL LINK ─── centered below the slant. Mirrors
+           the store-badge pattern on the sides (icon + two-line text)
+           so the three CTAs read as a set. Arrow on the right
+           provides the forward-motion cue and slides on hover. */}
+      <a class="sw-owner-link" href="https://portal.eviumcharging.com">
+        <svg class="sw-owner-icon" viewBox="0 0 24 24" aria-hidden="true"
+             fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linejoin="round" stroke-linecap="round">
+          {/* Dashboard / grid icon — represents the portal's panel view. */}
+          <rect x="3"  y="3"  width="7" height="7" rx="1.2"/>
+          <rect x="14" y="3"  width="7" height="7" rx="1.2"/>
+          <rect x="3"  y="14" width="7" height="7" rx="1.2"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.2"/>
+        </svg>
+        <span class="sw-owner-text">
+          <span class="sw-owner-small">For station owners</span>
+          <span class="sw-owner-large">Access the Owner Portal</span>
+        </span>
+        <svg class="sw-owner-arrow" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6 3l5 5-5 5M1 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+    </section>
+
+    {/* ─── FEATURES STRIP ─── four-up feature cards below the stage. */}
+    <section class="sw-features" aria-label="App features">
+      {features.map((f) => (
+        <article class="sw-feature">
+          <h3 class="sw-feature-title">{f.title}</h3>
+          <p class="sw-feature-body">{f.body}</p>
+        </article>
+      ))}
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .sw-root {
+    background: #0d1a22;
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TITLE BLOCK ───────────────────────────────────────────── */
+  .sw-header {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 96px) 24px clamp(28px, 4vw, 44px);
+    text-align: center;
+  }
+  .sw-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 14px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #2DC856;
+  }
+  .sw-eyebrow-dash {
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+  }
+  .sw-title {
+    margin: 0 0 14px;
+    font-size: clamp(1.9rem, 4.2vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-wrap: balance;
+  }
+  .sw-sub {
+    margin: 0 auto;
+    max-width: 52ch;
+    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.65);
+    text-wrap: pretty;
+  }
+
+  /* ─── SPLIT STAGE ───────────────────────────────────────────── */
+  .sw-stage {
+    position: relative;
+    width: 100%;
+    /* Sized so (a) the slant at top:68% still sits inside the initial
+       viewport fold on typical desktops, and (b) the area ABOVE the
+       slant (68% of stage) is tall enough to fit the phone's fully-
+       risen position without its top spilling above the stage. */
+    height: clamp(600px, 72vh, 820px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Half-background fills — straight vertical L/R split with distinct
+     gradient tints (Apple cool-grey, Google green-tinted). The halves
+     live behind everything; the slant + floor (below) cross on top. */
+  .sw-half {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* PURE flat fills — one solid color per half. No linear gradient,
+     no radial accent. The previous radial accents (a big light-blue
+     ellipse on Apple, a green one on Google) each spanned 100% of
+     their half's width, which read as a THIRD coloured region
+     hovering between the two flat bases. Removing them leaves the
+     composition with exactly what was asked for: one solid blue on
+     the left, one solid green on the right, one slanted divider
+     between them, nothing else. */
+  .sw-half--apple  { left: 0;  background: #172a3c; }
+  .sw-half--google { right: 0; background: #142a1d; }
+
+  /* Slant — near-horizontal diagonal rule at y=75% of the stage.
+     Angle softened further to -5° and overhang reduced from -10%/
+     -10% to -5%/-5%, which lifts the LEFT-corner endpoint ~30px
+     higher so it sits inside the initial viewport fold on typical
+     desktop screens (previously the left corner was dropping just
+     off the bottom of the visible area). Gradient fade-in/out tight-
+     ened to 5%/95% so the bar reaches full opacity close to the
+     stage's left/right edges, making the left corner visually land
+     on-screen without a long low-opacity tail. */
+  .sw-divider {
+    position: absolute;
+    top: 75%;
+    left: -5%;
+    right: -5%;
+    height: 6px;
+    margin-top: -3px;
+    background: linear-gradient(
+      to right,
+      rgba(244, 242, 232, 0) 0%,
+      rgba(244, 242, 232, 0.95) 5%,
+      rgba(244, 242, 232, 0.95) 95%,
+      rgba(244, 242, 232, 0) 100%
+    );
+    transform: rotate(-5deg);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow:
+      0 0 12px rgba(45, 200, 86, 0.5),
+      0 0 32px rgba(45, 200, 86, 0.2);
+  }
+
+  /* ─── SIDE TILES ─── full-height clickable halves. */
+  .sw-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 2;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sw-side--apple  { left: 0;  }
+  .sw-side--google { right: 0; }
+  /* Hover fills — subtle lift on the active half. */
+  .sw-side--apple:hover {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, transparent 80%);
+  }
+  .sw-side--google:hover {
+    background: linear-gradient(270deg, rgba(45, 200, 86, 0.05) 0%, transparent 80%);
+  }
+
+  /* Inner content block for each side — positioned in the UPPER HALF
+     of the stage (above the slant at y=50%). Below-slant area is
+     covered by the floor, so anything placed there would be hidden;
+     content lives in the visible upper region. */
+  .sw-side-inner {
+    position: absolute;
+    top: clamp(28px, 5vw, 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 0;
+    max-width: 380px;
+  }
+  .sw-side--apple .sw-side-inner {
+    left: clamp(24px, 6vw, 70px);
+    text-align: left;
+  }
+  .sw-side--google .sw-side-inner {
+    right: clamp(24px, 6vw, 70px);
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .sw-platform-icon {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+  }
+  .sw-side--google .sw-platform-icon { color: #2DC856; }
+
+  .sw-side-platform {
+    margin: 2px 0 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .sw-side-headline {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+  .sw-side-note {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Store badge — dark pill with platform mark and two-line label.
+     Sized to closely echo the official App Store / Google Play marks
+     without reproducing their exact artwork. */
+  .sw-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 10px 16px;
+    background: #0a1218;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .sw-side:hover .sw-badge {
+    background: #111c24;
+    border-color: rgba(45, 200, 86, 0.55);
+    transform: translateY(-1px);
+  }
+  .sw-badge-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    color: #ffffff;
+  }
+  .sw-side--google .sw-badge-icon { color: #2DC856; }
+  .sw-badge-text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .sw-badge-small {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .sw-badge-large {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+
+  /* Hint — "tap anywhere on this side" prompt below the badge.
+     Appears on hover to reinforce the clickable-half behavior. */
+  .sw-side-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(45, 200, 86, 0.75);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .sw-side--google .sw-side-hint {
+    transform: translateX(4px);
+  }
+  .sw-side:hover .sw-side-hint { opacity: 1; transform: translateX(0); }
+  .sw-hint-arrow {
+    width: 12px;
+    height: 12px;
+  }
+  .sw-side--apple .sw-hint-arrow { transform: rotate(180deg); }
+
+  /* ─── PHONE CENTERPIECE ───────────────────────────────────────
+     Stacking: half fills (0) < phone-area (1) < side content (2) < divider (10).
+
+     The .sw-phone-area wrapper spans the FULL stage and applies a
+     hard-cut `mask-image` at y=55% (= the slant line). Any part of
+     the phone that falls BELOW the slant is clipped invisibly by
+     this mask, so the phone is only ever visible above the line —
+     regardless of how tucked/risen it is. This replaces the older
+     "floor cover div" approach and works cleanly across the diagonal
+     half-seam (the mask is just an alpha cut, color-agnostic).
+
+     Motion is scroll-driven: a JS scroll listener tracks the stage's
+     position in the viewport and writes `--sw-progress` (0 → 1) on
+     .sw-phone-wrap. The CSS transform interpolates vertical position
+     off that variable; opacity is constant at 1 (phone never fades). */
+  .sw-phone-area {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    /* Clip follows the slant's ANGLE, not just its center. The slant
+       is rotated -5° around (50%W, 75%H), so its y-coord at any x is:
+       75%H − tan(5°) × (x − 50%W). With tan(5°) ≈ 0.0875 and stage
+       width = 100vw, the deviation from 75% at the left/right edges
+       is ±tan(5°) × 50vw = ±4.375vw. This 4-point polygon clips
+       along the slant's actual line, so the phone's visible region
+       ends exactly at the bar, edge-to-edge. */
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% calc(75% - 4.375vw),
+      0% calc(75% + 4.375vw)
+    );
+  }
+
+  .sw-phone-wrap {
+    position: absolute;
+    left: 50%;
+    /* Anchored to the slant line (y=75%) rather than stage center, so
+       the translateY % math below is relative to the slant itself. */
+    top: 75%;
+    width: clamp(260px, 28vw, 360px);
+    --sw-progress: 0;
+    /* Travel range — phone starts clearly peeking above the slant,
+       and at progress 1 it's shifted ALL the way up so the phone's
+       BOTTOM (home-indicator area) lands on the slant:
+         · progress 0 → translateY(35%). Phone center 35% of phone-
+           height below slant → phone top is 15% above slant (~105px
+           of visible peek on a 700px-tall phone).
+         · progress 1 → translateY(-50%). Phone center 50% of phone-
+           height above slant → phone BOTTOM sits exactly at the
+           slant line. The phone's top (camera/notch bar) is now
+           clipped above the stage top, which is fine — the user
+           cares about the SCREEN content, and pushing the phone up
+           this far maximizes how much of the screen/app UI is
+           visible in the above-slant window.
+       Total travel = 85% of phone height. The slanted clip-path
+       hard-cuts everything below the slant regardless of position. */
+    transform:
+      translate(-50%, -50%)
+      translateY(calc(35% - (85% * var(--sw-progress))));
+    will-change: transform;
+  }
+  .sw-phone {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    filter:
+      drop-shadow(0 18px 30px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+    user-select: none;
+    /* No bottom fade mask — the phone-area's hard cut at the slant
+       handles hiding the asset's abrupt bottom edge. The asset's
+       cut edge only matters if it crosses above the slant, which
+       never happens given the translateY range above (phone bottom
+       never goes above slant). */
+  }
+  /* Soft green halo behind the phone — ties it to the Evium brand
+     and reinforces the sense that it's emerging from the divider's
+     green hairline glow. */
+  .sw-phone-glow {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    width: 88%;
+    height: 80%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse 60% 70% at 50% 50%,
+      rgba(45, 200, 86, 0.28) 0%,
+      rgba(45, 200, 86, 0.08) 40%,
+      transparent 72%
+    );
+    filter: blur(24px);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sw-phone-wrap {
+      --sw-progress: 1;
+      transform: translate(-50%, -50%) translateY(-50%);
+    }
+  }
+
+  /* ─── OWNER PORTAL LINK ─────────────────────────────────────────
+     Horizontal [icon | 2-line text | arrow] badge, mirroring the
+     App Store / Google Play badge pattern on the sides so all three
+     CTAs read as a cohesive set. Solid dark fill with a green-accent
+     border, rounded rectangle (10px) — matching the store badges'
+     border-radius instead of the prior full-pill shape. */
+  .sw-owner-link {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(20px, 3.5vw, 42px);
+    transform: translateX(-50%);
+    z-index: 11;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 12px 22px;
+    background: #0a1218;
+    border: 1px solid rgba(45, 200, 86, 0.4);
+    border-radius: 10px;
+    box-shadow:
+      0 10px 28px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+
+    transition:
+      background 0.22s ease,
+      border-color 0.22s ease,
+      transform 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+  .sw-owner-link:hover,
+  .sw-owner-link:focus-visible {
+    background: #111c24;
+    border-color: #2DC856;
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow:
+      0 16px 36px rgba(0, 0, 0, 0.55),
+      0 0 32px rgba(45, 200, 86, 0.25),
+      0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+    outline: none;
+  }
+
+  .sw-owner-icon {
+    width: 26px;
+    height: 26px;
+    color: #2DC856;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 4px rgba(45, 200, 86, 0.35));
+  }
+  .sw-owner-text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .sw-owner-small {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .sw-owner-large {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+  .sw-owner-arrow {
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    color: #2DC856;
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+  }
+  .sw-owner-link:hover .sw-owner-arrow,
+  .sw-owner-link:focus-visible .sw-owner-arrow {
+    transform: translateX(5px);
+  }
+
+  /* ─── FEATURES STRIP ────────────────────────────────────────── */
+  .sw-features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    padding: clamp(32px, 5vw, 60px) clamp(24px, 5vw, 48px) clamp(48px, 7vw, 80px);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .sw-feature {
+    padding: 20px 22px 22px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 2px solid rgba(45, 200, 86, 0.5);
+    border-radius: 10px;
+  }
+  .sw-feature-title {
+    margin: 0 0 8px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: -0.005em;
+    color: #ffffff;
+  }
+  .sw-feature-body {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* ─── RESPONSIVE: narrower phones/tablets ─────────────────────
+     Same overall composition (half fills + slant + floor + phone)
+     but the horizontal slant stretches further beyond the edges so
+     its endpoints stay off-screen, side content compresses into the
+     tighter upper-half, and the phone shrinks to fit. */
+  @media (max-width: 860px) {
+    .sw-stage {
+      height: clamp(560px, 86vh, 780px);
+    }
+    .sw-side-inner,
+    .sw-side--apple .sw-side-inner,
+    .sw-side--google .sw-side-inner {
+      max-width: 300px;
+      padding: 10px 0;
+      gap: 8px;
+      top: clamp(20px, 4vw, 40px);
+    }
+    .sw-side-hint { display: none; }
+    .sw-phone-wrap {
+      width: clamp(200px, 38vw, 280px);
+      /* Shorten the rise on mobile. Desktop travels 85 % of phone-
+         height (35 % → -50 %) so the phone bottom lands exactly at
+         the slant. On narrow screens the iPhone asset's edge started
+         peeking past the slant as the phone reached its rest
+         position — this 50 % travel (35 % → -15 %) stops the rise
+         earlier so the phone is still anchored comfortably above
+         the slant line without revealing the PNG's cut edge.
+         Desktop's behavior is untouched — the base rule still
+         applies above 860 px. */
+      transform:
+        translate(-50%, -50%)
+        translateY(calc(35% - (50% * var(--sw-progress))));
+    }
+    .sw-features {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .sw-owner-link  { padding: 10px 18px; gap: 11px; }
+    .sw-owner-icon  { width: 22px; height: 22px; }
+    .sw-owner-small { font-size: 0.55rem; letter-spacing: 0.16em; }
+    .sw-owner-large { font-size: 0.95rem; }
+  }
+  @media (max-width: 520px) {
+    .sw-features { grid-template-columns: 1fr; }
+    /* On very narrow screens, side copy + badges need more room than
+       half-width allows. Temporarily let each side span full width
+       and stack vertically on top/bottom halves of the upper zone. */
+    .sw-side-inner {
+      max-width: none;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .sw-side--apple .sw-side-inner {
+      left: 0;
+      right: 0;
+      top: clamp(16px, 4vw, 28px);
+    }
+    .sw-side--google .sw-side-inner {
+      left: 0;
+      right: 0;
+      top: auto;
+      /* Google content sits in the UPPER-right region lower than Apple,
+         but still above slant — put it at ~25% down so it doesn't
+         overlap the Apple block above. */
+      top: 25%;
+      align-items: center;
+      text-align: center;
+    }
+    .sw-side--apple .sw-side-inner { align-items: center; text-align: center; }
+  }
+</style>
+
+<script>
+  /*
+   * Scroll-linked phone animation. Writes a progress value (0-1) on
+   * .sw-phone-wrap as `--sw-progress`; the CSS transform interpolates
+   * the phone's vertical position and opacity off that variable.
+   *
+   * Progress mapping:
+   *   · Progress 0 — stage has not yet reached the "reveal" zone.
+   *     Phone rests below the slant, completely hidden behind the
+   *     floor (translateY ~80%, opacity 0).
+   *   · Progress 1 — stage has scrolled fully into view. Phone has
+   *     risen up through the slant into its centered rest position
+   *     (translateY ~-8%, opacity 1).
+   *
+   * The reveal zone is tied to the stage's own position in the
+   * viewport. As the user scrolls the page, the stage moves up; we
+   * compute how much of it has entered the viewport's vertical range
+   * and translate that 0-1 progress onto the phone.
+   *
+   * Uses `requestAnimationFrame` scheduling — at most one update per
+   * frame regardless of scroll event rate — so the listener is cheap.
+   * `prefers-reduced-motion` short-circuits to progress:1 with no
+   * listeners attached.
+   */
+  (() => {
+    const stage    = document.querySelector<HTMLElement>('[data-sw-stage]');
+    const phoneWrap = document.querySelector<HTMLElement>('.sw-phone-wrap');
+    if (!stage || !phoneWrap) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      phoneWrap.style.setProperty('--sw-progress', '1');
+      return;
+    }
+
+    let rafId: number | null = null;
+
+    function update() {
+      rafId = null;
+      if (!stage || !phoneWrap) return;
+      const rect = stage.getBoundingClientRect();
+      const vh   = window.innerHeight;
+
+      // Progress mapping tuned so the phone (a) stays fully TUCKED on
+      // initial page load (even if the stage is partially visible
+      // below the header) and (b) rises SLOWLY across a long scroll
+      // range so the motion feels deliberate, not abrupt:
+      //   · stage top at 30% vh or below → progress 0 (tucked)
+      //   · stage top at −45% vh         → progress 1 (fully risen)
+      // Total scroll range ≈ 75% of viewport height — completing the
+      // phone's rise takes roughly three-quarters of a viewport of
+      // scroll, which reads as a satisfying, product-reveal rise
+      // rather than a quick snap. endAt is NEGATIVE (past the top)
+      // which means the animation can still be in progress while the
+      // stage is scrolling past the top of the viewport.
+      const startAt = vh * 0.30;
+      const endAt   = vh * -0.45;
+      const raw     = (startAt - rect.top) / (startAt - endAt);
+      const progress = Math.max(0, Math.min(1, raw));
+
+      // Soft ease-out so the phone decelerates as it nears rest.
+      const eased = 1 - Math.pow(1 - progress, 2.2);
+
+      phoneWrap.style.setProperty('--sw-progress', eased.toFixed(4));
+    }
+
+    function onScroll() {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    // Initial call so the progress value is correct on first paint
+    // (e.g. user navigates to a fragment URL that lands them mid-stage).
+    update();
+  })();
+</script>

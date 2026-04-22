@@ -1,0 +1,554 @@
+---
+/**
+ * StateInstallationsPage — shared layout for every /locations/[state] page.
+ *
+ * Each state page imports Layout + this component and passes a `stateAbbr`.
+ * Everything else (title, installations, photo galleries, empty state) is
+ * driven from src/data/states.ts, so adding a new install is a one-line
+ * change there and this component picks it up.
+ *
+ * Matches the premium dark aesthetic of the Locations Map page. Renders:
+ *  - Back-to-map breadcrumb
+ *  - Hero with state name + install count
+ *  - Grid of project cards, each with a photo strip (first 4 photos)
+ *  - Expand-to-gallery on click (lightbox-style)
+ *  - Empty-state CTA for states that don't have installs yet
+ */
+
+import { STATE_BY_ABBR } from '../data/states';
+
+interface Props {
+  stateAbbr: string;
+}
+const { stateAbbr } = Astro.props as Props;
+const state = STATE_BY_ABBR[stateAbbr];
+if (!state) {
+  throw new Error(`StateInstallationsPage: unknown state abbr "${stateAbbr}"`);
+}
+
+const hasInstalls = state.installations.length > 0;
+const totalPhotos = state.installations.reduce((sum, i) => sum + i.photoCount, 0);
+---
+
+<main class="state-root" aria-label={`${state.name} installations`}>
+  <div class="state-bloom" aria-hidden="true"></div>
+
+  <!-- Back link -->
+  <nav class="state-breadcrumb" aria-label="Breadcrumb">
+    <a href="/#locations-map" class="back-link">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>All locations</span>
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <header class="state-hero">
+    <p class="state-abbr" aria-hidden="true">{state.abbr}</p>
+    <h1 class="state-title">{state.name}</h1>
+    {hasInstalls ? (
+      <p class="state-meta">
+        <span class="meta-num">{state.installations.length}</span>
+        <span class="meta-label">{state.installations.length === 1 ? 'installation' : 'installations'}</span>
+        <span class="meta-dot">·</span>
+        <span class="meta-num">{totalPhotos}</span>
+        <span class="meta-label">photos documented</span>
+      </p>
+    ) : (
+      <p class="state-meta state-meta-soft">
+        Active service area — installations in planning.
+      </p>
+    )}
+  </header>
+
+  {hasInstalls ? (
+    <section class="state-grid" aria-label={`${state.name} projects`}>
+      {state.installations.map((p, idx) => {
+        const photos = Array.from({ length: p.photoCount }, (_, i) => {
+          const n = String(i + 1).padStart(2, '0');
+          return `${p.photoDir}/${n}.jpg`;
+        });
+        const previews = photos.slice(0, 4);
+        return (
+          <article class="project-card" data-project={p.slug} data-photo-count={p.photoCount}>
+            <div class="project-media">
+              <div class="media-main" style={`background-image: url('${previews[0]}')`}></div>
+              <div class="media-side">
+                {previews.slice(1, 4).map((src, i) => (
+                  <div class="media-thumb" style={`background-image: url('${src}')`} data-thumb-index={i + 1}></div>
+                ))}
+              </div>
+              {p.photoCount > 4 && (
+                <button class="media-more" type="button" aria-label={`View all ${p.photoCount} photos for ${p.title}`}>
+                  +{p.photoCount - 4}
+                </button>
+              )}
+            </div>
+            <div class="project-body">
+              <p class="project-idx">Project {String(idx + 1).padStart(2, '0')}</p>
+              <h2 class="project-title">{p.title}</h2>
+              <p class="project-city">{p.city}</p>
+              <p class="project-stats">
+                <span class="project-stat">{p.photoCount} photos</span>
+              </p>
+            </div>
+          </article>
+        );
+      })}
+    </section>
+  ) : (
+    <section class="state-empty">
+      <div class="empty-card">
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="40" height="40">
+            <rect x="14" y="6" width="20" height="36" rx="2" fill="none" stroke="#2DC856" stroke-width="2"/>
+            <path d="M20 14h8M20 20h8" stroke="#2DC856" stroke-width="2" stroke-linecap="round"/>
+            <path d="M22 26l-2 6h4l-2 6" stroke="#2DC856" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>We're building in {state.name}.</h2>
+        <p>
+          {state.name} is on our active service map. We haven't documented a
+          public installation here yet — but our team can scope, design, and
+          deliver a turnkey EV charging project for your property today.
+        </p>
+        <div class="empty-actions">
+          <a href="/contact/quote" class="btn btn-primary">Get a free site assessment</a>
+          <a href="/#locations-map" class="btn btn-ghost">See where we are</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Lightbox for full galleries -->
+  <div class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+    <button class="lightbox-close" type="button" aria-label="Close gallery">×</button>
+    <button class="lightbox-prev"  type="button" aria-label="Previous photo">‹</button>
+    <button class="lightbox-next"  type="button" aria-label="Next photo">›</button>
+    <div class="lightbox-stage">
+      <img class="lightbox-img" alt="" />
+    </div>
+    <p class="lightbox-caption" aria-live="polite"></p>
+  </div>
+
+  <!-- Data embedded for the lightbox -->
+  <script type="application/json" id="state-projects-data" set:html={JSON.stringify(
+    state.installations.map(p => ({
+      slug: p.slug,
+      title: p.title,
+      city: p.city,
+      photos: Array.from({ length: p.photoCount }, (_, i) => `${p.photoDir}/${String(i + 1).padStart(2, '0')}.jpg`)
+    }))
+  )} />
+</main>
+
+<style>
+  .state-root {
+    position: relative;
+    min-height: 100vh;
+    padding: 120px 5vw 100px;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 38%, #0E1C22 0%, #060C10 60%, #020608 100%);
+    color: #E6F0EC;
+    overflow: hidden;
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .state-bloom {
+    position: absolute;
+    left: 60%;
+    top: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse 50% 40% at 50% 50%,
+      rgba(45, 200, 86, 0.12) 0%,
+      rgba(45, 200, 86, 0.04) 45%,
+      rgba(0,0,0,0) 75%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .state-breadcrumb {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto 28px;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(230, 240, 236, 0.55);
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+  .back-link:hover { color: #2DC856; }
+
+  /* ── Hero ─────────────────────────────────────────────── */
+  .state-hero {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto 56px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(45, 200, 86, 0.15);
+  }
+  .state-abbr {
+    font-size: clamp(5rem, 12vw, 11rem);
+    font-weight: 900;
+    color: rgba(45, 200, 86, 0.08);
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+    margin: 0 0 -1rem;
+    user-select: none;
+  }
+  .state-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+  }
+  .state-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: rgba(230, 240, 236, 0.68);
+    margin: 0;
+    flex-wrap: wrap;
+  }
+  .state-meta .meta-num { color: #2DC856; font-weight: 800; font-size: 1.1rem; }
+  .state-meta .meta-label { letter-spacing: 0.01em; }
+  .state-meta .meta-dot { color: rgba(230, 240, 236, 0.3); }
+  .state-meta-soft { color: rgba(230, 240, 236, 0.55); font-style: italic; }
+
+  /* ── Grid ─────────────────────────────────────────────── */
+  .state-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 28px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .project-card {
+    position: relative;
+    background: rgba(14, 28, 34, 0.85);
+    border: 1px solid rgba(45, 200, 86, 0.18);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  }
+  .project-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(45, 200, 86, 0.45);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  }
+
+  .project-media {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2px;
+    height: 260px;
+    background: #020608;
+  }
+  .media-main {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: zoom-in;
+  }
+  .media-side {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .media-thumb {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: zoom-in;
+    transition: opacity 160ms ease;
+  }
+  .media-thumb:hover { opacity: 0.85; }
+
+  .media-more {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    background: rgba(6, 14, 18, 0.92);
+    border: 1px solid rgba(45, 200, 86, 0.5);
+    color: #2DC856;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .media-more:hover { background: #2DC856; color: #020608; }
+
+  .project-body {
+    padding: 22px 24px 24px;
+  }
+  .project-idx {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin: 0 0 8px;
+  }
+  .project-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 4px;
+    letter-spacing: -0.005em;
+  }
+  .project-city {
+    font-size: 0.88rem;
+    color: rgba(230, 240, 236, 0.55);
+    margin: 0 0 10px;
+  }
+  .project-stats { margin: 0; }
+  .project-stat {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: rgba(45, 200, 86, 0.1);
+    color: #2DC856;
+    border-radius: 3px;
+  }
+
+  /* ── Empty state ──────────────────────────────────────── */
+  .state-empty {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 40px auto 0;
+  }
+  .empty-card {
+    background: rgba(14, 28, 34, 0.85);
+    border: 1px solid rgba(45, 200, 86, 0.18);
+    border-radius: 10px;
+    padding: 48px 44px;
+    text-align: center;
+  }
+  .empty-icon {
+    display: inline-flex;
+    margin-bottom: 18px;
+    padding: 16px;
+    background: rgba(45, 200, 86, 0.08);
+    border-radius: 50%;
+  }
+  .empty-card h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .empty-card p {
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: rgba(230, 240, 236, 0.65);
+    margin: 0 0 28px;
+  }
+  .empty-actions {
+    display: inline-flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+  .btn-primary {
+    background: #2DC856;
+    color: #020608;
+  }
+  .btn-primary:hover { background: #48E672; }
+  .btn-ghost {
+    border: 1px solid rgba(45, 200, 86, 0.4);
+    color: rgba(230, 240, 236, 0.8);
+  }
+  .btn-ghost:hover { border-color: #2DC856; color: #2DC856; }
+
+  /* ── Lightbox ─────────────────────────────────────────── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(2, 6, 8, 0.96);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .lightbox.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lightbox-stage {
+    max-width: 92vw;
+    max-height: 82vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-img {
+    max-width: 92vw;
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .lightbox-caption {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.88rem;
+    color: rgba(230, 240, 236, 0.7);
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .lightbox-close,
+  .lightbox-prev,
+  .lightbox-next {
+    position: absolute;
+    background: rgba(14, 28, 34, 0.85);
+    border: 1px solid rgba(45, 200, 86, 0.3);
+    color: #E6F0EC;
+    font-size: 1.6rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  }
+  .lightbox-close:hover,
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    background: #2DC856;
+    color: #020608;
+    border-color: #2DC856;
+  }
+  .lightbox-close { top: 24px; right: 24px; font-size: 1.8rem; }
+  .lightbox-prev  { left: 24px;  top: 50%; transform: translateY(-50%); }
+  .lightbox-next  { right: 24px; top: 50%; transform: translateY(-50%); }
+
+  @media (max-width: 700px) {
+    .project-media { height: 210px; }
+    .state-grid { grid-template-columns: 1fr; }
+    .empty-card { padding: 32px 22px; }
+  }
+</style>
+
+<script>
+  (() => {
+    const dataEl = document.getElementById('state-projects-data');
+    if (!dataEl) return;
+    const projects: { slug: string; title: string; city: string; photos: string[] }[] =
+      JSON.parse(dataEl.textContent || '[]');
+    if (projects.length === 0) return;
+
+    const lightbox = document.querySelector<HTMLElement>('.lightbox')!;
+    const img = lightbox.querySelector<HTMLImageElement>('.lightbox-img')!;
+    const caption = lightbox.querySelector<HTMLElement>('.lightbox-caption')!;
+    const btnClose = lightbox.querySelector<HTMLElement>('.lightbox-close')!;
+    const btnPrev  = lightbox.querySelector<HTMLElement>('.lightbox-prev')!;
+    const btnNext  = lightbox.querySelector<HTMLElement>('.lightbox-next')!;
+
+    let activeSlug = '';
+    let activeIdx = 0;
+
+    const open = (slug: string, idx = 0) => {
+      const p = projects.find((x) => x.slug === slug);
+      if (!p) return;
+      activeSlug = slug;
+      activeIdx = idx;
+      render();
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+    const close = () => {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+    const render = () => {
+      const p = projects.find((x) => x.slug === activeSlug);
+      if (!p) return;
+      const total = p.photos.length;
+      activeIdx = ((activeIdx % total) + total) % total;
+      img.src = p.photos[activeIdx];
+      img.alt = `${p.title} — photo ${activeIdx + 1} of ${total}`;
+      caption.textContent = `${p.title} · ${p.city} · ${activeIdx + 1} / ${total}`;
+    };
+    const next = () => { activeIdx += 1; render(); };
+    const prev = () => { activeIdx -= 1; render(); };
+
+    // Wire card triggers
+    document.querySelectorAll<HTMLElement>('.project-card').forEach((card) => {
+      const slug = card.dataset.project;
+      if (!slug) return;
+      const main  = card.querySelector<HTMLElement>('.media-main');
+      const thumbs = card.querySelectorAll<HTMLElement>('.media-thumb');
+      const more  = card.querySelector<HTMLElement>('.media-more');
+
+      main?.addEventListener('click', () => open(slug, 0));
+      thumbs.forEach((t) => {
+        t.addEventListener('click', () => {
+          const i = parseInt(t.dataset.thumbIndex || '0', 10);
+          open(slug, i);
+        });
+      });
+      more?.addEventListener('click', () => open(slug, 4));
+    });
+
+    btnClose.addEventListener('click', close);
+    btnPrev.addEventListener('click', prev);
+    btnNext.addEventListener('click', next);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('is-open')) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+    });
+  })();
+</script>

@@ -2,6 +2,10 @@
 // Hero: Home — full-viewport landing hero. Parking-lot charging scene as the
 // background; brand-green accents + bold headline + CTAs on a dark gradient
 // overlay. Scroll cue hints at the portal section below.
+//
+// Overlay gradient is deliberately lighter on the right than the left so
+// the car + charger stand in the background photo reads through — the
+// left stays dark so the headline copy holds.
 ---
 
 <section class="home-hero" aria-label="Evium Charging — home hero">
@@ -16,7 +20,16 @@
       fetchpriority="high"
     />
     <div class="hh-overlay"></div>
+    <!-- Seam bridge: continues the portal stage's radial gradient UPWARD
+         into the bottom of the hero. At the seam pixel this overlay paints
+         the exact color the portal stage paints at its own y=0 → the two
+         sides meet as one continuous gradient, no hard line. Mask fades
+         the overlay in only in the lower ~70% of the hero so the photo
+         still reads clean above. Ordered before .hh-accent so the green
+         corner glow stays on top. -->
+    <div class="hh-bottom-seam" aria-hidden="true"></div>
     <div class="hh-accent" aria-hidden="true"></div>
+    <div class="hh-accent-right" aria-hidden="true"></div>
   </div>
 
   <!-- Content -->
@@ -32,71 +45,215 @@
       and full revenue share.
     </p>
 
-    <!-- Eligibility check — primary interaction on the hero.
-         (Mirrors the original Evium site's address-lookup input.) -->
+    <!-- Prompt label — sits above the pill as an invitation to act.
+         Sized between the subtitle and the old micro-hint so it reads
+         as a question, not a disclaimer. Uppercase + tracked so it
+         pairs with the "SEE HOW IT WORKS" and "EXPLORE CHARGERS"
+         tertiary links visually without competing with the subtitle. -->
+    <p class="hh-prompt">Find what works best for your property</p>
+
+    <!-- Product finder — primary interaction on the hero. Two custom
+         dropdowns (segment + priority) + a green CTA. On submit the form
+         renders a match card below with a tailored charger + program
+         recommendation. Pill shell is identical to the old eligibility
+         pill — same shape, padding, and dimensions. -->
     <form class="hh-eligibility" id="hh-eligibility" autocomplete="off" novalidate>
       <div class="hh-eligibility-row">
-        <label class="hh-eligibility-field">
-          <svg class="hh-eligibility-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <!-- Field 1: segment — "I own / operate a…"
+             Map-pin icon. 10 UI labels collapse to 7 canonical slugs
+             (multifamily, retail, fleets, highway, commercial, parking,
+             medical) via data-value attrs on the <li> options. -->
+        <div class="hh-eligibility-field hh-eligibility-field--select hh-eligibility-field--segment" data-propdd data-propdd-kind="segment">
+          <svg class="hh-eligibility-icon hh-eligibility-select-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="12" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
           </svg>
-          <input
-            type="text"
-            name="address"
-            class="hh-eligibility-input"
-            placeholder="Enter your address to check eligibility"
-            aria-label="Enter your address to check eligibility"
+          <button
+            type="button"
+            class="hh-eligibility-dd-trigger"
+            data-propdd-trigger
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="I own or operate a…"
+          >
+            <span class="hh-eligibility-dd-label" data-propdd-label data-placeholder>I own or operate a…</span>
+          </button>
+          <select
+            name="segment"
+            class="hh-eligibility-dd-hidden"
+            data-propdd-select
+            aria-hidden="true"
+            tabindex="-1"
             required
-          />
-        </label>
+          >
+            <option value="" disabled selected>Property type</option>
+            <option value="multifamily">Multifamily</option>
+            <option value="retail">Retail</option>
+            <option value="fleets">Fleet depot</option>
+            <option value="highway">Highway / travel center</option>
+            <option value="commercial">Office or commercial</option>
+            <option value="parking">Parking garage</option>
+            <option value="medical">Medical</option>
+            <option value="retail">Hotel or lodging</option>
+            <option value="highway">Gas station</option>
+            <option value="commercial">Municipal</option>
+          </select>
+          <svg class="hh-eligibility-caret" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <ul class="hh-eligibility-dd-menu" role="listbox" data-propdd-menu hidden>
+            <li role="option" data-value="multifamily" data-label="Multifamily">Multifamily</li>
+            <li role="option" data-value="retail" data-label="Retail">Retail</li>
+            <li role="option" data-value="fleets" data-label="Fleet depot">Fleet depot</li>
+            <li role="option" data-value="highway" data-label="Highway / travel center">Highway / travel center</li>
+            <li role="option" data-value="commercial" data-label="Office or commercial">Office or commercial</li>
+            <li role="option" data-value="parking" data-label="Parking garage">Parking garage</li>
+            <li role="option" data-value="medical" data-label="Medical">Medical</li>
+            <li role="option" data-value="retail" data-label="Hotel or lodging">Hotel or lodging</li>
+            <li role="option" data-value="highway" data-label="Gas station">Gas station</li>
+            <li role="option" data-value="commercial" data-label="Municipal">Municipal</li>
+          </ul>
+        </div>
+
+        <!-- Field 2: priority — "My priority is…"
+             Lightning-bolt icon. 4 options slug-keyed to the 4 Evium
+             financial/deployment flavors. -->
+        <div class="hh-eligibility-field hh-eligibility-field--select hh-eligibility-field--priority" data-propdd data-propdd-kind="priority">
+          <svg class="hh-eligibility-icon hh-eligibility-select-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <button
+            type="button"
+            class="hh-eligibility-dd-trigger"
+            data-propdd-trigger
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="My priority is…"
+          >
+            <span class="hh-eligibility-dd-label" data-propdd-label data-placeholder>My priority is…</span>
+          </button>
+          <select
+            name="priority"
+            class="hh-eligibility-dd-hidden"
+            data-propdd-select
+            aria-hidden="true"
+            tabindex="-1"
+            required
+          >
+            <option value="" disabled selected>Priority</option>
+            <option value="zero-upfront">Zero upfront cost</option>
+            <option value="max-revenue">Maximum revenue</option>
+            <option value="fast-install">Fastest install</option>
+            <option value="nevi">NEVI-grade fast charging</option>
+          </select>
+          <svg class="hh-eligibility-caret" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <ul class="hh-eligibility-dd-menu" role="listbox" data-propdd-menu hidden>
+            <li role="option" data-value="zero-upfront" data-label="Zero upfront cost">Zero upfront cost</li>
+            <li role="option" data-value="max-revenue" data-label="Maximum revenue">Maximum revenue</li>
+            <li role="option" data-value="fast-install" data-label="Fastest install">Fastest install</li>
+            <li role="option" data-value="nevi" data-label="NEVI-grade fast charging">NEVI-grade fast charging</li>
+          </ul>
+        </div>
+
         <button type="submit" class="hh-eligibility-btn">
-          <span>Check Eligibility</span>
+          <span>Find my match</span>
           <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-cta-arrow">
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           </svg>
         </button>
       </div>
-      <p class="hh-eligibility-hint">Please enter a legal U.S. address.</p>
     </form>
 
-    <a href="/how-it-works" class="hh-secondary-link">
-      <span>See how it works</span>
-      <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-secondary-arrow">
-        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </svg>
-    </a>
+    <!-- Match card — hidden by default. Populated and shown by the submit
+         handler after the user picks a segment + priority. -->
+    <div class="hh-match" id="hh-match" hidden aria-live="polite">
+      <button type="button" class="hh-match-close" data-match-close aria-label="Close recommendation">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="hh-match-photo">
+        <img data-match-img src="" alt="" draggable="false" />
+      </div>
+      <div class="hh-match-body">
+        <span class="hh-match-eyebrow" data-match-eyebrow></span>
+        <p class="hh-match-lead">We recommend the</p>
+        <h3 class="hh-match-title" data-match-title></h3>
+        <p class="hh-match-copy">...paired with our <span data-match-model></span> program.</p>
+        <div class="hh-match-actions">
+          <a class="hh-match-primary" data-match-href href="#">
+            <span>See this solution</span>
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </a>
+          <a class="hh-match-secondary" data-match-quote href="/products">Get a quote</a>
+        </div>
+      </div>
+    </div>
 
-    <!-- Stats row -->
+    <!-- Tertiary action row — three micro-links side by side.
+         "See how it works" · "Explore chargers" · "Owner Portal".
+         The Owner Portal deep-link previously lived on the mobile
+         header's right edge; since that slot was removed, this row
+         is its new home. Between-link dividers + padding are handled
+         by the `> a + a` sibling rule below, so new links slot in
+         automatically. -->
+    <div class="hh-actions-row">
+      <a href="/how-it-works" class="hh-secondary-link">
+        <span>See how it works</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-secondary-arrow">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+      <a href="#portal-to-solutions" class="hh-scroll-link" aria-label="Scroll to product portals">
+        <span>Explore chargers</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-scroll-link-icon">
+          <path d="M8 3v9M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+      <a href="https://portal.eviumcharging.com" class="hh-portal-link" aria-label="Open the Evium Owner Portal">
+        <span>Owner Portal</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true" class="hh-portal-link-icon">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Stats row — three credential blocks: network scale, capital
+         secured, geographic footprint. -->
     <ul class="hh-stats" role="list">
       <li class="hh-stat">
-        <span class="hh-stat-n">500+</span>
-        <span class="hh-stat-l">Chargers deployed</span>
+        <span class="hh-stat-n">
+          <span class="hh-stat-num">500+</span>
+          <span class="hh-stat-unit">
+            <span>Chargers</span>
+            <span>Deployed</span>
+          </span>
+        </span>
+        <span class="hh-stat-l">Join the fastest-growing EV network before your neighbor.</span>
       </li>
       <li class="hh-stat">
-        <span class="hh-stat-n">$0</span>
-        <span class="hh-stat-l">Upfront cost</span>
+        <span class="hh-stat-n">$25M+ Secured</span>
+        <span class="hh-stat-l">Public &amp; private funding to execute your projects.</span>
       </li>
       <li class="hh-stat">
-        <span class="hh-stat-n">NEVI</span>
-        <span class="hh-stat-l">Grant-ready</span>
+        <span class="hh-stat-n">18 States</span>
+        <span class="hh-stat-l">Powering properties from multifamily to highway corridors.</span>
       </li>
-      <li class="hh-stat">
-        <span class="hh-stat-n">24/7</span>
-        <span class="hh-stat-l">Monitored</span>
+      <!-- 4th stat — mobile-only. At desktop the 3 stats read as a
+           balanced row; on phones they fall into a 2×2 grid and
+           without a 4th item the bottom-right cell was empty.
+           Hidden at desktop via `.hh-stat--mobile { display: none }`,
+           shown at ≤760px inside the mobile @media block. -->
+      <li class="hh-stat hh-stat--mobile">
+        <span class="hh-stat-n">24/7 Support</span>
+        <span class="hh-stat-l">Live monitoring and on-call help, every hour of every day.</span>
       </li>
     </ul>
   </div>
-
-  <!-- Scroll cue -->
-  <a href="#portal-to-solutions" class="hh-scroll" aria-label="Scroll to product portals">
-    <span class="hh-scroll-label">Explore chargers</span>
-    <span class="hh-scroll-icon" aria-hidden="true">
-      <svg viewBox="0 0 16 16">
-        <path d="M8 3v9M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </svg>
-    </span>
-  </a>
 
 </section>
 
@@ -136,7 +293,10 @@
     to   { transform: scale(1);    }
   }
   /* Dark gradient: stronger on the LEFT where the text lives, lighter on
-     the right so the parking-lot scene stays readable. */
+     the right so the parking-lot scene (car + charger stand) stays
+     readable. Bottom vertical fade lands on solid #0d1a22 at 100 % — the
+     portal section below mirrors this color with its own top fade, so
+     the seam between the two sections disappears. */
   .hh-overlay {
     position: absolute;
     inset: 0;
@@ -144,15 +304,11 @@
       linear-gradient(
         100deg,
         rgba(13, 26, 34, 0.92) 0%,
-        rgba(13, 26, 34, 0.82) 28%,
-        rgba(13, 26, 34, 0.55) 55%,
-        rgba(13, 26, 34, 0.30) 80%,
-        rgba(13, 26, 34, 0.45) 100%
+        rgba(13, 26, 34, 0.78) 28%,
+        rgba(13, 26, 34, 0.42) 55%,
+        rgba(13, 26, 34, 0.15) 80%,
+        rgba(13, 26, 34, 0.18) 100%
       ),
-      /* Vertical fade at the very bottom so the hero dissolves into the
-         next (dark) section. Lands on solid #0d1a22 at 100 % — the portal
-         section below mirrors this color with its own top fade, so the
-         seam between the two sections disappears. */
       linear-gradient(
         to bottom,
         rgba(13, 26, 34, 0) 58%,
@@ -161,29 +317,83 @@
         #0d1a22 100%
       );
   }
-  /* Brand-green side glow — subtle "Evium mark" in the lower-left corner */
+  /* Seam bridge — continues the portal stage's radial gradient upward
+     into the hero's bottom zone. Math:
+       - Portal stage uses `ellipse 90% 80% at 50% 46%` on a 100vh box.
+         Those are the ellipse RADII (90%/80%), not diameters.
+       - Stage ellipse y-center is 46vh below its own top.
+       - Our overlay sits at the hero's bottom. We want the bottom pixel
+         of this overlay (= hero's bottom = stage's y=0) to paint the
+         exact color the stage paints at its own y=0.
+       - With overlay height = 35vh and stage height = 100vh, the stage's
+         ellipse center lives `overlay_h + 46vh` = 35vh + 46vh = 81vh
+         below the overlay's top → 81 / 35 = 231% in overlay coords.
+         The y-radius (80vh) becomes 80 / 35 = 229% in overlay coords.
+     The mask fades the overlay in from the top so the photo stays
+     visible above and the full gradient only lands near the bottom. */
+  .hh-bottom-seam {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 35vh;
+    background: radial-gradient(
+      ellipse 90% 229% at 50% 231%,
+      #2a4a5e 0%,
+      #1a2f3a 45%,
+      #081420 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to top, black 0%, black 30%, transparent 100%
+    );
+    mask-image: linear-gradient(
+      to top, black 0%, black 30%, transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Brand-green side glow — "Evium mark" in the lower-left corner.
+     Key layout: the element's BOTTOM edge sits exactly at the hero's
+     bottom (bottom: 0), and the element is sized so the radial's 0-stop
+     transparent ring lands at ~81% of the element — before the element's
+     own edge. That means the glow radial fades to fully transparent
+     WITHIN the hero, before any clipping, so there's no horizontal
+     endpoint line at the seam. The green blends seamlessly into the
+     teal of .hh-bottom-seam below. */
   .hh-accent {
     position: absolute;
     left: -10%;
-    bottom: -20%;
-    width: 50%;
+    bottom: 0;
+    width: 60%;
+    height: 72%;
+    background: radial-gradient(
+      ellipse 42% 36% at 50% 62%,
+      rgba(45, 200, 86, 0.26) 0%,
+      rgba(45, 200, 86, 0.11) 38%,
+      rgba(45, 200, 86, 0.04) 65%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    filter: blur(22px);
+    pointer-events: none;
+  }
+  /* Mirror glow on the right — same self-contained falloff technique,
+     just smaller + subtler so it reads as a counterpoint, not a match. */
+  .hh-accent-right {
+    position: absolute;
+    right: -8%;
+    bottom: 0;
+    width: 46%;
     height: 60%;
     background: radial-gradient(
-      ellipse at center,
+      ellipse 40% 34% at 50% 60%,
       rgba(45, 200, 86, 0.22) 0%,
-      rgba(45, 200, 86, 0.08) 40%,
-      rgba(45, 200, 86, 0) 70%
+      rgba(45, 200, 86, 0.09) 38%,
+      rgba(45, 200, 86, 0.03) 65%,
+      rgba(45, 200, 86, 0) 100%
     );
-    filter: blur(18px);
-    /* Fade the glow to zero before it reaches the bottom seam. The glow's
-       center sits ~10 % above the hero bottom (element-local ~50 %); the
-       hero bottom itself maps to element-local ~67 %. We keep 0–56 % fully
-       intact (covers the entire upper half of the glow, including its
-       brightest core) and fade to transparent by 70 %, so the ~10 % green
-       tint that used to reach the seam is wiped out without touching the
-       main glow shape. */
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 70%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 70%);
+    /* Dialed down from full intensity so it doesn't re-tint the
+       right-hand portion of the photo that the overlay has
+       deliberately left clearer. */
+    opacity: 0.55;
+    filter: blur(20px);
     pointer-events: none;
   }
 
@@ -234,11 +444,26 @@
     max-width: 54ch;
   }
 
-  /* ── Eligibility form — primary hero interaction.
-       A single rounded "field" containing a pin icon, text input, and the
-       submit pill. Inspired by the original Evium site's address lookup. */
+  /* ── Prompt label — sits above the pill as a conversational cue.
+       Size lands between the subtitle and the tertiary micro-links, so it
+       reads as a friendly lead-in without competing with the subtitle's
+       full-sentence body copy. Uppercase + tracked so it echoes the
+       "SEE HOW IT WORKS" / "EXPLORE CHARGERS" links. */
+  .hh-prompt {
+    margin: 0 0 clamp(14px, 1.4vw, 18px);
+    font-size: clamp(0.84rem, 0.95vw, 0.95rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* ── Product-finder pill — primary hero interaction.
+       Two custom dropdowns + green CTA. Width is trimmed from the old
+       address-lookup pill (820–870 px) to stay tighter to the content
+       block so it no longer reaches toward the parking-lot photo. */
   .hh-eligibility {
-    max-width: 720px;
+    max-width: clamp(720px, 48vw, 780px);
     margin: 0 0 clamp(18px, 2.2vw, 26px);
   }
   .hh-eligibility-row {
@@ -277,28 +502,156 @@
     color: rgba(13, 26, 34, 0.48);
     flex-shrink: 0;
   }
-  .hh-eligibility-input {
+  /* ── Select fields — segment + priority ──────────────────
+     Both fields use a custom popover dropdown (native <select> is
+     kept in the DOM for form semantics only). Field 1 (segment) has
+     no left border; field 2 (priority) carries a thin vertical
+     divider on its left edge as a subtle field separator.
+     Both fields share the remaining pill width evenly (flex: 1 1 0)
+     after the submit button reserves its own width on the right. */
+  .hh-eligibility-field--select {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    cursor: pointer;
+  }
+  .hh-eligibility-field--priority {
+    border-left: 1px solid rgba(13, 26, 34, 0.09);
+  }
+  /* Icon, caret, and hidden form control are all non-interactive — every
+     click lands on either the trigger button or the field's own click
+     handler, which opens the custom menu. */
+  .hh-eligibility-select-icon,
+  .hh-eligibility-caret {
+    pointer-events: none;
+  }
+  .hh-eligibility-select-icon {
+    position: absolute;
+    left: clamp(10px, 1vw, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  .hh-eligibility-dd-hidden {
+    /* Kept in DOM for form submission only; visually gone. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Trigger button — styled to look exactly like the old native select
+     text row. Stretches across the field so clicking anywhere opens
+     the menu. */
+  .hh-eligibility-dd-trigger {
     flex: 1 1 auto;
     min-width: 0;
     background: transparent;
     border: 0;
     outline: none;
-    padding: clamp(10px, 1vw, 14px) 0;
     font-family: 'Maven Pro', sans-serif;
     font-size: clamp(0.9rem, 1.05vw, 1.05rem);
     font-weight: 500;
     color: #0d1a22;
     letter-spacing: 0.005em;
+    cursor: pointer;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    /* Reserve icon room on the left, caret room on the right. The
+       button itself extends under both via this padding so its click
+       hit area covers the full pill width. */
+    padding: clamp(10px, 1vw, 14px)
+             22px
+             clamp(10px, 1vw, 14px)
+             calc(clamp(18px, 1.5vw, 22px) + clamp(6px, 0.8vw, 12px));
   }
-  .hh-eligibility-input::placeholder {
+  .hh-eligibility-dd-label[data-placeholder] {
     color: rgba(13, 26, 34, 0.45);
     font-weight: 500;
   }
+  .hh-eligibility-dd-label[data-selected] {
+    color: #0d1a22;
+    font-weight: 500;
+  }
+
+  .hh-eligibility-caret {
+    position: absolute;
+    right: clamp(10px, 1vw, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(14px, 1.2vw, 18px);
+    height: clamp(14px, 1.2vw, 18px);
+    color: rgba(13, 26, 34, 0.48);
+    transition: transform 0.22s ease, color 0.22s ease;
+  }
+  /* Caret flips on open — driven by data-open on the field */
+  .hh-eligibility-field--select[data-open] .hh-eligibility-caret {
+    transform: translateY(-50%) rotate(180deg);
+    color: #2DC856;
+  }
+
+  /* Custom menu — positioned below the pill with an 8px gap so it
+     never covers the trigger text (the core fix over native <select>
+     picker behavior). */
+  .hh-eligibility-dd-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: -1px;
+    right: -1px;
+    margin: 0;
+    padding: 6px 0;
+    background: #ffffff;
+    border: 1px solid rgba(13, 26, 34, 0.1);
+    border-radius: 14px;
+    box-shadow:
+      0 18px 48px rgba(6, 14, 18, 0.22),
+      0 4px 12px rgba(6, 14, 18, 0.08);
+    list-style: none;
+    z-index: 50;
+    max-height: 320px;
+    overflow-y: auto;
+    font-family: 'Maven Pro', sans-serif;
+    /* Subtle entrance animation matching the caret's timing */
+    transform-origin: top center;
+    animation: propdd-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hh-eligibility-dd-menu[hidden] { display: none; }
+  @keyframes propdd-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .hh-eligibility-dd-menu li {
+    padding: 11px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #0d1a22;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+    outline: none;
+  }
+  .hh-eligibility-dd-menu li:hover,
+  .hh-eligibility-dd-menu li:focus,
+  .hh-eligibility-dd-menu li[aria-selected="true"] {
+    background: rgba(45, 200, 86, 0.1);
+    color: #187a30;
+  }
+
   .hh-eligibility-btn {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    padding: clamp(10px, 1.1vw, 14px) clamp(18px, 1.8vw, 26px);
+    /* Horizontal padding max trimmed 26 → 22 so the button surrenders
+       ~8 px back to the address input when the pill hits its 870 px
+       cap. CHECK ELIGIBILITY still reads with plenty of air around it. */
+    padding: clamp(10px, 1.1vw, 14px) clamp(18px, 1.8vw, 22px);
     font-family: 'Maven Pro', sans-serif;
     font-size: clamp(0.72rem, 0.88vw, 0.88rem);
     font-weight: 900;
@@ -324,20 +677,181 @@
   .hh-eligibility-btn:active {
     transform: translateY(0);
   }
-  .hh-eligibility-hint {
-    margin: clamp(10px, 1vw, 14px) 0 0 clamp(18px, 1.5vw, 24px);
-    font-size: clamp(0.66rem, 0.78vw, 0.78rem);
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.6);
-    letter-spacing: 0.01em;
+  /* ── Match card — appears inline below the pill after submit ──
+     Reuses the pill's white glassmorphism vocabulary so the card
+     reads as the pill's "answer." Photo on the left, copy + CTAs
+     on the right. Slides in with a short opacity + translateY
+     animation matching the dropdown's propdd-in timing. */
+  .hh-match {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 2vw, 28px);
+    max-width: clamp(720px, 48vw, 780px);
+    margin: clamp(16px, 1.8vw, 22px) 0 clamp(20px, 2.4vw, 28px);
+    padding: clamp(14px, 1.4vw, 20px) clamp(18px, 2vw, 26px);
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 26px;
+    box-shadow:
+      0 14px 38px rgba(0, 0, 0, 0.32),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform-origin: top left;
+    animation: hh-match-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .hh-match[hidden] { display: none; }
+  @keyframes hh-match-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);     }
+  }
+  .hh-match-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(13, 26, 34, 0.06);
+    color: rgba(13, 26, 34, 0.55);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .hh-match-close svg { width: 14px; height: 14px; }
+  .hh-match-close:hover {
+    background: rgba(13, 26, 34, 0.12);
+    color: #0d1a22;
+  }
+  .hh-match-photo {
+    flex: 0 0 clamp(96px, 10vw, 128px);
+    height: clamp(96px, 10vw, 128px);
+    border-radius: 18px;
+    background: linear-gradient(160deg, #f4f6f8 0%, #e7ecef 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hh-match-photo img {
+    max-width: 84%;
+    max-height: 84%;
+    object-fit: contain;
+    user-select: none;
+  }
+  .hh-match-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* Reserve space for the absolute close button */
+    padding-right: 26px;
+  }
+  .hh-match-eyebrow {
+    font-size: clamp(0.62rem, 0.72vw, 0.72rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #187a30;
+  }
+  .hh-match-lead {
+    margin: 2px 0 0;
+    font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+    font-weight: 500;
+    color: rgba(13, 26, 34, 0.62);
+  }
+  .hh-match-title {
+    margin: 0;
+    font-size: clamp(1.1rem, 1.45vw, 1.45rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: #0d1a22;
+  }
+  .hh-match-copy {
+    margin: 4px 0 10px;
+    font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+    font-weight: 500;
+    line-height: 1.5;
+    color: rgba(13, 26, 34, 0.72);
+  }
+  .hh-match-copy span {
+    color: #0d1a22;
+    font-weight: 700;
+  }
+  .hh-match-actions {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.1vw, 14px);
+    flex-wrap: wrap;
+  }
+  .hh-match-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: clamp(9px, 1vw, 12px) clamp(16px, 1.6vw, 20px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.7rem, 0.82vw, 0.82rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #0d1a22;
+    background: #2DC856;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 6px 14px rgba(45, 200, 86, 0.35);
+    transition: background 0.18s ease, gap 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
+  }
+  .hh-match-primary:hover {
+    background: #36e464;
+    gap: 12px;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(45, 200, 86, 0.48);
+  }
+  .hh-match-primary svg { width: 1em; height: 1em; display: block; }
+  .hh-match-secondary {
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.7rem, 0.82vw, 0.82rem);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(13, 26, 34, 0.62);
+    text-decoration: none;
+    padding: 6px 4px;
+    transition: color 0.15s ease;
+  }
+  .hh-match-secondary:hover { color: #0d1a22; }
 
-  /* ── Secondary link ("See how it works") ───────────── */
-  .hh-secondary-link {
+  /* ── Tertiary action row — "See how it works" + "Explore chargers"
+       inline side by side, separated by a thin vertical divider. This
+       row replaces the old absolute bottom-center scroll cue that used
+       to collide with the stats strip once the match card opened and
+       pushed content down. Both links share the same uppercase / tracked
+       treatment so they read as a matched pair. */
+  .hh-actions-row {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(14px, 1.6vw, 22px);
+    margin: 0 0 clamp(30px, 4vw, 52px);
+    align-self: flex-start;
+  }
+  .hh-actions-row > a + a {
+    padding-left: clamp(14px, 1.6vw, 22px);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .hh-secondary-link,
+  .hh-scroll-link,
+  .hh-portal-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin: 0 0 clamp(30px, 4vw, 52px);
     padding: 6px 0;
     font-size: clamp(0.7rem, 0.85vw, 0.88rem);
     font-weight: 800;
@@ -346,17 +860,35 @@
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     transition: color 0.18s ease, gap 0.18s ease;
-    align-self: flex-start;
   }
-  .hh-secondary-link:hover {
+  .hh-secondary-link:hover,
+  .hh-scroll-link:hover,
+  .hh-portal-link:hover {
     color: #2DC856;
     gap: 12px;
   }
-  .hh-secondary-arrow {
+  .hh-secondary-arrow,
+  .hh-scroll-link-icon,
+  .hh-portal-link-icon {
     width: 1em;
     height: 1em;
     display: block;
     flex-shrink: 0;
+  }
+  /* Subtle bounce on the down-arrow keeps the "scroll down" affordance
+     the old absolute scroll cue had, just at tertiary-link scale. */
+  .hh-scroll-link-icon {
+    animation: hh-bounce 2.2s ease-in-out infinite;
+  }
+  /* Owner Portal arrow renders in brand green by default (inherits
+     from the original mobile-portal-cta treatment) so the link reads
+     as a branded external action alongside the two in-page links. */
+  .hh-portal-link-icon {
+    color: #2DC856;
+    transition: transform 0.18s ease;
+  }
+  .hh-portal-link:hover .hh-portal-link-icon {
+    transform: translateX(2px);
   }
   .hh-cta-arrow {
     width: 1em;
@@ -365,98 +897,412 @@
     flex-shrink: 0;
   }
 
-  /* ── Stats strip ─────────────────────────────────────── */
+  /* ── Stats strip ─────────────────────────────────────────
+     Three stat blocks at desktop (500+ / $25M+ / 18 States) with
+     a sentence-case subtitle line under each. A 4th "24/7 Support"
+     block lives in the markup but is gated to mobile only via
+     .hh-stat--mobile so the desktop row keeps its original balanced
+     3-across rhythm. Top padding nudged down so the strip sits a
+     touch lower under the tertiary action row; number + subtitle
+     font sizes bumped a hair so the stats read with more presence. */
   .hh-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: clamp(20px, 3vw, 44px);
+    gap: clamp(22px, 2.6vw, 44px);
     margin: 0;
-    padding: clamp(20px, 2vw, 28px) 0 0;
+    padding: clamp(28px, 2.8vw, 40px) 0 0;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     list-style: none;
-    max-width: 780px;
+    max-width: 960px;
   }
   .hh-stat {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-  }
-  .hh-stat-n {
-    font-size: clamp(1.4rem, 2.2vw, 2.1rem);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    color: #2DC856;
-  }
-  .hh-stat-l {
-    font-size: clamp(0.55rem, 0.65vw, 0.7rem);
-    font-weight: 700;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
+    gap: 8px;
+    flex: 1 1 220px;   /* grow to fill, fall back to stacked at <220px */
+    max-width: 320px;  /* cap so three stats don't spread too wide */
+    min-width: 0;
   }
 
-  /* ── Scroll cue ──────────────────────────────────────── */
-  .hh-scroll {
-    position: absolute;
-    bottom: clamp(20px, 3vh, 34px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: rgba(255, 255, 255, 0.68);
-    text-decoration: none;
-    transition: color 0.2s ease, transform 0.2s ease;
-  }
-  .hh-scroll:hover {
+  /* 4th stat gate — desktop renders 3 stats in the balanced row
+     above; on phones the stats fall into a 2×2 grid (see mobile
+     @media below) where an empty 4th cell looked awkward, so the
+     "24/7 Support" block fills it at mobile only. */
+  .hh-stat--mobile { display: none; }
+  .hh-stat-n {
+    display: inline-flex;     /* lets the stat sit as "number + stacked unit" */
+    align-items: center;      /* vertically center-align number vs stacked unit */
+    gap: 0.35em;              /* space between number and stacked unit words */
+    font-size: clamp(1.5rem, 2.1vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
     color: #2DC856;
+    white-space: nowrap; /* keep the number line from wrapping */
   }
-  .hh-scroll-label {
-    font-size: clamp(0.54rem, 0.64vw, 0.66rem);
-    font-weight: 800;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
+  /* Stacked unit words ("Chargers" / "Deployed") sit next to the big
+     number. 0.58em (was 0.5em) is the size where the two small words
+     read cleanly at every viewport without being distracting. Tight
+     line-height keeps the stack's total height close to the number's
+     so align-items: center on the parent reads as "side by side". */
+  /* "500+" number — bumped up relative to the stat block so a three-digit
+     count reads as confidently as a four-digit one next to the stacked unit. */
+  .hh-stat-num {
+    font-size: 1.28em;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+  .hh-stat-unit {
+    display: inline-flex;
+    flex-direction: column;
+    font-size: 0.58em;
     line-height: 1;
+    letter-spacing: 0;   /* relax the negative tracking for smaller text */
   }
-  .hh-scroll-icon {
-    display: block;
-    width: 22px;
-    height: 22px;
-    animation: hh-bounce 2.2s ease-in-out infinite;
+  .hh-stat-unit > span { display: block; }
+  .hh-stat-l {
+    font-size: clamp(0.8rem, 0.94vw, 0.94rem);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+    color: rgba(255, 255, 255, 0.62);
+    max-width: 30ch;      /* cap line width so subtitles wrap cleanly */
+    text-wrap: balance;   /* distribute words evenly across wrapped lines */
   }
-  .hh-scroll-icon svg { width: 100%; height: 100%; display: block; }
+
+  /* Down-arrow bounce — reused on the inline "Explore chargers" link. */
   @keyframes hh-bounce {
     0%, 100% { transform: translateY(0); opacity: 0.7; }
-    50%      { transform: translateY(6px); opacity: 1; }
+    50%      { transform: translateY(3px); opacity: 1; }
   }
 
   /* ── Responsive — keep content readable on narrow screens ── */
   @media (max-width: 760px) {
-    .hh-title { max-width: 100%; }
-    .hh-stats { gap: 16px 28px; }
-    /* Collapse the eligibility row into a stacked layout on very narrow screens */
+    /* Title bump: at desktop the headline scales with viewport via
+       7vw, which on a 375-420 px phone lands at ~26-29 px — below
+       the 2.8rem min, so it clamps up to 2.8rem regardless. That
+       made the title feel small vs. the rest of the hero. On mobile
+       only, push the min/max range so the headline anchors the
+       hero's top half with more presence. Keeps wrapping behavior
+       (18ch max-width + text-wrap: balance) intact. */
+    .hh-title {
+      max-width: 100%;
+      font-size: clamp(3.1rem, 11.5vw, 3.8rem);
+    }
+
+    /* Anchor the content column to the top of the hero on mobile.
+       Desktop uses `justify-content: center` and generous top
+       padding (clamp(90px, 13vh, 140px)) which, combined with all
+       the stacked content below the headline, pushed the title far
+       down the viewport and left a big dead zone above it. On mobile
+       we want the title sitting right under the header, with the
+       rest of the hero flowing down from there. */
+    .hh-inner {
+      justify-content: flex-start;
+      padding-top: clamp(82px, 11vh, 100px);
+    }
+
+    /* Stats → predictable 2×2 grid on mobile. Prior flex-wrap
+       behavior with a 220 px basis produced a 2-col layout with
+       the 3rd stat alone on its own row — awkward gap. Showing
+       the mobile-only "24/7 Support" stat fills the 4th cell so
+       the grid lays out evenly. */
+    .hh-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 20px;
+    }
+    .hh-stat {
+      max-width: none;  /* let the grid cell govern width */
+    }
+    .hh-stat--mobile { display: flex; }
+    .hh-stat-n { white-space: normal; } /* allow wrap on narrow screens */
+
+    /* Compact stacked pill on mobile.
+       Why so many rules: the desktop pill layers padding in three
+       places (outer .hh-eligibility-row + per-field wrapper + each
+       .hh-eligibility-dd-trigger button). On desktop those layers
+       compose nicely into a generous single row. When the row
+       collapses into three stacked rows on mobile, that layered
+       padding *triples* into ~190 px of dead pill height that
+       covers most of the phone screen.
+       Fix: collapse the redundancy. The trigger button already owns
+       its tap-target height — so the field wrapper gives up its
+       vertical padding (becomes `padding: 0 10px`), the trigger
+       itself gets a tighter explicit 10/10 vertical padding (was
+       `clamp(10px, 1vw, 14px)`), and the CTA button drops from
+       `14px 16px` → `10px 16px`. Outer pill padding halves (`8px →
+       4px`) and the radius eases from pill-shaped `20px` → form-
+       card `14px`. Net result: ≈ 35% shorter pill, same visual
+       language, same dropdown behavior, same tap targets. */
     .hh-eligibility-row {
       flex-direction: column;
       align-items: stretch;
-      padding: 8px;
-      border-radius: 20px;
+      padding: 4px;
+      border-radius: 14px;
+      gap: 0;
     }
-    .hh-eligibility-field { padding: 8px 12px; }
-    .hh-eligibility-btn   { justify-content: center; padding: 14px 16px; }
+    .hh-eligibility-field { padding: 0 10px; }
+    .hh-eligibility-dd-trigger {
+      padding: 10px 22px 10px 32px;
+      font-size: 0.9rem;
+    }
+    .hh-eligibility-select-icon { left: 10px; }
+    .hh-eligibility-caret { right: 10px; width: 14px; height: 14px; }
+    /* When the row stacks, the divider between segment + priority
+       needs to flip from left-edge to top-edge — only the priority
+       field (2nd child) carries the divider at desktop, and it
+       should do the same stacked: a top border instead of a left. */
+    .hh-eligibility-field--priority {
+      border-left: 0;
+      border-top: 1px solid rgba(13, 26, 34, 0.09);
+    }
+    .hh-eligibility-btn {
+      justify-content: center;
+      padding: 10px 16px;
+      font-size: 0.72rem;
+    }
+
+    /* Match card stacks photo above copy on mobile */
+    .hh-match { flex-direction: column; align-items: stretch; padding: 18px; }
+    .hh-match-photo { width: 100%; height: 160px; flex: 0 0 auto; }
+    .hh-match-body  { padding-right: 0; }
+    .hh-match-actions .hh-match-primary,
+    .hh-match-actions .hh-match-secondary { flex: 1 1 auto; justify-content: center; text-align: center; }
   }
   @media (max-height: 620px) {
-    .hh-stats  { display: none; }
-    .hh-scroll { display: none; }
+    .hh-stats { display: none; }
   }
 </style>
 
 <script>
-  // Eligibility form — no backend wired yet. Prevent default submit and keep
-  // the input's value so the page isn't reloaded with a query string.
-  document.getElementById('hh-eligibility')?.addEventListener('submit', (e) => {
-    e.preventDefault();
+  // ── Custom popover dropdowns (segment + priority) ───────
+  // Both pill fields share one behavior: hidden <select> is kept in
+  // the DOM for form semantics; all clicks (icon, trigger text,
+  // padding, caret) open a custom <ul> menu positioned 10px below
+  // the pill so it never covers the trigger text the way Safari's
+  // native <select> picker does.
+  //
+  // Wired per-field so both dropdowns operate independently. Each
+  // field carries its current value (li data-value) on its dataset
+  // so the submit handler can read without re-querying the menus.
+  const pilFields = Array.from(document.querySelectorAll<HTMLElement>('[data-propdd]'));
+  pilFields.forEach((field) => {
+    const trigger = field.querySelector<HTMLButtonElement>('[data-propdd-trigger]');
+    const label   = field.querySelector<HTMLElement>('[data-propdd-label]');
+    const menu    = field.querySelector<HTMLUListElement>('[data-propdd-menu]');
+    const hidden  = field.querySelector<HTMLSelectElement>('[data-propdd-select]');
+    if (!trigger || !label || !menu || !hidden) return;
+    const items = Array.from(menu.querySelectorAll<HTMLLIElement>('li[role="option"]'));
+    items.forEach((li) => li.setAttribute('tabindex', '-1'));
+
+    const open = () => {
+      // Close any other open dropdown first so only one is ever open.
+      pilFields.forEach((other) => {
+        if (other === field) return;
+        const otherMenu = other.querySelector<HTMLUListElement>('[data-propdd-menu]');
+        const otherTrig = other.querySelector<HTMLButtonElement>('[data-propdd-trigger]');
+        if (otherMenu && !otherMenu.hidden) {
+          otherMenu.hidden = true;
+          otherTrig?.setAttribute('aria-expanded', 'false');
+          other.removeAttribute('data-open');
+        }
+      });
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      field.setAttribute('data-open', '');
+      const active = menu.querySelector<HTMLLIElement>('li[aria-selected="true"]') || items[0];
+      active?.focus();
+    };
+    const close = (returnFocus = true) => {
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      field.removeAttribute('data-open');
+      if (returnFocus) trigger.focus();
+    };
+    const toggle = () => (menu.hidden ? open() : close());
+
+    field.addEventListener('click', (e) => {
+      // Bail when the click bubbled up from the menu (option selection
+       // handles itself) or from anywhere inside the trigger button —
+       // the trigger's own handler already toggled, so running toggle()
+       // again here would cancel it out. Using .contains covers clicks
+       // on the label <span> inside the trigger (the old `e.target ===
+       // trigger` check missed those, so clicking the text was a no-op).
+      if (menu.contains(e.target as Node)) return;
+      if (trigger.contains(e.target as Node)) return;
+      e.preventDefault();
+      toggle();
+    });
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle();
+    });
+
+    items.forEach((li) => {
+      li.addEventListener('click', () => {
+        const value = li.dataset.value || '';
+        const displayLabel = li.dataset.label || li.textContent || '';
+        hidden.value = value;
+        label.textContent = displayLabel;
+        label.removeAttribute('data-placeholder');
+        label.setAttribute('data-selected', '');
+        items.forEach((el) => el.removeAttribute('aria-selected'));
+        li.setAttribute('aria-selected', 'true');
+        // Cache the current pick on the field for the submit handler.
+        field.dataset.value = value;
+        field.dataset.label = displayLabel;
+        close();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menu.hidden && !field.contains(e.target as Node)) close(false);
+    });
+
+    trigger.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        open();
+      }
+    });
+    menu.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      const focused = document.activeElement as HTMLElement;
+      const idx = items.indexOf(focused as HTMLLIElement);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        items[Math.min(items.length - 1, idx + 1)]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        items[Math.max(0, idx - 1)]?.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        (focused as HTMLElement)?.click();
+      }
+    });
   });
+
+  // ── Submit: compute + render the match card ─────────────
+  // No backend. Two selections map to a charger recommendation, a
+  // financial-model recommendation, and a destination URL. The match
+  // card already lives in the DOM (hidden); we populate its fields
+  // and un-hide it. Close button restores the default state with
+  // the user's selections preserved.
+  type ChargerSuggestion = { name: string; image: string; alt: string; productId: string };
+
+  // productId matches the `id={product.id}` anchor on each product card in
+  // /products (see src/pages/products/index.astro). Used to deep-link the
+  // "Get a quote" button to the exact recommended product.
+  const getCharger = (segment: string, priority: string): ChargerSuggestion => {
+    const needsDCFast =
+      priority === 'nevi' ||
+      segment === 'highway' ||
+      segment === 'fleets';
+    if (needsDCFast) {
+      return {
+        name: 'Evium DC Fast 180kW',
+        image: '/images/chargers/tellus/tellus-dc-fast-180kw.png',
+        alt: 'Evium DC Fast 180kW charger',
+        productId: 'evium-180kw',
+      };
+    }
+    if (segment === 'multifamily' || segment === 'parking') {
+      return {
+        name: 'EvoCharge Concealed Pedestal',
+        image: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',
+        alt: 'EvoCharge Concealed Pedestal Level 2 charger',
+        productId: 'evocharge-pedestal',
+      };
+    }
+    return {
+      name: 'EvoCharge 40A Level 2',
+      image: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',
+      alt: 'EvoCharge 40A Level 2 wall-mount charger',
+      productId: 'evocharge-40a',
+    };
+  };
+
+  const PROGRAMS: Record<string, string> = {
+    'zero-upfront': 'No-Cost',
+    'max-revenue':  'Investment',
+    'fast-install': 'Hybrid',
+    'nevi':         'NEVI-Funded Deployment',
+  };
+
+  const form = document.getElementById('hh-eligibility') as HTMLFormElement | null;
+  const card = document.getElementById('hh-match');
+  const segmentField  = document.querySelector<HTMLElement>('[data-propdd-kind="segment"]');
+  const priorityField = document.querySelector<HTMLElement>('[data-propdd-kind="priority"]');
+
+  if (form && card && segmentField && priorityField) {
+    const imgEl   = card.querySelector<HTMLImageElement>('[data-match-img]')!;
+    const eyebrow = card.querySelector<HTMLElement>('[data-match-eyebrow]')!;
+    const titleEl = card.querySelector<HTMLElement>('[data-match-title]')!;
+    const modelEl = card.querySelector<HTMLElement>('[data-match-model]')!;
+    const hrefEl  = card.querySelector<HTMLAnchorElement>('[data-match-href]')!;
+    const quoteEl = card.querySelector<HTMLAnchorElement>('[data-match-quote]')!;
+    const closeBtn = card.querySelector<HTMLButtonElement>('[data-match-close]')!;
+
+    const flashMissing = (field: HTMLElement) => {
+      field.animate(
+        [
+          { transform: 'translateX(0)' },
+          { transform: 'translateX(-4px)' },
+          { transform: 'translateX(4px)' },
+          { transform: 'translateX(-3px)' },
+          { transform: 'translateX(0)' },
+        ],
+        { duration: 260, easing: 'ease-out' },
+      );
+      (field.querySelector<HTMLButtonElement>('[data-propdd-trigger]'))?.focus();
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const segment  = segmentField.dataset.value  || '';
+      const segLabel = segmentField.dataset.label  || '';
+      const priority = priorityField.dataset.value || '';
+
+      if (!segment)  { flashMissing(segmentField);  return; }
+      if (!priority) { flashMissing(priorityField); return; }
+
+      const charger = getCharger(segment, priority);
+      const program = PROGRAMS[priority] || '';
+      const href = priority === 'nevi'
+        ? `/solutions/highway-fast-charging?priority=${priority}`
+        : `/solutions/${segment === 'highway' ? 'highway-fast-charging' : segment}?priority=${priority}`;
+
+      eyebrow.textContent = `For your ${segLabel}`;
+      titleEl.textContent = charger.name;
+      modelEl.textContent = program;
+      imgEl.src = charger.image;
+      imgEl.alt = charger.alt;
+      hrefEl.setAttribute('href', href);
+      // "Get a quote" — pass the matched segment + priority as query
+      // params so the /contact/quote page can pre-fill the property-
+      // type + related fields once it's wired up server-side.
+      quoteEl.setAttribute('href', `/contact/quote?segment=${segment}&priority=${priority}`);
+
+      // Restart the entrance animation even when re-submitting with
+      // a changed selection (card is already visible).
+      card.hidden = false;
+      card.style.animation = 'none';
+      // Force reflow so the animation restarts on the next tick.
+      void (card as HTMLElement).offsetWidth;
+      card.style.animation = '';
+    });
+
+    closeBtn.addEventListener('click', () => {
+      card.hidden = true;
+    });
+
+    // Escape closes the card if it's open and no dropdown is capturing.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || card.hidden) return;
+      const anyOpen = document.querySelector('[data-propdd][data-open]');
+      if (anyOpen) return;
+      card.hidden = true;
+    });
+  }
 </script>

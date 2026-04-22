@@ -17,6 +17,10 @@ node_modules/
 CopyOfZippedEviumDataFromGoogleToInspect/
 ExistingEviumContextMedia/
 NewEviumAssets/
+use-these-in-site-soon/
+
+# Full-res installation originals to upload to cloudflare later (~326M); site serves downsized copies from public/images/installations/.
+Installations/
 
 # Local-only markdown notes and context files
 markdowns/

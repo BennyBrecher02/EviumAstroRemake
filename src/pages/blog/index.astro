@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
 
 const categories = [
   {
@@ -40,7 +41,7 @@ const posts = [
     date: 'Apr 2026',
     excerpt: 'A zero-cost amenity that generates passive income, attracts tenants, and future-proofs your asset.',
     readTime: '5 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'real-cost-of-doing-nothing',
@@ -49,7 +50,7 @@ const posts = [
     date: 'Mar 2026',
     excerpt: 'Properties without charging are already losing lease negotiations. The calculus shifts every month.',
     readTime: '4 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'revenue-projections-ev-charging',
@@ -58,7 +59,7 @@ const posts = [
     date: 'Mar 2026',
     excerpt: 'From $900 to $2,100 per charger per month. Utilization is the variable. Here is what drives it.',
     readTime: '6 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'ev-adoption-accelerating',
@@ -67,7 +68,7 @@ const posts = [
     date: 'Apr 2026',
     excerpt: 'Regulatory tailwinds, NEVI funding, and shifting buyer demographics are converging fast.',
     readTime: '5 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'nevi-funding-reshaping-highway-charging',
@@ -76,7 +77,7 @@ const posts = [
     date: 'Feb 2026',
     excerpt: 'Federal dollars are eliminating the cost barrier for site hosts.',
     readTime: '5 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'level2-vs-dcfast-explained',
@@ -85,7 +86,7 @@ const posts = [
     date: 'Apr 2026',
     excerpt: 'Dwell time is the deciding factor. A clear framework for every property type.',
     readTime: '5 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'ocpp-open-standards-matter',
@@ -94,7 +95,7 @@ const posts = [
     date: 'Mar 2026',
     excerpt: 'Vendor lock-in is a real risk in EV infrastructure. OCPP 1.6 compliance is your insurance policy.',
     readTime: '4 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'ev-infrastructure-next-five-years',
@@ -103,7 +104,7 @@ const posts = [
     date: 'Jan 2026',
     excerpt: 'Smart charging, V2G, and grid integration are reshaping infrastructure investment decisions.',
     readTime: '4 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'how-modern-evs-change-charging-behavior',
@@ -112,7 +113,7 @@ const posts = [
     date: 'Apr 2026',
     excerpt: 'More range means less frequent but longer sessions — and that changes how smart operators should plan.',
     readTime: '5 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: 'battery-tech-trends-infrastructure',
@@ -121,7 +122,7 @@ const posts = [
     date: 'Feb 2026',
     excerpt: 'Solid-state, faster charge acceptance, V2G — the battery roadmap has direct implications for how you build today.',
     readTime: '6 min',
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
   },
   {
     slug: '',
@@ -130,7 +131,7 @@ const posts = [
     date: 'Coming soon',
     excerpt: 'More analysis on regulatory changes, NEVI rollout, and EV adoption.',
     readTime: null,
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
     placeholder: true,
   },
   {
@@ -140,7 +141,7 @@ const posts = [
     date: 'Coming soon',
     excerpt: 'Battery chemistry, thermal management, and how fast-improving specs change the calculus.',
     readTime: null,
-    image: '/images/logo.webp',
+    image: '/images/logos/evium/logo.webp',
     placeholder: true,
   },
 ];
@@ -262,6 +263,8 @@ const postsByCat = Object.fromEntries(
   </section>
 
 </main>
+
+<SiteFooter />
 </Layout>
 
 <style>

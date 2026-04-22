@@ -442,7 +442,14 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     }
   }
 
-  /* ── Bottom HUD — horizontal pill with prev arrow, dots, and next arrow. ── */
+  /*
+   * Bottom HUD — single-row pill, matches the mobile HeroCarouselPedestalMobile
+   * design exactly (kept in sync so any tweak here also goes to
+   * HeroCarouselPedestalMobile.astro → .mcp-hud). Prev arrow · dots ·
+   * next arrow. Active dot widens and glows green; inactive dots are
+   * short neutral pills. Fully-rounded pill shape, dark frosted-glass
+   * body, green hairline top border.
+   */
   .cp-hud {
     position: fixed;
     bottom: clamp(18px, 3.5vh, 44px);
@@ -453,15 +460,18 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     flex-direction: row;
     align-items: center;
     gap: clamp(10px, 1.2vw, 18px);
-    padding: clamp(8px, 0.9vw, 12px) clamp(10px, 1.2vw, 16px);
-    background: rgba(10, 18, 22, 0.66);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    padding: clamp(8px, 0.9vw, 12px) clamp(12px, 1.2vw, 16px);
+    background: rgba(10, 18, 22, 0.76);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 2px solid rgba(45, 200, 86, 0.55);
+    border-radius: 999px;
     max-width: calc(100vw - 32px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
-  /* Prev / next nav arrows — inherit the same dark pill aesthetic. */
+  /* Prev / next nav arrows — transparent, icon-only with a green hover
+     tint (same style as the mobile hero). */
   .cp-nav {
     background: transparent;
     border: 0;
@@ -471,10 +481,11 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.78);
     transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease;
     border-radius: 999px;
     line-height: 0;
+    flex-shrink: 0;
   }
   .cp-nav svg {
     width: clamp(16px, 1.3vw, 20px);
@@ -483,7 +494,7 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
   }
   .cp-nav:hover {
     color: #2DC856;
-    background: rgba(45, 200, 86, 0.1);
+    background: rgba(45, 200, 86, 0.12);
   }
   .cp-prev:hover { transform: translateX(-2px); }
   .cp-next:hover { transform: translateX(2px); }
@@ -493,25 +504,33 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     outline-offset: 2px;
   }
 
+  /* Dots — single-line row (no wrap), centered, narrow gap. */
   .cp-dots {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
     justify-content: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+    min-width: 0;
   }
   .cp-dot {
+    flex-shrink: 0;
     width: 8px;
     height: 3px;
     background: rgba(255, 255, 255, 0.22);
     border: 0;
     padding: 0;
+    border-radius: 2px;
     cursor: pointer;
-    transition: width 0.25s ease, background 0.25s ease;
+    transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.22s ease;
+    -webkit-tap-highlight-color: transparent;
   }
+  .cp-dot:hover { background: rgba(255, 255, 255, 0.4); }
   .cp-dot.is-active {
     width: 22px;
     background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.55);
   }
 
   /* ── Responsive: keep caption within the arch on all viewports. ── */

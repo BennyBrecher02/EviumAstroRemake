@@ -1,0 +1,359 @@
+---
+/**
+ * SiteFooter
+ * ──────────
+ * Shared site footer — drop into any page (like Header). Matches the
+ * brand palette (#2DC856 green, #1A2F3A teal, #0d1a22 base) and the
+ * Maven Pro family used across the rest of the site.
+ *
+ * Usage:
+ *   ---
+ *   import SiteFooter from '../components/SiteFooter.astro';
+ *   ---
+ *   <Layout>
+ *     …page content…
+ *     <SiteFooter />
+ *   </Layout>
+ *
+ * Layout: brand column on the left (logo, tagline, station-support +
+ * partner-inquiry contacts, four social links) + three link columns
+ * on the right (Solutions, Products, Company). Legal bar underneath
+ * with copyright + privacy/terms/accessibility/cookie links.
+ */
+
+const footerCols = [
+  {
+    title: 'Solutions',
+    links: [
+      { label: 'Multifamily',          href: '/solutions/multifamily' },
+      { label: 'Fleet depot',          href: '/solutions/fleets' },
+      { label: 'Highway / fast lane',  href: '/solutions/highway-fast-charging' },
+      { label: 'Retail & hospitality', href: '/solutions/retail' },
+      { label: 'Parking garages',      href: '/solutions/parking' },
+      { label: 'Medical',              href: '/solutions/medical' },
+    ],
+  },
+  {
+    title: 'Products',
+    links: [
+      { label: 'Level 2 chargers',    href: '/products' },
+      { label: 'DC fast chargers',    href: '/products' },
+      { label: 'Evium app',           href: '/#home-app-download' },
+      { label: 'Owner Portal',        href: 'https://portal.eviumcharging.com' },
+      { label: 'See all products →',  href: '/products' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'How it works',      href: '/how-it-works' },
+      { label: 'Services',          href: '/services' },
+      { label: 'Electrician partners', href: '/solutions/electrician-partners' },
+      { label: 'Blog',              href: '/blog' },
+      { label: 'Contact',           href: '/contact' },
+    ],
+  },
+];
+
+const socials = [
+  { label: 'Instagram', href: 'https://www.instagram.com/eviumcharging/',        kind: 'instagram' as const },
+  { label: 'Facebook',  href: 'https://www.facebook.com/eviumcharging/',         kind: 'facebook'  as const },
+  { label: 'X',         href: 'https://x.com/eviumcharging',                     kind: 'x'         as const },
+  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/evium-charging', kind: 'linkedin'  as const },
+];
+---
+
+<footer class="ev-footer" aria-label="Site footer">
+  <div class="ev-footer-inner">
+
+    <div class="ev-footer-top">
+      <div class="ev-brand-col">
+        <a href="/" class="ev-brand-link" aria-label="Evium Charging home">
+          <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="ev-logo" />
+        </a>
+        <p class="ev-tagline">Electrifying the future.<br/>One property at a time.</p>
+        <p class="ev-contact">
+          <span class="ev-contact-label">Station support</span>
+          <a href="tel:+19499452000" class="ev-contact-link">(949) 945-2000</a>
+        </p>
+        <p class="ev-contact">
+          <span class="ev-contact-label">Partner inquiries</span>
+          <a href="mailto:support@eviumcharging.com" class="ev-contact-link">support@eviumcharging.com</a>
+        </p>
+        <div class="ev-socials" aria-label="Evium on social">
+          {socials.map((s) => (
+            <a
+              href={s.href}
+              class="ev-social-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Evium on ${s.label}`}
+            >
+              {s.kind === 'instagram' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {s.kind === 'facebook' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 8h2.5V5H14c-2 0-3.5 1.5-3.5 3.5V11H8v3h2.5v7h3v-7H16l.5-3h-3V8.8C13.5 8.4 13.7 8 14 8z"/>
+                </svg>
+              )}
+              {s.kind === 'x' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              )}
+              {s.kind === 'linkedin' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M7 10v7M7 7.5v.01"/>
+                  <path d="M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <nav class="ev-links" aria-label="Footer navigation">
+        {footerCols.map((col) => (
+          <div class="ev-col">
+            <h3 class="ev-col-title">{col.title}</h3>
+            <ul class="ev-col-list" role="list">
+              {col.links.map((link) => (
+                <li><a href={link.href} class="ev-col-link">{link.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </div>
+
+    <div class="ev-footer-rule" aria-hidden="true"></div>
+
+    <div class="ev-footer-bottom">
+      <p class="ev-copy">
+        © 2026 Evium Charging.
+        <span class="ev-copy-soft">All rights reserved.</span>
+      </p>
+      <nav class="ev-legal" aria-label="Legal">
+        <a href="/legal/privacy"       class="ev-legal-link">Privacy policy</a>
+        <a href="/legal/terms"         class="ev-legal-link">Terms of service</a>
+        <a href="/legal/accessibility" class="ev-legal-link">Accessibility</a>
+        <a href="/legal/cookies"       class="ev-legal-link">Cookie preferences</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ev-footer {
+    background:
+      linear-gradient(180deg, #0b161d 0%, #0a1822 45%, #0a1a24 100%);
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    position: relative;
+    isolation: isolate;
+  }
+  .ev-footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0.55) 20%,
+      rgba(45, 200, 86, 0.85) 50%,
+      rgba(45, 200, 86, 0.55) 80%,
+      rgba(45, 200, 86, 0) 100%
+    );
+  }
+  .ev-footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: clamp(36px, 4vw, 56px) clamp(28px, 5vw, 56px) clamp(18px, 2vw, 24px);
+  }
+  .ev-footer-top {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) 1fr;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+  }
+
+  .ev-brand-link { display: inline-block; line-height: 0; }
+  .ev-logo {
+    height: 44px;
+    width: auto;
+    display: block;
+    transition: opacity 0.18s ease;
+  }
+  .ev-brand-link:hover .ev-logo { opacity: 0.85; }
+  .ev-tagline {
+    margin: 12px 0 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.74);
+    max-width: 28ch;
+  }
+  .ev-contact {
+    margin: 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 0.8rem;
+  }
+  .ev-contact-label {
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #2DC856;
+  }
+  .ev-contact-link {
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    transition: color 0.18s ease;
+    font-weight: 600;
+  }
+  .ev-contact-link:hover { color: #ffffff; }
+
+  .ev-socials {
+    margin-top: 14px;
+    display: inline-flex;
+    gap: 8px;
+  }
+  .ev-social-link {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.78);
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .ev-social-link:hover,
+  .ev-social-link:focus-visible {
+    background: rgba(45, 200, 86, 0.12);
+    border-color: rgba(45, 200, 86, 0.5);
+    color: #2DC856;
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .ev-social-link svg { width: 15px; height: 15px; display: block; }
+
+  .ev-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: clamp(20px, 2.5vw, 40px);
+  }
+  .ev-col-title {
+    margin: 0 0 10px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .ev-col-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .ev-col-link {
+    display: inline-block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.62);
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+    padding: 1px 0;
+  }
+  .ev-col-link:hover,
+  .ev-col-link:focus-visible {
+    color: #2DC856;
+    transform: translateX(2px);
+    outline: none;
+  }
+
+  .ev-footer-rule {
+    height: 1px;
+    margin: clamp(24px, 3vw, 40px) 0 clamp(14px, 1.5vw, 20px);
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 255, 255, 0.12) 20%,
+      rgba(255, 255, 255, 0.12) 80%,
+      transparent 100%
+    );
+  }
+
+  .ev-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .ev-copy {
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .ev-copy-soft { color: rgba(255, 255, 255, 0.42); }
+  .ev-legal {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(12px, 1.6vw, 20px);
+    flex-wrap: wrap;
+  }
+  .ev-legal-link {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.56);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .ev-legal-link:hover,
+  .ev-legal-link:focus-visible {
+    color: #ffffff;
+    outline: none;
+  }
+
+  @media (max-width: 860px) {
+    .ev-footer-top {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .ev-links {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 32px;
+    }
+  }
+  @media (max-width: 520px) {
+    .ev-footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .ev-legal { gap: 12px 18px; }
+  }
+</style>

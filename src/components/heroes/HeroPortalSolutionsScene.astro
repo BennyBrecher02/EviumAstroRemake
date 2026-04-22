@@ -68,15 +68,17 @@ type CardCrop = 'left' | 'center' | 'right';
 interface Card { label: string; href: string; image: string; crop: CardCrop; }
 const cards: Card[] = [
   { label: 'Hardware', href: '/products',           image: '/images/TODO-edit-on-our-logo.png',          crop: 'center' },
-  { label: 'Software', href: '/solutions/software', image: '/images/sofware-solutions-button-light.png', crop: 'center' },
+  { label: 'Software', href: '#home-app-download',   image: '/images/sofware-solutions-button-light.png', crop: 'center' },
   { label: 'Services', href: '/services',           image: '/images/solutions-placeholder.jpg',          crop: 'right'  },
 ];
 ---
 
 <div id="portal-to-solutions" class="pps-scene">
   <div class="pps-stage">
-    {/* Seam-blend top vignette so the hero above dissolves cleanly in. */}
-    <div class="pps-top-vignette" aria-hidden="true"></div>
+    {/* Seam with the hero above is handled from the hero side now — the
+        hero paints the stage's exact gradient UP into its bottom zone,
+        so both sides of the seam meet as one continuous gradient. No
+        top vignette needed. */}
 
     {/* Wind field — JS appends animated gust lines here. Parallax: drifts
         up + fades out during the --p-portal window. */}
@@ -109,7 +111,13 @@ const cards: Card[] = [
         Flex-column, vertically centered, with the same padding + gap. */}
     <div class="pps-content">
       <div class="pps-header">
-        <img src="/images/logo.webp" alt="Evium Charging" class="pps-logo" />
+        {/* Centered logo doubles as a link to the products index, matching
+            the pattern where each flying portal routes to its specific
+            product — the logo routes to the top of the full products
+            catalog. */}
+        <a href="/products" class="pps-logo-link" aria-label="See all products">
+          <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="pps-logo" />
+        </a>
         {/* Portal-only tagline. Visible at --p-tagline=1, collapses to 0-height
             and slides down while fading. Not rendered in solutions state. */}
         <p class="pps-tagline">Electrifying the future. One property at a time.</p>
@@ -118,8 +126,9 @@ const cards: Card[] = [
         <p class="pps-subtitle">Solutions</p>
       </div>
 
-      {/* 3-card grid — identical layout to solutions page. Hidden + offset
-          in portal state; rises up with per-card stagger in cards phase. */}
+      {/* 3-card grid + wide calculate-profits card below. Same stagger
+          system (--card-i 0..3), wider card spans all columns and uses
+          a shorter aspect ratio so the row reads as a secondary CTA. */}
       <div class="pps-cards" data-pps-cards>
         {cards.map((card, i) => (
           <a
@@ -135,6 +144,22 @@ const cards: Card[] = [
             <span class="pps-card-label">{card.label}</span>
           </a>
         ))}
+        <a
+          href="/solutions/generate-profits"
+          class="pps-card pps-card-wide"
+          data-pps-card
+          style="--card-i: 3;"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <img
+            src="/images/generate-profits-solutions-pic.avif"
+            alt="Calculate generated profits"
+            class="pps-card-img pps-card-crop-center"
+          />
+          <div class="pps-card-overlay"></div>
+          <span class="pps-card-label">Calculate Generated Profits</span>
+        </a>
       </div>
     </div>
   </div>
@@ -146,7 +171,19 @@ const cards: Card[] = [
      ═══════════════════════════════════════════════════════════════════════ */
   .pps-scene {
     position: relative;
-    height: 220vh;
+    /* Scene height is deliberately taller than vh so the sticky stage
+       has a scroll band to drive the transition AND two hold zones — a
+       front hold before the animation starts (pure portal) and a back
+       hold after it finishes (pure solutions). The back hold is what
+       keeps the user anchored in the final solutions state instead of
+       releasing sticky the instant animation completes. See HOLD_END
+       and HOLD_OUT_START in the JS below for the exact bands. Bumped
+       from 240vh to 270vh so the back-hold band is longer — users
+       stay anchored in the solutions committed state for a bit more
+       scroll distance before the map section appears. This replaces
+       the previous "dead padding between sections" approach, which
+       produced a flat color band that broke the seamless flow. */
+    height: 270vh;
     background: #0d1a22;
   }
 
@@ -169,23 +206,10 @@ const cards: Card[] = [
     --img-w:  clamp(80px, 15vw, 280px);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════
-     TOP VIGNETTE — seam blend with hero above
-     ═══════════════════════════════════════════════════════════════════════ */
-  .pps-top-vignette {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 220px;
-    background: linear-gradient(
-      to bottom,
-      #0d1a22 0%,
-      rgba(13, 26, 34, 0.92) 35%,
-      rgba(13, 26, 34, 0.55) 65%,
-      rgba(13, 26, 34, 0) 100%
-    );
-    pointer-events: none;
-    z-index: 4;
-  }
+  /* (Old .pps-top-vignette removed — the hero's .hh-bottom-seam now
+     extends the stage's exact radial gradient upward, so both sides of
+     the seam paint identical colors at the boundary pixel with no
+     overlay needed here.) */
 
   /* ═══════════════════════════════════════════════════════════════════════
      WIND FIELD + PORTAL GROUPS
@@ -404,6 +428,38 @@ const cards: Card[] = [
   }
 
   /* ── Logo: center-big → upper-small (driven by flex + size change) ── */
+  /* Anchor wraps the logo image for click-through to /products. Sized to
+     shrink-wrap the image so the clickable area matches the logo bounds
+     (not the full header width). Hover provides a subtle affordance. */
+  .pps-logo-link {
+    display: inline-block;
+    line-height: 0;
+    text-decoration: none;
+    /* Parent .pps-content / .pps-header have pointer-events: none so the
+       flying portal cards behind the content layer can still receive
+       clicks. Re-enable events on the logo link itself so it's clickable
+       as a small island within the otherwise click-through header. */
+    pointer-events: auto;
+    transition: transform 0.22s ease, filter 0.22s ease;
+  }
+  .pps-logo-link:hover {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 16px rgba(45, 200, 86, 0.25));
+  }
+  /* Once the scene starts morphing toward the solutions state, the logo
+     is on its way somewhere else — keeping it a /products link during
+     the transition would be misleading. `.is-transitioning` is already
+     toggled on the stage the moment --p > 0.02 (or the tagline fades),
+     so hooking in there means the logo only acts as a link in its
+     centered portal state. Hover affordance is removed in sync. */
+  .pps-stage.is-transitioning .pps-logo-link {
+    pointer-events: none;
+    cursor: default;
+  }
+  .pps-stage.is-transitioning .pps-logo-link:hover {
+    transform: none;
+    filter: none;
+  }
   .pps-logo {
     height: calc(80px - var(--p) * 16px); /* 5rem → 64px */
     display: block;
@@ -452,7 +508,9 @@ const cards: Card[] = [
         on a slightly different progress threshold. Pure scroll-driven —
         no time-based transitions. ── */
   .pps-cards {
-    max-height: calc(var(--p-cards) * 90vh);
+    /* Bumped from 90vh to accommodate the secondary wide card row below
+       the 3-card grid without clipping at full reveal. */
+    max-height: calc(var(--p-cards) * 120vh);
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
@@ -467,6 +525,7 @@ const cards: Card[] = [
     will-change: opacity, transform, max-height;
   }
   .pps-stage.cards-interactive .pps-cards { pointer-events: auto; }
+
 
   .pps-card {
     position: relative;
@@ -488,6 +547,15 @@ const cards: Card[] = [
   .pps-card:hover {
     border-color: rgba(45, 200, 86, 0.35);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 0 24px rgba(45, 200, 86, 0.08);
+  }
+
+  /* Secondary wide CTA — spans the full row beneath the 3 cards,
+     shorter aspect so it reads as a linked banner. Inherits all
+     .pps-card styling + parallax via the same --card-i system.
+     Compound selector to override the base .pps-card aspect-ratio. */
+  .pps-card.pps-card-wide {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 3.4;
   }
 
   .pps-card-img {
@@ -523,6 +591,11 @@ const cards: Card[] = [
     );
   }
 
+  /* Editorial label treatment — no pill, no heavy box. A permanent
+     text-shadow keeps the label readable on any photo brightness (the
+     old green-on-image hover failed on lighter photos). On hover the
+     label gets a subtle tracking expansion and a thin brand-accent
+     rule slides in below it, like a premium product page header. */
   .pps-card-label {
     position: relative;
     z-index: 1;
@@ -530,10 +603,41 @@ const cards: Card[] = [
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.88);
-    transition: color 0.3s ease;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow:
+      0 2px 14px rgba(0, 0, 0, 0.55),
+      0 1px 3px  rgba(0, 0, 0, 0.45);
+    transition:
+      color 260ms ease,
+      letter-spacing 360ms cubic-bezier(.22,1,.36,1),
+      text-shadow 260ms ease;
   }
-  .pps-card:hover .pps-card-label { color: #2DC856; }
+  .pps-card-label::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 44px;
+    height: 1.5px;
+    background: #2DC856;
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    transition:
+      transform 380ms cubic-bezier(.22,1,.36,1),
+      opacity 260ms ease;
+  }
+  .pps-card:hover .pps-card-label {
+    color: #ffffff;
+    letter-spacing: 0.26em;
+    text-shadow:
+      0 3px 18px rgba(0, 0, 0, 0.65),
+      0 1px 3px  rgba(0, 0, 0, 0.55);
+  }
+  .pps-card:hover .pps-card-label::after {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
 
   /* Narrow viewports — single column, wider aspect */
   @media (max-width: 640px) {
@@ -542,6 +646,7 @@ const cards: Card[] = [
       max-width: 20rem;
     }
     .pps-card { aspect-ratio: 16 / 9; }
+    .pps-card-wide { aspect-ratio: 16 / 6; }
     .pps-tagline { white-space: normal; max-width: 80vw; }
   }
 </style>
@@ -586,10 +691,17 @@ const cards: Card[] = [
     // ────────────────────────────────────────────────────────────────
     // SCROLL-DRIVEN TRANSITION  (parallax — five layered windows)
     //
-    //   raw 0.00 → 0.10   HOLD (pure portal state, nothing moves)
-    //   raw 0.10 → 1.00   transition (normalized into local t = 0..1)
+    //   raw 0.00 → 0.08   HOLD FRONT (pure portal state, nothing moves)
+    //   raw 0.08 → 0.80   transition (normalized into local t = 0..1)
+    //   raw 0.80 → 1.00   HOLD BACK (pure solutions state, nothing moves)
     //
-    //   Within t = 0..1 each element has its own window:
+    //   The HOLD BACK band is what anchors the user in the solutions
+    //   final state — without it, sticky releases the instant the
+    //   animation hits t=1, which makes "solutions" feel unstable. With
+    //   it, the user has ~20 % of the scene's scroll band where the
+    //   stage stays pinned in its committed solutions layout.
+    //
+    //   Within t = 0..1 each element still has its own window:
     //     --p-tagline  : 1 - window(t, 0.00, 0.28)   fade + fall away
     //     --p-portal   :     window(t, 0.10, 0.55)   fade + drift up
     //     --p          :     window(t, 0.15, 0.65)   logo size/opacity
@@ -597,7 +709,9 @@ const cards: Card[] = [
     //     --p-cards    :     window(t, 0.55, 1.00)   rise (staggered)
     // ────────────────────────────────────────────────────────────────
     let ticking = false;
-    const HOLD_END = 0.10;
+    const HOLD_END        = 0.08;  // raw at which animation starts
+    const HOLD_OUT_START  = 0.80;  // raw at which animation completes
+    const TRANS_RANGE     = HOLD_OUT_START - HOLD_END;
 
     function computeProgress() {
       const rect = scene!.getBoundingClientRect();
@@ -610,7 +724,10 @@ const cards: Card[] = [
       let p = 0, pTagline = 1, pSubtitle = 0, pCards = 0, pPortal = 0;
 
       if (raw > HOLD_END) {
-        const t = clamp01((raw - HOLD_END) / (1 - HOLD_END));
+        // clamp01 handles the back-hold band by forcing t=1 once raw
+        // passes HOLD_OUT_START → every window stays at its committed
+        // end value through the rest of the scene.
+        const t = clamp01((raw - HOLD_END) / TRANS_RANGE);
         pTagline  = 1 - windowProgress(t, 0.00, 0.28);
         pPortal   =     windowProgress(t, 0.10, 0.55);
         p         =     windowProgress(t, 0.15, 0.65);
@@ -640,15 +757,148 @@ const cards: Card[] = [
       });
     }
 
+    // Track the last scroll direction so the snap-on-idle handler
+    // commits toward the direction the user was already going. Updated
+    // on every scroll event, ignored while our own programmatic snap
+    // scroll is settling (otherwise the snap would think the user
+    // scrolled against their intent and flip direction on the next
+    // idle). `null` means we haven't observed any direction yet — on
+    // first-visit-to-scene we default to `'down'` (user entered by
+    // scrolling down).
+    let lastScrollY: number = window.scrollY;
+    let lastScrollDirection: 'down' | 'up' = 'down';
+
     function onScroll() {
+      const curY = window.scrollY;
+      if (!snapping) {
+        if (curY > lastScrollY + 1)       lastScrollDirection = 'down';
+        else if (curY < lastScrollY - 1)  lastScrollDirection = 'up';
+      }
+      lastScrollY = curY;
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => { computeProgress(); ticking = false; });
+      scheduleSnap();
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     computeProgress();
+
+    // ────────────────────────────────────────────────────────────────
+    // SNAP-ON-IDLE
+    //
+    // If the user stops scrolling while the scene is mid-transition,
+    // gently finish the movement so they don't sit in an awkward
+    // half-morphed state. Direction-driven: the snap commits toward
+    // whichever direction the user was already scrolling. Scrolling
+    // down and pausing → commits forward (into solutions). Scrolling
+    // up and pausing → commits back (into portal). This matches user
+    // intent instead of a positional threshold that sometimes flipped
+    // the commit direction against the user's momentum.
+    //
+    // Still deliberately quiet:
+    //   - Waits SNAP_IDLE_MS after the last scroll before committing
+    //     so intentional micro-pauses don't trigger.
+    //   - Skipped when the user is already near a committed state
+    //     (raw < SNAP_LOW_SKIP or raw > SNAP_HIGH_SKIP) — the front
+    //     and back hold zones are already resting states.
+    //   - Skipped when `prefers-reduced-motion` is set.
+    //   - Skipped when a hash-driven auto-scroll (#solutions) is in
+    //     flight, and during its own smooth-scroll settle.
+    // ────────────────────────────────────────────────────────────────
+    let snapTimer: number | null = null;
+    let snapping = false;
+    // Idle threshold — time after the last scroll before the snap
+    // fires. Tuned to feel responsive: long enough that a user
+    // actively scrolling doesn't trigger it, short enough that a
+    // deliberate stop doesn't feel like it's hanging.
+    const SNAP_IDLE_MS      = 400;
+    // Duration of the custom rAF-driven snap scroll (ms). A browser-
+    // default smooth scroll is short (~300 ms) which read as jerky
+    // here; this slows + eases the motion so the commit feels like
+    // a deliberate glide rather than a whip.
+    const SNAP_DURATION_MS  = 1400;
+    // Snap is only active inside the animation band — front hold and
+    // back hold are already committed states, so the user is free to
+    // rest there without getting nudged. A small buffer inside each
+    // hold keeps us from snapping users who are one pixel away from a
+    // committed state just because they're mid-scroll.
+    const SNAP_LOW_SKIP     = HOLD_END - 0.02;        // ≈ 0.06
+    const SNAP_HIGH_SKIP    = HOLD_OUT_START + 0.02;  // ≈ 0.82
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function currentRaw() {
+      const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
+      const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
+      return { raw: scrolled / scrollable, scrollable, sceneTopAbs: window.scrollY + rect.top };
+    }
+
+    function scheduleSnap() {
+      if (prefersReducedMotion.matches) return;
+      if (snapping) return;
+      if (snapTimer !== null) window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(runSnap, SNAP_IDLE_MS);
+    }
+
+    function runSnap() {
+      snapTimer = null;
+      if (snapping) return;
+      // Don't fight a hash-driven jump in progress.
+      if (window.location.hash === '#solutions') return;
+      const { raw, scrollable, sceneTopAbs } = currentRaw();
+      // Skip if we're effectively at a committed state already.
+      if (raw <= SNAP_LOW_SKIP || raw >= SNAP_HIGH_SKIP) return;
+      // Skip if the scene isn't currently the pinned element on screen
+      // (e.g. user is scrolling way above/below — rect math can read
+      // within the range even when the sticky band isn't active).
+      const rect = scene!.getBoundingClientRect();
+      if (rect.top > 1 || rect.bottom < window.innerHeight - 1) return;
+
+      // Direction-driven commit — whichever way the user was
+      // scrolling is the way the snap finishes. Respects momentum /
+      // intent instead of flipping based on mid-animation position.
+      const goForward = lastScrollDirection === 'down';
+      // Commit targets:
+      //   forward → solutionsAnchorY (mid-back-hold, raw ≈ 0.90) so
+      //             the user is firmly anchored with sticky still
+      //             active and buffer in both directions.
+      //   back    → just inside the front HOLD zone so we land in
+      //             pure portal state without hopping out of sticky.
+      const targetY = goForward
+        ? solutionsAnchorY()
+        : Math.round(sceneTopAbs + 0.03 * scrollable);
+
+      snapping = true;
+      smoothScrollTo(targetY, SNAP_DURATION_MS);
+      // Release the flag after the animation's had time to finish.
+      // Buffer a bit past SNAP_DURATION_MS so the last scroll event
+      // doesn't flip direction tracking before we mark it complete.
+      window.setTimeout(() => { snapping = false; }, SNAP_DURATION_MS + 120);
+    }
+
+    // rAF-based smooth scroll with cubic ease-in-out. Fires scroll
+    // events along the way (which the direction tracker ignores
+    // because `snapping` is true) and lands exactly on the target.
+    function smoothScrollTo(targetY: number, durationMs: number) {
+      const startY = window.scrollY;
+      const dist   = targetY - startY;
+      if (Math.abs(dist) < 1) return;
+      const startTs = performance.now();
+      function step(now: number) {
+        const t = Math.min(1, (now - startTs) / durationMs);
+        // Symmetrical ease-in-out — gentle start and stop at both ends.
+        const eased = t < 0.5
+          ? 2 * t * t
+          : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        window.scrollTo(0, Math.round(startY + dist * eased));
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
 
     // ────────────────────────────────────────────────────────────────
     // #solutions HASH HANDLER
@@ -664,11 +914,22 @@ const cards: Card[] = [
     //   The -1 keeps us just inside the sticky range so the stage is
     //   guaranteed pinned (one pixel further and sticky releases).
     // ────────────────────────────────────────────────────────────────
-    function scrollToSolutionsFinalState(behavior: ScrollBehavior) {
+    // Target raw for the "solutions anchored" state: halfway inside the
+    // back hold band so the user has equal buffer in both directions
+    // before sticky releases or animation reverses.
+    const SOLUTIONS_ANCHOR_RAW = HOLD_OUT_START + (1 - HOLD_OUT_START) * 0.5; // 0.90
+
+    function solutionsAnchorY() {
       const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
       const sceneTopAbs = window.scrollY + rect.top;
-      const targetY = Math.max(0, sceneTopAbs + scene!.offsetHeight - window.innerHeight - 1);
-      window.scrollTo({ top: targetY, behavior });
+      return Math.round(sceneTopAbs + SOLUTIONS_ANCHOR_RAW * scrollable);
+    }
+
+    function scrollToSolutionsFinalState(behavior: ScrollBehavior) {
+      window.scrollTo({ top: solutionsAnchorY(), behavior });
     }
 
     function maybeJumpToSolutions(behavior: ScrollBehavior) {
