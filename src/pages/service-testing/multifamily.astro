@@ -1,0 +1,378 @@
+---
+/**
+ * /service-testing/multifamily — first instance of the new
+ * shared ServicePageV2 template.
+ *
+ * Content is migrated 1:1 from /solutions/multifamily.astro so
+ * the new design can be evaluated against the same source data.
+ * Once the template is approved here it'll be rolled out across
+ * the rest of the service slugs.
+ *
+ * The whole page is just data + a single component. Future
+ * design tweaks happen in ServicePageV2.astro and propagate to
+ * every service that uses it.
+ */
+import ServicePageV2 from '../../components/services/ServicePageV2.astro';
+import type { ServicePageConfig } from '../../components/services/types';
+
+const service: ServicePageConfig = {
+  meta: {
+    title: 'Multifamily EV Charging — Evium',
+    description:
+      'Evium installs, manages, and maintains EV charging at multifamily properties — at zero upfront cost. Earn passive revenue, retain residents, and outpace competing buildings.',
+  },
+
+  hero: {
+    eyebrow: 'Multifamily Real Estate',
+    headline: 'The amenity your tenants are already asking for.',
+    subhead:
+      "EV ownership is rising fast — and residents are choosing properties based on charging access. Add a premium amenity, earn a new revenue stream, and outpace competing buildings. Evium handles everything. You pay nothing upfront.",
+    primaryCta: { label: 'Get a Free Site Assessment', href: '/contact/quote' },
+    secondaryCta: { label: 'See Financing Options', href: '#service-financialModels' },
+    image: {
+      src: '/images/multifamily-realestate-service-hero.jpg',
+      alt: 'Modern multifamily apartment building at golden hour, deep teal facade with warm orange accent and rows of balconies',
+    },
+    /* Hero quick-nav strip — page-section shortcuts replace the
+       generic "500+ chargers / $0 upfront / 24/7 support" stats
+       (which read too similar to the home hero's stat row).
+       Each tile is an anchor button with a leading icon that
+       jumps to the linked in-page section, giving first-time
+       visitors three confident entry points into the page's
+       deeper content. The middle slot is intentionally NOT
+       Financial Models — the hero's secondary CTA already
+       routes there. Hardware fills it instead so the trio
+       reads as: process → product → people. */
+    stats: [
+      { value: 'How we deliver',     label: 'See the full scope',  href: '#service-scope',    icon: 'compass' },
+      { value: 'Recommended hardware', label: 'View the chargers', href: '#service-hardware', icon: 'bolt'    },
+      { value: 'Talk to our team',   label: 'Start your quote',    href: '#service-cta',      icon: 'users'   },
+    ],
+  },
+
+  sections: [
+    {
+      type: 'narrative',
+      anchor: 'service-market',
+      eyebrow: 'The Market Reality',
+      title: "EV Charging Isn't Optional Anymore.",
+      subhead:
+        'The shift is already underway. Properties without charging infrastructure are losing leases. Properties with it are winning them.',
+      highlights: [
+        {
+          icon: 'trend',
+          title: 'EV Adoption Is Accelerating',
+          body:
+            "Millions of new EVs hit the road every year. By 2030, EV drivers will be the norm, not the exception. Residents without home charging are frustrated residents looking to move.",
+        },
+        {
+          icon: 'home',
+          title: 'Tenants Search for Charging',
+          body:
+            'Apartment-hunting EV drivers filter by charging availability the same way they filter by parking or laundry. Your listing without it is invisible to a growing slice of the renter market.',
+        },
+        {
+          icon: 'compass',
+          title: 'Competitors Are Already Moving',
+          body:
+            "Across NJ, NY, and the rest of the country, forward-thinking property owners are locking in charging before their neighbors do. The time to act is now — not when you're playing catch-up.",
+        },
+      ],
+    },
+    {
+      type: 'painPoints',
+      anchor: 'service-pain',
+      eyebrow: 'Every Objection, Handled',
+      title: "We Know What's Been Holding You Back.",
+      subhead:
+        'Property owners come to us with the same concerns every time. Upfront cost. Electrical complexity. Permits. Liability. Ongoing maintenance. Resident billing headaches. Here\'s how Evium eliminates all of it.',
+      cta: { label: 'Talk to Our Team', href: '/contact/quote' },
+      items: [
+        {
+          problem: 'Upfront capital costs are prohibitive.',
+          solution:
+            'Under our no-cost model, Evium covers 100% of hardware, installation, and electrical work. Zero capital required from you.',
+        },
+        {
+          problem: 'Electrical infrastructure is complicated.',
+          solution:
+            "Our engineers assess your property's electrical capacity, design the optimal layout, and handle every aspect of the upgrade or new installation.",
+        },
+        {
+          problem: 'Permits and compliance are a maze.',
+          solution:
+            'We manage all permits, inspections, utility coordination, and code compliance from start to finish. You sign once — we handle the rest.',
+        },
+        {
+          problem: 'Ongoing maintenance is a burden.',
+          solution:
+            'Evium provides 24/7 remote monitoring, preventative maintenance, and on-site repair service. If a charger goes down, we fix it — not you.',
+        },
+        {
+          problem: 'Resident billing and access are complex.',
+          solution:
+            'Our software platform handles resident access control, usage tracking, and billing automatically. Residents pay per session. You see the revenue.',
+        },
+      ],
+    },
+
+    {
+      type: 'scope',
+      anchor: 'service-scope',
+      eyebrow: 'The Full Scope',
+      title: 'Truly Turnkey. One Partner. Everything Covered.',
+      subhead:
+        'From the initial site walk to day-1,000 of operations, Evium owns the entire process so you never have to.',
+      items: [
+        {
+          title: 'Site assessment & engineering',
+          body: 'We evaluate your electrical capacity, parking layout, and resident density to design the right charging footprint for your property.',
+          icon: 'map',
+        },
+        {
+          title: 'Hardware selection',
+          body: 'We match Level 2 chargers to your property type, resident profile, and parking configuration — no guessing, no oversizing.',
+          icon: 'bolt',
+        },
+        {
+          title: 'Full electrical installation',
+          body: 'Licensed electricians handle all panel work, conduit, wiring, and equipment mounting. We work around your residents with minimal disruption.',
+          icon: 'hammer',
+        },
+        {
+          title: 'Permits & utility coordination',
+          body: 'All permitting, inspections, utility applications, and compliance paperwork managed end-to-end. You stay focused on your property.',
+          icon: 'shield',
+        },
+        {
+          title: 'Rebate processing',
+          body: 'We identify and file applicable utility rebates, state incentives, and NEVI-aligned programs to maximize value for every project.',
+          icon: 'coin',
+        },
+        {
+          title: 'Ongoing operations & support',
+          body: '24/7 remote monitoring, resident support line, preventative maintenance, and on-site repair service. We never hand you the keys and disappear.',
+          icon: 'clock',
+        },
+      ],
+    },
+
+    {
+      type: 'hardware',
+      anchor: 'service-hardware',
+      eyebrow: 'Recommended hardware',
+      title: 'Level 2 chargers built for shared-access multifamily.',
+      subhead:
+        'Hardware is matched to your property — not a one-size catalog. Below: the workhorses we deploy across most multifamily portfolios.',
+      seeAllLink: { label: 'View All Level 2 Products', href: '/products/level-2' },
+      items: [
+        {
+          name: 'EvoCharge by Evium',
+          image: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',
+          imageAlt: 'EvoCharge Level 2 wall-mount',
+          tier: 'l2',
+          features: [
+            'In-house branded Level 2 wall-mount charger',
+            'ENERGY STAR certified, OCPP 1.6 compatible',
+            'Built for shared-access residential environments',
+          ],
+        },
+        {
+          name: 'Siemens VersiCharge',
+          image: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',
+          imageAlt: 'Siemens VersiCharge wall-mount',
+          tier: 'l2',
+          features: [
+            'Commercial-grade Level 2 from our Siemens eMobility partnership',
+            'Configurable for dedicated or shared use',
+            'Durable all-weather construction',
+          ],
+        },
+        {
+          name: 'GSA-approved & code compliant',
+          tier: 'l2',
+          features: [
+            'All hardware sourced from GSA-approved manufacturers',
+            'UL-listed, NEC compliant',
+            'Warranted against defects — no surprises at inspection',
+          ],
+        },
+      ],
+    },
+
+    {
+      type: 'financialModels',
+      anchor: 'service-financialModels',
+      eyebrow: 'Financial models',
+      title: 'You Choose How\nYou Want to Work With Us.',
+      subhead:
+        'Most multifamily owners start with our no-cost model. But if you want more control — or more upside — we have options for that too.',
+      models: [
+        {
+          name: 'No-Cost Model',
+          tagline: '$0 upfront — Evium covers everything',
+          body:
+            'Evium funds 100% of hardware, installation, and ongoing operations. In exchange, you receive approximately 10% of charging revenue generated on your property — a true passive income stream with zero capital at risk.',
+          bullets: [
+            'Zero operational burden — Evium handles everything.',
+            'Fastest path to launch and revenue.',
+            'No capital approval, no procurement cycle.',
+          ],
+          highlight:
+            'Ideal for property owners who want the amenity and the revenue without any budget commitment or operational burden.',
+          badge: 'Most Popular',
+          featured: true,
+          icon: 'coin',
+        },
+        {
+          name: 'Client Investment',
+          tagline: 'You finance, you keep 100%',
+          body:
+            'Fund the installation yourself and retain 100% of all charging revenue. Best for owners who want maximum return on a long hold and have capital to deploy.',
+          bullets: [
+            'Maximum revenue capture — keep every dollar.',
+            'Best for long holds where capital ROI compounds.',
+            'Evium can still operate the network on a service contract.',
+          ],
+          icon: 'chart',
+        },
+        {
+          name: 'Hybrid Model',
+          tagline: 'Shared cost, shared upside',
+          body:
+            'Both parties contribute to installation costs and share revenue proportionally. A balanced option that improves your revenue share without full capital exposure.',
+          bullets: [
+            'Improved revenue share vs. no-cost.',
+            'Capital exposure scaled to your comfort level.',
+            'Custom terms — no two deals look alike.',
+          ],
+          icon: 'stack',
+        },
+      ],
+      footnote: {
+        before: 'Leasing options also available. ',
+        link: { label: 'Speak with our team', href: '#service-cta' },
+        after: ' to find the right structure for your portfolio.',
+      },
+    },
+
+    {
+      type: 'software',
+      anchor: 'service-software',
+      eyebrow: 'Software & management',
+      title: 'Full Visibility.\nZero Effort.',
+      config: {
+        intro:
+          "Evium's owner portal and resident driver app give you and your tenants a seamless, modern experience — while you watch the revenue flow in from your dashboard.",
+        portalTitle: 'Owner Portal',
+        portalFeatures: [
+          'Real-time revenue reporting and session history',
+          'Remote start/stop and charger management',
+          'Load management to protect your electrical infrastructure',
+          'Resident access whitelisting and permissions',
+          'Maintenance alerts and service ticket tracking',
+          'OCPP 1.6+ protocol — future-proof and interoperable',
+        ],
+        appTitle: 'Evium Driver App',
+        appSubtitle: 'iOS & Android',
+        appBody:
+          'Your residents get a polished, intuitive app to find available chargers, start and stop sessions, manage their payment method, and view their charging history — all from their phone.',
+        appFeatures: [
+          'Find & reserve chargers on-property',
+          'Start/stop sessions remotely',
+          'Contactless payment & digital receipts',
+          'Session history and spend tracking',
+        ],
+        support: {
+          title: '24/7 Live Support',
+          body: "Residents and property managers both have access to Evium's support line around the clock. Charging issues get resolved fast — not left to you to troubleshoot.",
+        },
+      },
+    },
+
+    {
+      type: 'socialProof',
+      anchor: 'service-proof',
+      eyebrow: 'Proven at Scale',
+      title: 'Real Properties.\nReal Results.',
+      config: {
+        stats: [
+          { value: '500+',     label: 'Chargers Installed Nationwide' },
+          { value: 'Hundreds', label: 'Chargers with RJ Block Properties, NJ & NY' },
+          { value: '$6MM+',    label: 'CEC Grant Awarded' },
+          { value: 'NEVI',     label: 'Federal Award Recipient, New Mexico' },
+        ],
+        testimonial: {
+          quote:
+            "In the first month, EVIUM's Chargers have brought us three brand new tenants.",
+          attribution: 'Property Manager',
+          role: 'Multifamily Portfolio',
+          company: 'Oakmark Client',
+        },
+        callout: {
+          title: 'RJ Block Properties — NJ & NY Portfolio',
+          body:
+            "Hundreds of Evium chargers deployed across RJ Block's multifamily and commercial properties throughout New Jersey and New York, with Michael Kovitz leading the expansion. One of the largest residential EV charging rollouts in the region.",
+        },
+      },
+    },
+
+    {
+      type: 'faq',
+      anchor: 'service-faq',
+      eyebrow: 'Frequently Asked Questions',
+      title: 'Good Questions.\nStraight Answers.',
+      items: [
+        {
+          q: 'Who pays for the chargers and installation?',
+          a: 'Under our no-cost model, Evium covers 100% of hardware costs, installation labor, electrical work, permitting, and ongoing maintenance. You pay nothing upfront and nothing ongoing. If you prefer to invest directly and capture 100% of revenue, that option is also available.',
+        },
+        {
+          q: 'Who handles maintenance and repairs?',
+          a: 'Evium does — permanently. We remotely monitor every charger 24/7. If an issue is detected, we resolve it remotely when possible or dispatch a technician when physical service is required. You never need to call an electrician, coordinate a repair, or field resident complaints about broken equipment.',
+        },
+        {
+          q: 'What electrical work does installation involve?',
+          a: "It depends on your property's existing electrical capacity. Our engineers assess your panel, service entrance, and available capacity before proposing a scope. For many properties, installation is straightforward panel additions and conduit runs. For others, a service upgrade may be required — all coordinated and managed by our team.",
+        },
+        {
+          q: 'How do my residents pay for charging?',
+          a: 'Residents pay per session using the Evium Driver App (iOS & Android) with a credit card or linked payment method. Sessions are billed automatically. Residents receive digital receipts. You never handle money from residents — Evium manages all payment processing and pays your revenue share directly to you.',
+        },
+        {
+          q: 'What happens if a charger breaks down?',
+          a: "We're notified before your residents are, in most cases. Our 24/7 remote monitoring system alerts us to faults automatically. We triage remotely and either resolve the issue over-the-air or dispatch a field technician. Our goal is same-day or next-day resolution for any service-affecting fault.",
+        },
+        {
+          q: 'How long does installation take from start to finish?',
+          a: "From initial site assessment to go-live typically takes 6–12 weeks, depending on permit timelines in your municipality, electrical scope, and number of chargers. Permitting is often the longest variable — we set expectations clearly upfront so you're never left wondering where the project stands.",
+        },
+        {
+          q: 'Can I see charging revenue and usage data?',
+          a: "Yes, in real time. Your owner portal gives you a live dashboard with session history, per-charger revenue, total kWh dispensed, and monthly reporting exports. You always know exactly what your property's charging infrastructure is generating.",
+        },
+      ],
+    },
+  ],
+
+  finalCta: {
+    eyebrow: 'Now Serving NJ, NY & Nationwide',
+    /* Each line lives on its own row deliberately. Embedded
+       <span class="svc-final-title-accent"> tags the "Electrified."
+       middle line for the brand-green color treatment so the
+       three-line stack reads as: white / green / white — same
+       cadence as v1. The render block converts \n → <br /> at
+       runtime via set:html. */
+    headline:
+      'Your Property.\n<span class="svc-final-title-accent">Electrified.</span>\nZero Cost to You.',
+    subhead:
+      'Every week you wait is another week competing properties are locking in residents with charging. Book a free site assessment today. No obligation. No sales pressure. Just a clear picture of what EV charging looks like on your property.',
+    primaryCta: { label: 'Book a Free Site Assessment', href: '/contact/quote' },
+    secondaryCta: { label: 'Schedule a Call', href: '/contact/schedule' },
+    footnote:
+      'No upfront cost. No hidden fees. No obligation to proceed after your assessment.',
+  },
+};
+---
+
+<ServicePageV2 service={service} />

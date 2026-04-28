@@ -1,15 +1,35 @@
 ---
 /**
- * Dev-only floating toggle — swaps between Dark navbar and Light navbar.
- * Apple Glass pill style. Persists choice in localStorage.
+ * Dev Mode toggle — floating Apple-Glass pill in the bottom-right.
+ * ──────────────────────────────────────────────────────────────
+ * Flips `body.dev-mode-off` on/off. When OFF (the default), the
+ * dev-only nav items — AI BS, Testing, Other — collapse out of
+ * the battery navbar via smooth width/opacity animations driven
+ * by CSS transitions in Header.astro. When ON, those slots
+ * animate back in and the battery extends in length.
+ *
+ * Persistence: the ON/OFF choice is stored under
+ * `evium-dev-mode` in localStorage, so dev-mode state survives
+ * page navigations and refreshes.
+ *
+ * Visibility: the "Toggle the toggle" item in the AI BS nav
+ * dropdown hides THIS pill. That key persists separately under
+ * `ev-devswitch-hidden`. Hidden means you can't toggle dev-mode
+ * from the UI until you click "Toggle the toggle" again.
+ *
+ * Historical note: this component used to switch a dark/light
+ * navbar theme (stored under `evium-theme`). The navbar's colors
+ * are now locked to the light-nav palette in global.css. The
+ * localStorage key `evium-theme` is no longer read, and the
+ * `data-theme` attribute on <html> is no longer set by this file.
  */
 ---
 
-<div id="dev-toggle" role="button" tabindex="0" aria-label="Toggle navbar theme">
+<div id="dev-toggle" role="button" tabindex="0" aria-label="Toggle dev mode">
   <span class="track">
     <span class="thumb"></span>
   </span>
-  <span class="label" id="dev-toggle-label">DARK NAV</span>
+  <span class="label" id="dev-toggle-label">DEV MODE OFF</span>
 </div>
 
 <style>
@@ -77,19 +97,20 @@
     letter-spacing: 0.12em;
     color: rgba(255, 255, 255, 0.70);
     transition: color 0.2s;
-    min-width: 52px;
+    min-width: 70px;
+    white-space: nowrap;
   }
 
-  /* Light-nav state */
-  #dev-toggle.is-light-nav .track {
+  /* Dev-mode-on state — thumb slides right, track + label brand-green. */
+  #dev-toggle.is-dev-on .track {
     background: rgba(45, 200, 86, 0.28);
     border-color: rgba(45, 200, 86, 0.5);
   }
-  #dev-toggle.is-light-nav .thumb {
+  #dev-toggle.is-dev-on .thumb {
     transform: translateX(16px);
     background: #2DC856;
   }
-  #dev-toggle.is-light-nav .label {
+  #dev-toggle.is-dev-on .label {
     color: rgba(45, 200, 86, 0.9);
   }
 </style>
@@ -97,12 +118,12 @@
 <script>
   const toggle = document.getElementById('dev-toggle')!;
   const label  = document.getElementById('dev-toggle-label')!;
-  const html   = document.documentElement;
+  const body   = document.body;
 
-  // Respect a persisted "hidden" choice set by the AI BS →
-  // "Toggle the toggle" nav item. If the key is present, this
-  // floating pill stays hidden across page navigations until the
-  // user explicitly toggles it back on. No key = visible (default).
+  /* Visibility of the pill itself — driven by the AI BS nav's
+     "Toggle the toggle" item. If the `ev-devswitch-hidden` key is
+     set to '1', this pill stays hidden across page navigations
+     until the user explicitly toggles it back on. */
   try {
     if (localStorage.getItem('ev-devswitch-hidden') === '1') {
       toggle.style.display = 'none';
@@ -110,25 +131,35 @@
     }
   } catch {}
 
-  function applyTheme(theme: 'dark' | 'dark-light') {
-    if (theme === 'dark-light') {
-      html.setAttribute('data-theme', 'dark-light');
-      toggle.classList.add('is-light-nav');
-      label.textContent = 'LIGHT NAV';
+  /* ─── Dev-mode on/off ──────────────────────────────────
+     Persisted under `evium-dev-mode`: 'on' → dev-mode on
+     (slots visible, body class removed); anything else (or
+     missing) → dev-mode off (the default — body.dev-mode-off
+     set, dev-only slots collapsed).
+  */
+  function applyDevMode(mode: 'on' | 'off') {
+    if (mode === 'on') {
+      body.classList.remove('dev-mode-off');
+      toggle.classList.add('is-dev-on');
+      label.textContent = 'DEV MODE ON';
     } else {
-      html.removeAttribute('data-theme');
-      toggle.classList.remove('is-light-nav');
-      label.textContent = 'DARK NAV';
+      body.classList.add('dev-mode-off');
+      toggle.classList.remove('is-dev-on');
+      label.textContent = 'DEV MODE OFF';
     }
-    localStorage.setItem('evium-theme', theme);
+    try { localStorage.setItem('evium-dev-mode', mode); } catch {}
   }
 
-  const saved = localStorage.getItem('evium-theme');
-  applyTheme(saved === 'dark-light' ? 'dark-light' : 'dark');
+  /* Initial apply. We default to OFF — the public-facing nav
+     should be clean on every fresh session. Devs opt in by
+     clicking the pill once. */
+  let saved: string | null = null;
+  try { saved = localStorage.getItem('evium-dev-mode'); } catch {}
+  applyDevMode(saved === 'on' ? 'on' : 'off');
 
   toggle.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme') === 'dark-light' ? 'dark-light' : 'dark';
-    applyTheme(current === 'dark' ? 'dark-light' : 'dark');
+    const current = body.classList.contains('dev-mode-off') ? 'off' : 'on';
+    applyDevMode(current === 'off' ? 'on' : 'off');
   });
 
   toggle.addEventListener('keydown', (e) => {
@@ -138,3 +169,5 @@
     }
   });
 </script>
+</content>
+</invoke>

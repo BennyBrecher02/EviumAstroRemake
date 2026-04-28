@@ -1,7 +1,952 @@
 ---
+/**
+ * /contact — Contact hub.
+ * ───────────────────────
+ * Top-level contact page. Adapted from the legacy Evium contact page
+ * layout (Hero + 2-col "Get in Touch" form on the left, Socials +
+ * email + testimonial card on the right) and re-skinned to match the
+ * current site's brand palette (#2DC856 green, #0d1a22 / #1a2f3a dark
+ * teal, Maven Pro, glass cards with the same shadow stack the quote
+ * page + electrician-partners page use).
+ *
+ * Below the main form, three subpage "route cards" wire the contact
+ * hub to its deeper sub-pages:
+ *   → /contact/schedule  (Schedule a Call)
+ *   → /contact/support   (Support)
+ *   → /contact/referral  (Referral Program)
+ *
+ * Get a Quote is intentionally NOT linked here — it moved to the
+ * "Other" dropdown in the nav since it's a property-qualification
+ * form, not a general contact action.
+ */
 import Layout from '../../layouts/Layout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+/**
+ * Customer testimonials — shorter excerpts from Evium's real reviewed
+ * customer base (source: CopyOfZippedEviumDataFromGoogleToInspect/
+ * "Copy of Evium Customer Reviews.xlsx", the "Customer Review Edited"
+ * column). Eight properties across multi-family, commercial, office,
+ * and mixed-use. Attributed by company + property type + geography
+ * rather than personal name (safer; only 3 rows in the sheet have
+ * explicit "sent" approval markers, and company-level attribution is
+ * stronger B2B social proof anyway). Rotates client-side every ~6s.
+ */
+const testimonials = [
+  {
+    quote: "Evium transformed our portfolio of multi-family properties across Newark and the Bronx. Their team handled everything from site assessment to installation across our nine locations. Our residents love having reliable EV charging right at home.",
+    company: 'RJ Block Properties',
+    meta:    'Multi-Family · Newark + Bronx, NY',
+  },
+  {
+    quote: "Within just one month of installation, we secured three new tenants specifically because of our EV charging amenity. Evium's cost-effective solution and comprehensive support made it possible.",
+    company: 'Oakmark Management',
+    meta:    'Multi-Family · Hampton, VA',
+  },
+  {
+    quote: "Evium delivered exceptional results across our Maine and New Hampshire locations. Their consultative approach and deep understanding of commercial properties made the entire process seamless. ROI has exceeded our projections.",
+    company: 'Jones Street Investment Partners',
+    meta:    'Commercial · Maine + New Hampshire',
+  },
+  {
+    quote: "Evium's office-focused EV charging solution at our Secaucus location has become a major tenant amenity. The user-friendly management platform makes monitoring and maintenance incredibly simple.",
+    company: 'Sax Properties',
+    meta:    'Office · Secaucus, NJ',
+  },
+  {
+    quote: "We needed EV charging for both our apartment building and retail strip in Brooklyn. Evium created a custom plan that perfectly accommodated both property types. Their expertise in mixed-use properties is unmatched.",
+    company: 'Cammbeys',
+    meta:    'Mixed-Use · Brooklyn, NY',
+  },
+  {
+    quote: "Evium's expertise in California's EV charging requirements was invaluable for our multi-family properties. They handled everything from permits to implementation across our Los Angeles and Panorama City locations.",
+    company: 'MMPLA',
+    meta:    'Multi-Family · Los Angeles, CA',
+  },
+  {
+    quote: "Evium revolutionized our Elizabeth properties with state-of-the-art EV charging. Their understanding of multi-family needs and local regulations was impressive — the integration with our property management systems has made operations much more efficient.",
+    company: 'Tunic Group',
+    meta:    'Multi-Family · Elizabeth, NJ',
+  },
+  {
+    quote: "Working with Evium on our East Lyme property was an excellent decision. The advanced features and reliable performance have greatly enhanced our property's value — the installation has become a showcase feature.",
+    company: 'Yakar Partners',
+    meta:    'Multi-Family · East Lyme, CT',
+  },
+];
+
+/**
+ * Subpage route cards — shown in a 3-up grid below the main form.
+ * Each card carries an icon, a title, a single-sentence purpose, and
+ * a "Go →" arrow. Clicking anywhere on the card routes to the subpage.
+ */
+const routeCards = [
+  {
+    href:  '/contact/schedule',
+    title: 'Schedule a Call',
+    copy:  'Pick a time that works and talk with an Evium specialist about your property.',
+    icon:  'calendar' as const,
+  },
+  {
+    href:  '/contact/support',
+    title: 'Support',
+    copy:  '24/7 help for drivers, station owners, and deployed fleets on the Evium network.',
+    icon:  'support' as const,
+  },
+  {
+    href:  '/contact/referral',
+    title: 'Referral Program',
+    copy:  'Earn 5–6 figures a year by connecting us with property owners who need EV charging.',
+    icon:  'referral' as const,
+  },
+];
 ---
+
 <Layout title="Contact — Evium Charging">
-  <PagePlaceholder title="Contact" />
+  <section class="c-hero" aria-label="Contact — hero">
+    <div class="c-hero-inner">
+      <nav class="c-crumb" aria-label="Breadcrumb">
+        <a href="/" class="c-crumb-link">Home</a>
+        <span class="c-crumb-sep" aria-hidden="true">»</span>
+        <span class="c-crumb-current">Contact</span>
+      </nav>
+      <h1 class="c-hero-title">Contact</h1>
+      <p class="c-hero-sub">Send your message to our specialists — we read every one and reply within one business day.</p>
+    </div>
+    <div class="c-hero-accent" aria-hidden="true"></div>
+  </section>
+
+  <!-- Two-column body: form card on the left (spans 2 col-units), info
+       rail on the right (1 col-unit). Mobile stacks: form first, info rail
+       second. -->
+  <section class="c-body" aria-label="Get in touch">
+    <div class="c-body-inner">
+
+      <!-- Main form card -->
+      <div class="c-card c-form-card">
+        <h2 class="c-card-title">Get in Touch</h2>
+        <p class="c-card-sub">Have a question, a property to discuss, or a project in mind? Fill in the form and our team will reach out.</p>
+
+        <form id="c-contact-form" class="c-form" novalidate autocomplete="on">
+          <div class="c-row">
+            <label class="c-field">
+              <span class="c-label">First Name <span class="c-req" aria-hidden="true">*</span></span>
+              <input type="text" name="first_name" required placeholder="Type here…" class="c-input" />
+            </label>
+            <label class="c-field">
+              <span class="c-label">Last Name <span class="c-req" aria-hidden="true">*</span></span>
+              <input type="text" name="last_name" required placeholder="Type here…" class="c-input" />
+            </label>
+          </div>
+
+          <div class="c-row">
+            <label class="c-field">
+              <span class="c-label">Company Name</span>
+              <input type="text" name="company" placeholder="Type here…" class="c-input" />
+            </label>
+            <label class="c-field">
+              <span class="c-label">Phone</span>
+              <input type="tel" name="phone" placeholder="Type here…" class="c-input" />
+            </label>
+          </div>
+
+          <label class="c-field">
+            <span class="c-label">Email <span class="c-req" aria-hidden="true">*</span></span>
+            <input type="email" name="email" required placeholder="Type here…" class="c-input" />
+          </label>
+
+          <label class="c-field">
+            <span class="c-label">Site Address</span>
+            <input type="text" name="site_address" placeholder="Type here…" class="c-input" />
+          </label>
+
+          <label class="c-field">
+            <span class="c-label">Write a Message</span>
+            <textarea name="message" rows="6" placeholder="Type here…" class="c-input c-textarea"></textarea>
+          </label>
+
+          <div class="c-form-foot">
+            <button type="submit" class="c-submit">
+              <span>Submit</span>
+              <svg viewBox="0 0 16 16" aria-hidden="true" class="c-submit-arrow">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </button>
+            <p class="c-form-note">By submitting, you agree to be contacted by Evium about your inquiry. We never share your info.</p>
+          </div>
+
+          <!-- Success state — shown after submit via JS. -->
+          <div class="c-form-success" hidden data-form-success>
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="c-success-check">
+              <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3 class="c-success-title">Message received.</h3>
+            <p class="c-success-copy">Thanks for reaching out — an Evium specialist will get back to you within one business day.</p>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right rail: socials, email, testimonial -->
+      <aside class="c-rail" aria-label="Ways to reach Evium">
+        <div class="c-card c-rail-card">
+          <h3 class="c-rail-h">Follow us on Socials</h3>
+          <div class="c-socials">
+            <a href="https://www.linkedin.com/company/evium-charging" target="_blank" rel="noopener noreferrer" class="c-social" aria-label="Evium on LinkedIn">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M7 10v7M7 7.5v.01"/>
+                <path d="M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/>
+              </svg>
+            </a>
+            <a href="https://www.facebook.com/eviumcharging/" target="_blank" rel="noopener noreferrer" class="c-social" aria-label="Evium on Facebook">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 8h2.5V5H14c-2 0-3.5 1.5-3.5 3.5V11H8v3h2.5v7h3v-7H16l.5-3h-3V8.8C13.5 8.4 13.7 8 14 8z"/>
+              </svg>
+            </a>
+            <a href="https://x.com/eviumcharging" target="_blank" rel="noopener noreferrer" class="c-social" aria-label="Evium on X">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/eviumcharging/" target="_blank" rel="noopener noreferrer" class="c-social" aria-label="Evium on Instagram">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="c-card c-rail-card">
+          <span class="c-rail-eyebrow">Contact email</span>
+          <a href="mailto:contact@eviumcharging.com" class="c-rail-email">contact@eviumcharging.com</a>
+
+          <span class="c-rail-eyebrow c-rail-eyebrow--gap">Station support</span>
+          <a href="mailto:support@eviumcharging.com" class="c-rail-email c-rail-email--soft">support@eviumcharging.com</a>
+          <a href="tel:+19499452000" class="c-rail-email c-rail-email--soft">(949) 945-2000</a>
+        </div>
+
+        <!-- Testimonial carousel — cycles through 8 real customer quotes
+             every ~6s. Dots + prev/next controls for manual navigation.
+             Auto-rotate pauses on hover. Source: Evium's customer review
+             sheet (edited column). -->
+        <div class="c-card c-testimonial" data-testimonials>
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="c-testimonial-quote">
+            <path d="M8 11c0-3 2-5 5-5v2c-2 0-3 1-3 3h3v6H6v-6h2zm10 0c0-3 2-5 5-5v2c-2 0-3 1-3 3h3v6h-7v-6h2z" fill="currentColor"/>
+          </svg>
+
+          <div class="c-testimonial-track" data-testimonial-track>
+            {testimonials.map((t, i) => (
+              <div
+                class={`c-testimonial-slide${i === 0 ? ' is-active' : ''}`}
+                data-testimonial-slide={i}
+                aria-hidden={i === 0 ? 'false' : 'true'}
+              >
+                <p class="c-testimonial-quote-text">&ldquo;{t.quote}&rdquo;</p>
+                <div class="c-testimonial-author">
+                  <span class="c-testimonial-name">{t.company}</span>
+                  <span class="c-testimonial-role">{t.meta}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- Closing quote mark — mirrors the opening glyph at the top
+               of the card, rotated 180° so the "66" becomes "99". Sits
+               right-aligned below the quote body so the card reads with
+               a proper open-and-close pair no matter which slide is
+               showing. Matches the opening's brand-green color. -->
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="c-testimonial-quote c-testimonial-quote--close">
+            <path d="M8 11c0-3 2-5 5-5v2c-2 0-3 1-3 3h3v6H6v-6h2zm10 0c0-3 2-5 5-5v2c-2 0-3 1-3 3h3v6h-7v-6h2z" fill="currentColor"/>
+          </svg>
+
+          <div class="c-testimonial-controls">
+            <div class="c-testimonial-dots" role="tablist" aria-label="Testimonials">
+              {testimonials.map((_, i) => (
+                <button
+                  type="button"
+                  class={`c-testimonial-dot${i === 0 ? ' is-active' : ''}`}
+                  data-testimonial-dot={i}
+                  role="tab"
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  aria-label={`Testimonial ${i + 1} of ${testimonials.length}`}
+                ></button>
+              ))}
+            </div>
+            <div class="c-testimonial-nav">
+              <button type="button" class="c-testimonial-arrow" data-testimonial-prev aria-label="Previous testimonial">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3m4-4L3 8l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+              </button>
+              <button type="button" class="c-testimonial-arrow" data-testimonial-next aria-label="Next testimonial">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- Subpage routing grid — three cards linking to the deeper contact
+       surfaces. Keeps the main /contact page as the discovery hub. -->
+  <section class="c-routes" aria-label="More ways to reach us">
+    <div class="c-routes-inner">
+      <h2 class="c-routes-h">Other ways to reach us</h2>
+      <div class="c-routes-grid">
+        {routeCards.map((r) => (
+          <a href={r.href} class="c-route">
+            <span class="c-route-icon" aria-hidden="true">
+              {r.icon === 'calendar' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="16" rx="2"/>
+                  <path d="M8 3v4M16 3v4M3 10h18"/>
+                  <circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {r.icon === 'support' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12a8 8 0 1 1 16 0v4a2 2 0 0 1-2 2h-2v-6h4"/>
+                  <path d="M4 12v4a2 2 0 0 0 2 2h2v-6H4"/>
+                </svg>
+              )}
+              {r.icon === 'referral' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="8" cy="8" r="3"/>
+                  <circle cx="16" cy="16" r="3"/>
+                  <path d="M10.2 9.8l5.6 5.6M21 8h-3V5"/>
+                  <path d="M18 5l3 3"/>
+                </svg>
+              )}
+            </span>
+            <h3 class="c-route-title">{r.title}</h3>
+            <p class="c-route-copy">{r.copy}</p>
+            <span class="c-route-cta">
+              <span>Go</span>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter />
 </Layout>
+
+<style>
+  /* ─── Hero ─────────────────────────────────────────── */
+  .c-hero {
+    position: relative;
+    background:
+      linear-gradient(180deg, #0b161d 0%, #0d1a22 55%, #0e1e28 100%);
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    padding: clamp(120px, 16vh, 180px) clamp(24px, 5vw, 80px) clamp(60px, 8vh, 110px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .c-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .c-hero-accent {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: clamp(280px, 36vw, 520px);
+    background:
+      linear-gradient(115deg, rgba(45, 200, 86, 0) 0%, rgba(45, 200, 86, 0.14) 40%, rgba(45, 200, 86, 0.28) 100%);
+    clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .c-crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: clamp(18px, 2vw, 28px);
+  }
+  .c-crumb-link {
+    color: #2DC856;
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .c-crumb-link:hover { color: #36e464; }
+  .c-crumb-sep { color: rgba(255, 255, 255, 0.45); }
+  .c-crumb-current { color: rgba(255, 255, 255, 0.6); }
+  .c-hero-title {
+    margin: 0 0 14px;
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .c-hero-sub {
+    margin: 0;
+    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.74);
+    max-width: 56ch;
+  }
+
+  /* ─── Body: form + rail ──────────────────────────────── */
+  .c-body {
+    background: #f7f7f4;
+    padding: clamp(48px, 6vh, 88px) clamp(24px, 5vw, 80px) clamp(32px, 4vh, 56px);
+  }
+  .c-body-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
+  }
+  .c-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: clamp(28px, 3.2vw, 44px);
+    box-shadow:
+      0 18px 48px rgba(8, 20, 32, 0.08),
+      0 4px 12px rgba(8, 20, 32, 0.04),
+      0 0 0 1px rgba(8, 20, 32, 0.04);
+  }
+  .c-card-title {
+    margin: 0 0 10px;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(1.6rem, 2vw, 2rem);
+    font-weight: 900;
+    color: #0d1a22;
+    letter-spacing: -0.02em;
+  }
+  .c-card-sub {
+    margin: 0 0 28px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: rgba(13, 26, 34, 0.62);
+    max-width: 52ch;
+  }
+
+  /* Form */
+  .c-form { display: flex; flex-direction: column; gap: 18px; }
+  .c-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .c-field { display: flex; flex-direction: column; gap: 8px; }
+  .c-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(13, 26, 34, 0.82);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .c-req { color: #2DC856; font-weight: 900; }
+  .c-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.95rem;
+    color: #0d1a22;
+    background: #f7f7f4;
+    border: 1px solid rgba(13, 26, 34, 0.08);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  }
+  .c-input::placeholder { color: rgba(13, 26, 34, 0.38); }
+  .c-input:hover { border-color: rgba(13, 26, 34, 0.18); }
+  .c-input:focus {
+    background: #ffffff;
+    border-color: #2DC856;
+    box-shadow: 0 0 0 4px rgba(45, 200, 86, 0.12);
+  }
+  .c-input[aria-invalid="true"] {
+    border-color: #e04a4a;
+    box-shadow: 0 0 0 4px rgba(224, 74, 74, 0.08);
+  }
+  .c-textarea { resize: vertical; min-height: 140px; font-family: 'Maven Pro', sans-serif; }
+
+  .c-form-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .c-submit {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: #2DC856;
+    color: #0d1a22;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(45, 200, 86, 0.35);
+    transition: background 0.18s ease, transform 0.18s ease, gap 0.18s ease, box-shadow 0.18s ease;
+  }
+  .c-submit:hover {
+    background: #36e464;
+    gap: 13px;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(45, 200, 86, 0.45);
+  }
+  .c-submit:active { transform: translateY(0); }
+  .c-submit-arrow { width: 16px; height: 16px; display: block; }
+  .c-form-note {
+    margin: 0;
+    font-size: 0.78rem;
+    color: rgba(13, 26, 34, 0.48);
+    max-width: 56ch;
+  }
+
+  /* Success state */
+  .c-form-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 48px 24px;
+    text-align: center;
+    animation: c-success-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes c-success-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .c-success-check {
+    width: 56px;
+    height: 56px;
+    color: #2DC856;
+    background: rgba(45, 200, 86, 0.12);
+    border-radius: 50%;
+    padding: 10px;
+  }
+  .c-success-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #0d1a22;
+    letter-spacing: -0.01em;
+  }
+  .c-success-copy {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(13, 26, 34, 0.65);
+    max-width: 48ch;
+    line-height: 1.55;
+  }
+
+  /* Rail */
+  .c-rail {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2vw, 24px);
+  }
+  .c-rail-card {
+    padding: clamp(22px, 2.6vw, 32px);
+  }
+  .c-rail-h {
+    margin: 0 0 16px;
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #0d1a22;
+    letter-spacing: -0.015em;
+  }
+  .c-rail-eyebrow {
+    display: block;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 4px;
+  }
+  .c-rail-eyebrow--gap { margin-top: 16px; }
+  .c-rail-email {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0d1a22;
+    text-decoration: none;
+    transition: color 0.18s ease;
+    display: inline-block;
+    word-break: break-all;
+  }
+  .c-rail-email:hover { color: #2DC856; }
+  .c-rail-email--soft { font-size: 0.95rem; color: rgba(13, 26, 34, 0.74); }
+
+  /* Socials */
+  .c-socials {
+    display: inline-flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .c-social {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(45, 200, 86, 0.08);
+    color: #2DC856;
+    text-decoration: none;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  }
+  .c-social:hover {
+    background: #2DC856;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  .c-social svg { width: 18px; height: 18px; display: block; }
+
+  /* ─── Testimonial carousel ──────────────────────────── */
+  .c-testimonial {
+    position: relative;
+    background: linear-gradient(160deg, rgba(45, 200, 86, 0.14) 0%, rgba(45, 200, 86, 0.06) 100%);
+    border: 1px solid rgba(45, 200, 86, 0.32);
+    color: #0d1a22;
+    overflow: hidden;
+  }
+  .c-testimonial-quote {
+    width: 32px;
+    height: 32px;
+    color: #2DC856;
+    margin-bottom: 10px;
+    opacity: 0.85;
+  }
+  /* Closing quote — same glyph, rotated 180°, pushed to the right
+     edge under the testimonial body so the card reads open-then-
+     close as a pair. Slightly softer opacity so it feels like a
+     close punctuation rather than a second headline. */
+  .c-testimonial-quote--close {
+    display: block;
+    margin: 0 0 14px auto;
+    transform: rotate(180deg);
+    opacity: 0.55;
+  }
+  /* Track is a 1×1 CSS grid — every slide is placed at row 1 / col 1,
+     so they stack in the same cell. The cell sizes to the tallest
+     slide automatically (grid intrinsic sizing). Active slide is
+     visible, others fade out in place. No JS height measurement
+     needed — no bounce when a shorter quote cycles in. */
+  .c-testimonial-track {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-bottom: 18px;
+  }
+  .c-testimonial-slide {
+    grid-row: 1;
+    grid-column: 1;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition: opacity 380ms ease, transform 380ms cubic-bezier(.22,1,.36,1);
+  }
+  .c-testimonial-slide.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .c-testimonial-quote-text {
+    margin: 0 0 18px;
+    font-size: 1.04rem;
+    line-height: 1.55;
+    font-weight: 600;
+    color: #0d1a22;
+  }
+  .c-testimonial-author {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(45, 200, 86, 0.24);
+  }
+  .c-testimonial-name {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0d1a22;
+    letter-spacing: -0.005em;
+  }
+  .c-testimonial-role {
+    font-size: 0.78rem;
+    color: rgba(13, 26, 34, 0.6);
+    letter-spacing: 0.01em;
+  }
+
+  .c-testimonial-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(45, 200, 86, 0.18);
+  }
+  .c-testimonial-dots {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .c-testimonial-dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(13, 26, 34, 0.2);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, width 0.25s ease;
+  }
+  .c-testimonial-dot:hover { background: rgba(45, 200, 86, 0.5); }
+  .c-testimonial-dot.is-active {
+    background: #2DC856;
+    width: 18px;
+    border-radius: 4px;
+  }
+  .c-testimonial-nav {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .c-testimonial-arrow {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(13, 26, 34, 0.06);
+    color: rgba(13, 26, 34, 0.6);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .c-testimonial-arrow:hover {
+    background: #2DC856;
+    color: #ffffff;
+  }
+  .c-testimonial-arrow svg { width: 14px; height: 14px; display: block; }
+
+  /* ─── Routes grid ────────────────────────────────────── */
+  .c-routes {
+    background: #0d1a22;
+    color: #fff;
+    padding: clamp(60px, 8vh, 100px) clamp(24px, 5vw, 80px);
+  }
+  .c-routes-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .c-routes-h {
+    margin: 0 0 clamp(28px, 3vw, 44px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .c-routes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: clamp(16px, 2vw, 24px);
+  }
+  .c-route {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: clamp(22px, 2.6vw, 32px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    text-decoration: none;
+    color: #fff;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .c-route:hover,
+  .c-route:focus-visible {
+    background: rgba(45, 200, 86, 0.08);
+    border-color: rgba(45, 200, 86, 0.38);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+    outline: none;
+  }
+  .c-route-icon {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(45, 200, 86, 0.12);
+    color: #2DC856;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .c-route:hover .c-route-icon {
+    background: #2DC856;
+    color: #0d1a22;
+    transform: scale(1.05);
+  }
+  .c-route-icon svg { width: 22px; height: 22px; display: block; }
+  .c-route-title {
+    margin: 6px 0 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: -0.015em;
+    color: #fff;
+  }
+  .c-route-copy {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .c-route-cta {
+    margin-top: auto;
+    padding-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #2DC856;
+    transition: gap 0.2s ease;
+  }
+  .c-route:hover .c-route-cta { gap: 10px; }
+  .c-route-cta svg { width: 14px; height: 14px; display: block; }
+
+  /* ─── Responsive ─────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .c-body-inner {
+      grid-template-columns: 1fr;
+    }
+    .c-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  // Client-side form handler. No backend wired up yet (matches the
+  // current state of /contact/quote where the form just swaps to a
+  // success state locally). Validates required fields, adds the
+  // invalid state to any that fail, and shows the success card.
+  (() => {
+    const form = document.getElementById('c-contact-form') as HTMLFormElement | null;
+    if (!form) return;
+    const successEl = form.querySelector<HTMLElement>('[data-form-success]');
+    const fieldsWrap = form;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Light validation — just required fields
+      const required = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        '[required]'
+      );
+      let firstInvalid: HTMLElement | null = null;
+      required.forEach((el) => {
+        const ok = el.value.trim().length > 0 &&
+          (el.type !== 'email' || /\S+@\S+\.\S+/.test(el.value.trim()));
+        if (!ok) {
+          el.setAttribute('aria-invalid', 'true');
+          if (!firstInvalid) firstInvalid = el;
+        } else {
+          el.removeAttribute('aria-invalid');
+        }
+      });
+
+      if (firstInvalid) {
+        (firstInvalid as HTMLElement).focus();
+        return;
+      }
+
+      // Swap form UI for success message
+      const cardEls = form.querySelectorAll<HTMLElement>('.c-row, .c-field:not([hidden]), .c-form-foot');
+      cardEls.forEach((el) => {
+        if (!el.closest('[data-form-success]')) el.style.display = 'none';
+      });
+      if (successEl) successEl.hidden = false;
+    });
+
+    // Clear invalid state as the user types
+    fieldsWrap.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((el) => {
+      el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+    });
+  })();
+
+  /* ─── Testimonial carousel ──────────────────────────────
+     Auto-rotate every 6s. Pauses on pointer hover / focus-within.
+     Prev/next arrows + dot buttons jump directly. Track height is
+     governed by CSS grid (tallest slide sets cell height) — no JS
+     measurement needed, so no bounce when a shorter quote cycles in. */
+  (() => {
+    const root = document.querySelector<HTMLElement>('[data-testimonials]');
+    if (!root) return;
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-testimonial-slide]'));
+    const dots   = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-testimonial-dot]'));
+    const prev   = root.querySelector<HTMLButtonElement>('[data-testimonial-prev]');
+    const next   = root.querySelector<HTMLButtonElement>('[data-testimonial-next]');
+    if (!slides.length) return;
+
+    const INTERVAL = 6000;
+    let current = 0;
+    let timer: number | null = null;
+
+    function go(i: number) {
+      current = ((i % slides.length) + slides.length) % slides.length;
+      slides.forEach((s, idx) => {
+        const active = idx === current;
+        s.classList.toggle('is-active', active);
+        s.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      dots.forEach((d, idx) => {
+        const active = idx === current;
+        d.classList.toggle('is-active', active);
+        d.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+    }
+
+    function startAuto() {
+      if (timer !== null) return;
+      timer = window.setInterval(() => go(current + 1), INTERVAL);
+    }
+    function stopAuto() {
+      if (timer !== null) { window.clearInterval(timer); timer = null; }
+    }
+
+    dots.forEach((d, i) => d.addEventListener('click', () => { go(i); stopAuto(); startAuto(); }));
+    prev?.addEventListener('click', () => { go(current - 1); stopAuto(); startAuto(); });
+    next?.addEventListener('click', () => { go(current + 1); stopAuto(); startAuto(); });
+
+    // Pause on hover / focus within — user is reading, don't move it
+    root.addEventListener('mouseenter', stopAuto);
+    root.addEventListener('mouseleave', startAuto);
+    root.addEventListener('focusin',    stopAuto);
+    root.addEventListener('focusout',   startAuto);
+
+    startAuto();
+  })();
+</script>
+</content>
+</invoke>

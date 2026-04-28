@@ -44,44 +44,59 @@ const navItems = [
     ],
   },
   {
+    /* Blog — pure dropdown trigger. Since /blog isn't a single
+       canonical page anymore (we have a desktop, a mobile, and a
+       v2 variant), clicking the label only opens the dropdown so
+       the user picks the variant they want. `noNavigate: true`
+       both swallows the click and renders the chevron — same
+       pattern Testing uses. */
     label: 'Blog',
     href: '/blog',
-    sub: [
-      { label: 'All Posts',     href: '/blog'                },
-      { label: 'News',          href: '/blog/news'           },
-      { label: 'Case Studies',  href: '/blog/case-studies'   },
-      { label: 'Newsletter',    href: '/blog/newsletter'     },
-    ],
-  },
-  {
-    // AI BS is now a grouping-only nav item (dropdown, no navigation
-    // on click) — same pattern as Testing. Its subpages hold
-    // archived AI-era drafts that are kept for reference but
-    // shouldn't surface in the main site's information architecture.
-    label: 'AI BS',
-    href: '/ai-bs',
     noNavigate: true,
     sub: [
-      { label: 'Old Saved Sections',      href: '/ai-bs/old-saved-sections'       },
-      { label: 'Old Electrician Partners',href: '/ai-bs/old-electrician-partners' },
-      // Dev convenience — clicking "Toggle" flips the floating
-      // dark/light nav switch in the bottom-right corner between
-      // visible + hidden. The hash-only href keeps it from ever
-      // navigating; `data-toggle-devswitch` is the hook the JS
-      // listener picks up to run the visibility toggle. Used for
-      // clean screenshots where the dev toggle would be in the way.
-      { label: 'Toggle the toggle',       href: '#',                             devSwitch: true },
+      /* 3 desktop variants first, then the 2 mobile variants —
+         keeps the dropdown grouped by form-factor. */
+      { label: 'Desktop v1', href: '/blog'                  },
+      { label: 'Desktop v2', href: '/blog-v2'               },
+      { label: 'Desktop v3', href: '/blog-v3'               },
+      { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
+      { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
     ],
   },
   {
+    // Site v2 — dropdown index of every v2-sandbox page. Replaces
+    // the old single-target "Home v2" slot. The trigger itself
+    // navigates to /home-v2 (so a direct click still lands on the
+    // flagship v2 page the user remembers), but a chevron + hover
+    // dropdown surfaces every v2 variant we build — Home v2,
+    // Products v2, and anything future. `hasChevron: true` tells
+    // the render loop to draw the up/down arrow indicator even
+    // though `noNavigate` is NOT set (clicking still navigates).
+    // Gated behind dev mode same as Testing + Other.
+    label: 'Site v2',
+    href: '/home-v2',
+    devOnly: true,
+    hasChevron: true,
+    sub: [
+      { label: 'Home v2',                  href: '/home-v2'                        },
+      { label: 'Products v2',              href: '/products-v2'                    },
+      { label: 'Service — Multifamily v2', href: '/service-testing/multifamily'    },
+      { label: 'Service — Multifamily v3', href: '/service-testing/multifamily-v3' },
+    ],
+  },
+  {
+    // Testing — sandbox/WIP pages. Gated behind dev mode.
     label: 'Testing',
     href: '/testing',
     noNavigate: true,
+    devOnly: true,
     sub: [
-      { label: 'Mobile Blogs',         href: '/testing/mobile-blogs'       },
-      { label: 'Product Portal',       href: '/testing/product-portal'     },
-      { label: 'Software (no footer)', href: '/testing/software'           },
-      { label: 'Old footer concept',   href: '/testing/footer-concept'     },
+      /* Mobile Blogs has moved to the Blog dropdown — it's a blog
+         variant, not a generic sandbox page. */
+      { label: 'Intersection (codepen)', href: '/testing/intersection'    },
+      { label: 'Product Portal',         href: '/testing/product-portal'  },
+      { label: 'Software (no footer)',   href: '/testing/software'        },
+      { label: 'Old footer concept',     href: '/testing/footer-concept'  },
     ],
   },
   {
@@ -100,14 +115,34 @@ const navItems = [
     label: 'Contact',
     href: '/contact',
     sub: [
-      { label: 'Get a Quote',          href: '/contact/quote'                  },
       { label: 'Schedule a Call',      href: '/contact/schedule'               },
       { label: 'Support',              href: '/contact/support'                },
       { label: 'Referral Program',     href: '/contact/referral'               },
-      // Electrician Partners belongs here (not under Services) — it's a
-      // recruiting / application page for electrical contractors who want
-      // to work with Evium, so it reads as a "reach out / apply" action.
-      { label: 'Electrician Partners', href: '/solutions/electrician-partners' },
+    ],
+  },
+  {
+    // "Other" — grouping dropdown for action-style pages that don't
+    // fit neatly under Contact (message-style) or the product /
+    // solutions columns. Also gated behind dev mode for now.
+    //
+    // As of the Home v2 split, this dropdown also holds the three
+    // items that used to live under the retired "AI BS" slot —
+    // Old Saved Sections, Old Electrician Partners, and the dev
+    // "Toggle the toggle" item that hides/shows the floating
+    // dev-mode pill.
+    label: 'Other',
+    href: '#',
+    noNavigate: true,
+    devOnly: true,
+    sub: [
+      { label: 'Get a Quote',             href: '/contact/quote'                  },
+      { label: 'Electrician Partners',    href: '/solutions/electrician-partners' },
+      { label: 'Old Saved Sections',      href: '/ai-bs/old-saved-sections'       },
+      { label: 'Old Electrician Partners',href: '/ai-bs/old-electrician-partners' },
+      // Dev convenience — hides/reveals the floating dev-mode pill
+      // in the bottom-right. Hash href + devSwitch flag keep it
+      // from ever navigating; the JS hook in DevToggle picks it up.
+      { label: 'Toggle the toggle',       href: '#',                             devSwitch: true },
     ],
   },
 ];
@@ -165,7 +200,7 @@ const currentPath = Astro.url.pathname;
 >
   <div class="mobile-nav-inner">
     {navItems.map((item) => (
-      <div class="m-nav-group" data-m-nav-group>
+      <div class:list={['m-nav-group', (item as any).devOnly ? 'is-dev-only' : '']} data-m-nav-group>
         {item.sub.length > 0 ? (
           <>
             <button
@@ -181,7 +216,7 @@ const currentPath = Astro.url.pathname;
             </button>
             <div class="m-nav-subs" data-m-nav-subs>
               <div class="m-nav-subs-inner">
-                {!(item as any).noNavigate && (
+                {!(item as any).noNavigate && !(item as any).hasChevron && (
                   <a href={item.href} class="m-nav-sub m-nav-sub--primary">
                     All {item.label}
                   </a>
@@ -207,7 +242,11 @@ const currentPath = Astro.url.pathname;
 </div>
 
 <header class="fixed top-0 left-0 right-0 z-50 flex justify-center px-6 py-4 desktop-header" data-desktop-header>
-  <div class="flex items-center w-full max-w-[900px]">
+  <!-- Inner div sizes to battery content, not to a fixed 900px. The
+       outer header stays `flex justify-center`, so the battery+nub
+       unit is always centered regardless of how long the battery
+       is. Max-width cap prevents overflow at tiny mobile widths. -->
+  <div class="flex items-center max-w-full">
 
     <nav class="battery-body">
 
@@ -223,13 +262,20 @@ const currentPath = Astro.url.pathname;
 
       {navItems.map((item) => (
         <>
-          <span class="divider" aria-hidden="true" />
-          <div class="nav-item-wrap" data-nav-item>
+          <span class:list={['divider', (item as any).devOnly ? 'is-dev-only' : '']} aria-hidden="true" />
+          <div class:list={['nav-item-wrap', (item as any).devOnly ? 'is-dev-only' : '']} data-nav-item>
             <a
               href={item.href}
               data-no-navigate={(item as any).noNavigate ? '' : undefined}
               class:list={[
-                'nav-trigger group relative flex flex-1 items-center justify-center px-2 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap w-full h-full no-underline',
+                // `flex-1` and `w-full` removed — battery + slots
+                // now content-size themselves so the whole battery
+                // physically extends/retracts as dev-only slots
+                // show/hide. `px-5` gives each slot comfortable
+                // breathing room at the battery's natural width
+                // (longest visible label "How It Works" now fits
+                // without any fight).
+                'nav-trigger group relative flex items-center justify-center px-5 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap h-full no-underline',
                 currentPath.startsWith(item.href) ? 'is-active' : ''
               ]}
               aria-expanded="false"
@@ -243,7 +289,7 @@ const currentPath = Astro.url.pathname;
               ></span>
               <span class="relative z-10 nav-trigger-label">
                 {item.label}
-                {(item as any).noNavigate && (
+                {((item as any).noNavigate || (item as any).hasChevron) && (
                   <svg class="nav-chevron" viewBox="0 0 10 6" width="9" height="6" aria-hidden="true">
                     <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -500,6 +546,28 @@ const currentPath = Astro.url.pathname;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
+  /* Mobile dev-mode gating — same idea as desktop, but the axis is
+     vertical. When dev-mode is off, dev-only groups collapse via
+     max-height + opacity + padding/margin so the divider line
+     between visible rows doesn't leave a stray stripe behind. */
+  .m-nav-group {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.28s ease,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-width 0.4s ease;
+  }
+  body.dev-mode-off .m-nav-group.is-dev-only {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    border-top-width: 0;
+    pointer-events: none;
+  }
+
   .m-nav-row {
     display: flex;
     align-items: center;
@@ -581,7 +649,12 @@ const currentPath = Astro.url.pathname;
 
   /* ── Battery shell ─────────────────────────────────────────── */
   .battery-body {
-    flex: 1;
+    /* Content-sized: sums logo + all visible slot widths + dividers.
+       When dev-only slots collapse to max-width:0 via the transition
+       below, this width literally shrinks — the battery physically
+       retracts in length. When dev-mode toggles back on, the slots
+       animate open and the battery extends. */
+    flex: 0 1 auto;
     display: flex;
     align-items: stretch;
     height: 48px;
@@ -589,6 +662,10 @@ const currentPath = Astro.url.pathname;
     border-radius: 4px 0 0 4px;
     background: var(--nav-bg);
     backdrop-filter: blur(var(--nav-blur));
+    /* Smooth the width change as dev-only slots collapse. Even
+       though individual slots are what animate, this transition
+       ensures the battery-body itself keeps up gracefully. */
+    transition: background 0.2s ease;
   }
 
   .battery-nub {
@@ -610,12 +687,66 @@ const currentPath = Astro.url.pathname;
     margin-top: 0;
     margin-bottom: 0;
     align-self: stretch;
+    /* Smooth collapse to 0 when a dev-only sibling slot hides —
+       keeps the divider edge animation in sync with the slot. */
+    transition: width 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease;
   }
 
   .nav-item-wrap {
-    flex: 1;
+    /* Content-sized slots. The nav-trigger inside carries `px-5`
+       so each slot has its label's natural width + 40 px padding.
+       No overflow/transition on the base rule — those are scoped
+       to `.is-dev-only` below so they only apply to slots that
+       can collapse. "How It Works" etc. render at full width. */
+    flex: 0 0 auto;
     position: relative;
     display: flex;
+  }
+
+  /* ─── Dev-mode gating ─────────────────────────────────────
+     `body.dev-mode-off` is set by DevToggle in its OFF state
+     (the default). When that's present, every `.is-dev-only`
+     slot and its preceding divider collapse to 0 width with a
+     smooth animation. Because slots are content-sized (see
+     `.nav-item-wrap`), the battery body literally shrinks to
+     match the visible content — the whole battery physically
+     retracts in length. Flipping dev-mode back ON reverses it. */
+  .nav-item-wrap.is-dev-only {
+    overflow: hidden;
+    /* Expanded max-width cap is generous so any dev-only label
+       can render fully in the "open" state. Collapse target is
+       0 (set below under body.dev-mode-off). */
+    max-width: 260px;
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.28s ease 0.06s,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.dev-mode-off .nav-item-wrap.is-dev-only {
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    opacity: 0;
+    pointer-events: none;
+    /* Opacity fades out first (no delay on the reverse), then
+       width collapses — so the label doesn't linger as a
+       squished strip during the shrink. */
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                opacity 0.2s ease,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s;
+  }
+
+  body.dev-mode-off .divider.is-dev-only {
+    width: 0;
+    opacity: 0;
+    /* Divider collapses in sync with the slot on the same easing. */
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                opacity 0.2s ease;
   }
 
   .nav-trigger {

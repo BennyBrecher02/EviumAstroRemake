@@ -1,0 +1,654 @@
+---
+/**
+ * HomeAppDownloadSection
+ * ──────────────────────
+ * Standalone-section copy of the /testing/software page, adapted for
+ * inline use on the home page. Everything below the Layout wrapper is
+ * preserved — title block, split stage with Apple/Google halves + the
+ * slanted white rule, scroll-driven iPhone centerpiece, owner-portal
+ * CTA, and the four-up features strip — with the outer <Layout>/<main>
+ * peeled off so it drops into the home-page flow directly below the
+ * FAQ section. The testing page itself is intentionally left intact at
+ * /testing/software so its sandbox URL keeps working.
+ *
+ * Scoped classnames use the `sw-` prefix (same as the sandbox page)
+ * and every <style> in Astro is component-scoped, so these styles
+ * can't leak to other sections of the home page.
+ */
+
+// Placeholder URLs. Swap these out when the real listings go live.
+const APPLE_URL  = 'https://apps.apple.com/app/evium';
+const GOOGLE_URL = 'https://play.google.com/store/apps/details?id=com.evium';
+
+// Skew applied to the Apple|Google divider (the boundary between the
+// two half-fills). Signed OPPOSITE to the white horizontal slant
+// (slant rotates -10°, leaning up-right; this seam tans -30°, leaning
+// up-left) so the two diagonals form a subtle X over the composition.
+const HALF_SKEW_TAN = Math.tan(-30 * Math.PI / 180);
+
+// (Footer data + markup + styles were extracted into the shared
+// `SiteFooter.astro` component. The home page now includes that
+// component directly from `src/pages/index.astro` after this
+// section, so every page that wants the footer just imports + drops
+// <SiteFooter /> — same pattern as Header.)
+---
+
+<section id="home-app-download" class="sw-root" aria-label="Evium app download">
+
+  {/* ─── TITLE BLOCK ─── above-the-fold intro. */}
+  <header class="sw-header">
+    <p class="sw-eyebrow">
+      <span class="sw-eyebrow-dash" aria-hidden="true"></span>
+      Evium Mobile App
+      <span class="sw-eyebrow-dash" aria-hidden="true"></span>
+    </p>
+    <h2 class="sw-title">Charge smarter with the Evium app.</h2>
+    <p class="sw-sub">
+      Access thousands of stations across the Evium network. Real-time availability,
+      instant activation, and smart routing — on the phone that's already in your pocket.
+    </p>
+  </header>
+
+  {/* ─── SPLIT STAGE ─── Apple ▏Google, divided by a skewed line. */}
+  <div class="sw-stage" data-sw-stage>
+
+    {/* Background halves — divided by a SLANTED seam leaning the
+        opposite direction from the white horizontal slant below. */}
+    <div
+      class="sw-half sw-half--apple"
+      style={`clip-path: polygon(0 0, calc(50% + (50vh * ${HALF_SKEW_TAN})) 0, calc(50% - (50vh * ${HALF_SKEW_TAN})) 100%, 0 100%);`}
+      aria-hidden="true"
+    ></div>
+    <div
+      class="sw-half sw-half--google"
+      style={`clip-path: polygon(calc(50% + (50vh * ${HALF_SKEW_TAN})) 0, 100% 0, 100% 100%, calc(50% - (50vh * ${HALF_SKEW_TAN})) 100%);`}
+      aria-hidden="true"
+    ></div>
+
+    {/* White slant — near-horizontal diagonal rule. */}
+    <div class="sw-divider" aria-hidden="true"></div>
+
+    {/* ─── APPLE SIDE ─── clickable link covering the left half. */}
+    <a class="sw-side sw-side--apple" href={APPLE_URL} aria-label="Download on the App Store">
+      <div class="sw-side-inner">
+        <svg class="sw-platform-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.05 20.28c-.98.95-2.05.88-3.08.44-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.44C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
+        </svg>
+        <p class="sw-side-platform">iPhone &middot; iPad</p>
+        <h3 class="sw-side-headline">Get it for iOS</h3>
+        <p class="sw-side-note">Requires iOS 13 or later.</p>
+        <div class="sw-badge">
+          <svg class="sw-badge-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.44-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.44C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
+          </svg>
+          <span class="sw-badge-text">
+            <span class="sw-badge-small">Download on the</span>
+            <span class="sw-badge-large">App Store</span>
+          </span>
+        </div>
+        <span class="sw-side-hint">
+          Tap anywhere on this side
+          <svg viewBox="0 0 12 12" aria-hidden="true" class="sw-hint-arrow"><path d="M7 2l4 4-4 4M2 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </span>
+      </div>
+    </a>
+
+    {/* ─── GOOGLE PLAY SIDE ─── clickable link covering the right half. */}
+    <a class="sw-side sw-side--google" href={GOOGLE_URL} aria-label="Get it on Google Play">
+      <div class="sw-side-inner">
+        <svg class="sw-platform-icon" viewBox="0 0 24 24" aria-hidden="true"
+             fill="none" stroke="currentColor" stroke-width="1.2"
+             stroke-linejoin="round" stroke-linecap="round">
+          <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z"/>
+          <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z"/>
+          <path d="M13.544 10.989l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z"/>
+          <path d="M13.544 13.056l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/>
+        </svg>
+        <p class="sw-side-platform">Android &middot; Samsung Galaxy</p>
+        <h3 class="sw-side-headline">Get it for Android</h3>
+        <p class="sw-side-note">Requires Android 8 (Oreo) or later.</p>
+        <div class="sw-badge">
+          <svg class="sw-badge-icon" viewBox="0 0 24 24" aria-hidden="true"
+               fill="none" stroke="currentColor" stroke-width="1.4"
+               stroke-linejoin="round" stroke-linecap="round">
+            <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z"/>
+            <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z"/>
+            <path d="M13.544 10.989l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z"/>
+            <path d="M13.544 13.056l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/>
+          </svg>
+          <span class="sw-badge-text">
+            <span class="sw-badge-small">Get it on</span>
+            <span class="sw-badge-large">Google Play</span>
+          </span>
+        </div>
+        <span class="sw-side-hint">
+          Tap anywhere on this side
+          <svg viewBox="0 0 12 12" aria-hidden="true" class="sw-hint-arrow"><path d="M7 2l4 4-4 4M2 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </span>
+      </div>
+    </a>
+
+    {/* ─── PHONE CENTERPIECE ─── sits on the divider, rises on scroll-in. */}
+    <div class="sw-phone-area" aria-hidden="true">
+      <div class="sw-phone-wrap">
+        <div class="sw-phone-glow" aria-hidden="true"></div>
+        <img
+          src="/images/iphone.png"
+          alt=""
+          class="sw-phone"
+          draggable="false"
+        />
+      </div>
+    </div>
+
+    {/* ─── OWNER PORTAL LINK ─── centered below the slant. */}
+    <a class="sw-owner-link" href="https://portal.eviumcharging.com">
+      <svg class="sw-owner-icon" viewBox="0 0 24 24" aria-hidden="true"
+           fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linejoin="round" stroke-linecap="round">
+        <rect x="3"  y="3"  width="7" height="7" rx="1.2"/>
+        <rect x="14" y="3"  width="7" height="7" rx="1.2"/>
+        <rect x="3"  y="14" width="7" height="7" rx="1.2"/>
+        <rect x="14" y="14" width="7" height="7" rx="1.2"/>
+      </svg>
+      <span class="sw-owner-text">
+        <span class="sw-owner-small">For station owners</span>
+        <span class="sw-owner-large">Access the Owner Portal</span>
+      </span>
+      <svg class="sw-owner-arrow" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M6 3l5 5-5 5M1 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </a>
+  </div>
+
+  {/* Footer extracted to src/components/SiteFooter.astro — rendered
+      on the home page immediately after this section from index.astro. */}
+
+</section>
+
+<style>
+  .sw-root {
+    background: #0d1a22;
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TITLE BLOCK ───────────────────────────────────────────── */
+  .sw-header {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 96px) 24px clamp(28px, 4vw, 44px);
+    text-align: center;
+  }
+  .sw-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 14px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #2DC856;
+  }
+  .sw-eyebrow-dash {
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+  }
+  .sw-title {
+    margin: 0 0 14px;
+    font-size: clamp(1.9rem, 4.2vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-wrap: balance;
+  }
+  .sw-sub {
+    margin: 0 auto;
+    max-width: 52ch;
+    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.65);
+    text-wrap: pretty;
+  }
+
+  /* ─── SPLIT STAGE ───────────────────────────────────────────── */
+  .sw-stage {
+    position: relative;
+    width: 100%;
+    height: clamp(600px, 72vh, 820px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .sw-half {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sw-half--apple  { left: 0;  background: #172a3c; }
+  .sw-half--google { right: 0; background: #142a1d; }
+
+  .sw-divider {
+    position: absolute;
+    top: 75%;
+    left: -5%;
+    right: -5%;
+    height: 6px;
+    margin-top: -3px;
+    background: linear-gradient(
+      to right,
+      rgba(244, 242, 232, 0) 0%,
+      rgba(244, 242, 232, 0.95) 5%,
+      rgba(244, 242, 232, 0.95) 95%,
+      rgba(244, 242, 232, 0) 100%
+    );
+    transform: rotate(-5deg);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow:
+      0 0 12px rgba(45, 200, 86, 0.5),
+      0 0 32px rgba(45, 200, 86, 0.2);
+  }
+
+  /* ─── SIDE TILES ─── full-height clickable halves. */
+  .sw-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 2;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sw-side--apple  { left: 0;  }
+  .sw-side--google { right: 0; }
+  .sw-side--apple:hover {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, transparent 80%);
+  }
+  .sw-side--google:hover {
+    background: linear-gradient(270deg, rgba(45, 200, 86, 0.05) 0%, transparent 80%);
+  }
+
+  .sw-side-inner {
+    position: absolute;
+    top: clamp(28px, 5vw, 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 0;
+    max-width: 380px;
+  }
+  .sw-side--apple .sw-side-inner {
+    left: clamp(24px, 6vw, 70px);
+    text-align: left;
+  }
+  .sw-side--google .sw-side-inner {
+    right: clamp(24px, 6vw, 70px);
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .sw-platform-icon {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+  }
+  .sw-side--google .sw-platform-icon { color: #2DC856; }
+
+  .sw-side-platform {
+    margin: 2px 0 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .sw-side-headline {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+  .sw-side-note {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .sw-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 10px 16px;
+    background: #0a1218;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .sw-side:hover .sw-badge {
+    background: #111c24;
+    border-color: rgba(45, 200, 86, 0.55);
+    transform: translateY(-1px);
+  }
+  .sw-badge-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    color: #ffffff;
+  }
+  .sw-side--google .sw-badge-icon { color: #2DC856; }
+  .sw-badge-text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .sw-badge-small {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .sw-badge-large {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+
+  .sw-side-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(45, 200, 86, 0.75);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .sw-side--google .sw-side-hint {
+    transform: translateX(4px);
+  }
+  .sw-side:hover .sw-side-hint { opacity: 1; transform: translateX(0); }
+  .sw-hint-arrow {
+    width: 12px;
+    height: 12px;
+  }
+  .sw-side--apple .sw-hint-arrow { transform: rotate(180deg); }
+
+  /* ─── PHONE CENTERPIECE ─────────────────────────────────────── */
+  .sw-phone-area {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% calc(75% - 4.375vw),
+      0% calc(75% + 4.375vw)
+    );
+  }
+
+  .sw-phone-wrap {
+    position: absolute;
+    left: 50%;
+    top: 75%;
+    width: clamp(260px, 28vw, 360px);
+    --sw-progress: 0;
+    transform:
+      translate(-50%, -50%)
+      translateY(calc(35% - (85% * var(--sw-progress))));
+    will-change: transform;
+  }
+  .sw-phone {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    filter:
+      drop-shadow(0 18px 30px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+    user-select: none;
+  }
+  .sw-phone-glow {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    width: 88%;
+    height: 80%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse 60% 70% at 50% 50%,
+      rgba(45, 200, 86, 0.28) 0%,
+      rgba(45, 200, 86, 0.08) 40%,
+      transparent 72%
+    );
+    filter: blur(24px);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sw-phone-wrap {
+      --sw-progress: 1;
+      transform: translate(-50%, -50%) translateY(-50%);
+    }
+  }
+
+  /* ─── OWNER PORTAL LINK ───────────────────────────────────────── */
+  .sw-owner-link {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(20px, 3.5vw, 42px);
+    transform: translateX(-50%);
+    z-index: 11;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 12px 22px;
+    background: #0a1218;
+    border: 1px solid rgba(45, 200, 86, 0.4);
+    border-radius: 10px;
+    box-shadow:
+      0 10px 28px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+
+    transition:
+      background 0.22s ease,
+      border-color 0.22s ease,
+      transform 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+  .sw-owner-link:hover,
+  .sw-owner-link:focus-visible {
+    background: #111c24;
+    border-color: #2DC856;
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow:
+      0 16px 36px rgba(0, 0, 0, 0.55),
+      0 0 32px rgba(45, 200, 86, 0.25),
+      0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+    outline: none;
+  }
+
+  .sw-owner-icon {
+    width: 26px;
+    height: 26px;
+    color: #2DC856;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 4px rgba(45, 200, 86, 0.35));
+  }
+  .sw-owner-text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .sw-owner-small {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .sw-owner-large {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+  .sw-owner-arrow {
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    color: #2DC856;
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+  }
+  .sw-owner-link:hover .sw-owner-arrow,
+  .sw-owner-link:focus-visible .sw-owner-arrow {
+    transform: translateX(5px);
+  }
+
+  /* (Footer CSS extracted to SiteFooter.astro.) */
+
+  /* ─── RESPONSIVE: narrower phones/tablets ───────────────────── */
+  @media (max-width: 860px) {
+    .sw-stage {
+      height: clamp(560px, 86vh, 780px);
+    }
+    .sw-side-inner,
+    .sw-side--apple .sw-side-inner,
+    .sw-side--google .sw-side-inner {
+      max-width: 300px;
+      padding: 10px 0;
+      gap: 8px;
+      top: clamp(20px, 4vw, 40px);
+    }
+    .sw-side-hint { display: none; }
+    .sw-phone-wrap {
+      width: clamp(200px, 38vw, 280px);
+      /* Shorten the rise on mobile. Desktop travels 85 % of phone-
+         height (35 % → -50 %) so the phone bottom lands exactly at
+         the slant. On narrow screens the iPhone asset's edge started
+         peeking past the slant as the phone reached its rest
+         position — this 50 % travel (35 % → -15 %) stops the rise
+         earlier so the phone is still anchored comfortably above
+         the slant line without revealing the PNG's cut. Desktop's
+         behavior is untouched — the base rule still applies above
+         860 px. */
+      transform:
+        translate(-50%, -50%)
+        translateY(calc(35% - (50% * var(--sw-progress))));
+    }
+    .sw-owner-link  { padding: 10px 18px; gap: 11px; }
+    .sw-owner-icon  { width: 22px; height: 22px; }
+    .sw-owner-small { font-size: 0.55rem; letter-spacing: 0.16em; }
+    .sw-owner-large { font-size: 0.95rem; }
+  }
+  @media (max-width: 520px) {
+    .sw-side-inner {
+      max-width: none;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .sw-side--apple .sw-side-inner {
+      left: 0;
+      right: 0;
+      top: clamp(16px, 4vw, 28px);
+    }
+    .sw-side--google .sw-side-inner {
+      left: 0;
+      right: 0;
+      top: auto;
+      top: 25%;
+      align-items: center;
+      text-align: center;
+    }
+    .sw-side--apple .sw-side-inner { align-items: center; text-align: center; }
+  }
+</style>
+
+<script>
+  /*
+   * Scroll-linked phone animation. Writes a progress value (0-1) on
+   * .sw-phone-wrap as `--sw-progress`; the CSS transform interpolates
+   * the phone's vertical position off that variable. Identical to the
+   * sandbox implementation on /testing/software — reproduced here so
+   * the home-page copy animates on its own without depending on the
+   * sandbox page being rendered.
+   */
+  (() => {
+    const stage    = document.querySelector<HTMLElement>('[data-sw-stage]');
+    const phoneWrap = document.querySelector<HTMLElement>('.sw-phone-wrap');
+    if (!stage || !phoneWrap) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      phoneWrap.style.setProperty('--sw-progress', '1');
+      return;
+    }
+
+    let rafId: number | null = null;
+
+    function update() {
+      rafId = null;
+      if (!stage || !phoneWrap) return;
+      const rect = stage.getBoundingClientRect();
+      const vh   = window.innerHeight;
+
+      const startAt = vh * 0.30;
+      const endAt   = vh * -0.45;
+      const raw     = (startAt - rect.top) / (startAt - endAt);
+      const progress = Math.max(0, Math.min(1, raw));
+
+      const eased = 1 - Math.pow(1 - progress, 2.2);
+
+      phoneWrap.style.setProperty('--sw-progress', eased.toFixed(4));
+    }
+
+    function onScroll() {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+  })();
+
+  // Anchoring intentionally removed from this section. The FAQ above
+  // is the last locked stage on the home page; everything below it
+  // (this app-download section, and anything further) scrolls as
+  // natural flow so the scroll-driven phone-rise animation doesn't
+  // fight a sticky pin and so nothing important (e.g. the eyebrow)
+  // gets covered by the fixed nav bar during a sticky hold.
+</script>

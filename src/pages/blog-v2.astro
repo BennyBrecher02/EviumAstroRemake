@@ -1,0 +1,886 @@
+---
+/**
+ * /blog-v2 — desktop blog v2 sandbox.
+ *
+ * Forked from /blog so this route can carry experimental content
+ * (currently the Crossroads codepen below the footer) without
+ * touching the original 4-door garage page. The garage hero +
+ * emerge-grid layout is kept identical so visual regressions
+ * between v1 and v2 are easy to spot.
+ *
+ * Reachable via the navbar's Blog → "Desktop v2" sub-link.
+ */
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const categories = [
+  {
+    id: 'cost-demand',
+    label: 'Cost & Demand',
+    color: '#5BC8DC',
+    door: 'blue garage door.png',
+    pos: { left: 4.05, top: 54.1, width: 19.56, height: 21.09 },
+  },
+  {
+    id: 'market-shifts',
+    label: 'Market Shifts',
+    color: '#E8C030',
+    door: 'yellow garage door.png',
+    pos: { left: 28.05, top: 54.58, width: 20.15, height: 20.33 },
+  },
+  {
+    id: 'charging-tech',
+    label: 'Charging Tech',
+    color: '#E07428',
+    door: 'orange garage door.png',
+    pos: { left: 52.44, top: 54.03, width: 19.76, height: 20.68 },
+  },
+  {
+    id: 'vehicle-efficiency',
+    label: 'Vehicle Efficiency',
+    color: '#D82020',
+    door: 'red garage door.png',
+    pos: { left: 76.78, top: 54.03, width: 18.68, height: 20.33 },
+  },
+];
+
+const posts = [
+  {
+    slug: 'why-ev-charging-pays-multifamily',
+    title: 'Why EV Charging Pays for Itself in Multifamily Properties',
+    category: 'cost-demand',
+    date: 'Apr 2026',
+    excerpt: 'A zero-cost amenity that generates passive income, attracts tenants, and future-proofs your asset.',
+    readTime: '5 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'real-cost-of-doing-nothing',
+    title: 'The Real Cost of Not Offering EV Charging',
+    category: 'cost-demand',
+    date: 'Mar 2026',
+    excerpt: 'Properties without charging are already losing lease negotiations. The calculus shifts every month.',
+    readTime: '4 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'revenue-projections-ev-charging',
+    title: 'What Does an EV Charger Actually Earn?',
+    category: 'cost-demand',
+    date: 'Mar 2026',
+    excerpt: 'From $900 to $2,100 per charger per month. Utilization is the variable. Here is what drives it.',
+    readTime: '6 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'ev-adoption-accelerating',
+    title: 'EV Adoption Is Accelerating — What Property Owners Need to Know',
+    category: 'market-shifts',
+    date: 'Apr 2026',
+    excerpt: 'Regulatory tailwinds, NEVI funding, and shifting buyer demographics are converging fast.',
+    readTime: '5 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'nevi-funding-reshaping-highway-charging',
+    title: 'How NEVI Funding Is Reshaping Highway Charging Economics',
+    category: 'market-shifts',
+    date: 'Feb 2026',
+    excerpt: 'Federal dollars are eliminating the cost barrier for site hosts.',
+    readTime: '5 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'level2-vs-dcfast-explained',
+    title: 'Level 2 vs DC Fast Charging: Which Is Right for Your Property?',
+    category: 'charging-tech',
+    date: 'Apr 2026',
+    excerpt: 'Dwell time is the deciding factor. A clear framework for every property type.',
+    readTime: '5 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'ocpp-open-standards-matter',
+    title: 'OCPP: Why Open Standards Protect Your Charging Investment',
+    category: 'charging-tech',
+    date: 'Mar 2026',
+    excerpt: 'Vendor lock-in is a real risk in EV infrastructure. OCPP 1.6 compliance is your insurance policy.',
+    readTime: '4 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'ev-infrastructure-next-five-years',
+    title: 'EV Charging Infrastructure: What to Expect in the Next Five Years',
+    category: 'charging-tech',
+    date: 'Jan 2026',
+    excerpt: 'Smart charging, V2G, and grid integration are reshaping infrastructure investment decisions.',
+    readTime: '4 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'how-modern-evs-change-charging-behavior',
+    title: 'How Longer EV Ranges Are Changing When Drivers Charge',
+    category: 'vehicle-efficiency',
+    date: 'Apr 2026',
+    excerpt: 'More range means less frequent but longer sessions — and that changes how smart operators should plan.',
+    readTime: '5 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: 'battery-tech-trends-infrastructure',
+    title: 'Battery Tech Trends Every Infrastructure Investor Should Watch',
+    category: 'vehicle-efficiency',
+    date: 'Feb 2026',
+    excerpt: 'Solid-state, faster charge acceptance, V2G — the battery roadmap has direct implications for how you build today.',
+    readTime: '6 min',
+    image: '/images/logos/evium/logo.webp',
+  },
+  {
+    slug: '',
+    title: 'More market coverage on the way',
+    category: 'market-shifts',
+    date: 'Coming soon',
+    excerpt: 'More analysis on regulatory changes, NEVI rollout, and EV adoption.',
+    readTime: null,
+    image: '/images/logos/evium/logo.webp',
+    placeholder: true,
+  },
+  {
+    slug: '',
+    title: 'More vehicle efficiency coverage on the way',
+    category: 'vehicle-efficiency',
+    date: 'Coming soon',
+    excerpt: 'Battery chemistry, thermal management, and how fast-improving specs change the calculus.',
+    readTime: null,
+    image: '/images/logos/evium/logo.webp',
+    placeholder: true,
+  },
+];
+
+const postsByCat = Object.fromEntries(
+  categories.map(c => [c.id, posts.filter(p => p.category === c.id)])
+);
+---
+
+<Layout
+  title="Blog v2 — Evium Charging"
+  description="Insights on EV charging economics, market shifts, technology, and vehicle efficiency."
+  headerVariant="v4"
+  bodyClass="page-blog-v2"
+>
+<main class="blog-root">
+
+  <section class="garage-section" id="garage-hero">
+
+    <div class="garage-clip">
+      <div class="sky-overlay" aria-hidden="true"></div>
+
+      <div class="hero-text">
+        <p class="ht-eyebrow">Evium Insights</p>
+        <h1 class="ht-title">The knowledge behind<br>every charging decision.</h1>
+        <p class="ht-sub">Infrastructure economics, technology trends, and market signals — from the team deploying charging networks across the country.</p>
+      </div>
+
+      <div class="garage-stage" id="garage-stage">
+
+        <!-- Layer 0: base photo -->
+        <img
+          src="/images/blog-hero/full-heros/garage opened final state.jpg"
+          alt="" class="garage-base" aria-hidden="true" draggable="false"
+        />
+
+        <!-- Layer 1: compact cards INSIDE each bay — revealed as door rolls up -->
+        {categories.map((cat, i) => {
+          const colPosts = (postsByCat[cat.id] || []).slice(0, 3);
+          return (
+            <div
+              class="bay-card-stack"
+              style={`left:${cat.pos.left}%;top:${cat.pos.top}%;width:${cat.pos.width}%;height:${cat.pos.height}%;--door-color:${cat.color};--col-delay:${0.8 + i * 0.25}s;`}
+            >
+              {colPosts.map(post => (
+                <div class="bay-c">
+                  <div class="bc-img">
+                    <img src={(post as any).image} alt="" draggable="false" />
+                  </div>
+                  <p class="bc-title">{post.title}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+
+        <!-- Layer 2: door overlays — cover layer 1, roll up to reveal it -->
+        {categories.map((cat, i) => (
+          <div
+            class="door-overlay"
+            data-category={cat.id}
+            style={`left:${cat.pos.left}%;top:${cat.pos.top}%;width:${cat.pos.width}%;height:${cat.pos.height}%;--door-color:${cat.color};--delay:${i * 0.22}s;`}
+          >
+            <img
+              src={`/images/blog-hero/moving-doors/${cat.door}`}
+              alt="" class="door-img" draggable="false"
+            />
+          </div>
+        ))}
+
+        <!-- Layer 3: bay labels — all at same height for even alignment -->
+        {categories.map((cat, i) => (
+          <div
+            class="bay-label"
+            aria-hidden="true"
+            style={`left:${cat.pos.left}%;top:54%;width:${cat.pos.width}%;--door-color:${cat.color};`}
+          >
+            <div class="bl-inner">
+              <span class="bl-number">BAY 0{i + 1}</span>
+              <span class="bl-name">{cat.label}</span>
+            </div>
+          </div>
+        ))}
+
+      </div><!-- /garage-stage -->
+    </div><!-- /garage-clip -->
+
+    <!-- Full-size card grid — streams in as bay cards exit above -->
+    <div class="emerge-grid" id="emerge-grid">
+      {categories.map((cat, i) => {
+        const base = i * 0.25;
+        const colPosts = (postsByCat[cat.id] || []).slice(0, 3);
+        return (
+          <div class="emerge-col" style={`--door-color:${cat.color};`}>
+            {colPosts.map((post, j) => (
+              (post as any).placeholder ? (
+                <div class="emerge-card is-placeholder" style={`--card-delay:${base + j * 0.12}s;`}>
+                  <div class="ec-img"><img src={(post as any).image} alt="" draggable="false" /></div>
+                  <div class="ec-body">
+                    <span class="ec-cat" style={`color:${cat.color};`}>{cat.label}</span>
+                    <p class="ec-title">{post.title}</p>
+                    <span class="ec-meta">Coming soon</span>
+                  </div>
+                </div>
+              ) : (
+                <a href={`/blog/${post.slug}`} class="emerge-card" style={`--card-delay:${base + j * 0.12}s;`}>
+                  <div class="ec-img"><img src={(post as any).image} alt="" draggable="false" /></div>
+                  <div class="ec-body">
+                    <span class="ec-cat" style={`color:${cat.color};`}>{cat.label}</span>
+                    <p class="ec-title">{post.title}</p>
+                    <span class="ec-meta">{post.date} · {post.readTime} read</span>
+                  </div>
+                </a>
+              )
+            ))}
+          </div>
+        );
+      })}
+
+      <!-- Road-cars overlay — small vehicles drive vertically in
+           each of the 4 lanes (one per column). Pure decoration,
+           bolted onto the existing road-styled grid. CSS sits in
+           the page <style>, animation in the matching <script>
+           below. aria-hidden because it adds nothing semantic. -->
+      <div class="road-cars" aria-hidden="true">
+        <!-- Lanes 1 + 2 (left of the double-yellow): traffic DOWN. -->
+        <div class="road-car road-car-tb" data-lane="1" data-color="1" data-spd="85"  data-start-y="80">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-tb" data-lane="1" data-color="2" data-spd="65"  data-start-y="480">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-tb" data-lane="2" data-color="3" data-spd="95"  data-start-y="200">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-tb" data-lane="2" data-color="4" data-spd="75"  data-start-y="620">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <!-- Lanes 3 + 4 (right of the double-yellow): traffic UP. -->
+        <div class="road-car road-car-bt" data-lane="3" data-color="5" data-spd="88"  data-start-y="320">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-bt" data-lane="3" data-color="6" data-spd="68"  data-start-y="740">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-bt" data-lane="4" data-color="7" data-spd="100" data-start-y="140">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+        <div class="road-car road-car-bt" data-lane="4" data-color="8" data-spd="78"  data-start-y="560">
+          <div class="cone"></div>
+          <div class="hl hl-a"></div><div class="hl hl-b"></div>
+          <div class="tail tail-a"></div><div class="tail tail-b"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<SiteFooter />
+
+</Layout>
+
+<style>
+.blog-root {
+  background: #080d12;
+  min-height: 100vh;
+  padding-top: 80px;
+}
+.garage-section {
+  width: 100%;
+  position: relative;
+  /* Extend teal behind the fixed nav — kills the black bar */
+  background: #1A2F3A;
+  margin-top: -80px;
+  padding-top: 80px;
+}
+
+/* ── Clip ─────────────────────────────────────────── */
+.garage-clip {
+  width: 100%;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  /* Brand teal hero background — visible where the image is masked away */
+  background: linear-gradient(
+    to bottom,
+    #1A2F3A 0%,
+    #1c3240 50%,
+    #1A2F3A 100%
+  );
+}
+
+/* ── Subtle nav shading — barely-there darkening at the very top ── */
+.sky-overlay {
+  position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(6,14,22,0.35) 0%,
+    transparent 40px
+  );
+}
+
+/* ── Hero text ───────────────────────────────────── */
+.hero-text {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 32%; z-index: 7;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  text-align: center;
+  padding: clamp(12px, 2vh, 24px) clamp(20px, 6vw, 100px) 0;
+  pointer-events: none;
+}
+.ht-eyebrow {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(10px, 0.72vw, 12px); font-weight: 800;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: #2DC856; margin-bottom: clamp(8px, 1.2vh, 16px);
+}
+.ht-title {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(28px, 3.2vw, 48px); font-weight: 900;
+  color: #fff; line-height: 1.08; margin-bottom: clamp(10px, 1.4vh, 18px);
+  text-shadow: 0 2px 28px rgba(0,0,0,0.4);
+}
+.ht-sub {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(12px, 0.95vw, 15px); font-weight: 500;
+  color: rgba(255,255,255,0.45); max-width: 540px; line-height: 1.6;
+  letter-spacing: 0.015em;
+}
+
+/* ── Stage ───────────────────────────────────────── */
+.garage-stage {
+  position: absolute; bottom: -6%; left: 0; right: 0;
+  aspect-ratio: 2050 / 1451;
+  /* No overflow:hidden — bay cards need to slide out through stage bottom */
+}
+.garage-base {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  user-select: none; z-index: 0;
+  /* Hide the image sky — 44% of the image is sky, buildings start at 44%.
+     This is image-relative so it works on all viewport sizes. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 46%, black 47.5%);
+  mask-image: linear-gradient(to bottom, transparent 46%, black 47.5%);
+}
+
+/* ── Layer 1: Compact cards inside bays ─────────── */
+@keyframes bay-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.bay-card-stack {
+  position: absolute;
+  z-index: 1; /* above base (0), below doors (2) */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3% 4% 0;
+  overflow: hidden;
+  /* Explicit initial state — always fully visible before is-open */
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Bay cards fade as their full-size counterparts fly out */
+.garage-stage.is-open .bay-card-stack {
+  animation: bay-fade 0.5s ease-out forwards;
+  animation-delay: var(--col-delay, 0.8s);
+}
+
+.bay-c {
+  display: flex;
+  flex-direction: column;
+  /* Noticeably lighter than the dark bay interior so cards read clearly */
+  background: rgba(22, 34, 50, 0.97);
+  border-top: 2px solid var(--door-color);
+  border-left: none;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+.bc-img {
+  width: 100%;
+  padding: 5% 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.bc-img img {
+  height: clamp(10px, 1.4vw, 16px);
+  opacity: 0.45;
+  filter: grayscale(1) brightness(2);
+  user-select: none; pointer-events: none;
+}
+.bc-title {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(7px, 0.58vw, 9px);
+  font-weight: 700;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.3;
+  padding: 4% 7% 5%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Layer 2: Door overlays ─────────────────────── */
+.door-overlay {
+  position: absolute;
+  z-index: 2; /* covers bay-card-stack */
+  overflow: hidden;
+  transform-origin: top center;
+  transform: scaleY(1);
+  transition: transform 1.4s cubic-bezier(0.42, 0, 0.12, 1);
+  transition-delay: var(--delay);
+  will-change: transform;
+}
+.door-img {
+  width: 100%; height: 100%;
+  object-fit: fill; display: block;
+  user-select: none;
+}
+/* Individual door interaction */
+.door-overlay { cursor: pointer; }
+.garage-stage.is-open .door-overlay {
+  transform: scaleY(0);
+}
+/* Doors roll back down after cards have landed */
+.garage-stage.is-closed .door-overlay {
+  transform: scaleY(1);
+  transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+  transition-delay: var(--delay);
+}
+/* Click to peek inside a bay — must override is-closed */
+.garage-stage.is-closed .door-overlay.peek {
+  transform: scaleY(0);
+  transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+  transition-delay: 0s;
+}
+
+/* ── Layer 3: Bay labels ─────────────────────────── */
+.bay-label {
+  position: absolute; z-index: 3;
+  transform: translateY(-100%);
+  padding-bottom: clamp(6px, 0.6vw, 10px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  pointer-events: none;
+}
+.bl-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: rgba(6,10,15,0.82);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 2px solid var(--door-color);
+  padding: clamp(7px, 0.75vw, 11px) clamp(10px, 1.1vw, 18px);
+  backdrop-filter: blur(4px);
+}
+.bl-number {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(7px, 0.55vw, 9px); font-weight: 800;
+  letter-spacing: 0.38em; text-transform: uppercase;
+  color: var(--door-color); opacity: 0.9; line-height: 1;
+}
+.bl-name {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(10px, 0.95vw, 14px); font-weight: 900;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.95); line-height: 1; white-space: nowrap;
+}
+
+/* ── Emerge grid — cards fly from behind the garage into position ── */
+.emerge-grid {
+  display: flex; width: 100%;
+  background: #080d12;
+  position: relative; z-index: 1;
+  /* no overlap — cards sit fully below the garage so nothing gets clipped */
+}
+.emerge-col {
+  flex: 1;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+/* ── Road lane dividers ── 4 lanes, 2 each direction ── */
+/* Solid white edge line — left shoulder */
+.emerge-col:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 0;
+  border-left: 3px solid rgba(244, 242, 232, 0.78);
+  z-index: 2; pointer-events: none;
+}
+/* Solid white edge line — right shoulder */
+.emerge-col:last-child {
+  border-right: 3px solid rgba(244, 242, 232, 0.78);
+}
+/* Lanes 1→2: same direction — white dashed skip line */
+.emerge-col:nth-child(2)::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 0;
+  border-left: 3px dashed rgba(244, 242, 232, 0.78);
+  z-index: 2; pointer-events: none;
+}
+/* Lanes 2→3: opposing traffic — double yellow solid center line */
+.emerge-col:nth-child(3)::after {
+  content: '';
+  position: absolute;
+  left: -4px; top: 0; bottom: 0;
+  width: 9px;
+  background: linear-gradient(to right,
+    rgba(220, 175, 20, 0.8) 0px, rgba(220, 175, 20, 0.8) 3px,
+    transparent 3px, transparent 6px,
+    rgba(220, 175, 20, 0.8) 6px, rgba(220, 175, 20, 0.8) 9px
+  );
+  z-index: 2; pointer-events: none;
+}
+/* Lanes 3→4: same direction — white dashed skip line */
+.emerge-col:nth-child(4)::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 0;
+  border-left: 3px dashed rgba(244, 242, 232, 0.78);
+  z-index: 2; pointer-events: none;
+}
+
+/* ── Full-size card ──────────────────────────────── */
+.emerge-card {
+  display: flex; flex-direction: column;
+  text-decoration: none;
+  background: #080d12;
+  /* Start hidden behind the garage (z-index:2 covers z-index:1) */
+  opacity: 0;
+  transform: translateY(-55vh);
+  transition:
+    opacity 0.6s ease,
+    transform 1.8s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.18s;
+  transition-delay: var(--card-delay, 0s);
+}
+.emerge-card:hover { background: #0f1720; }
+.emerge-grid.is-visible .emerge-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+.emerge-grid.is-visible .emerge-card:hover {
+  transform: translateY(-2px);
+}
+
+.ec-img {
+  width: 100%; aspect-ratio: 3 / 1;
+  background: #0c1520;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+.ec-img img {
+  height: clamp(20px, 2.2vw, 34px); width: auto;
+  opacity: 0.22;
+  filter: grayscale(1) brightness(1.4);
+  user-select: none; pointer-events: none;
+}
+.ec-body {
+  padding: clamp(10px, 1vw, 16px);
+  display: flex; flex-direction: column; gap: 6px; flex: 1;
+}
+.ec-cat {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(8px, 0.6vw, 9px); font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase; line-height: 1;
+}
+.ec-title {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(11px, 0.95vw, 14px); font-weight: 700;
+  color: rgba(255,255,255,0.88); line-height: 1.38;
+}
+.ec-meta {
+  font-size: clamp(9px, 0.68vw, 11px);
+  color: rgba(255,255,255,0.28); font-weight: 500;
+  margin-top: auto; padding-top: 4px;
+}
+.emerge-card.is-placeholder .ec-img {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px,
+    transparent 1px, transparent 8px
+  );
+}
+.emerge-card.is-placeholder .ec-title { color: rgba(255,255,255,0.25); font-style: italic; }
+.emerge-card.is-placeholder .ec-meta { color: rgba(255,255,255,0.15); text-transform: uppercase; font-size: clamp(8px, 0.6vw, 9px); letter-spacing: 0.08em; font-weight: 700; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 860px) {
+  .emerge-grid { flex-wrap: wrap; }
+  .emerge-col { flex: 0 0 50%; }
+}
+@media (max-width: 520px) {
+  .emerge-col { flex: 0 0 100%; }
+}
+
+/* ─── Road-cars overlay ────────────────────────────
+   The emerge-grid columns are styled like a 4-lane road
+   (left/right shoulders, dashed same-direction skip lines,
+   double-yellow centre). This overlay parks small cars in
+   each column centre and animates them up/down so the road
+   feels alive.
+
+   Adapted from the Crossroads codepen below the footer
+   (same colour palette + headlight/tail-light + cone
+   geometry) but stripped to a single axis — no
+   intersection, no traffic lights, no cross-traffic logic.
+
+   Lane assignment:
+     Lane 1 (col 1, x=12.5%) → traffic DOWN (TB)
+     Lane 2 (col 2, x=37.5%) → traffic DOWN (TB)
+     Lane 3 (col 3, x=62.5%) → traffic UP   (BT)
+     Lane 4 (col 4, x=87.5%) → traffic UP   (BT)
+   The double-yellow line lives between cols 2 and 3, so
+   the left half (1+2) and right half (3+4) flow opposite
+   directions like a real two-way road.                       */
+.road-cars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;     /* clicks pass through to cards */
+  z-index: 4;               /* above lane markings (z:2) and cards */
+  overflow: hidden;         /* clip cars at grid edges so they
+                               don't escape into the garage above
+                               or the footer below */
+}
+.road-car {
+  position: absolute;
+  /* Larger than the Crossroads codepen cars (22×36) so they
+     read at a glance against the wider blog cards behind
+     them. Headlights, tail-lights, and cones below scale
+     proportionally — keep them in sync if you change these. */
+  width: 54px;
+  height: 90px;
+  border-radius: 5px;
+  filter: drop-shadow(0 5px 14px #000d);
+  will-change: transform;
+  /* JS sets --y = current Y in px every frame; CSS combines
+     it with translate(-50%) so the car's centre lands on
+     its lane's `left:%` anchor. */
+  transform: translate(-50%, var(--y, 0px));
+}
+.road-car[data-lane="1"] { left: 12.5%; }
+.road-car[data-lane="2"] { left: 37.5%; }
+.road-car[data-lane="3"] { left: 62.5%; }
+.road-car[data-lane="4"] { left: 87.5%; }
+
+/* Body colours — match the Crossroads palette. */
+.road-car[data-color="1"] { background: linear-gradient(180deg, #e63950, #991a2c); }
+.road-car[data-color="2"] { background: linear-gradient(180deg, #e68c39, #995015); }
+.road-car[data-color="3"] { background: linear-gradient(180deg, #39a0e6, #155499); }
+.road-car[data-color="4"] { background: linear-gradient(180deg, #a439e6, #5a1599); }
+.road-car[data-color="5"] { background: linear-gradient(180deg, #39e67a, #158840); }
+.road-car[data-color="6"] { background: linear-gradient(180deg, #e6d639, #998a15); }
+.road-car[data-color="7"] { background: linear-gradient(180deg, #e63982, #991545); }
+.road-car[data-color="8"] { background: linear-gradient(180deg, #39e6e6, #159999); }
+
+/* Headlights — two per car, on the leading edge. Scaled
+   to match the bigger car body (36×60). */
+.road-car .hl {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fffde8;
+  box-shadow: 0 0 14px 5px #fffde8aa, 0 0 28px 10px #ffffff44;
+  z-index: 2;
+}
+.road-car-tb .hl-a { bottom: 5px; left:  8px; }
+.road-car-tb .hl-b { bottom: 5px; right: 8px; }
+.road-car-bt .hl-a { top:    5px; left:  8px; }
+.road-car-bt .hl-b { top:    5px; right: 8px; }
+
+/* Tail-lights — two per car, on the trailing edge. */
+.road-car .tail {
+  position: absolute;
+  width: 9px; height: 12px;
+  border-radius: 2px;
+  background: #ff3355;
+  box-shadow: 0 0 10px #ff335577;
+  z-index: 2;
+}
+.road-car-tb .tail-a { top:    5px; left:  8px; }
+.road-car-tb .tail-b { top:    5px; right: 8px; }
+.road-car-bt .tail-a { bottom: 5px; left:  8px; }
+.road-car-bt .tail-b { bottom: 5px; right: 8px; }
+
+/* Headlight cone — soft white wedge ahead of the car.
+   Opacity dropped vs the codepen (.45 → .25) because here
+   the cones pass over readable card content; the codepen
+   beams over a black scene where wash-out doesn't matter.   */
+.road-car .cone {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.25;
+}
+.road-car-tb .cone {
+  bottom: -75px; left: 0;
+  width: 54px; height: 78px;
+  background: linear-gradient(180deg, #fffde0, transparent);
+  clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+}
+.road-car-bt .cone {
+  top: -75px; left: 0;
+  width: 54px; height: 78px;
+  background: linear-gradient(0deg, #fffde0, transparent);
+  clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 18% 100%);
+}
+
+/* Mobile — emerge-grid wraps to 2 cols at 860px or stacks
+   to 1 col at 520px, so the 4-lane layout no longer holds.
+   Hide the overlay rather than mis-align it. */
+@media (max-width: 860px) {
+  .road-cars { display: none; }
+}
+</style>
+
+<script>
+const stage      = document.getElementById('garage-stage') as HTMLElement | null;
+const emergeGrid = document.getElementById('emerge-grid') as HTMLElement | null;
+
+let userScrolled = false;
+window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
+
+function openGarage() {
+  if (!stage) return;
+
+  // 1. Doors roll up — reveals bay cards inside
+  stage.classList.add('is-open');
+
+  // 2. Cards fly + gentle scroll happen TOGETHER while doors are still opening
+  setTimeout(() => {
+    if (emergeGrid) emergeGrid.classList.add('is-visible');
+    if (!userScrolled) {
+      window.scrollTo({ top: window.innerHeight * 0.55, behavior: 'smooth' });
+    }
+  }, 800);
+
+  // 3. After all cards have landed, doors roll back down
+  setTimeout(() => {
+    stage.classList.add('is-closed');
+  }, 3200);
+}
+
+setTimeout(openGarage, 350);
+
+// ── Click a door to peek inside, then auto-close ──────────────────────
+document.querySelectorAll('.door-overlay').forEach(door => {
+  door.addEventListener('click', () => {
+    if (door.classList.contains('peek') || !stage?.classList.contains('is-closed')) return;
+    door.classList.add('peek');
+    setTimeout(() => door.classList.remove('peek'), 2500);
+  });
+});
+
+/* ─────────────────────────────────────────────────────
+   Road-cars — vertical traffic in the 4 emerge-grid lanes.
+   Each car holds its own y position (px) and direction;
+   on every animation frame we advance y by spd*dt and
+   wrap when it leaves the visible area. Grid height is
+   read live via ResizeObserver so a viewport change or
+   lazy-loaded card never desyncs the wrap point.
+   ───────────────────────────────────────────────────── */
+(() => {
+  const grid  = document.getElementById('emerge-grid');
+  const layer = grid?.querySelector<HTMLElement>('.road-cars');
+  if (!grid || !layer) return;
+
+  type RoadCar = { el: HTMLElement; dir: 1 | -1; spd: number; y: number; };
+  const cars: RoadCar[] = Array.from(layer.querySelectorAll<HTMLElement>('.road-car')).map((el) => ({
+    el,
+    dir: el.classList.contains('road-car-tb') ? 1 : -1,
+    spd: parseFloat(el.dataset.spd || '80'),
+    y:   parseFloat(el.dataset.startY || '0'),
+  }));
+
+  // Push initial positions so cars are spread before first frame.
+  for (const c of cars) c.el.style.setProperty('--y', `${c.y}px`);
+
+  let gridH = grid.getBoundingClientRect().height;
+  const ro = new ResizeObserver(() => {
+    gridH = grid.getBoundingClientRect().height;
+  });
+  ro.observe(grid);
+
+  const CAR_H = 90;  // matches .road-car height in CSS
+  let lastTs: number | null = null;
+
+  function tick(ts: number) {
+    if (lastTs === null) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05); // cap at 50 ms
+    lastTs = ts;
+
+    for (const c of cars) {
+      c.y += c.dir * c.spd * dt;
+      // Wrap once the car is fully past the edge it's heading for.
+      if (c.dir > 0 && c.y > gridH)        c.y = -CAR_H;
+      else if (c.dir < 0 && c.y < -CAR_H)  c.y = gridH;
+      c.el.style.setProperty('--y', `${c.y.toFixed(1)}px`);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+})();
+</script>
+

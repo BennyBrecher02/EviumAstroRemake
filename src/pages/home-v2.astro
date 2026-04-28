@@ -1,0 +1,45 @@
+---
+/**
+ * /home-v2 — Home page, v2 (editing sandbox).
+ * ─────────────────────────────────────────────
+ * Full duplicate of the original homepage (src/pages/index.astro)
+ * wired to its own set of `*V2` component variants. The point of
+ * this page is so the production `/` can stay untouched while
+ * heavier revisions are iterated on here without fear of breaking
+ * v1.
+ *
+ * When a future instruction refers to "the homepage", "home", etc.
+ * it means v2 going forward (per Benny's direction after the manager
+ * review). V1 is the stable reference.
+ *
+ * Accessibility note: this route is currently reachable only via
+ * the nav's "Home v2" slot, which is gated behind dev mode (same
+ * pattern as Testing / Other). Public visitors never see it.
+ *
+ * Components cloned:
+ *   - HeroHomeMain             → HeroHomeMainV2
+ *   - HeroPortalSolutionsScene → HeroPortalSolutionsSceneV2
+ *   - LocationsMapSection      → LocationsMapSectionV2
+ *   - HomeFaqSection           → HomeFaqSectionV2
+ *   - HomeAppDownloadSection   → HomeAppDownloadSectionV2
+ *
+ * SiteFooter is intentionally NOT duplicated — it's the shared
+ * site-wide footer and belongs to the broader layout, not the home
+ * page specifically. Edit it in one place for the whole site.
+ */
+import Layout from '../layouts/Layout.astro';
+import HeroHomeMainV2 from '../components/heroes/HeroHomeMainV2.astro';
+import HeroPortalSolutionsSceneV2 from '../components/heroes/HeroPortalSolutionsSceneV2.astro';
+import LocationsMapSectionV2 from '../components/LocationsMapSectionV2.astro';
+import HomeFaqSectionV2 from '../components/HomeFaqSectionV2.astro';
+import HomeAppDownloadSectionV2 from '../components/HomeAppDownloadSectionV2.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+<Layout title="Evium Charging — Home v2" headerVariant="v4" bodyClass="page-home-v2">
+  <HeroHomeMainV2 />
+  <HeroPortalSolutionsSceneV2 />
+  <LocationsMapSectionV2 />
+  <HomeFaqSectionV2 />
+  <HomeAppDownloadSectionV2 />
+  <SiteFooter />
+</Layout>

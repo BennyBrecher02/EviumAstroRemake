@@ -2,6 +2,20 @@
 // Hero: Pedestal carousel — used as the hero of the /products page.
 // Identical behavior to /testing/carousel-pedestal, minus the Layout wrapper.
 
+/**
+ * `productLinkBase` — path prefix used when the featured slide /
+ * in-arch CTA link out to a product card. Defaults to `/products`
+ * (the production catalog). The /products-v2 sandbox passes
+ * `/products-v2` so the hero routes within its own page instead
+ * of bouncing the user back to the production page. The ids
+ * themselves (productId values below) are identical on both
+ * pages, so only the path prefix differs.
+ */
+interface Props {
+  productLinkBase?: string;
+}
+const { productLinkBase = '/products' } = Astro.props;
+
 // Full charger lineup — cycles through every charger asset in /public/images/chargers/*
 // `botPad` = % of the PNG's height that is transparent below the charger body.
 // `productId` matches the id used in /products so clicking navigates to that product card.
@@ -32,7 +46,7 @@ const SLOT_FC = { x: 61.0, y: 75.0 }; // front-center — preview slide (nudged 
 const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up)
 ---
 
-<main class="carousel-root" aria-label="Charger Showcase">
+<main class="carousel-root" aria-label="Charger Showcase" data-product-link-base={productLinkBase}>
     <!-- Stage: aspect-ratio locked to source image so pedestal positions are exact.
          Sized to min-cover the viewport (mirrors background-size: cover). -->
     <div class="pedestal-stage" id="pedestal-stage">
@@ -67,6 +81,7 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
       <header class="stage-header">
         <p class="sh-eyebrow">Evium Product Suite</p>
         <h1 class="sh-title">Built to power every property.</h1>
+        <span class="sh-rule" aria-hidden="true"></span>
         <p class="sh-sub">
           From 7.4&#8202;kW wall chargers to 300&#8202;kW DC fast stations,
           Evium's hardware lineup spans every need — multifamily, fleet,
@@ -351,7 +366,10 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
        for editorial rhythm. */
   .stage-header {
     position: absolute;
-    left: 5.5%;
+    /* Shifted right from 5.5% → 9% so the text block sits further
+       inboard of the lefter rail, with more breathing room between
+       it and the left edge of the stage. */
+    left: 9%;
     top:  19%;
     width: 28%;
     max-width: 440px;
@@ -382,26 +400,55 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     height: 2px;
     background: currentColor;
   }
-  /* Title — elegant but not dominating. Capped width so it breaks into
-     balanced lines rather than running across the whole mint wall. */
+
+  /* Title — display-size editorial headline.
+     Multi-stop near-black gradient (clipped to glyph shapes via
+     background-clip: text) gives the type subtle vertical depth —
+     the top reads as a deeper ink than the bottom, exactly like
+     premium printed type catching directional studio light. The
+     padding-bottom is the same descender-rescue trick used on
+     .v2-brand-name: the gradient paints the element's padding box,
+     so we need explicit room below the line for any 'g' / 'p' / 'y'
+     descenders to render with gradient instead of clipping to
+     transparent. */
   .sh-title {
-    margin: 0 0 clamp(16px, 1.7vw, 24px);
-    font-size: clamp(1.3rem, 2.25vw, 2.3rem);
+    margin: 0;
+    font-size: clamp(1.35rem, 2.35vw, 2.4rem);
     font-weight: 900;
-    line-height: 1.04;
-    letter-spacing: -0.025em;
-    color: #0d1a22;
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    background: linear-gradient(180deg, #0a141b 0%, #1d2932 65%, #2c3a44 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: 0.14em;
     text-wrap: balance;
     max-width: 14ch;
   }
-  /* Subtitle — refined body copy. Slightly looser leading, cleaner color. */
+
+  /* Hairline rule between title and subtitle — short fading
+     accent that introduces the body copy. Same gradient-fade
+     vocabulary as the eyebrow divider, so the two refined accents
+     rhyme visually across the stack. */
+  .sh-rule {
+    display: block;
+    width: clamp(38px, 4.2vw, 54px);
+    height: 1px;
+    background: linear-gradient(90deg, rgba(13, 26, 34, 0.55) 0%, rgba(13, 26, 34, 0) 100%);
+    margin: clamp(14px, 1.6vw, 22px) 0 clamp(12px, 1.4vw, 18px);
+  }
+
+  /* Subtitle — refined body copy. Specific charcoal color (vs. the
+     previous alpha-on-dark) sits in the same family as Apple's
+     secondary text scale, giving the paragraph a definite identity
+     against the mint wall instead of muddying with transparency. */
   .sh-sub {
     margin: 0;
-    font-size: clamp(0.7rem, 0.88vw, 0.9rem);
-    font-weight: 500;
-    line-height: 1.6;
+    font-size: clamp(0.74rem, 0.92vw, 0.94rem);
+    font-weight: 400;
+    line-height: 1.65;
     letter-spacing: 0;
-    color: rgba(13, 26, 34, 0.6);
+    color: #4d5963;
     max-width: 42ch;
     text-wrap: pretty;
   }
@@ -648,7 +695,13 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
         }
       }
       const pid = active.dataset.productId ?? '';
-      if (acCta && pid) acCta.setAttribute('href', `/products#${pid}`);
+      /* Path prefix is set by the host page via the root's
+         data-product-link-base attribute (default "/products").
+         Captured once from the DOM at mount time — not from
+         window.location — so links stay stable even if the user
+         navigates client-side. */
+      const linkBase = root.dataset.productLinkBase || '/products';
+      if (acCta && pid) acCta.setAttribute('href', `${linkBase}#${pid}`);
       // Reveal the caption once first update has run (avoids initial flash
       // of the static template content before JS syncs).
       captionEl?.classList.add('is-ready');
@@ -686,7 +739,10 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
       // Skip if the click came from a swipe (see touch handlers below)
       if (suppressNextClick) { suppressNextClick = false; return; }
       const pid = slide.dataset.productId;
-      if (pid) window.location.href = `/products#${pid}`;
+      if (pid) {
+        const linkBase = root.dataset.productLinkBase || '/products';
+        window.location.href = `${linkBase}#${pid}`;
+      }
     });
 
     // ── Swipe handling (touch + mouse drag) ──

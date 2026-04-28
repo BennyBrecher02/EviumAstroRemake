@@ -1,17 +1,52 @@
 ---
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import HeaderV4 from '../components/HeaderV4.astro';
 import DevToggle from '../components/DevToggle.astro';
 
 interface Props {
   title?: string;
   description?: string;
+  /**
+   * Which header variant to render. Defaults to the production
+   * top-battery Header. `'v4'` swaps in the Tesla-PRNDL nav rail
+   * (the v2 sandbox pages use this). Archived variants sit in
+   * src/components/ for reference but none are imported by this
+   * Layout:
+   *   - HeaderV1RadialTransparency.astro  (obscuring-band header)
+   *   - HeaderV2BatteryLefter.astro       (battery rail)
+   *   - HeaderV3SolidLefterMenu.astro     (solid rail + mega-menu overlay)
+   */
+  headerVariant?: 'default' | 'v4';
+  /**
+   * Optional extra className applied to <body>. Used by the v2
+   * sandbox pages to flag which page HeaderV4 is rendering on so
+   * it can swap its lefter anchor set per-page (home-v2 sections
+   * vs products-v2 catalog tabs, etc.) without a hardcoded page
+   * list living inside the header itself.
+   *
+   *   - `page-home-v2`      set by /home-v2
+   *   - `page-products-v2`  set by /products-v2
+   *
+   * Empty / unset on every other page — HeaderV4 falls back to
+   * its home-v2 anchor list so nothing changes for existing
+   * surfaces.
+   */
+  bodyClass?: string;
 }
 
 const {
   title = "Evium Charging",
   description = "Turnkey EV charging solutions for property owners. Zero cost, zero hassle — electrifying the future one property at a time.",
+  headerVariant = 'default',
+  bodyClass: extraBodyClass = '',
 } = Astro.props;
+
+/* Any lefter-style nav (currently only v4) adds `has-lefter-nav`
+   to the body so the global padding-left rule pushes page content
+   right by the nav's width. Other pages render unaffected. */
+const isLefter = headerVariant === 'v4';
+const bodyClass = [isLefter ? 'has-lefter-nav' : '', extraBodyClass].filter(Boolean).join(' ');
 ---
 
 <html lang="en">
@@ -23,9 +58,23 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
   </head>
-  <body>
-    <Header />
+  <body class={bodyClass}>
+    {headerVariant === 'v4' ? <HeaderV4 /> : <Header />}
     <slot />
     <DevToggle />
   </body>
 </html>
+
+<style is:global>
+  /* Lefter-nav page offset — active when Layout is rendered with
+     any lefter-style header (currently `headerVariant === 'v3'`).
+     Pushes every body-level block right by the nav's width so the
+     fixed-left nav doesn't overlap hero sections. The width is
+     exposed by whichever lefter component is rendered via the
+     `--lefter-width` CSS variable, so this rule stays header-
+     agnostic — narrower-phone overrides for the width live in
+     the header component itself. */
+  body.has-lefter-nav {
+    padding-left: var(--lefter-width, 72px);
+  }
+</style>

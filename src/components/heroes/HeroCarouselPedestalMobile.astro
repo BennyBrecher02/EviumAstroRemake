@@ -45,9 +45,19 @@ const slides = [
 const SLOT_BL = { x: 30.0, y: 59.0 };
 const SLOT_FC = { x: 57.0, y: 64.0 };
 const SLOT_BR = { x: 75.0, y: 54.0 };
+
+/**
+ * `productLinkBase` — path prefix for featured-slide / ac-cta
+ * navigation. See the matching prop on HeroCarouselPedestal for
+ * the full rationale. Default /products for backwards compat.
+ */
+interface Props {
+  productLinkBase?: string;
+}
+const { productLinkBase = '/products' } = Astro.props;
 ---
 
-<section class="mcp-root" aria-label="Charger Showcase">
+<section class="mcp-root" aria-label="Charger Showcase" data-product-link-base={productLinkBase}>
   {/*
     Background image — fills the entire hero rect. The hero's
     aspect-ratio exactly matches the image (1024/1536 = 2/3), so
@@ -581,7 +591,11 @@ const SLOT_BR = { x: 75.0, y: 54.0 };
         }
       }
       const pid = active.dataset.productId ?? '';
-      if (acCta && pid) acCta.setAttribute('href', `/products#${pid}`);
+      /* Path prefix from the host page via data-product-link-base
+         (default "/products"). See the desktop variant for the
+         full rationale. */
+      const linkBase = root.dataset.productLinkBase || '/products';
+      if (acCta && pid) acCta.setAttribute('href', `${linkBase}#${pid}`);
       captionEl?.classList.add('is-ready');
     }
 
@@ -608,7 +622,10 @@ const SLOT_BR = { x: 75.0, y: 54.0 };
       if (!slide) return;
       if (suppressNextClick) { suppressNextClick = false; return; }
       const pid = slide.dataset.productId;
-      if (pid) window.location.href = `/products#${pid}`;
+      if (pid) {
+        const linkBase = root.dataset.productLinkBase || '/products';
+        window.location.href = `${linkBase}#${pid}`;
+      }
     });
 
     // Swipe handling — scoped to the root so caption/HUD drags don't

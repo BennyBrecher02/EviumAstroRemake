@@ -1,7 +1,675 @@
 ---
+/**
+ * /contact/referral — Referral Program.
+ * ─────────────────────────────────────
+ * Content sourced verbatim from Evium's "Referral Program Deck.pptx"
+ * (ExistingEviumContextMedia/). Every copy block, number, and step
+ * here maps back to a specific slide in that deck:
+ *   - Slide 1 : Hero pitch — "Partner with Evium Charging"
+ *   - Slide 2 : Why EV charging matters for your clients
+ *   - Slide 3 : What Evium actually delivers (turnkey)
+ *   - Slide 4 : The opportunity — "Earn 5-6 figures a year"
+ *   - Slide 5 : Why refer (reputation, revenue, credibility)
+ *   - Slide 6 : Smart tech for landlords
+ *   - Slide 7 : How the referral process works (3 steps)
+ *   - Slide 8 : Start earning — contact + CTA
+ */
 import Layout from '../../layouts/Layout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+const process = [
+  {
+    n:     '01',
+    title: 'Warm Intro',
+    copy:  'Make a warm introduction to a property owner or company interested in EV charging.',
+  },
+  {
+    n:     '02',
+    title: 'Solution Design',
+    copy:  'We run the site assessment and deliver a custom proposal tailored to that property.',
+  },
+  {
+    n:     '03',
+    title: 'Installation & Go Live',
+    copy:  'After we install and turn the stations on, you receive your referral fee — paid per charging port.',
+  },
+];
+
+const whyRefer = [
+  {
+    h: 'Our Reputation',
+    p: 'Proven success with seamless installations across multifamily, commercial, and retail properties.',
+  },
+  {
+    h: 'Revenue Growth for Owners',
+    p: 'Owners see an added amenity, higher property value, and an additional income stream via 50% revenue share.',
+  },
+  {
+    h: 'Trusted Partner',
+    p: "We're a reliable partner, ready to support your clients from consultation through ongoing maintenance.",
+  },
+];
+
+const credibility = [
+  'EVIUM wins NM NEVI site in partnership with industry-leader EV Gateway.',
+  'EVIUM secures major NJ BPU grant to boost EV infrastructure.',
+  'CEC selects EVIUM for the groundbreaking $6MM+ REACH 2.0 grant award.',
+];
 ---
+
 <Layout title="Referral Program — Evium Charging">
-  <PagePlaceholder title="Referral Program" />
+  <!-- Hero -->
+  <section class="rp-hero" aria-label="Referral program — hero">
+    <div class="rp-hero-inner">
+      <nav class="rp-crumb" aria-label="Breadcrumb">
+        <a href="/contact" class="rp-crumb-link">Contact</a>
+        <span class="rp-crumb-sep" aria-hidden="true">»</span>
+        <span class="rp-crumb-current">Referral Program</span>
+      </nav>
+      <span class="rp-eyebrow">Partner with Evium Charging</span>
+      <h1 class="rp-title">Drive revenue with<br/><span class="rp-title-accent">EV charging referrals.</span></h1>
+      <p class="rp-sub">
+        Earn referral fees by providing warm intros to commercial real estate
+        decision makers. Paid out per charging port — as soon as the machines
+        are turned on.
+      </p>
+      <div class="rp-hero-cta-row">
+        <a href="#rp-apply" class="rp-cta-primary">
+          <span>Start earning</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+        <a href="#rp-process" class="rp-cta-secondary">
+          <span>See how it works</span>
+        </a>
+      </div>
+    </div>
+    <div class="rp-hero-accent" aria-hidden="true"></div>
+  </section>
+
+  <!-- Opportunity band -->
+  <section class="rp-band" aria-label="The opportunity">
+    <div class="rp-band-inner">
+      <div class="rp-band-big">
+        <span class="rp-band-eyebrow">Your opportunity</span>
+        <h2 class="rp-band-headline">Earn <span class="rp-band-accent">5–6 figures</span> a year.</h2>
+      </div>
+      <p class="rp-band-copy">
+        Provide warm introductions to landlords and owners interested in EV
+        charging. We pay out referral fees on a per-charging-port basis as
+        soon as the machines are turned on.
+      </p>
+    </div>
+  </section>
+
+  <!-- Why EV charging matters (slide 2) -->
+  <section class="rp-why">
+    <div class="rp-why-inner">
+      <div class="rp-why-copy">
+        <span class="rp-section-eyebrow">Why EV charging matters for your clients</span>
+        <h2 class="rp-section-h">50 million EVs projected on the road by 2030.</h2>
+        <p class="rp-section-p">
+          Is your client's property ready? As adoption grows and EV charging
+          is increasingly mandated, properties with charging are in high
+          demand. Brokers add real value by connecting property owners with
+          our services — before the market catches up.
+        </p>
+      </div>
+      <ul class="rp-turnkey" role="list">
+        <li class="rp-turnkey-item">
+          <span class="rp-turnkey-h">100% Free Installation</span>
+          <span class="rp-turnkey-p">No upfront or ongoing costs for property owners.</span>
+        </li>
+        <li class="rp-turnkey-item">
+          <span class="rp-turnkey-h">Revenue Sharing</span>
+          <span class="rp-turnkey-p">Property owners receive 50% of all charging revenue.</span>
+        </li>
+        <li class="rp-turnkey-item">
+          <span class="rp-turnkey-h">Flexible Approaches</span>
+          <span class="rp-turnkey-p">Leasing, revenue share, or hybrid — whichever fits the property.</span>
+        </li>
+        <li class="rp-turnkey-item">
+          <span class="rp-turnkey-h">Hassle-Free</span>
+          <span class="rp-turnkey-p">We handle everything: assessment, planning, installation, support.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Process (slide 7) -->
+  <section id="rp-process" class="rp-process">
+    <div class="rp-process-inner">
+      <span class="rp-section-eyebrow rp-section-eyebrow--center">How the referral process works</span>
+      <h2 class="rp-section-h rp-section-h--center">Three steps. That's it.</h2>
+      <ol class="rp-steps" role="list">
+        {process.map((s) => (
+          <li class="rp-step">
+            <span class="rp-step-n">{s.n}</span>
+            <h3 class="rp-step-h">{s.title}</h3>
+            <p class="rp-step-p">{s.copy}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Why refer Evium + credibility -->
+  <section class="rp-why-refer">
+    <div class="rp-why-refer-inner">
+      <div class="rp-why-refer-head">
+        <span class="rp-section-eyebrow">Why refer Evium Charging?</span>
+        <h2 class="rp-section-h">Backed by real deployments, real grants, and real tenants.</h2>
+      </div>
+      <div class="rp-why-refer-grid">
+        {whyRefer.map((w) => (
+          <div class="rp-why-card">
+            <h3 class="rp-why-card-h">{w.h}</h3>
+            <p class="rp-why-card-p">{w.p}</p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Credibility bullets -->
+      <ul class="rp-credibility" role="list">
+        {credibility.map((c) => (
+          <li class="rp-credibility-item">
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="rp-credibility-icon">
+              <path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>{c}</span>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Testimonial pulled from the deck -->
+      <blockquote class="rp-testimonial">
+        <p class="rp-testimonial-q">
+          In the first month, EVIUM Chargers brought us three brand new tenants.
+        </p>
+        <cite class="rp-testimonial-c">— Property Owner, Multifamily</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- Apply / contact band -->
+  <section id="rp-apply" class="rp-apply">
+    <div class="rp-apply-inner">
+      <span class="rp-apply-eyebrow">Start earning with Evium Charging</span>
+      <h2 class="rp-apply-h">Join our network of referral partners.</h2>
+      <p class="rp-apply-p">
+        All warm introductions are welcome. Reach out and we'll set up a short
+        intro call to walk through the agreement and answer your questions.
+      </p>
+      <div class="rp-apply-actions">
+        <a href="mailto:joe@eviumcharging.com?subject=Referral%20Program%20Inquiry" class="rp-apply-btn rp-apply-btn--primary">
+          <span>joe@eviumcharging.com</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+        <a href="tel:+13479419945" class="rp-apply-btn rp-apply-btn--secondary">
+          <span>+1 (347) 941-9945</span>
+        </a>
+      </div>
+      <a href="/contact" class="rp-back">← Back to all contact options</a>
+    </div>
+  </section>
+
+  <SiteFooter />
 </Layout>
+
+<style>
+  /* ── Shared ─────────────────────────────────────────── */
+  :root, .rp-hero, .rp-band, .rp-why, .rp-process, .rp-why-refer, .rp-apply {
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .rp-section-eyebrow {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 12px;
+  }
+  .rp-section-eyebrow--center { text-align: center; }
+  .rp-section-h {
+    margin: 0 0 16px;
+    font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+    color: #0d1a22;
+  }
+  .rp-section-h--center { text-align: center; max-width: 20ch; margin-left: auto; margin-right: auto; }
+  .rp-section-p {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(13, 26, 34, 0.72);
+    max-width: 58ch;
+  }
+
+  /* ── Hero ───────────────────────────────────────────── */
+  .rp-hero {
+    position: relative;
+    background: linear-gradient(180deg, #0b161d 0%, #0d1a22 60%, #0f2029 100%);
+    color: #fff;
+    padding: clamp(120px, 16vh, 180px) clamp(24px, 5vw, 80px) clamp(80px, 10vh, 140px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .rp-hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+  .rp-hero-accent {
+    position: absolute;
+    right: -10%;
+    top: -10%;
+    width: 60%;
+    height: 120%;
+    background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(45, 200, 86, 0.18) 0%, rgba(45, 200, 86, 0.06) 48%, transparent 72%);
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .rp-crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.62);
+    margin-bottom: 28px;
+  }
+  .rp-crumb-link {
+    color: #2DC856;
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .rp-crumb-link:hover { color: #36e464; }
+  .rp-crumb-sep { color: rgba(255, 255, 255, 0.4); }
+  .rp-crumb-current { color: rgba(255, 255, 255, 0.58); }
+  .rp-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 22px;
+  }
+  .rp-title {
+    margin: 0 0 22px;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.032em;
+    color: #fff;
+  }
+  .rp-title-accent { color: #2DC856; }
+  .rp-sub {
+    margin: 0 0 32px;
+    font-size: clamp(1.02rem, 1.2vw, 1.2rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.76);
+    max-width: 60ch;
+  }
+  .rp-hero-cta-row {
+    display: inline-flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .rp-cta-primary, .rp-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, gap 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .rp-cta-primary {
+    background: #2DC856;
+    color: #0d1a22;
+    box-shadow: 0 10px 24px rgba(45, 200, 86, 0.35);
+  }
+  .rp-cta-primary:hover {
+    background: #36e464;
+    gap: 13px;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(45, 200, 86, 0.45);
+  }
+  .rp-cta-primary svg { width: 14px; height: 14px; }
+  .rp-cta-secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+  .rp-cta-secondary:hover {
+    border-color: #2DC856;
+    color: #2DC856;
+  }
+
+  /* ── Opportunity band ───────────────────────────────── */
+  .rp-band {
+    background:
+      linear-gradient(160deg, rgba(45, 200, 86, 0.1) 0%, rgba(45, 200, 86, 0.02) 100%),
+      #0b161d;
+    color: #fff;
+    padding: clamp(52px, 6vh, 80px) clamp(24px, 5vw, 80px);
+    border-top: 1px solid rgba(45, 200, 86, 0.16);
+    border-bottom: 1px solid rgba(45, 200, 86, 0.16);
+  }
+  .rp-band-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 60px);
+    align-items: center;
+  }
+  .rp-band-eyebrow {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 10px;
+  }
+  .rp-band-headline {
+    margin: 0;
+    font-size: clamp(2rem, 3.6vw, 3.4rem);
+    font-weight: 900;
+    letter-spacing: -0.022em;
+    line-height: 1.05;
+    color: #fff;
+  }
+  .rp-band-accent { color: #2DC856; }
+  .rp-band-copy {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 58ch;
+  }
+
+  /* ── Why EV charging matters ────────────────────────── */
+  .rp-why {
+    background: #f7f7f4;
+    padding: clamp(60px, 8vh, 100px) clamp(24px, 5vw, 80px);
+  }
+  .rp-why-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 64px);
+    align-items: start;
+  }
+  .rp-turnkey {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .rp-turnkey-item {
+    padding: 22px 22px 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow:
+      0 12px 30px rgba(8, 20, 32, 0.06),
+      0 0 0 1px rgba(8, 20, 32, 0.04);
+  }
+  .rp-turnkey-h {
+    font-size: 0.98rem;
+    font-weight: 900;
+    color: #0d1a22;
+    letter-spacing: -0.01em;
+  }
+  .rp-turnkey-p {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: rgba(13, 26, 34, 0.64);
+  }
+
+  /* ── Process ────────────────────────────────────────── */
+  .rp-process {
+    background: #0d1a22;
+    color: #fff;
+    padding: clamp(72px, 9vh, 120px) clamp(24px, 5vw, 80px);
+  }
+  .rp-process-inner { max-width: 1100px; margin: 0 auto; }
+  .rp-process .rp-section-h--center { color: #fff; }
+  .rp-steps {
+    list-style: none;
+    margin: clamp(32px, 4vw, 52px) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.4vw, 32px);
+    counter-reset: rp-step;
+  }
+  .rp-step {
+    position: relative;
+    padding: 32px 28px 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .rp-step:hover {
+    background: rgba(45, 200, 86, 0.06);
+    border-color: rgba(45, 200, 86, 0.28);
+    transform: translateY(-3px);
+  }
+  .rp-step-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(45, 200, 86, 0.12);
+    color: #2DC856;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  .rp-step-h {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.015em;
+  }
+  .rp-step-p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* ── Why refer ──────────────────────────────────────── */
+  .rp-why-refer {
+    background: #ffffff;
+    padding: clamp(72px, 9vh, 120px) clamp(24px, 5vw, 80px);
+  }
+  .rp-why-refer-inner { max-width: 1200px; margin: 0 auto; }
+  .rp-why-refer-head { margin-bottom: clamp(32px, 4vw, 52px); }
+  .rp-why-refer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 2vw, 28px);
+    margin-bottom: clamp(40px, 5vw, 64px);
+  }
+  .rp-why-card {
+    padding: 26px 24px 28px;
+    background: #f7f7f4;
+    border-radius: 16px;
+    border: 1px solid rgba(8, 20, 32, 0.06);
+  }
+  .rp-why-card-h {
+    margin: 0 0 8px;
+    font-size: 1.06rem;
+    font-weight: 900;
+    color: #0d1a22;
+    letter-spacing: -0.012em;
+  }
+  .rp-why-card-p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(13, 26, 34, 0.66);
+  }
+  .rp-credibility {
+    list-style: none;
+    margin: 0 0 clamp(32px, 4vw, 48px);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .rp-credibility-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: rgba(13, 26, 34, 0.82);
+  }
+  .rp-credibility-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 3px;
+    background: rgba(45, 200, 86, 0.12);
+    color: #2DC856;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+  .rp-testimonial {
+    margin: 0;
+    padding: clamp(24px, 3vw, 36px);
+    background: linear-gradient(160deg, rgba(45, 200, 86, 0.12) 0%, rgba(45, 200, 86, 0.04) 100%);
+    border-left: 3px solid #2DC856;
+    border-radius: 0 16px 16px 0;
+  }
+  .rp-testimonial-q {
+    margin: 0 0 10px;
+    font-size: clamp(1.1rem, 1.4vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.45;
+    color: #0d1a22;
+    font-style: italic;
+  }
+  .rp-testimonial-c {
+    font-size: 0.86rem;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(13, 26, 34, 0.6);
+  }
+
+  /* ── Apply band ─────────────────────────────────────── */
+  .rp-apply {
+    background: linear-gradient(160deg, #0d1a22 0%, #0f2029 100%);
+    color: #fff;
+    padding: clamp(72px, 9vh, 120px) clamp(24px, 5vw, 80px);
+    text-align: center;
+  }
+  .rp-apply-inner { max-width: 780px; margin: 0 auto; }
+  .rp-apply-eyebrow {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 14px;
+  }
+  .rp-apply-h {
+    margin: 0 0 16px;
+    font-size: clamp(1.9rem, 3vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .rp-apply-p {
+    margin: 0 auto 30px;
+    max-width: 54ch;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.74);
+  }
+  .rp-apply-actions {
+    display: inline-flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .rp-apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, gap 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .rp-apply-btn--primary {
+    background: #2DC856;
+    color: #0d1a22;
+    box-shadow: 0 10px 24px rgba(45, 200, 86, 0.35);
+  }
+  .rp-apply-btn--primary:hover {
+    background: #36e464;
+    gap: 13px;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(45, 200, 86, 0.45);
+  }
+  .rp-apply-btn--primary svg { width: 14px; height: 14px; }
+  .rp-apply-btn--secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+  .rp-apply-btn--secondary:hover {
+    border-color: #2DC856;
+    color: #2DC856;
+  }
+  .rp-back {
+    display: inline-block;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.62);
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .rp-back:hover { color: #2DC856; }
+
+  /* ── Responsive ─────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .rp-band-inner,
+    .rp-why-inner { grid-template-columns: 1fr; }
+    .rp-turnkey { grid-template-columns: 1fr 1fr; }
+    .rp-steps { grid-template-columns: 1fr; }
+    .rp-why-refer-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .rp-turnkey { grid-template-columns: 1fr; }
+  }
+</style>
+</content>
+</invoke>

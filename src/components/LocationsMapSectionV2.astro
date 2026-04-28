@@ -1,0 +1,1140 @@
+---
+/**
+ * LocationsMapSection
+ * ───────────────────
+ * The US locations map that lives on both /testing/locations-map and the
+ * home page below the solutions scene. All markup, styles, and behavior
+ * live here so the two pages never drift.
+ *
+ * Entry animation
+ * ───────────────
+ * The whole section starts with .map-root hidden; IntersectionObserver
+ * adds .is-revealed once the section is ~25% on-screen, which triggers
+ * a choreographed reveal:
+ *
+ *   ghost outlines    fade in at t=0
+ *   active states     pop-scale west → east, staggered ~55ms apart
+ *   connector lines   "draw" via stroke-dashoffset
+ *   connector dots    fade in after the line reaches them
+ *   pins              scale-bounce in last
+ *   labels            fade in with the pins
+ *
+ * Each state has --reveal-i set from a west-to-east sort of centroid x,
+ * so all the staggered animations anchor off the same progression.
+ */
+
+import { STATES } from '../data/states';
+import mapData from '../data/us-map-paths.json';
+
+const activeAbbrs = new Set(STATES.map((s) => s.abbr));
+const activePaths = mapData.states.filter((s: any) => activeAbbrs.has(s.abbr));
+const ghostPaths  = mapData.states.filter((s: any) => !activeAbbrs.has(s.abbr));
+
+// Stagger order: west → east so the reveal sweeps across the country.
+// Build once so every layer (state, pin, label, connector) agrees.
+const revealOrder = [...activePaths].sort((a: any, b: any) => a.cx - b.cx);
+const revealIndex: Record<string, number> = {};
+revealOrder.forEach((s: any, i: number) => { revealIndex[s.abbr] = i; });
+
+type LabelPos = { x: number; y: number; anchor: 'start' | 'middle' | 'end' };
+const LABELS: Record<string, LabelPos> = {
+  WA: { x: 150,  y: 70,  anchor: 'end'    },
+  OR: { x: -8,   y: 170, anchor: 'end'    },
+  CA: { x: -8,   y: 340, anchor: 'end'    },
+  CO: { x: 305,  y: 540, anchor: 'middle' },
+  NM: { x: 420,  y: 560, anchor: 'middle' },
+  TX: { x: 560,  y: 540, anchor: 'middle' },
+  IL: { x: 610,  y: 80,  anchor: 'middle' },
+  OH: { x: 740,  y: 60,  anchor: 'middle' },
+  NY: { x: 825,  y: 75,  anchor: 'middle' },
+  NH: { x: 910,  y: 42,  anchor: 'middle' },
+  ME: { x: 995,  y: 72,  anchor: 'start'  },
+  MA: { x: 1018, y: 150, anchor: 'start'  },
+  CT: { x: 1018, y: 218, anchor: 'start'  },
+  NJ: { x: 1018, y: 262, anchor: 'start'  },
+  DE: { x: 1018, y: 306, anchor: 'start'  },
+  VA: { x: 1000, y: 352, anchor: 'start'  },
+  NC: { x: 910,  y: 410, anchor: 'start'  },
+  FL: { x: 820,  y: 555, anchor: 'middle' },
+};
+
+const TEXT_W = 26;
+const TEXT_H = 14;
+const PAD = 5;
+
+function connectorOrigin(label: LabelPos, cx: number, cy: number) {
+  const left =
+    label.anchor === 'start'  ? label.x :
+    label.anchor === 'middle' ? label.x - TEXT_W / 2 :
+                                label.x - TEXT_W;
+  const right =
+    label.anchor === 'start'  ? label.x + TEXT_W :
+    label.anchor === 'middle' ? label.x + TEXT_W / 2 :
+                                label.x;
+  const top    = label.y - TEXT_H;
+  const bottom = label.y + 2;
+  const mx = (left + right) / 2;
+  const my = (top + bottom) / 2;
+  const dx = cx - mx;
+  const dy = cy - my;
+  const horizontalDominant = Math.abs(dx) / (TEXT_W / 2) > Math.abs(dy) / (TEXT_H / 2);
+  if (horizontalDominant) {
+    return dx > 0
+      ? { x: right + PAD,  y: my }
+      : { x: left  - PAD,  y: my };
+  }
+  return dy > 0
+    ? { x: mx, y: bottom + PAD }
+    : { x: mx, y: top    - PAD };
+}
+
+const PIN_STATES = new Set([
+  'WA','OR','CA','CO','NM','TX','IL','OH','NY','ME','NC','FL',
+  'VA','CT','NJ','MA','NH','DE',
+]);
+
+const PIN_SIZES: Record<string, { w: number; h: number }> = {
+  NH: { w: 9,  h: 11 },
+  CT: { w: 8,  h: 10 },
+  NJ: { w: 11, h: 13 },
+  MA: { w: 7,  h: 9  },
+  ME: { w: 16, h: 19 },
+  NC: { w: 16, h: 19 },
+  DE: { w: 6,  h: 8  },
+};
+
+const PIN_POSITIONS: Record<string, { x: number; y: number }> = {
+  WA: { x: 55,  y: 140 },
+  OR: { x: 90,  y: 185 },
+  CO: { x: 305, y: 275 },
+  DE: { x: 854, y: 267 },
+  IL: { x: 600, y: 245 },
+  NY: { x: 860, y: 200 },
+  NC: { x: 800, y: 328 },
+  MA: { x: 912, y: 210 },
+  NH: { x: 919, y: 183 },
+  NJ: { x: 865, y: 249 },
+  CT: { x: 899, y: 226 },
+  ME: { x: 960, y: 170 },
+  FL: { x: 746, y: 460 },
+};
+
+const brightTier = new Set(
+  STATES
+    .filter((s) => s.installations.length > 0 || PIN_STATES.has(s.abbr))
+    .map((s) => s.abbr),
+);
+
+const stateLookup = Object.fromEntries(
+  STATES.map((s) => [s.abbr, s]),
+);
+---
+
+<!-- .map-scene wraps the sticky .map-root so we get a trailing hold band,
+     mirroring the treatment on the portal/solutions scene: the scene is
+     taller than the viewport, the map sticks at top 0 for the entire
+     scroll range, and an idle-driven snap anchors the user to the middle
+     of the scene so they land on the map cleanly rather than mid-scroll. -->
+<div id="locations-map" class="map-scene" data-map-scene>
+<section class="map-root" aria-label="Evium charging footprint map">
+  <!-- Seam-blend top vignette. The solutions scene above ends with a
+       matching bottom vignette fading to #020608; this one fades FROM
+       #020608 back into the map's own gradient, so the seam is one
+       continuous deep-dark with no visible dividing line. -->
+  <div class="map-top-vignette" aria-hidden="true"></div>
+  <!-- Seam-blend bottom vignette. Fades the map's deep-dark outer
+       gradient (#020608) INTO the FAQ's top color (#1A2F3A) so the
+       handoff feels like one continuous gradient rather than a hard
+       color change against the FAQ's old green divider line. Paired
+       with HomeFaqSection dropping its green border-top so the seam
+       reads as pure color flow. -->
+  <div class="map-bottom-vignette" aria-hidden="true"></div>
+  <div class="map-bloom map-bloom-green" aria-hidden="true"></div>
+  <div class="map-bloom map-bloom-teal"  aria-hidden="true"></div>
+  <div class="map-scan"                    aria-hidden="true"></div>
+  <div class="map-grain"                   aria-hidden="true"></div>
+
+  <header class="map-header">
+    <p class="eyebrow">
+      <span class="eyebrow-leaf" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="12" height="12">
+          <path d="M13 3C9 3 5 5 4 9c-.6 2.4.4 4.2 2 5 2-3 5-4 7-4-3 1-5 3-6 6 3 .6 5.2-.4 7-3 1.8-2.6 1.4-6.4 0-10z" fill="currentColor"/>
+        </svg>
+      </span>
+      Our footprint
+    </p>
+    <h1>
+      <span class="electrify">Electrifying</span>
+      the country,<br/>one property at a time.
+    </h1>
+    <p class="lede">
+      Every charger we deploy powers a cleaner tomorrow.
+      <span class="count">500+ stations</span> across
+      <span class="count">{STATES.length} states</span> and counting.
+      Sustainable transportation infrastructure, built one property at a time.
+      Click a state to explore our active projects.
+    </p>
+  </header>
+
+  <div class="map-stage">
+    <svg
+      class="map-svg"
+      viewBox={`0 0 ${mapData.viewBoxWidth} ${mapData.viewBoxHeight}`}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-labelledby="map-title"
+    >
+      <title id="map-title">United States map — Evium service area</title>
+
+      <defs>
+        <symbol id="pin-charger" viewBox="0 0 24 24">
+          <g fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+            <rect x="5.5" y="3" width="9" height="18" rx="1.2" fill="rgba(18,38,26,0.55)" />
+            <path d="M8 7h4M8 10h4" />
+            <path d="M14.5 9.5h2.5a1.5 1.5 0 0 1 1.5 1.5v3a1.2 1.2 0 0 0 1.2 1.2h0" />
+            <path d="M10 13l-1.2 3h2.2l-1 3" stroke="#2DC856" stroke-width="1.8" />
+          </g>
+        </symbol>
+        <filter id="state-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        {/* Sweep mask — a narrow white "slit" that slides left→right
+            across the viewBox. Applied to .layer-sweep via mask="" so
+            only the state borders within the slit are rendered at any
+            moment; the rest of the layer is masked out. SMIL <animate>
+            is used instead of CSS mask-image because CSS mask on SVG
+            <g> elements has inconsistent layout semantics — mask
+            percentages don't resolve on SVG groups in all browsers.
+            SMIL drives the x attribute directly, which is battle-
+            tested in every browser that renders SVG.
+
+            maskUnits="userSpaceOnUse" pins the coords to the SVG
+            viewBox (1000×600) so the slit width is predictable.
+            The slit starts fully off-screen left (x=-200) and ends
+            fully off-screen right (x=1000) so the sweep enters and
+            exits cleanly. Gradient stops on the slit soften the
+            leading + trailing edges so the light feels organic. */}
+        <linearGradient id="map-sweep-slit" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0"    stop-color="white" stop-opacity="0"    />
+          <stop offset="0.35" stop-color="white" stop-opacity="0.65" />
+          <stop offset="0.5"  stop-color="white" stop-opacity="1"    />
+          <stop offset="0.65" stop-color="white" stop-opacity="0.65" />
+          <stop offset="1"    stop-color="white" stop-opacity="0"    />
+        </linearGradient>
+        <mask id="map-sweep-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="600">
+          <rect x="-200" y="0" width="200" height="600" fill="url(#map-sweep-slit)">
+            {/* Ping-pong sweep: one full cycle carries the slit from
+                off-screen-left → off-screen-right → back to off-screen-
+                left over 15 s. The values list is interpolated linearly
+                between the three keyTimes, so alternate halves of the
+                cycle produce a west→east pass then an east→west pass.
+                Slightly slower than the previous 6 s one-way sweep so
+                the light reads as a deliberate pulse rather than a
+                loop. */}
+            <animate
+              attributeName="x"
+              values="-200; 1000; -200"
+              keyTimes="0; 0.5; 1"
+              dur="15s"
+              begin="1.2s"
+              repeatCount="indefinite"
+            />
+          </rect>
+        </mask>
+      </defs>
+
+      <g class="layer-ghost" aria-hidden="true">
+        {ghostPaths.map((s: any) => (
+          <path d={s.d} />
+        ))}
+      </g>
+      {/* Sweep layer — duplicates EVERY state border (ghost + active)
+          with a soft white stroke, then applies the SVG <mask> defined
+          above so only a narrow slit of the layer is visible at any
+          moment. The SMIL <animate> in the mask slides that slit
+          across the viewBox 0→1000, so the slit shows borders
+          progressively from west coast to east coast. The sweep runs
+          over active (green) state borders too, not just the ghost
+          silhouettes. pointer-events:none ensures the decorative
+          layer doesn't swallow clicks from the real .layer-active
+          states underneath. */}
+      <g class="layer-sweep" mask="url(#map-sweep-mask)" aria-hidden="true">
+        {ghostPaths.map((s: any) => (
+          <path d={s.d} />
+        ))}
+        {activePaths.map((s: any) => (
+          <path d={s.d} />
+        ))}
+      </g>
+
+      <g class="layer-active">
+        {activePaths.map((s: any) => {
+          const meta = stateLookup[s.abbr];
+          const hasInstalls = meta && meta.installations.length > 0;
+          const tier = brightTier.has(s.abbr) ? 'bright' : 'dim';
+          return (
+            <path
+              d={s.d}
+              class={`state state-${tier} ${hasInstalls ? 'has-installs' : 'coming-soon'}`}
+              data-abbr={s.abbr}
+              data-name={s.name}
+              data-slug={meta?.slug ?? ''}
+              data-install-count={meta?.installations.length ?? 0}
+              data-has-installs={hasInstalls ? 'true' : 'false'}
+              style={`--reveal-i: ${revealIndex[s.abbr] ?? 0};`}
+              tabindex={0}
+              role="link"
+              aria-label={hasInstalls
+                ? `${s.name} — ${meta.installations.length} installation${meta.installations.length === 1 ? '' : 's'}`
+                : `${s.name} — service area, installations coming soon`}
+            />
+          );
+        })}
+      </g>
+
+      <g class="layer-connectors" aria-hidden="true">
+        {activePaths.map((s: any) => {
+          const label = LABELS[s.abbr];
+          if (!label) return null;
+          const end = PIN_POSITIONS[s.abbr] ?? { x: s.cx, y: s.cy };
+          const o = connectorOrigin(label, end.x, end.y);
+          const dx = end.x - o.x;
+          const dy = end.y - o.y;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          const DOT_R = 2;
+          const GAP = 2;
+          const sx = o.x + (dx / len) * (DOT_R + GAP);
+          const sy = o.y + (dy / len) * (DOT_R + GAP);
+          const i = revealIndex[s.abbr] ?? 0;
+          return (
+            <>
+              <line
+                x1={sx}
+                y1={sy}
+                x2={end.x}
+                y2={end.y}
+                class="connector"
+                data-for={s.abbr}
+                pathLength="1"
+                style={`--reveal-i: ${i};`}
+              />
+              <circle
+                cx={o.x}
+                cy={o.y}
+                r={DOT_R}
+                class="connector-dot"
+                data-for={s.abbr}
+                style={`--reveal-i: ${i};`}
+              />
+            </>
+          );
+        })}
+      </g>
+
+      <g class="layer-pins" aria-hidden="true">
+        {activePaths.map((s: any) => {
+          if (!PIN_STATES.has(s.abbr)) return null;
+          const p = PIN_POSITIONS[s.abbr] ?? { x: s.cx, y: s.cy };
+          const size = PIN_SIZES[s.abbr] ?? { w: 20, h: 24 };
+          return (
+            <use
+              href="#pin-charger"
+              x={p.x - size.w / 2}
+              y={p.y - size.h / 2}
+              width={size.w}
+              height={size.h}
+              data-for={s.abbr}
+              style={`--reveal-i: ${revealIndex[s.abbr] ?? 0};`}
+            />
+          );
+        })}
+      </g>
+
+      <g class="layer-labels">
+        {activePaths.map((s: any) => {
+          const label = LABELS[s.abbr];
+          if (!label) return null;
+          return (
+            <text
+              x={label.x}
+              y={label.y}
+              class="state-label"
+              data-for={s.abbr}
+              text-anchor={label.anchor}
+              dominant-baseline="alphabetic"
+              style={`--reveal-i: ${revealIndex[s.abbr] ?? 0};`}
+            >{s.abbr}</text>
+          );
+        })}
+      </g>
+    </svg>
+
+    <div class="map-tooltip" role="status" aria-live="polite"></div>
+  </div>
+
+  {/* Footer stats row removed — the "500+ stations across 18 states"
+      info duplicates what's already in the .lede subtitle above and the
+      three-stat layout visually echoed the hero's own stats strip. With
+      it gone, the SVG flex-grows into that reclaimed vertical space. */}
+</section>
+</div>
+
+<style>
+  /* Scene wrapper — gives the sticky map a scroll range so the user
+     lingers on the map for ~2/3 of a viewport of extra scroll before
+     it releases. Mirrors the front/back HOLD pattern on the portal
+     scene. The spatial "pause" between solutions and map is provided
+     UPSTREAM by extending the pps-scene's back-hold — that keeps the
+     user anchored in solutions for longer without introducing a flat
+     dark band between the two scenes. */
+  .map-scene {
+    position: relative;
+    height: 170vh;
+  }
+  /* Sticky map. Content is laid out as a flex column so the SVG stage
+     flex-grows / flex-shrinks to consume whatever vertical space is
+     left after the header and footer. Without this, the SVG's native
+     aspect ratio made the map taller than the viewport and the footer
+     (stats row) got clipped. Padding is tighter than the old natural-
+     flow version so the header sits closer to the nav. */
+  .map-root {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    /* V2: no top navbar (the lefter nav is on the side), so the big
+       90px top reserve from V1 is wasted space. 56px gives the
+       eyebrow comfortable air below the viewport edge without
+       pushing text too low. Bottom padding trimmed to 0 so every
+       pixel of remaining vertical space flows into the SVG stage —
+       the southernmost state labels already have built-in safety
+       margin in their label coords (y≤555) so they won't touch the
+       viewport edge. */
+    padding: 56px 5vw 0;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(ellipse 85% 75% at 50% 45%, #0E1F22 0%, #071418 55%, #020608 100%);
+    color: #E6F0EC;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  /* Seam blend with the solutions scene above. The stage uses
+       radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%)
+     on a 100vh box — so its bottom edge is NOT uniform #081420; it
+     shows a mix-toned teal (~rgb(19,36,47) center → rgb(12,26,38)
+     corners) because the ellipse radii (90%/80%) are larger than the
+     box. To get a true seamless continuation we replicate that exact
+     gradient here, re-anchored so its ellipse CENTER lands 54% of the
+     stage's height ABOVE the vignette's top. With vignette height set
+     to 50vh and stage height 100vh, that works out to center-y = -108%
+     and y-radius = 160% of the vignette's own height. The first pixel
+     of the vignette therefore paints the exact color the stage would
+     have painted at its last pixel — pixel-perfect match, no line.
+     A soft mask fades the vignette out by its bottom so the map's own
+     darker radial takes over naturally below the header area. */
+  .map-top-vignette {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50vh;
+    background: radial-gradient(
+      ellipse 90% 160% at 50% -108%,
+      #2a4a5e 0%,
+      #1a2f3a 45%,
+      #081420 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 30%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 30%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Bottom seam — mirrors .map-top-vignette in reverse. Sits pinned
+     to the bottom edge of the sticky map-root; its upper region is
+     transparent (map's own radial shows through), lower region is
+     #1A2F3A matching the FAQ's top gradient stop. The mask fades it
+     in from transparent at the top to opaque at the bottom so the
+     handoff is a smooth gradient rather than a hard color step. */
+  .map-bottom-vignette {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 38vh;
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 47, 58, 0) 0%,
+      rgba(26, 47, 58, 0.45) 55%,
+      #1A2F3A 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .map-bloom {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(60px);
+    mix-blend-mode: screen;
+  }
+  .map-bloom-green {
+    left: -12%;
+    top: 42%;
+    width: 55%;
+    height: 70%;
+    background: radial-gradient(ellipse 55% 45% at 50% 50%,
+      rgba(45, 200, 86, 0.20) 0%,
+      rgba(45, 200, 86, 0.08) 42%,
+      rgba(0,0,0,0) 78%);
+  }
+  .map-bloom-teal {
+    right: -10%;
+    top: -8%;
+    width: 55%;
+    height: 60%;
+    background: radial-gradient(ellipse 55% 45% at 50% 50%,
+      rgba(80, 200, 220, 0.14) 0%,
+      rgba(30, 140, 170, 0.06) 45%,
+      rgba(0,0,0,0) 78%);
+  }
+  .map-scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 140% 50% at 15% 100%,
+        rgba(45, 200, 86, 0.06) 0%,
+        transparent 55%),
+      radial-gradient(ellipse 120% 40% at 85% 0%,
+        rgba(80, 200, 220, 0.05) 0%,
+        transparent 55%);
+    mix-blend-mode: screen;
+  }
+  .map-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 280px 280px;
+  }
+
+  .map-header {
+    position: relative;
+    z-index: 2;
+    /* V2 layout: lefter nav trims ~72px off the viewport, so the header
+       can use a wider max-width without feeling oversized. Bumped from
+       880 → 980 to better balance the map-stage's own wider cap. */
+    max-width: 980px;
+    margin: 0 auto;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .eyebrow {
+    /* V2: nudged up from 0.72 → 0.82rem for more confident presence
+       against the larger title and lede below it. */
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #2DC856;
+    /* Tightened further (10 → 6) — every pixel saved here becomes
+       extra height on the SVG stage below. */
+    margin: 0 0 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow-leaf {
+    display: inline-flex;
+    color: #2DC856;
+    opacity: 0.9;
+    transform: rotate(-18deg);
+  }
+
+  .electrify {
+    color: #2DC856;
+    display: inline-block;
+    text-shadow:
+      0 0 18px rgba(45, 200, 86, 0.35),
+      0 0 34px rgba(45, 200, 86, 0.18);
+    animation: electrify-pulse 3.2s ease-in-out infinite;
+  }
+  @keyframes electrify-pulse {
+    0%, 100% {
+      text-shadow:
+        0 0 18px rgba(45, 200, 86, 0.32),
+        0 0 32px rgba(45, 200, 86, 0.16);
+    }
+    50% {
+      text-shadow:
+        0 0 26px rgba(45, 200, 86, 0.55),
+        0 0 46px rgba(45, 200, 86, 0.28);
+    }
+  }
+
+  .map-header h1 {
+    /* V2: bumped up one tier (1.35–1.95 → 1.65–2.4) for more hero
+       presence. Still compact enough that the 100vh sticky container
+       keeps a generous SVG stage height below. */
+    font-size: clamp(1.65rem, 3.2vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: white;
+  }
+  .map-header .lede {
+    /* V2: 0.88 → 1rem with a slightly wider wrap cap so the subtitle
+       still lands on ~2 lines at desktop widths. */
+    font-size: 1rem;
+    line-height: 1.5;
+    color: rgba(230, 240, 236, 0.68);
+    margin: 0;
+    max-width: 820px;
+    margin-inline: auto;
+  }
+  .map-header .count {
+    color: #2DC856;
+    font-weight: 700;
+  }
+
+  .map-stage {
+    position: relative;
+    z-index: 1;
+    /* V2: lefter nav reserves ~72px on the left so the available
+       content width is narrower — bumping the cap from 1280 → 1600
+       lets the map breathe all the way across the usable viewport on
+       wide monitors instead of feeling centered-and-small. The
+       flex/min-height:0 rules below still keep the SVG height-bounded
+       by the 100vh sticky container, so the aspect ratio handles the
+       actual sizing without clipping. */
+    max-width: 1600px;
+    /* flex: 1 1 auto + min-height:0 lets the SVG shrink to fit the
+       remaining viewport height when the map is sticky (height:100vh).
+       The SVG preserves its 1000:600 aspect ratio via preserveAspectRatio
+       on the <svg> element, so if height is the binding constraint the
+       SVG becomes narrower (centered) rather than clipped. */
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-svg {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    overflow: visible;
+  }
+
+  .layer-ghost path {
+    fill: none;
+    stroke: rgba(200, 220, 220, 0.06);
+    stroke-width: 0.5;
+    pointer-events: none;
+  }
+
+  /* ── Traveling line of light across the map's border grid ────
+     .layer-sweep duplicates every state border (ghost + active) with
+     a soft white stroke. The SVG <mask id="map-sweep-mask"> (defined
+     inside the SVG's <defs>) restricts rendering to a narrow vertical
+     "slit" of the layer; that slit's x position is animated by SMIL
+     from -200 → 1000 in viewBox units, so the visible band sweeps
+     west→east across the whole map.
+
+     Why SVG <mask> + SMIL instead of CSS mask-image: CSS mask on SVG
+     <g> elements has inconsistent layout semantics — mask-size/
+     mask-position percentages don't resolve reliably on SVG groups
+     across browsers, which caused the previous implementation to
+     appear to work in one browser and not in another. SVG <mask>
+     with SMIL <animate> is a first-class SVG feature supported
+     everywhere SVG is rendered.
+
+     CSS here only styles the stroke appearance and gates opacity
+     via .is-revealed so the sweep fades in with the rest of the
+     reveal choreography. */
+  .layer-sweep path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.95);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.55));
+    pointer-events: none;
+  }
+  .layer-sweep {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 800ms ease-out 1s;
+  }
+  .map-root.is-revealed .layer-sweep {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .map-root.is-revealed .layer-sweep {
+      opacity: 0;
+    }
+  }
+
+  /* Replaced the SVG filter (feDropShadow) with a CSS drop-shadow —
+     GPU-accelerated and doesn't re-rasterize when children animate
+     opacity. That alone removed most of the reveal lag. */
+  .layer-active {
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.55));
+  }
+  .layer-active .state {
+    stroke: rgba(6, 14, 18, 0.65);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+    cursor: pointer;
+    transition:
+      fill 220ms ease,
+      opacity 220ms ease,
+      transform 220ms ease,
+      filter 220ms ease;
+    transform-origin: center;
+    transform-box: fill-box;
+    will-change: opacity, transform;
+  }
+  .layer-pins use     { will-change: opacity, transform; }
+  .layer-labels text  { will-change: opacity, transform; }
+  .layer-connectors line,
+  .layer-connectors circle { will-change: opacity; }
+  .layer-active .state.state-bright { fill: #2DC856; }
+  .layer-active .state.state-dim    { fill: rgba(45, 200, 86, 0.58); }
+  .layer-active .state.coming-soon  { fill: rgba(45, 200, 86, 0.32); }
+
+  .layer-active .state:focus-visible {
+    outline: none;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  .map-svg:has(.layer-active .state:hover) .layer-active .state,
+  .map-svg.is-focus-active .layer-active .state {
+    opacity: 0.28;
+  }
+  .map-svg:has(.layer-active .state:hover) .layer-active .state:hover,
+  .map-svg .layer-active .state.is-focused {
+    opacity: 1;
+    fill: #48E672;
+    filter: url(#state-glow) drop-shadow(0 0 18px rgba(45, 200, 86, 0.55));
+  }
+  .map-svg:has(.layer-active .state.coming-soon:hover) .layer-active .state.coming-soon:hover {
+    fill: rgba(230, 240, 236, 0.55);
+  }
+
+  .map-svg:has(.layer-active .state:hover) .layer-pins use,
+  .map-svg:has(.layer-active .state:hover) .layer-labels text,
+  .map-svg:has(.layer-active .state:hover) .layer-connectors line,
+  .map-svg:has(.layer-active .state:hover) .layer-connectors circle {
+    opacity: 0.35;
+    transition: opacity 180ms ease;
+  }
+  .map-svg:has(.layer-active .state:hover) .layer-pins use.is-match,
+  .map-svg:has(.layer-active .state:hover) .layer-labels text.is-match,
+  .map-svg:has(.layer-active .state:hover) .layer-connectors line.is-match,
+  .map-svg:has(.layer-active .state:hover) .layer-connectors circle.is-match {
+    opacity: 1;
+  }
+
+  .layer-connectors .connector {
+    stroke: rgba(255, 255, 255, 0.32);
+    stroke-width: 0.8;
+    fill: none;
+    transition: stroke 180ms ease, opacity 180ms ease;
+  }
+  .layer-connectors .connector-dot {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.32);
+    stroke-width: 0.8;
+    transition: opacity 180ms ease, r 180ms ease, stroke 180ms ease;
+  }
+
+  .layer-pins use {
+    transition: opacity 180ms ease, transform 180ms ease;
+    transform-origin: center;
+    transform-box: fill-box;
+    /* Pass pointer events through to the state path below so clicking
+       the charger icon (which sits visually on top of the state fill)
+       still counts as a click on the state → navigates to the state
+       page. Without this, clicks on the pin hit the <use> element
+       which has no handler and nothing happens. */
+    pointer-events: none;
+  }
+
+  .layer-labels .state-label {
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    fill: #2DC856;
+    paint-order: stroke fill;
+    stroke: rgba(6, 14, 18, 0.7);
+    stroke-width: 0.6;
+    transition: fill 180ms ease, opacity 180ms ease;
+    user-select: none;
+  }
+
+  .map-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -115%);
+    transition: opacity 140ms ease;
+    padding: 10px 14px;
+    background: rgba(10, 20, 26, 0.96);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(45, 200, 86, 0.35);
+    border-radius: 6px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.55);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #E6F0EC;
+    white-space: nowrap;
+  }
+  .map-tooltip.is-visible { opacity: 1; }
+  .map-tooltip .tip-name {
+    display: block;
+    font-weight: 700;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    color: white;
+    margin-bottom: 2px;
+  }
+  .map-tooltip .tip-count { color: #2DC856; font-weight: 600; }
+  .map-tooltip .tip-soft  { color: rgba(230, 240, 236, 0.55); font-weight: 500; }
+  .map-tooltip .tip-cta {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(230, 240, 236, 0.55);
+  }
+
+  /* (Footer stats styles removed — the footer element is no longer
+     rendered; the info lives in the .lede subtitle above the map.) */
+
+  @media (max-width: 760px) {
+    .map-root { padding: 60px 4vw 60px; }
+    .layer-labels .state-label { font-size: 22px; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ENTRY REVEAL — production-grade choreography
+     IntersectionObserver toggles .is-revealed on .map-root. Every layer
+     staggers west → east using the shared --reveal-i (0..17), so at any
+     given frame only a small handful of elements are animating. That's
+     what removes the "72 elements popping at once" jank of the previous
+     pass while also making the whole reveal feel deliberate, not rushed.
+
+     Timeline:
+       0.0–1.0s    ghost silhouette fades in (gentle, whole layer)
+       0.1–0.9s    header fades up
+       0.6–2.6s    active states fade + rise, staggered ~72ms west→east
+       1.5–3.2s    pins fade + rise, lightly staggered ~28ms
+       1.6–3.2s    connector lines fade in, staggered ~24ms
+       1.7–3.3s    connector dots fade in, staggered ~24ms
+       1.8–3.3s    state-abbr labels fade + rise, staggered ~24ms
+       3.0–3.8s    footer stats fade up
+
+     All animations use a single easeOutQuart curve and only opacity +
+     transform (compositor-only properties, no layout/paint during the
+     animation). The SVG drop-shadow filter was replaced with CSS
+     drop-shadow so the browser doesn't re-rasterize it every frame.
+     ═══════════════════════════════════════════════════════════════════════ */
+  :root {
+    --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Hidden starting states — only apply before .is-revealed so that if
+     JS fails, content still shows. */
+  .map-root:not(.is-revealed) .map-header,
+  .map-root:not(.is-revealed) .map-footer,
+  .map-root:not(.is-revealed) .layer-ghost path,
+  .map-root:not(.is-revealed) .layer-active .state,
+  .map-root:not(.is-revealed) .layer-connectors .connector,
+  .map-root:not(.is-revealed) .layer-connectors .connector-dot,
+  .map-root:not(.is-revealed) .layer-pins use,
+  .map-root:not(.is-revealed) .layer-labels text {
+    opacity: 0;
+  }
+  .map-root:not(.is-revealed) .layer-active .state { transform: translateY(5px); }
+  .map-root:not(.is-revealed) .layer-pins use     { transform: translateY(-3px); }
+  .map-root:not(.is-revealed) .layer-labels text  { transform: translateY(3px); }
+
+  /* Header + footer (whole-section fades, no stagger) */
+  .map-root.is-revealed .map-header {
+    animation: map-fade-up 800ms var(--reveal-ease) 100ms both;
+  }
+  .map-root.is-revealed .map-footer {
+    animation: map-fade-up 800ms var(--reveal-ease) 2950ms both;
+  }
+
+  /* Ghost silhouette — first layer, whole shape in one smooth pass */
+  .map-root.is-revealed .layer-ghost path {
+    animation: map-fade-in 1000ms ease-out 0ms both;
+  }
+
+  /* Active states — slow, deliberate sweep west → east */
+  .map-root.is-revealed .layer-active .state {
+    animation: state-in 620ms var(--reveal-ease) both;
+    animation-delay: calc(600ms + var(--reveal-i) * 72ms);
+  }
+  @keyframes state-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Pins — light stagger so they don't all slam in at once. Starts
+     partway through the states sweep so late-arriving states already
+     have their pins appearing, but no moment has 18 things popping. */
+  .map-root.is-revealed .layer-pins use {
+    animation: pin-in 560ms var(--reveal-ease) both;
+    animation-delay: calc(1500ms + var(--reveal-i) * 28ms);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes pin-in {
+    from { opacity: 0; transform: translateY(-3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Connector lines — same light stagger, slightly behind the pins */
+  .map-root.is-revealed .layer-connectors .connector {
+    animation: map-fade-in 520ms ease-out both;
+    animation-delay: calc(1600ms + var(--reveal-i) * 24ms);
+  }
+  /* Connector dots — land after the line they sit on starts drawing */
+  .map-root.is-revealed .layer-connectors .connector-dot {
+    animation: map-fade-in 420ms ease-out both;
+    animation-delay: calc(1720ms + var(--reveal-i) * 24ms);
+  }
+
+  /* Labels — last to arrive, so the pin has "settled" before its name
+     appears. Small translate for a subtle rise. */
+  .map-root.is-revealed .layer-labels text {
+    animation: label-in 520ms var(--reveal-ease) both;
+    animation-delay: calc(1800ms + var(--reveal-i) * 24ms);
+  }
+  @keyframes label-in {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes map-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes map-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .electrify { animation: none; }
+    .map-root.is-revealed .map-header,
+    .map-root.is-revealed .map-footer,
+    .map-root.is-revealed .layer-ghost path,
+    .map-root.is-revealed .layer-active .state,
+    .map-root.is-revealed .layer-connectors .connector,
+    .map-root.is-revealed .layer-connectors .connector-dot,
+    .map-root.is-revealed .layer-pins use,
+    .map-root.is-revealed .layer-labels text {
+      animation: none;
+    }
+    .map-root.is-revealed .layer-active .state { transform: none; opacity: 1; }
+    .map-root.is-revealed .layer-connectors .connector { stroke-dashoffset: 0; opacity: 1; }
+    .map-root.is-revealed .layer-pins use { transform: none; opacity: 1; }
+    .map-root.is-revealed .layer-labels text { opacity: 1; }
+    .map-root.is-revealed .layer-connectors .connector-dot { opacity: 1; }
+    .map-root.is-revealed .layer-ghost path { opacity: 1; }
+    .map-root.is-revealed .map-header,
+    .map-root.is-revealed .map-footer { opacity: 1; transform: none; }
+  }
+</style>
+
+<script>
+  (() => {
+    // Scope everything to .map-root so multiple instances (or other pages
+    // using shared classnames) don't cross-wire.
+    const roots = document.querySelectorAll<HTMLElement>('.map-root');
+    roots.forEach((root) => {
+      const svg = root.querySelector<SVGSVGElement>('.map-svg');
+      const tooltip = root.querySelector<HTMLElement>('.map-tooltip');
+      const stage = root.querySelector<HTMLElement>('.map-stage');
+      if (!svg || !tooltip || !stage) return;
+
+      const states = svg.querySelectorAll<SVGPathElement>('.layer-active .state');
+      const allPins = svg.querySelectorAll<SVGUseElement>('.layer-pins use');
+      const allLabels = svg.querySelectorAll<SVGTextElement>('.layer-labels text');
+      const allConnectors = svg.querySelectorAll<SVGLineElement>('.layer-connectors line');
+      const allConnectorDots = svg.querySelectorAll<SVGCircleElement>('.layer-connectors circle');
+
+      const markMatch = (abbr: string | null) => {
+        const set = (nodes: NodeListOf<Element>) => nodes.forEach((n) => {
+          if (abbr && n.getAttribute('data-for') === abbr) n.classList.add('is-match');
+          else n.classList.remove('is-match');
+        });
+        set(allPins);
+        set(allLabels);
+        set(allConnectors);
+        set(allConnectorDots);
+      };
+
+      const showTooltip = (evt: PointerEvent, state: SVGPathElement) => {
+        const name = state.getAttribute('data-name') || '';
+        const count = parseInt(state.getAttribute('data-install-count') || '0', 10);
+        const has = state.getAttribute('data-has-installs') === 'true';
+        const rect = stage.getBoundingClientRect();
+        const x = evt.clientX - rect.left;
+        const y = evt.clientY - rect.top;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+        tooltip.innerHTML = has
+          ? `<span class="tip-name">${name}</span>
+             <span class="tip-count">${count}</span>
+             <span class="tip-soft">installation${count === 1 ? '' : 's'} documented</span>
+             <span class="tip-cta">Click to view →</span>`
+          : `<span class="tip-name">${name}</span>
+             <span class="tip-soft">Active service area</span>
+             <span class="tip-cta">Click to view →</span>`;
+        tooltip.classList.add('is-visible');
+      };
+
+      const hideTooltip = () => tooltip.classList.remove('is-visible');
+
+      states.forEach((state) => {
+        const abbr = state.getAttribute('data-abbr');
+        state.addEventListener('pointerenter', (e) => {
+          markMatch(abbr);
+          showTooltip(e as PointerEvent, state);
+        });
+        state.addEventListener('pointermove', (e) => showTooltip(e as PointerEvent, state));
+        state.addEventListener('pointerleave', () => {
+          markMatch(null);
+          hideTooltip();
+        });
+        state.addEventListener('click', () => {
+          const slug = state.getAttribute('data-slug');
+          if (slug) window.location.href = `/locations/${slug}`;
+        });
+        state.addEventListener('keydown', (e) => {
+          if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
+            e.preventDefault();
+            (state as unknown as HTMLElement).click();
+          }
+        });
+      });
+
+      svg.addEventListener('pointerleave', hideTooltip);
+
+      // ─── Entry reveal ───────────────────────────────────────────
+      // Add .is-revealed once the section is partially on-screen.
+      // One-shot; we don't unreveal when it leaves the viewport.
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              root.classList.add('is-revealed');
+              io.disconnect();
+              break;
+            }
+          }
+        }, { threshold: 0.18, rootMargin: '0px 0px -10% 0px' });
+        io.observe(root);
+      } else {
+        root.classList.add('is-revealed');
+      }
+    });
+  })();
+
+  // ──────────────────────────────────────────────────────────────────
+  // SNAP-ON-IDLE for the map scene
+  //
+  // Same pattern as the portal-solutions scene: the map sits inside a
+  // .map-scene that's taller than the viewport, so the map stays sticky
+  // for about one extra viewport of scroll before releasing. If the
+  // user stops scrolling while inside the scene but not yet comfortably
+  // anchored, we gently pull them to the middle of the scene so they
+  // land on the map stably instead of mid-scroll.
+  //
+  // Kept quiet:
+  //   - waits SNAP_IDLE_MS after the last scroll before committing
+  //   - no-op inside generous edge zones so users just passing through
+  //     or already resting near the edges aren't nudged
+  //   - skipped when `prefers-reduced-motion` is set
+  //   - won't re-fire while a snap-driven smooth scroll is still settling
+  // ──────────────────────────────────────────────────────────────────
+  (() => {
+    const scene = document.querySelector<HTMLElement>('[data-map-scene]');
+    if (!scene) return;
+
+    const SNAP_IDLE_MS   = 900;
+    const SNAP_LOW_SKIP  = 0.10;  // first 10 % — user is arriving, don't interfere
+    const SNAP_HIGH_SKIP = 0.90;  // last 10 % — user is leaving, don't interfere
+    const SNAP_ANCHOR    = 0.50;  // middle of the scene = full map comfortably held
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let snapTimer: number | null = null;
+    let snapping = false;
+
+    function currentRaw() {
+      const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
+      const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
+      return { raw: scrolled / scrollable, scrollable, sceneTopAbs: window.scrollY + rect.top, rect };
+    }
+
+    function scheduleSnap() {
+      if (prefersReducedMotion.matches) return;
+      if (snapping) return;
+      if (snapTimer !== null) window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(runSnap, SNAP_IDLE_MS);
+    }
+
+    function runSnap() {
+      snapTimer = null;
+      if (snapping) return;
+      const { raw, scrollable, sceneTopAbs, rect } = currentRaw();
+      // Skip if we're comfortably near either edge already.
+      if (raw <= SNAP_LOW_SKIP || raw >= SNAP_HIGH_SKIP) return;
+      // Skip if the sticky band isn't actively pinned on screen right now.
+      if (rect.top > 1 || rect.bottom < window.innerHeight - 1) return;
+
+      const targetY = Math.round(sceneTopAbs + SNAP_ANCHOR * scrollable);
+      snapping = true;
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      window.setTimeout(() => { snapping = false; }, 1000);
+    }
+
+    window.addEventListener('scroll', scheduleSnap, { passive: true });
+    window.addEventListener('resize', scheduleSnap);
+  })();
+</script>

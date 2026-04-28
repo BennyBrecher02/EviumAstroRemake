@@ -1,0 +1,880 @@
+---
+/**
+ * HeaderV3SolidLefterMenu  (ARCHIVED — NOT IMPORTED ANYWHERE)
+ * ──────────────────────────────────────────────────────────
+ * This file used to be `HeaderV3.astro`. Solid-color vertical
+ * lefter ("navigation rail") with a small burger-battery icon
+ * + sideways "MENU" label at the top. Clicking the burger
+ * opened a full-screen mega-menu overlay that covered the
+ * viewport (except the lefter itself), with a 3×3 grid of
+ * category cards — each card had an icon badge, title,
+ * description, and sub-link list. The grid staggered in on
+ * open, cards closed the overlay on click, Escape/close-button/
+ * outside-click all worked to dismiss.
+ *
+ * Archived here (not imported by Layout or any page) after we
+ * pivoted to HeaderV4 — a Tesla-PRNDL-inspired rail that mimics
+ * the gear-selector touchscreen with an interactive dot grid +
+ * plan-view car icon + pointer-tracked physics. Keeping this
+ * file around in case the mega-menu-overlay pattern gets
+ * resurrected later.
+ *
+ * Original rationale + context preserved below for reference.
+ * ──────────────────────────────────────────────────────────
+ * Previously: rendered EXCLUSIVELY by /home-v2 (via Layout's
+ * `headerVariant` prop). The nav was a skinny vertical strip
+ * pinned to the left edge — solid dark teal, no battery outline,
+ * no cells. Inside the lefter, at the top, sat a single button:
+ * the portrait burger-battery icon (same glyph as the mobile-
+ * battery on the production Header) plus the word "MENU" in
+ * sideways type immediately below it.
+ *
+ * Clicking that button opens a FULL-SCREEN menu overlay that
+ * covers every pixel of the viewport EXCEPT the lefter itself.
+ * The overlay is a dark-gradient panel with a 3×3 grid of
+ * category cards (each category has an icon, title, short
+ * description, and its sub-links), a close X in the top-right,
+ * and a footer CTA. The cards stagger-in on open. Dev-only
+ * cards (Home v2 / Testing / Other) are hidden unless
+ * `body.dev-mode-off` is OFF — same contract as every other
+ * nav variant.
+ *
+ * Closing: click the X, click the burger again, or press Escape.
+ *
+ * This component is archived by design — once we pick a final
+ * nav direction, it either ships, gets promoted into the
+ * production Header, or moves into the HeaderV*.astro graveyard
+ * with the others. Keeping it alongside the rest for parity.
+ */
+
+const currentPath = Astro.url.pathname;
+
+/**
+ * Menu categories — same data the production Header uses, with
+ * descriptive subtitles + chosen icons baked in.  Dev-only items
+ * carry `devOnly: true` so CSS can hide them when dev-mode is off.
+ */
+type Cat = {
+  label: string;
+  href: string;
+  icon: 'lightbulb' | 'hammer' | 'bolt' | 'article' | 'question' | 'envelope' | 'home-v2' | 'testing' | 'other';
+  desc: string;
+  devOnly?: boolean;
+  sub: Array<{ label: string; href: string }>;
+};
+
+const categories: Cat[] = [
+  {
+    label: 'Solutions',
+    href:  '/#solutions',
+    icon:  'lightbulb',
+    desc:  'Turnkey EV charging tailored to every property type.',
+    sub: [
+      { label: 'Hardware',  href: '/products'                   },
+      { label: 'Software',  href: '/solutions/software'         },
+      { label: 'Services',  href: '/services'                   },
+      { label: 'Profits',   href: '/solutions/generate-profits' },
+    ],
+  },
+  {
+    label: 'Services',
+    href:  '/services',
+    icon:  'hammer',
+    desc:  'Industries we serve — from multifamily to highway fast charging.',
+    sub: [
+      { label: 'Multifamily Real Estate', href: '/solutions/multifamily'          },
+      { label: 'Fleets',                  href: '/solutions/fleets'               },
+      { label: 'Highway Fast Charging',   href: '/solutions/highway-fast-charging'},
+      { label: 'Commercial',              href: '/solutions/commercial'           },
+      { label: 'Retail',                  href: '/solutions/retail'               },
+      { label: 'Parking',                 href: '/solutions/parking'              },
+      { label: 'Medical',                 href: '/solutions/medical'              },
+    ],
+  },
+  {
+    label: 'Products',
+    href:  '/products',
+    icon:  'bolt',
+    desc:  'Level 2 and DC fast charging hardware for every site.',
+    sub: [
+      { label: 'Level 2', href: '/products#panel-l2' },
+      { label: 'Level 3', href: '/products#panel-l3' },
+    ],
+  },
+  {
+    label: 'Blog',
+    href:  '/blog',
+    icon:  'article',
+    desc:  'Case studies, company news, and industry insight.',
+    sub: [
+      { label: 'All Posts',    href: '/blog'              },
+      { label: 'News',         href: '/blog/news'         },
+      { label: 'Case Studies', href: '/blog/case-studies' },
+      { label: 'Newsletter',   href: '/blog/newsletter'   },
+    ],
+  },
+  {
+    label: 'How It Works',
+    href:  '/how-it-works',
+    icon:  'question',
+    desc:  'From site assessment to ongoing revenue share, explained.',
+    sub: [
+      { label: 'Overview',    href: '/how-it-works#overview'  },
+      { label: 'Our Process', href: '/how-it-works#process'   },
+      { label: 'Financing',   href: '/how-it-works#financing' },
+      { label: 'Rebates',     href: '/how-it-works#rebates'   },
+      { label: 'FAQ',         href: '/how-it-works#faq'       },
+    ],
+  },
+  {
+    label: 'Contact',
+    href:  '/contact',
+    icon:  'envelope',
+    desc:  'Schedule a call, reach support, or join the referral program.',
+    sub: [
+      { label: 'Schedule a Call',  href: '/contact/schedule' },
+      { label: 'Support',          href: '/contact/support'  },
+      { label: 'Referral Program', href: '/contact/referral' },
+    ],
+  },
+  {
+    /* Site v2 — dropdown index of every v2-sandbox page. Card
+       header still routes to /home-v2 so a direct click lands on
+       the flagship v2 page, but the sub-link list surfaces every
+       v2 variant (Home v2, Products v2, …) as its own entry. */
+    label: 'Site v2',
+    href:  '/home-v2',
+    icon:  'home-v2',
+    desc:  'Dev-only sandbox pages running the PRNDL-lefter layout.',
+    devOnly: true,
+    sub: [
+      { label: 'Home v2',     href: '/home-v2'     },
+      { label: 'Products v2', href: '/products-v2' },
+    ],
+  },
+  {
+    label: 'Testing',
+    href:  '/testing',
+    icon:  'testing',
+    desc:  'Sandbox pages and WIP experiments.',
+    devOnly: true,
+    sub: [
+      { label: 'Mobile Blogs',         href: '/testing/mobile-blogs'   },
+      { label: 'Product Portal',       href: '/testing/product-portal' },
+      { label: 'Software (no footer)', href: '/testing/software'       },
+      { label: 'Old footer concept',   href: '/testing/footer-concept' },
+    ],
+  },
+  {
+    label: 'Other',
+    href:  '#',
+    icon:  'other',
+    desc:  'Apply / transact surfaces and dev shortcuts.',
+    devOnly: true,
+    sub: [
+      { label: 'Get a Quote',              href: '/contact/quote'                  },
+      { label: 'Electrician Partners',     href: '/solutions/electrician-partners' },
+      { label: 'Old Saved Sections',       href: '/ai-bs/old-saved-sections'       },
+      { label: 'Old Electrician Partners', href: '/ai-bs/old-electrician-partners' },
+    ],
+  },
+];
+---
+
+<!-- ═════════════════════════════════════════════════════════════════
+     LEFTER v3 — the thin dark strip pinned to the left edge.
+     ═════════════════════════════════════════════════════════════════ -->
+<aside class="lefter-v3" aria-label="Primary navigation">
+  <button
+    type="button"
+    class="lefter-v3-menu-btn"
+    data-menu-toggle
+    aria-controls="site-menu-overlay"
+    aria-expanded="false"
+    aria-label="Open navigation menu"
+  >
+    <!-- Burger-battery icon, same glyph family as the mobile nav
+         on the production Header. Portrait battery (nub top, body
+         below) with three horizontal divider slots reading as
+         burger lines. -->
+    <svg class="lefter-v3-battery" viewBox="0 0 28 44" aria-hidden="true">
+      <rect class="v3b-nub"     x="10"  y="0"  width="8"   height="4"   rx="1"/>
+      <rect class="v3b-body"    x="2"   y="5"  width="24"  height="37"  rx="2.5"/>
+      <line class="v3b-divider" x1="6"  y1="14"   x2="22" y2="14"/>
+      <line class="v3b-divider" x1="6"  y1="23.5" x2="22" y2="23.5"/>
+      <line class="v3b-divider" x1="6"  y1="33"   x2="22" y2="33"/>
+    </svg>
+    <span class="lefter-v3-menu-label">Menu</span>
+  </button>
+</aside>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     FULL-SCREEN MENU OVERLAY — covers the viewport RIGHT of the
+     lefter when opened. Left edge pinned to `var(--lefter-width)`
+     so the lefter's burger stays visible + clickable (for toggling
+     the menu shut). Hidden by default; `.is-open` turns it on.
+     ═════════════════════════════════════════════════════════════════ -->
+<div
+  id="site-menu-overlay"
+  class="site-menu-overlay"
+  data-menu-overlay
+  aria-hidden="true"
+  aria-label="Main menu"
+  role="dialog"
+  aria-modal="true"
+>
+  <button
+    type="button"
+    class="site-menu-close"
+    data-menu-close
+    aria-label="Close menu"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <div class="site-menu-inner">
+    <header class="site-menu-heading">
+      <a href="/" class="site-menu-brand" aria-label="Evium home">
+        <img src="/images/logos/evium/logo.webp" alt="Evium Charging" />
+      </a>
+      <p class="site-menu-tagline">Electrifying the future — one property at a time.</p>
+    </header>
+
+    <nav class="site-menu-grid" aria-label="Main navigation">
+      {categories.map((cat, i) => (
+        <!--
+          Card is a DIV, not an <a> — having an <a> wrapper
+          containing sub-link <a>s is invalid HTML (nested anchors)
+          and browsers silently break the DOM to "fix" it, which
+          was displacing sub-lists and the card-arrow into other
+          cells. Card is now keyboard-activatable via tabindex + a
+          click handler in the <script> below.
+        -->
+        <div
+          class:list={[
+            'site-menu-card',
+            cat.devOnly ? 'is-dev-only' : '',
+            currentPath.startsWith(cat.href) && cat.href !== '/' && cat.href !== '#' ? 'is-active' : '',
+          ]}
+          style={`--card-i: ${i};`}
+          data-menu-card
+          data-href={cat.href}
+          role="link"
+          tabindex="0"
+          aria-label={`${cat.label} — ${cat.desc}`}
+        >
+          <div class="site-menu-card-head">
+            <span class="site-menu-card-icon" aria-hidden="true">
+            {cat.icon === 'lightbulb' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+                <path d="M8 14a6 6 0 1 1 8 0c-.7.7-1 1.5-1 2.4V18H9v-1.6c0-.9-.3-1.7-1-2.4z"/>
+              </svg>
+            )}
+            {cat.icon === 'hammer' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                {/* Lucide hammer — claw-headed construction hammer, handle diagonal. */}
+                <path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/>
+                <path d="m18 15 4-4"/>
+                <path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/>
+              </svg>
+            )}
+            {cat.icon === 'bolt' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+              </svg>
+            )}
+            {cat.icon === 'article' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="1.5"/>
+                <line x1="8" y1="9"  x2="16" y2="9"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+                <line x1="8" y1="17" x2="13" y2="17"/>
+              </svg>
+            )}
+            {cat.icon === 'question' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M9.3 9.3a2.7 2.7 0 1 1 3.9 3.7c-.8.6-1.2 1-1.2 2"/>
+                <circle cx="12" cy="17.5" r="0.5" fill="currentColor"/>
+              </svg>
+            )}
+            {cat.icon === 'envelope' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="1.5"/>
+                <path d="M3 7l9 7 9-7"/>
+              </svg>
+            )}
+            {cat.icon === 'home-v2' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V11z"/>
+                <path d="M16 16h3"/>
+              </svg>
+            )}
+            {cat.icon === 'testing' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 2v5l-5.2 9a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 7V2"/>
+                <path d="M9 2h6"/>
+              </svg>
+            )}
+            {cat.icon === 'other' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6"  cy="12" r="2"/>
+                <circle cx="12" cy="12" r="2"/>
+                <circle cx="18" cy="12" r="2"/>
+              </svg>
+            )}
+            </span>
+            <h3 class="site-menu-card-title">{cat.label}</h3>
+          </div>
+
+          <p class="site-menu-card-desc">{cat.desc}</p>
+
+          {cat.sub.length > 0 && (
+            <ul class="site-menu-card-sub" role="list">
+              {cat.sub.map((sub) => (
+                <li class="site-menu-card-sub-item">
+                  <a href={sub.href} class="site-menu-card-sublink">
+                    <svg class="site-menu-card-sub-bullet" viewBox="0 0 12 12" aria-hidden="true">
+                      <path d="M3 6h6M7 3l2 3-2 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                    <span>{sub.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </nav>
+
+    <footer class="site-menu-footer">
+      <a href="/contact/quote" class="site-menu-cta">
+        <span>Request a Quote</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+      <span class="site-menu-footer-sep" aria-hidden="true"></span>
+      <a href="mailto:contact@eviumcharging.com" class="site-menu-footer-link">contact@eviumcharging.com</a>
+      <span class="site-menu-footer-sep" aria-hidden="true"></span>
+      <a href="tel:+19499452000" class="site-menu-footer-link">(949) 945-2000</a>
+    </footer>
+  </div>
+</div>
+
+<style>
+  /* Lefter width exposed for Layout's body padding-left rule. */
+  :root {
+    --lefter-width: 80px;
+  }
+  @media (max-width: 860px) {
+    :root { --lefter-width: 64px; }
+  }
+
+  /* ─── Lefter v3 ──────────────────────────────────────────
+     Solid dark strip, no border, no battery decoration. Just
+     a clean vertical slab with a single button centered near
+     the top. The gentle right-edge gradient is the only nod
+     toward dimensionality — keeps it from looking flat-cut. */
+  .lefter-v3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--lefter-width);
+    z-index: 50;
+
+    background:
+      linear-gradient(180deg, #0d1a22 0%, #0f1f2a 100%);
+    box-shadow:
+      2px 0 0 rgba(45, 200, 86, 0.18),
+      6px 0 32px rgba(0, 0, 0, 0.35);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 22px;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  /* ─── Menu button (burger battery + "MENU" sideways) ─── */
+  .lefter-v3-menu-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0 18px;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.82);
+    transition: color 0.2s ease;
+  }
+  .lefter-v3-menu-btn:hover,
+  .lefter-v3-menu-btn[aria-expanded="true"] {
+    color: #2DC856;
+  }
+  .lefter-v3-menu-btn:focus-visible {
+    outline: 2px solid rgba(45, 200, 86, 0.7);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  /* Burger battery SVG — sized smaller so the MENU label can
+     claim more of the visual weight in the lefter. */
+  .lefter-v3-battery {
+    width: 24px;
+    height: auto;
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+  }
+  .lefter-v3-menu-btn:hover .lefter-v3-battery,
+  .lefter-v3-menu-btn[aria-expanded="true"] .lefter-v3-battery {
+    transform: scale(1.08);
+  }
+  .v3b-nub  { fill: currentColor; }
+  .v3b-body {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .v3b-divider {
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /* Sideways MENU label — same technique as the lefter labels
+     we used in HeaderV2BatteryLefter: writing-mode gives it a
+     vertical layout box (no clipping), then rotate(180deg)
+     flips the reading direction to bottom-to-top so the reader
+     tilts their head LEFT (natural for a left-mounted nav). */
+  .lefter-v3-menu-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    text-transform: uppercase;
+    font-size: 0.96rem;
+    font-weight: 900;
+    letter-spacing: 0.32em;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* ─── Full-screen menu overlay ─────────────────────────── */
+  .site-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: var(--lefter-width);
+    right: 0;
+    bottom: 0;
+    z-index: 40; /* under the lefter itself so the lefter stays usable */
+
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(45, 200, 86, 0.12) 0%, transparent 60%),
+      linear-gradient(150deg, #0b161d 0%, #0e1f28 40%, #0d1a22 100%);
+
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.24s ease,
+      visibility 0s linear 0.24s;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .site-menu-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.24s ease,
+      visibility 0s linear 0s;
+  }
+
+  /* Close button */
+  .site-menu-close {
+    position: absolute;
+    top: clamp(18px, 2vw, 28px);
+    right: clamp(18px, 2vw, 28px);
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    z-index: 2;
+  }
+  .site-menu-close:hover {
+    background: rgba(45, 200, 86, 0.18);
+    color: #2DC856;
+    transform: rotate(90deg);
+  }
+  .site-menu-close svg { width: 18px; height: 18px; display: block; }
+
+  .site-menu-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(48px, 5vw, 80px) clamp(32px, 4vw, 72px);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Heading */
+  .site-menu-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: clamp(28px, 3.4vw, 44px);
+  }
+  .site-menu-brand { display: inline-block; line-height: 0; }
+  .site-menu-brand img {
+    height: 34px;
+    width: auto;
+    display: block;
+    opacity: 0.95;
+    transition: opacity 0.2s ease;
+  }
+  .site-menu-brand:hover img { opacity: 1; }
+  .site-menu-tagline {
+    margin: 0;
+    padding-left: 18px;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.01em;
+    max-width: 42ch;
+  }
+
+  /* ─── Category grid ──────────────────────────────────── */
+  .site-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 1.6vw, 22px);
+    /* Equal-height rows — every card in a row matches the tallest,
+       so the grid reads as a clean 3×N layout instead of a ragged
+       masonry even when sub-link counts vary (2 for Products,
+       7 for Services, etc.). */
+    grid-auto-rows: 1fr;
+    flex: 1;
+  }
+
+  /* Each card — a clickable <div> (role=link). Uses flex-column
+     so the head, description, and sub-link list stack cleanly and
+     the whole card stretches to row height. */
+  .site-menu-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 2vw, 26px);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+
+    /* Stagger entrance: the `.is-open` on the overlay triggers a
+       transition-delay based on --card-i so cards fan in one after
+       another instead of all at once. */
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .site-menu-overlay.is-open .site-menu-card {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.06s + var(--card-i, 0) * 0.04s);
+  }
+
+  .site-menu-card:hover,
+  .site-menu-card:focus-visible {
+    background: rgba(45, 200, 86, 0.06);
+    border-color: rgba(45, 200, 86, 0.38);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    outline: none;
+    transform: translateY(-2px);
+  }
+  .site-menu-card.is-active {
+    background: rgba(45, 200, 86, 0.08);
+    border-color: rgba(45, 200, 86, 0.5);
+  }
+
+  /* Dev-only cards hidden when dev-mode is off */
+  body.dev-mode-off .site-menu-card.is-dev-only { display: none; }
+
+  /* Head row — icon + title inline, tight spacing so the card's
+     identity reads at a glance without scanning vertically. */
+  .site-menu-card-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+
+  /* Icon badge */
+  .site-menu-card-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(45, 200, 86, 0.13);
+    color: #2DC856;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .site-menu-card:hover .site-menu-card-icon,
+  .site-menu-card:focus-visible .site-menu-card-icon {
+    background: #2DC856;
+    color: #0d1a22;
+    transform: scale(1.06);
+  }
+  .site-menu-card-icon svg { width: 22px; height: 22px; display: block; }
+
+  .site-menu-card-title {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.25vw, 1.25rem);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  /* Description */
+  .site-menu-card-desc {
+    margin: 0 0 14px;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.64);
+  }
+
+  /* Sub-link list — each sub is a pill-row with an arrow bullet
+     that slides right on hover. Flex-grow: 1 on the list pushes
+     everything above it to the top, so short cards (Products,
+     Contact) don't look top-heavy — the card's bottom empty space
+     becomes padding under the last sub instead of empty top
+     content. */
+  .site-menu-card-sub {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-grow: 1;
+  }
+  .site-menu-card-sub-item { margin: 0; }
+  .site-menu-card-sublink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color 0.15s ease, transform 0.18s ease, background 0.15s ease;
+  }
+  .site-menu-card-sublink:hover,
+  .site-menu-card-sublink:focus-visible {
+    color: #2DC856;
+    outline: none;
+    transform: translateX(3px);
+  }
+  .site-menu-card-sub-bullet {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    color: rgba(45, 200, 86, 0.55);
+    transition: color 0.15s ease, transform 0.2s ease;
+  }
+  .site-menu-card-sublink:hover .site-menu-card-sub-bullet,
+  .site-menu-card-sublink:focus-visible .site-menu-card-sub-bullet {
+    color: #2DC856;
+    transform: translateX(1px);
+  }
+
+  /* ─── Footer ─────────────────────────────────────────── */
+  .site-menu-footer {
+    margin-top: clamp(28px, 3.4vw, 44px);
+    padding-top: clamp(20px, 2vw, 28px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 2vw, 26px);
+    flex-wrap: wrap;
+  }
+  .site-menu-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 22px;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: #2DC856;
+    color: #0d1a22;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 8px 22px rgba(45, 200, 86, 0.32);
+    transition: background 0.18s ease, transform 0.18s ease, gap 0.2s ease, box-shadow 0.2s ease;
+  }
+  .site-menu-cta:hover {
+    background: #36e464;
+    transform: translateY(-1px);
+    gap: 12px;
+    box-shadow: 0 12px 28px rgba(45, 200, 86, 0.42);
+  }
+  .site-menu-cta svg { width: 14px; height: 14px; display: block; }
+
+  .site-menu-footer-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    flex-shrink: 0;
+  }
+  .site-menu-footer-link {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.66);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .site-menu-footer-link:hover { color: #2DC856; }
+
+  /* ─── Responsive ──────────────────────────────────────── */
+  @media (max-width: 1000px) {
+    .site-menu-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .site-menu-grid { grid-template-columns: 1fr; }
+    .site-menu-heading { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .site-menu-tagline { padding-left: 0; border-left: 0; }
+    .lefter-v3-battery { width: 24px; }
+    .lefter-v3-menu-label { font-size: 0.68rem; letter-spacing: 0.24em; }
+  }
+
+  /* Prevent the content underneath from scrolling while the
+     menu is open — the overlay itself scrolls if its content
+     exceeds the viewport height. */
+  :global(body.menu-open) { overflow: hidden; }
+</style>
+
+<script>
+  (() => {
+    const toggle  = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const overlay = document.querySelector<HTMLElement>('[data-menu-overlay]');
+    const closeEl = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+    if (!toggle || !overlay) return;
+
+    let lastFocused: Element | null = null;
+
+    function openMenu() {
+      lastFocused = document.activeElement;
+      overlay!.classList.add('is-open');
+      overlay!.setAttribute('aria-hidden', 'false');
+      toggle!.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('menu-open');
+      // Focus the close button on open for keyboard users
+      setTimeout(() => closeEl?.focus(), 10);
+    }
+
+    function closeMenu() {
+      overlay!.classList.remove('is-open');
+      overlay!.setAttribute('aria-hidden', 'true');
+      toggle!.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('menu-open');
+      // Return focus to the toggle (the burger button)
+      (lastFocused as HTMLElement)?.focus?.();
+    }
+
+    function isOpen() {
+      return overlay!.classList.contains('is-open');
+    }
+
+    // Toggle button: open if closed, close if open
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isOpen()) closeMenu();
+      else openMenu();
+    });
+
+    // Close button
+    closeEl?.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeMenu();
+    });
+
+    // Escape closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen()) {
+        e.preventDefault();
+        closeMenu();
+      }
+    });
+
+    /* Card clicks — cards are DIVs (role=link) because nesting
+       real <a> sub-links inside an <a> card is invalid HTML and
+       browsers break the DOM to "fix" it. Instead: clicking the
+       card's background navigates to its data-href; clicking a
+       sub-link lets the sub-link's own <a> handle navigation.
+       Keyboard: Enter on a focused card triggers the same nav. */
+    overlay.querySelectorAll<HTMLElement>('[data-menu-card]').forEach((card) => {
+      const go = () => {
+        const href = card.getAttribute('data-href');
+        if (!href || href === '#') { closeMenu(); return; }
+        closeMenu();
+        // Delay nav slightly so the close transition starts visibly
+        // before the new page loads. Keeps the exit feeling intentional.
+        setTimeout(() => { window.location.href = href; }, 60);
+      };
+
+      card.addEventListener('click', (e) => {
+        // Let real sub-links handle themselves
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('.site-menu-card-sublink')) return;
+        e.preventDefault();
+        go();
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('.site-menu-card-sublink')) return;
+        e.preventDefault();
+        go();
+      });
+    });
+
+    /* Close the overlay when a sub-link is clicked too — user is
+       navigating away, the menu's purpose is served. */
+    overlay.querySelectorAll<HTMLAnchorElement>('.site-menu-card-sublink').forEach((a) => {
+      a.addEventListener('click', () => {
+        requestAnimationFrame(() => closeMenu());
+      });
+    });
+  })();
+</script>

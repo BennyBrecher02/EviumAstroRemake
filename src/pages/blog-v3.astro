@@ -1,0 +1,1165 @@
+---
+/**
+ * /blog-v3 — single-door desktop blog with a city-strip road network.
+ *
+ * Layout (left → right within the page content area, after the
+ * lefter PRNDL nav):
+ *   ┌───────────┬───────────┬───────────┬───────────────────┐
+ *   │  Garage   │ Blog rail │  Right    │   City strip       │
+ *   │  hero     │ (cards    │  wall     │   (intersection,   │
+ *   │  on left  │  going    │  shoulder │   buildings,       │
+ *   │           │  down)    │           │   overpass, …)     │
+ *   └───────────┴───────────┴───────────┴───────────────────┘
+ *
+ * The `--garage-w` CSS variable + `--door-pct-l` / `--door-pct-w`
+ * percentages anchor everything: the door slot in the hero, the
+ * blog rail underneath, and the side shoulders all stay column-
+ * aligned regardless of viewport size.
+ *
+ * The right column is a "city strip" inspired by the Crossroads
+ * codepen at gitignore-artifacts/codepen/Crossroads/croosroads.html.
+ * Hero portion has a single 4-way intersection with city blocks,
+ * traffic lights, zebra crossings, lane markings, and 8 cars
+ * obeying a 9-second light cycle. Blog portion continues the NS
+ * road downward, hosts a SECOND intersection plus an overpass
+ * (horizontal road on a bridge with a shadow under the NS road
+ * portion), more buildings, and another set of cars on their own
+ * light cycle (offset so the two intersections don't sync).
+ *
+ * Header: HeaderV4 (lefter nav). Body class: `page-blog-v3`.
+ */
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const categories = [
+  { id: 'cost-demand',        label: 'Cost & Demand',      color: '#5BC8DC' },
+  { id: 'market-shifts',      label: 'Market Shifts',      color: '#E8C030' },
+  { id: 'charging-tech',      label: 'Charging Tech',      color: '#E07428' },
+  { id: 'vehicle-efficiency', label: 'Vehicle Efficiency', color: '#D82020' },
+];
+
+const posts = [
+  { slug: 'why-ev-charging-pays-multifamily', title: 'Why EV Charging Pays for Itself in Multifamily Properties', category: 'cost-demand',        date: 'Apr 2026', excerpt: 'A zero-cost amenity that generates passive income, attracts tenants, and future-proofs your asset.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'real-cost-of-doing-nothing',       title: 'The Real Cost of Not Offering EV Charging',                category: 'cost-demand',        date: 'Mar 2026', excerpt: 'Properties without charging are already losing lease negotiations. The calculus shifts every month.',   readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'revenue-projections-ev-charging',  title: 'What Does an EV Charger Actually Earn?',                   category: 'cost-demand',        date: 'Mar 2026', excerpt: 'From $900 to $2,100 per charger per month. Utilization is the variable. Here is what drives it.',     readTime: '6 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ev-adoption-accelerating',         title: 'EV Adoption Is Accelerating — What Property Owners Need to Know', category: 'market-shifts', date: 'Apr 2026', excerpt: 'Regulatory tailwinds, NEVI funding, and shifting buyer demographics are converging fast.',             readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'nevi-funding-reshaping-highway-charging', title: 'How NEVI Funding Is Reshaping Highway Charging Economics', category: 'market-shifts', date: 'Feb 2026', excerpt: 'Federal dollars are eliminating the cost barrier for site hosts.',                                  readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'level2-vs-dcfast-explained',       title: 'Level 2 vs DC Fast Charging: Which Is Right for Your Property?', category: 'charging-tech', date: 'Apr 2026', excerpt: 'Dwell time is the deciding factor. A clear framework for every property type.',                       readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ocpp-open-standards-matter',       title: 'OCPP: Why Open Standards Protect Your Charging Investment', category: 'charging-tech',       date: 'Mar 2026', excerpt: 'Vendor lock-in is a real risk in EV infrastructure. OCPP 1.6 compliance is your insurance policy.',     readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'ev-infrastructure-next-five-years', title: 'EV Charging Infrastructure: What to Expect in the Next Five Years', category: 'charging-tech', date: 'Jan 2026', excerpt: 'Smart charging, V2G, and grid integration are reshaping infrastructure investment decisions.',          readTime: '4 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'how-modern-evs-change-charging-behavior', title: 'How Longer EV Ranges Are Changing When Drivers Charge', category: 'vehicle-efficiency', date: 'Apr 2026', excerpt: 'More range means less frequent but longer sessions — and that changes how smart operators should plan.', readTime: '5 min', image: '/images/logos/evium/logo.webp' },
+  { slug: 'battery-tech-trends-infrastructure', title: 'Battery Tech Trends Every Infrastructure Investor Should Watch', category: 'vehicle-efficiency', date: 'Feb 2026', excerpt: 'Solid-state, faster charge acceptance, V2G — the battery roadmap has direct implications for how you build today.', readTime: '6 min', image: '/images/logos/evium/logo.webp' },
+  { slug: '', title: 'More market coverage on the way',           category: 'market-shifts',      date: 'Coming soon', excerpt: 'More analysis on regulatory changes, NEVI rollout, and EV adoption.',                              readTime: null, image: '/images/logos/evium/logo.webp', placeholder: true },
+  { slug: '', title: 'More vehicle efficiency coverage on the way', category: 'vehicle-efficiency', date: 'Coming soon', excerpt: 'Battery chemistry, thermal management, and how fast-improving specs change the calculus.',           readTime: null, image: '/images/logos/evium/logo.webp', placeholder: true },
+];
+
+/* ─── City-strip geometry ─────────────────────────────────────
+   The right column of the page (the "city strip") is sized to
+   573 × N px by the surrounding grid. NS road runs full-height
+   centred on x=287; EW roads appear at intersections only.
+
+   Coordinate system used by the JS car loop:
+     x: 0 to 573  (strip width)
+     y: 0 to strip height (1080 in hero, 2125 in blog)
+
+   Lane offsets from a road's centre line (in px), repeated in
+   four spots:
+     RL/BT outer = -57   (further from centre line)
+     RL/BT inner = -23
+     LR/TB inner = +23
+     LR/TB outer = +57
+   Cars are 36×22 (LR/RL) or 22×36 (TB/BT); the lane numbers
+   above point at the CAR'S CENTRE → subtract 11 for the
+   transform's top-left corner.
+
+   Stop-line padding before the intersection is 5 px, matching
+   the codepen.                                                  */
+const heroCars = [
+  /* hero intersection: NS road centred at x=287, EW road at y=540.
+     LR cars wait at x=166, RL at x=372, TB at y=419, BT at y=625. */
+  { id: 'h-A1', dir: 'lr', spd: 130, x:  -50, y: 552 },
+  { id: 'h-A2', dir: 'lr', spd:  92, x: -260, y: 586 },
+  { id: 'h-B1', dir: 'rl', spd: 110, x:  640, y: 472 },
+  { id: 'h-B2', dir: 'rl', spd:  84, x:  860, y: 506 },
+  { id: 'h-C1', dir: 'tb', spd: 118, x:  299, y:  -50 },
+  { id: 'h-C2', dir: 'tb', spd:  86, x:  333, y: -260 },
+  { id: 'h-D1', dir: 'bt', spd: 108, x:  219, y: 1130 },
+  { id: 'h-D2', dir: 'bt', spd:  96, x:  253, y: 1330 },
+];
+
+const blogCars = [
+  /* blog intersection 2: EW road at y=660, intersection y=580–740.
+     LR wait x=166, RL x=372, TB y=539, BT y=745.                   */
+  { id: 'b-A1', dir: 'lr', spd: 102, x:  -50, y: 672 },
+  { id: 'b-A2', dir: 'lr', spd:  78, x: -260, y: 706 },
+  { id: 'b-B1', dir: 'rl', spd:  96, x:  640, y: 592 },
+  { id: 'b-B2', dir: 'rl', spd:  82, x:  860, y: 626 },
+  /* NS cars run the full 2125 px strip — they only stop at int 2.   */
+  { id: 'b-C1', dir: 'tb', spd: 112, x:  299, y:  -50 },
+  { id: 'b-C2', dir: 'tb', spd:  88, x:  333, y: -300 },
+  { id: 'b-D1', dir: 'bt', spd: 116, x:  219, y: 2200 },
+  { id: 'b-D2', dir: 'bt', spd:  94, x:  253, y: 2400 },
+  /* Overpass cars (axis "op") at y=1505 centre. They DON'T stop —
+     the overpass is on a bridge above the NS road, no shared stop
+     line. Higher z-index in CSS so they render above the NS road. */
+  { id: 'b-E1', dir: 'op-lr', spd: 150, x:  -50, y: 1486 },
+  { id: 'b-E2', dir: 'op-rl', spd: 132, x:  640, y: 1518 },
+];
+
+const postsByCat = Object.fromEntries(
+  categories.map(c => [c.id, posts.filter(p => p.category === c.id)])
+);
+---
+
+<Layout
+  title="Blog v3 — Evium Charging"
+  description="Insights on EV charging economics, market shifts, technology, and vehicle efficiency."
+  headerVariant="v4"
+  bodyClass="page-blog-v3"
+>
+<main class="blog-root">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HERO: garage on the left, city intersection on the right.
+       The garage door rolls up on load and then closes again,
+       just like /blog and /blog-v2.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="garage-section" id="garage-hero">
+    <div class="garage-clip">
+
+      <div class="hero-text">
+        <p class="ht-eyebrow">Evium Insights</p>
+        <h1 class="ht-title">The knowledge behind<br>every charging decision.</h1>
+        <p class="ht-sub">Infrastructure economics, technology trends, and market signals — from the team deploying charging networks across the country.</p>
+      </div>
+
+      <div class="garage-stage" id="garage-stage">
+        <img
+          src="/images/blog-hero/single-door/garage1-cropped1.png"
+          alt="" class="garage-base" aria-hidden="true" draggable="false"
+        />
+        <div class="door-overlay" data-door>
+          <img
+            src="/images/blog-hero/single-door/garage1-door.png"
+            alt="" class="door-img" draggable="false"
+          />
+        </div>
+      </div>
+
+      <!-- ─── City strip: hero portion (1 main intersection) ─── -->
+      <div class="city-strip cs--hero" data-section="hero" aria-hidden="true">
+        <!-- 4 quadrants of buildings (one per intersection corner) -->
+        <div class="cs-quad cs-quad-tl"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-tr"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-bl"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-br"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+
+        <!-- NS road (vertical, full strip height) + EW road segment -->
+        <div class="cs-road-ns"></div>
+        <div class="cs-road-ew cs-road-ew--hero"></div>
+        <div class="cs-int cs-int--hero"></div>
+
+        <!-- Lane markings — yellow dashes within each road segment -->
+        <div class="cs-lm cs-lm-hl cs-lm--hero"></div>
+        <div class="cs-lm cs-lm-hr cs-lm--hero"></div>
+        <div class="cs-lm cs-lm-vt cs-lm--hero"></div>
+        <div class="cs-lm cs-lm-vb cs-lm--hero"></div>
+
+        <!-- Zebra crossings -->
+        <div class="cs-zebra cs-zebra-t cs-zebra--hero"></div>
+        <div class="cs-zebra cs-zebra-b cs-zebra--hero"></div>
+        <div class="cs-zebra cs-zebra-l cs-zebra--hero"></div>
+        <div class="cs-zebra cs-zebra-r cs-zebra--hero"></div>
+
+        <!-- Traffic lights (NE/SW = NS axis; NW/SE = EW axis) -->
+        <div class="cs-tl cs-tl-ne cs-tl--hero" data-tl-axis="ns" data-tl-section="hero"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-sw cs-tl--hero" data-tl-axis="ns" data-tl-section="hero"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-nw cs-tl--hero" data-tl-axis="ew" data-tl-section="hero"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-se cs-tl--hero" data-tl-axis="ew" data-tl-section="hero"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+
+        <!-- Cars — JS animates each frame, cars stop at red/amber. -->
+        {heroCars.map((c) => (
+          <div class={`cs-car cs-car-${c.dir}`} data-car-id={c.id} data-section="hero" data-spd={c.spd} data-x={c.x} data-y={c.y}>
+            <div class="cs-cone"></div>
+            <div class="cs-hl cs-hl-a"></div><div class="cs-hl cs-hl-b"></div>
+            <div class="cs-tail cs-tail-a"></div><div class="cs-tail cs-tail-b"></div>
+          </div>
+        ))}
+
+        <div class="cs-atmosphere"></div>
+      </div>
+    </div><!-- /garage-clip -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BLOG SECTION: blog rail (centre) flanked by side shoulders
+         and a city continuation on the right. The grid has 4 cols
+         locked to the hero geometry so everything aligns vertically.
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="blog-section" id="blog-section">
+
+      <!-- Narrow shoulder/lane parallel to the garage wall. -->
+      <div class="bs-side-left" aria-hidden="true">
+        <div class="bs-side-dashes"></div>
+      </div>
+
+      <!-- Main blog rail — single column of cards with yellow
+           shoulders + animated white centre dashes. UNCHANGED from
+           the previous v3 build per the user's request. -->
+      <div class="bs-main">
+        <div class="bs-main-dashes" aria-hidden="true"></div>
+        <div class="blog-cards" id="blog-cards">
+          {posts.map((post, i) => {
+            const cat = categories.find(c => c.id === post.category);
+            const isPlaceholder = (post as any).placeholder;
+            const inner = (
+              <>
+                <div class="bc-img"><img src={(post as any).image} alt="" draggable="false" /></div>
+                <div class="bc-body">
+                  <span class="bc-cat">{cat?.label}</span>
+                  <h3 class="bc-title">{post.title}</h3>
+                  <p class="bc-excerpt">{post.excerpt}</p>
+                  <span class="bc-meta">{isPlaceholder ? 'Coming soon' : `${post.date} · ${post.readTime} read`}</span>
+                </div>
+              </>
+            );
+            const style = `--card-delay:${i * 0.06}s;`;
+            return isPlaceholder ? (
+              <div class="blog-card is-placeholder" data-category={post.category} style={style}>{inner}</div>
+            ) : (
+              <a class="blog-card" href={`/blog/${post.slug}`} data-category={post.category} style={style}>{inner}</a>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Right shoulder — mirrors `bs-side-left` so the wall
+           padding either side of the door is consistent across
+           hero + blog section. -->
+      <div class="bs-side-right" aria-hidden="true">
+        <div class="bs-side-dashes"></div>
+      </div>
+
+      <!-- ─── City strip: blog portion (intersection 2 + overpass) ─── -->
+      <div class="city-strip cs--blog" data-section="blog" aria-hidden="true">
+        <!-- Quadrants — 6 of them this time, one per region between
+             the NS road and the strip edges, sliced by intersection 2
+             AND by the overpass.                                       -->
+        <div class="cs-quad cs-quad-blog-tl"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-blog-tr"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-blog-ml"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-blog-mr"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-blog-bl"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+        <div class="cs-quad cs-quad-blog-br"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
+
+        <!-- NS road through the entire blog strip + EW road at int 2. -->
+        <div class="cs-road-ns"></div>
+        <div class="cs-road-ew cs-road-ew--blog"></div>
+        <div class="cs-int cs-int--blog"></div>
+
+        <!-- Lane markings around int 2. -->
+        <div class="cs-lm cs-lm-hl cs-lm--blog"></div>
+        <div class="cs-lm cs-lm-hr cs-lm--blog"></div>
+        <div class="cs-lm cs-lm-vt cs-lm--blog"></div>
+        <div class="cs-lm cs-lm-vb-int cs-lm--blog"></div>
+
+        <!-- Zebra crossings around int 2. -->
+        <div class="cs-zebra cs-zebra-t cs-zebra--blog"></div>
+        <div class="cs-zebra cs-zebra-b cs-zebra--blog"></div>
+        <div class="cs-zebra cs-zebra-l cs-zebra--blog"></div>
+        <div class="cs-zebra cs-zebra-r cs-zebra--blog"></div>
+
+        <!-- Traffic lights at int 2. -->
+        <div class="cs-tl cs-tl-ne cs-tl--blog" data-tl-axis="ns" data-tl-section="blog"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-sw cs-tl--blog" data-tl-axis="ns" data-tl-section="blog"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-nw cs-tl--blog" data-tl-axis="ew" data-tl-section="blog"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+        <div class="cs-tl cs-tl-se cs-tl--blog" data-tl-axis="ew" data-tl-section="blog"><div class="cs-tl-box"><div class="cs-tl-dot" data-c="red"></div><div class="cs-tl-dot" data-c="amber"></div><div class="cs-tl-dot" data-c="green"></div></div></div>
+
+        <!-- Overpass: horizontal road on a bridge crossing OVER
+             the NS road. The shadow strip below the NS road
+             portion sells the bridge depth.                         -->
+        <div class="cs-overpass-shadow" aria-hidden="true"></div>
+        <div class="cs-overpass">
+          <div class="cs-overpass-edge cs-overpass-edge--top"></div>
+          <div class="cs-overpass-edge cs-overpass-edge--bot"></div>
+          <div class="cs-overpass-dashes"></div>
+        </div>
+
+        <!-- Cars — int 2 + overpass. -->
+        {blogCars.map((c) => (
+          <div class={`cs-car cs-car-${c.dir}`} data-car-id={c.id} data-section="blog" data-spd={c.spd} data-x={c.x} data-y={c.y}>
+            <div class="cs-cone"></div>
+            <div class="cs-hl cs-hl-a"></div><div class="cs-hl cs-hl-b"></div>
+            <div class="cs-tail cs-tail-a"></div><div class="cs-tail cs-tail-b"></div>
+          </div>
+        ))}
+
+        <div class="cs-atmosphere"></div>
+      </div>
+
+    </section><!-- /blog-section -->
+
+  </section><!-- /garage-section -->
+
+</main>
+
+<SiteFooter />
+</Layout>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   Layout shell — page background, hero clip, hero text, garage
+   stage + door. All unchanged from the previous v3 build.
+   ═══════════════════════════════════════════════════════════════ */
+.blog-root {
+  background: #080d12;
+  min-height: 100vh;
+}
+
+.garage-section {
+  --garage-w: min(calc(100vh * 1920 / 2635), 100%);
+  --door-pct-l: 12%;
+  --door-pct-w: 76%;
+  width: 100%;
+  position: relative;
+  background: #1A2F3A;
+}
+
+.garage-clip {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to bottom, #1A2F3A 0%, #1c3240 50%, #1A2F3A 100%);
+}
+
+.hero-text {
+  position: absolute; top: 0; left: 0;
+  width: var(--garage-w);
+  z-index: 7;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  text-align: center;
+  padding: clamp(12px, 2vh, 24px) clamp(20px, 4vw, 60px) 0;
+  pointer-events: none;
+}
+.ht-eyebrow {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(10px, 0.72vw, 12px); font-weight: 800;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: #2DC856; margin-bottom: clamp(8px, 1.2vh, 16px);
+}
+.ht-title {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(28px, 3.2vw, 48px); font-weight: 900;
+  color: #fff; line-height: 1.08; margin-bottom: clamp(10px, 1.4vh, 18px);
+  text-shadow: 0 2px 28px rgba(0,0,0,0.4);
+}
+.ht-sub {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(12px, 0.95vw, 15px); font-weight: 500;
+  color: rgba(255,255,255,0.45); max-width: 540px; line-height: 1.6;
+  letter-spacing: 0.015em;
+}
+
+.garage-stage {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: var(--garage-w);
+}
+.garage-base {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  user-select: none; z-index: 0;
+}
+
+.door-overlay {
+  position: absolute;
+  left: var(--door-pct-l);
+  top: 22%;
+  width: var(--door-pct-w);
+  aspect-ratio: 1396 / 1634;
+  z-index: 2;
+  overflow: hidden;
+  transform-origin: top center;
+  transform: scaleY(1);
+  transition: transform 1.4s cubic-bezier(0.42, 0, 0.12, 1);
+  will-change: transform;
+  cursor: pointer;
+}
+.door-img {
+  width: 100%; height: 100%;
+  object-fit: fill; display: block;
+  user-select: none;
+}
+.garage-stage.is-open .door-overlay { transform: scaleY(0); }
+.garage-stage.is-closed .door-overlay {
+  transform: scaleY(1);
+  transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+}
+.garage-stage.is-closed .door-overlay.peek {
+  transform: scaleY(0);
+  transition: transform 1.2s cubic-bezier(0.42, 0, 0.12, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CITY STRIP — base styles + per-section positioning.
+   ═══════════════════════════════════════════════════════════════ */
+.city-strip {
+  /* shared road palette */
+  --asphalt:    #16213e;
+  --lane-dash:  #f0c040;
+  --white-line: #e8e8e0;
+  --grass:      #0d1f0f;
+  --b1:         #0f3460;
+  --b2:         #162447;
+  --b3:         #1b1b2f;
+
+  position: absolute;
+  background: #06060f;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Hero strip — spans the right of the clip from the garage's
+   right edge to the clip's right edge, full clip height.        */
+.cs--hero {
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  left: var(--garage-w);
+}
+
+/* Blog strip — sits in column 4 of the blog grid (defined below).*/
+.cs--blog {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Roads ───────────────────────────────────────────────────── */
+.cs-road-ns {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 207px;
+  width: 160px;
+  background: var(--asphalt);
+  z-index: 1;
+}
+.cs-road-ns::before, .cs-road-ns::after {
+  content: ''; position: absolute;
+  top: 0; bottom: 0; width: 6px;
+}
+.cs-road-ns::before { left: 0;  background: linear-gradient(90deg, #0005, transparent); }
+.cs-road-ns::after  { right: 0; background: linear-gradient(270deg, #0005, transparent); }
+
+.cs-road-ew {
+  position: absolute;
+  left: 0; right: 0;
+  height: 160px;
+  background: var(--asphalt);
+  z-index: 2;
+}
+.cs-road-ew::before, .cs-road-ew::after {
+  content: ''; position: absolute;
+  left: 0; right: 0; height: 6px;
+}
+.cs-road-ew::before { top: 0;    background: linear-gradient(180deg, #0005, transparent); }
+.cs-road-ew::after  { bottom: 0; background: linear-gradient(0deg,   #0005, transparent); }
+
+.cs-road-ew--hero { top: 460px; }
+.cs-road-ew--blog { top: 580px; }
+
+.cs-int {
+  position: absolute;
+  left: 207px;
+  width: 160px;
+  height: 160px;
+  background: #1c1c32;
+  z-index: 5;
+}
+.cs-int--hero { top: 460px; }
+.cs-int--blog { top: 580px; }
+
+/* ── Quadrants — hero (4) + blog (6) ─────────────────────────── */
+.cs-quad {
+  position: absolute;
+  background: var(--grass);
+  overflow: hidden;
+  z-index: 0;
+}
+.cs-quad::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 30% 70%, #1a3a1a, transparent 60%),
+    radial-gradient(circle at 80% 20%, #122a12, transparent 50%);
+}
+
+/* Hero quadrants — 4 corners of the single intersection. */
+.cs-quad-tl { top: 0;     left: 0;  width: 207px; height: 460px; }
+.cs-quad-tr { top: 0;     right: 0; width: 206px; height: 460px; }
+.cs-quad-bl { top: 620px; left: 0;  width: 207px; height: 460px; }
+.cs-quad-br { top: 620px; right: 0; width: 206px; height: 460px; }
+
+/* Blog quadrants — 3 vertical bands (above int 2, between int 2
+   and overpass, below overpass) × 2 sides of the NS road.      */
+.cs-quad-blog-tl { top: 0;      left: 0;  width: 207px; height: 580px;  }
+.cs-quad-blog-tr { top: 0;      right: 0; width: 206px; height: 580px;  }
+.cs-quad-blog-ml { top: 740px;  left: 0;  width: 207px; height: 710px;  }
+.cs-quad-blog-mr { top: 740px;  right: 0; width: 206px; height: 710px;  }
+.cs-quad-blog-bl { top: 1610px; left: 0;  width: 207px; height: 515px;  }
+.cs-quad-blog-br { top: 1610px; right: 0; width: 206px; height: 515px;  }
+
+/* ── Buildings (codepen-derived) ─────────────────────────────── */
+.cs-bld {
+  position: absolute;
+  border-radius: 2px;
+  box-shadow: 0 0 12px #00aaff11;
+}
+.cs-bld::before {
+  content: ''; position: absolute; inset: 4px;
+  background:
+    repeating-linear-gradient(0deg,  transparent 0, transparent 6px, #fff1 6px, #fff1 7px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 8px, #fff1 8px, #fff1 9px);
+}
+.cs-bld::after {
+  content: ''; position: absolute; inset: 4px;
+  background:
+    radial-gradient(circle at 20% 30%, #ffcc0033 0, transparent 8px),
+    radial-gradient(circle at 70% 20%, #ffcc0055 0, transparent 6px),
+    radial-gradient(circle at 40% 70%, #ffcc0044 0, transparent 7px),
+    radial-gradient(circle at 80% 60%, #00aaff33 0, transparent 6px);
+  animation: cs-winBlink 3.5s ease-in-out infinite alternate;
+}
+@keyframes cs-winBlink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* Per-quadrant building placement. Sizes scaled to my taller
+   207×460 (and 207×515 / 207×580 / 207×710) quadrants vs the
+   codepen's 220×220. b1 = biggest, b2 = mid, b3 = small.       */
+.cs-quad-tl .cs-bld-1 { background: var(--b1); bottom: 24px; right: 24px; width: 92px; height: 188px; }
+.cs-quad-tl .cs-bld-2 { background: var(--b2); bottom: 28px; left: 18px; width: 64px; height: 142px; }
+.cs-quad-tl .cs-bld-3 { background: var(--b3); top: 28px;    right: 18px; width: 56px; height: 102px; }
+.cs-quad-tr .cs-bld-1 { background: var(--b2); bottom: 22px; left: 28px;  width: 88px; height: 176px; }
+.cs-quad-tr .cs-bld-2 { background: var(--b1); top: 32px;    left: 18px;  width: 60px; height: 124px; }
+.cs-quad-tr .cs-bld-3 { background: var(--b3); bottom: 30px; right: 16px; width: 52px; height: 96px; }
+.cs-quad-bl .cs-bld-1 { background: var(--b3); top: 24px;    right: 22px; width: 84px; height: 168px; }
+.cs-quad-bl .cs-bld-2 { background: var(--b1); top: 28px;    left: 16px;  width: 64px; height: 136px; }
+.cs-quad-bl .cs-bld-3 { background: var(--b2); bottom: 28px; right: 20px; width: 54px; height: 100px; }
+.cs-quad-br .cs-bld-1 { background: var(--b1); top: 22px;    left: 24px;  width: 90px; height: 184px; }
+.cs-quad-br .cs-bld-2 { background: var(--b2); top: 28px;    right: 18px; width: 58px; height: 130px; }
+.cs-quad-br .cs-bld-3 { background: var(--b3); bottom: 26px; left: 18px;  width: 56px; height: 104px; }
+
+/* Blog quadrant building placement — varied so the city doesn't
+   feel copy-pasted across the strip.                             */
+.cs-quad-blog-tl .cs-bld-1 { background: var(--b2); bottom: 24px; right: 28px; width: 96px; height: 220px; }
+.cs-quad-blog-tl .cs-bld-2 { background: var(--b1); bottom: 32px; left: 16px;  width: 70px; height: 168px; }
+.cs-quad-blog-tl .cs-bld-3 { background: var(--b3); top: 30px;    right: 22px; width: 60px; height: 130px; }
+.cs-quad-blog-tr .cs-bld-1 { background: var(--b1); bottom: 26px; left: 22px;  width: 92px; height: 208px; }
+.cs-quad-blog-tr .cs-bld-2 { background: var(--b3); top: 26px;    right: 16px; width: 68px; height: 152px; }
+.cs-quad-blog-tr .cs-bld-3 { background: var(--b2); bottom: 28px; right: 14px; width: 56px; height: 116px; }
+.cs-quad-blog-ml .cs-bld-1 { background: var(--b3); top: 36px;    right: 20px; width: 100px; height: 250px; }
+.cs-quad-blog-ml .cs-bld-2 { background: var(--b1); top: 60px;    left: 14px;  width: 76px; height: 200px; }
+.cs-quad-blog-ml .cs-bld-3 { background: var(--b2); bottom: 32px; right: 28px; width: 64px; height: 148px; }
+.cs-quad-blog-mr .cs-bld-1 { background: var(--b1); top: 28px;    left: 22px;  width: 102px; height: 240px; }
+.cs-quad-blog-mr .cs-bld-2 { background: var(--b2); top: 50px;    right: 18px; width: 70px; height: 180px; }
+.cs-quad-blog-mr .cs-bld-3 { background: var(--b3); bottom: 26px; left: 18px;  width: 60px; height: 124px; }
+.cs-quad-blog-bl .cs-bld-1 { background: var(--b1); bottom: 22px; right: 18px; width: 96px; height: 196px; }
+.cs-quad-blog-bl .cs-bld-2 { background: var(--b3); top: 24px;    left: 18px;  width: 68px; height: 148px; }
+.cs-quad-blog-bl .cs-bld-3 { background: var(--b2); bottom: 24px; left: 22px;  width: 58px; height: 110px; }
+.cs-quad-blog-br .cs-bld-1 { background: var(--b2); bottom: 28px; left: 22px;  width: 94px; height: 188px; }
+.cs-quad-blog-br .cs-bld-2 { background: var(--b1); top: 24px;    right: 22px; width: 66px; height: 144px; }
+.cs-quad-blog-br .cs-bld-3 { background: var(--b3); bottom: 30px; right: 18px; width: 56px; height: 100px; }
+
+/* ── Lane markings (yellow dashes) ───────────────────────────── */
+.cs-lm {
+  position: absolute;
+  background: repeating-linear-gradient(
+    var(--lm-dir, 90deg),
+    var(--lane-dash) 0, var(--lane-dash) 18px,
+    transparent 18px, transparent 32px
+  );
+  z-index: 6;
+  animation: var(--lm-anim, cs-dashH) 1.2s linear infinite;
+}
+@keyframes cs-dashH { from { background-position: 0 0; } to { background-position: 50px 0; } }
+@keyframes cs-dashV { from { background-position: 0 0; } to { background-position: 0 50px; } }
+
+/* Hero intersection lane markings (centre lines). */
+.cs-lm-hl.cs-lm--hero { top: 540px; height: 2px; transform: translateY(-50%); left: 0; width: 207px; --lm-dir: 90deg; --lm-anim: cs-dashH; }
+.cs-lm-hr.cs-lm--hero { top: 540px; height: 2px; transform: translateY(-50%); left: 367px; right: 0; --lm-dir: 90deg; --lm-anim: cs-dashH; }
+.cs-lm-vt.cs-lm--hero { left: 287px; width: 2px; transform: translateX(-50%); top: 0; height: 460px; --lm-dir: 180deg; --lm-anim: cs-dashV; }
+.cs-lm-vb.cs-lm--hero { left: 287px; width: 2px; transform: translateX(-50%); top: 620px; bottom: 0; --lm-dir: 180deg; --lm-anim: cs-dashV; }
+
+/* Blog int 2 lane markings — only between int 2 and overpass for VB
+   so the dashes stop at the overpass instead of bleeding under it. */
+.cs-lm-hl.cs-lm--blog     { top: 660px; height: 2px; transform: translateY(-50%); left: 0; width: 207px; --lm-dir: 90deg; --lm-anim: cs-dashH; }
+.cs-lm-hr.cs-lm--blog     { top: 660px; height: 2px; transform: translateY(-50%); left: 367px; right: 0; --lm-dir: 90deg; --lm-anim: cs-dashH; }
+.cs-lm-vt.cs-lm--blog     { left: 287px; width: 2px; transform: translateX(-50%); top: 0; height: 580px; --lm-dir: 180deg; --lm-anim: cs-dashV; }
+.cs-lm-vb-int.cs-lm--blog { left: 287px; width: 2px; transform: translateX(-50%); top: 740px; height: 710px; --lm-dir: 180deg; --lm-anim: cs-dashV; }
+
+/* ── Zebra crossings ─────────────────────────────────────────── */
+.cs-zebra { position: absolute; z-index: 7; opacity: .55; }
+.cs-zebra-t.cs-zebra--hero  { top: 442px; left: 207px; width: 160px; height: 18px; background: repeating-linear-gradient(90deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-b.cs-zebra--hero  { top: 620px; left: 207px; width: 160px; height: 18px; background: repeating-linear-gradient(90deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-l.cs-zebra--hero  { top: 460px; left: 189px; width: 18px; height: 160px;  background: repeating-linear-gradient(180deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-r.cs-zebra--hero  { top: 460px; left: 367px; width: 18px; height: 160px;  background: repeating-linear-gradient(180deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+
+.cs-zebra-t.cs-zebra--blog  { top: 562px; left: 207px; width: 160px; height: 18px; background: repeating-linear-gradient(90deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-b.cs-zebra--blog  { top: 740px; left: 207px; width: 160px; height: 18px; background: repeating-linear-gradient(90deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-l.cs-zebra--blog  { top: 580px; left: 189px; width: 18px; height: 160px;  background: repeating-linear-gradient(180deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+.cs-zebra-r.cs-zebra--blog  { top: 580px; left: 367px; width: 18px; height: 160px;  background: repeating-linear-gradient(180deg, var(--white-line) 0, var(--white-line) 9px, transparent 9px, transparent 18px); }
+
+/* ── Traffic lights ──────────────────────────────────────────── */
+.cs-tl { position: absolute; z-index: 20; }
+
+.cs-tl-ne.cs-tl--hero { top: 430px; left: 379px; }
+.cs-tl-sw.cs-tl--hero { top: 638px; left: 199px; }
+.cs-tl-nw.cs-tl--hero { top: 430px; left: 199px; }
+.cs-tl-se.cs-tl--hero { top: 638px; left: 379px; }
+
+.cs-tl-ne.cs-tl--blog { top: 550px; left: 379px; }
+.cs-tl-sw.cs-tl--blog { top: 758px; left: 199px; }
+.cs-tl-nw.cs-tl--blog { top: 550px; left: 199px; }
+.cs-tl-se.cs-tl--blog { top: 758px; left: 379px; }
+
+.cs-tl-box {
+  width: 14px; background: #0e0e0e; border-radius: 7px;
+  padding: 3px; display: flex; flex-direction: column; gap: 3px;
+  box-shadow: 0 0 6px #000a, inset 0 0 3px #fff1;
+}
+.cs-tl-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #1a1a1a;
+  transition: background .25s, box-shadow .25s;
+}
+.cs-tl-dot.on-red   { background: #ff3355; box-shadow: 0 0 8px #ff3355, 0 0 18px #ff335555; }
+.cs-tl-dot.on-amber { background: #ffaa00; box-shadow: 0 0 8px #ffaa00, 0 0 18px #ffaa0055; }
+.cs-tl-dot.on-green { background: #00ff88; box-shadow: 0 0 8px #00ff88, 0 0 18px #00ff8855; }
+
+/* ── Overpass ─────────────────────────────────────────────────
+   Horizontal road on a bridge crossing OVER the NS road in the
+   blog strip. Higher z-index than the NS road; a dark-gradient
+   shadow strip just below the bridge sells the depth.            */
+.cs-overpass-shadow {
+  position: absolute;
+  left: 207px; width: 160px;
+  top: 1565px; height: 38px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.0) 100%);
+  z-index: 4;
+  pointer-events: none;
+}
+.cs-overpass {
+  position: absolute;
+  left: 0; right: 0;
+  top: 1450px;
+  height: 110px;
+  background: linear-gradient(180deg, #1d2a4a 0%, #16213e 25%, #16213e 75%, #1d2a4a 100%);
+  z-index: 12;
+  box-shadow: 0 14px 22px rgba(0,0,0,0.7), 0 -3px 0 rgba(0,0,0,0.2);
+}
+.cs-overpass-edge {
+  position: absolute;
+  left: 0; right: 0;
+  height: 4px;
+  background: rgba(244, 242, 232, 0.78);
+}
+.cs-overpass-edge--top { top: 0; }
+.cs-overpass-edge--bot { bottom: 0; }
+.cs-overpass-dashes {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%; height: 2px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg,
+    var(--lane-dash) 0, var(--lane-dash) 18px,
+    transparent 18px, transparent 32px
+  );
+  animation: cs-dashH 1.2s linear infinite;
+}
+
+/* ── Cars ─────────────────────────────────────────────────────
+   Common body + light geometry; direction-specific positions
+   below. JS sets per-frame transform: translate(x,y) directly.   */
+.cs-car {
+  position: absolute;
+  top: 0; left: 0;
+  border-radius: 3px; z-index: 15;
+  filter: drop-shadow(0 3px 8px #000c);
+  will-change: transform;
+}
+.cs-car-lr, .cs-car-rl, .cs-car-op-lr, .cs-car-op-rl { width: 36px; height: 22px; }
+.cs-car-tb, .cs-car-bt { width: 22px; height: 36px; }
+
+/* Car colours — Crossroads palette. */
+.cs-car[data-car-id$="A1"] { background: linear-gradient(180deg, #e63950, #991a2c); }
+.cs-car[data-car-id$="A2"] { background: linear-gradient(180deg, #e68c39, #995015); }
+.cs-car[data-car-id$="B1"] { background: linear-gradient(180deg, #39a0e6, #155499); }
+.cs-car[data-car-id$="B2"] { background: linear-gradient(180deg, #a439e6, #5a1599); }
+.cs-car[data-car-id$="C1"] { background: linear-gradient(90deg,  #39e67a, #158840); }
+.cs-car[data-car-id$="C2"] { background: linear-gradient(90deg,  #e6d639, #998a15); }
+.cs-car[data-car-id$="D1"] { background: linear-gradient(90deg,  #e63982, #991545); }
+.cs-car[data-car-id$="D2"] { background: linear-gradient(90deg,  #39e6e6, #159999); }
+.cs-car[data-car-id$="E1"] { background: linear-gradient(180deg, #ff8855, #aa3322); }
+.cs-car[data-car-id$="E2"] { background: linear-gradient(180deg, #88ff55, #338822); }
+
+/* Overpass cars float above the rest of the strip. */
+.cs-car-op-lr, .cs-car-op-rl { z-index: 18; filter: drop-shadow(0 6px 12px #000e); }
+
+/* Headlights — leading edge. */
+.cs-hl {
+  position: absolute;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #fffde8;
+  box-shadow: 0 0 7px 3px #fffde8aa, 0 0 14px 5px #ffffff44;
+  z-index: 2;
+}
+.cs-car-lr .cs-hl-a, .cs-car-op-lr .cs-hl-a { right: 2px; top: 3px; }
+.cs-car-lr .cs-hl-b, .cs-car-op-lr .cs-hl-b { right: 2px; bottom: 3px; }
+.cs-car-rl .cs-hl-a, .cs-car-op-rl .cs-hl-a { left: 2px; top: 3px; }
+.cs-car-rl .cs-hl-b, .cs-car-op-rl .cs-hl-b { left: 2px; bottom: 3px; }
+.cs-car-tb .cs-hl-a { bottom: 2px; left: 3px; }
+.cs-car-tb .cs-hl-b { bottom: 2px; right: 3px; }
+.cs-car-bt .cs-hl-a { top: 2px; left: 3px; }
+.cs-car-bt .cs-hl-b { top: 2px; right: 3px; }
+
+/* Tail-lights — trailing edge. */
+.cs-tail {
+  position: absolute;
+  width: 4px; height: 5px; border-radius: 1px;
+  background: #ff3355;
+  box-shadow: 0 0 5px #ff335577;
+  z-index: 2;
+  transition: box-shadow .12s, background .12s;
+}
+.cs-car.braking .cs-tail { background: #ff0033; box-shadow: 0 0 10px 3px #ff0033cc; }
+.cs-car-lr .cs-tail-a, .cs-car-op-lr .cs-tail-a { left: 2px; top: 3px; }
+.cs-car-lr .cs-tail-b, .cs-car-op-lr .cs-tail-b { left: 2px; bottom: 3px; }
+.cs-car-rl .cs-tail-a, .cs-car-op-rl .cs-tail-a { right: 2px; top: 3px; }
+.cs-car-rl .cs-tail-b, .cs-car-op-rl .cs-tail-b { right: 2px; bottom: 3px; }
+.cs-car-tb .cs-tail-a { top: 2px; left: 3px; }
+.cs-car-tb .cs-tail-b { top: 2px; right: 3px; }
+.cs-car-bt .cs-tail-a { bottom: 2px; left: 3px; }
+.cs-car-bt .cs-tail-b { bottom: 2px; right: 3px; }
+
+/* Headlight beam cones. */
+.cs-cone { position: absolute; pointer-events: none; z-index: 1; opacity: .42; }
+.cs-car-lr .cs-cone, .cs-car-op-lr .cs-cone { right: -30px; top: 0; width: 32px; height: 22px; background: linear-gradient(90deg,  #fffde0, transparent); clip-path: polygon(0 18%, 100% 0%, 100% 100%, 0 82%); }
+.cs-car-rl .cs-cone, .cs-car-op-rl .cs-cone { left:  -30px; top: 0; width: 32px; height: 22px; background: linear-gradient(270deg, #fffde0, transparent); clip-path: polygon(100% 18%, 0% 0%, 0% 100%, 100% 82%); }
+.cs-car-tb .cs-cone { bottom: -30px; left: 0; width: 22px; height: 32px; background: linear-gradient(180deg, #fffde0, transparent); clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%); }
+.cs-car-bt .cs-cone { top: -30px;    left: 0; width: 22px; height: 32px; background: linear-gradient(0deg,   #fffde0, transparent); clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 18% 100%); }
+
+/* ── Atmosphere — slight vignette over the strip ─────────────── */
+.cs-atmosphere {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, #06060f99 100%);
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BLOG SECTION grid + side shoulders.
+   ═══════════════════════════════════════════════════════════════ */
+.blog-section {
+  display: grid;
+  grid-template-columns:
+    calc(var(--garage-w) * 0.12)   /* bs-side-left */
+    calc(var(--garage-w) * 0.76)   /* bs-main (the blog rail) */
+    calc(var(--garage-w) * 0.12)   /* bs-side-right */
+    1fr;                             /* city strip — 573 px on desktop */
+  background: #06060f;
+  position: relative;
+  z-index: 1;
+  min-height: 60vh;
+}
+
+/* Side shoulders — narrow lanes flanking the blog rail. */
+.bs-side-left, .bs-side-right {
+  position: relative;
+  background: #16213e;
+  overflow: hidden;
+}
+.bs-side-left  { border-right: 3px solid rgba(244, 242, 232, 0.78); }
+.bs-side-right { border-left:  3px solid rgba(244, 242, 232, 0.78); }
+.bs-side-dashes {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 4px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(180deg,
+    rgba(255, 255, 255, 0.18) 0,
+    rgba(255, 255, 255, 0.18) 22px,
+    transparent 22px,
+    transparent 50px
+  );
+  animation: cs-dashV 1.4s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BLOG RAIL — main centre column carrying the cards. UNCHANGED.
+   ═══════════════════════════════════════════════════════════════ */
+.bs-main {
+  position: relative;
+  background: #16213e;
+  padding: 36px 0;
+  overflow: hidden;
+}
+.bs-main::before, .bs-main::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 4px;
+  background: rgba(220, 175, 20, 0.85);
+  z-index: 2;
+}
+.bs-main::before { left: 0; }
+.bs-main::after  { right: 0; }
+
+.bs-main-dashes {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 5px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(180deg,
+    rgba(244, 242, 232, 0.7) 0,
+    rgba(244, 242, 232, 0.7) 28px,
+    transparent 28px,
+    transparent 60px
+  );
+  animation: cs-dashV 1.6s linear infinite;
+  z-index: 1;
+}
+
+.blog-cards {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 0 28px;
+}
+.blog-card {
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+  background: #080d12;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-40vh);
+  transition:
+    opacity 0.6s ease,
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.18s, border-color 0.18s;
+  transition-delay: var(--card-delay, 0s);
+}
+.blog-cards.is-visible .blog-card { opacity: 1; transform: translateY(0); }
+.blog-card:hover { background: #0f1720; border-color: rgba(45, 200, 86, 0.3); }
+.blog-cards.is-visible .blog-card:hover { transform: translateY(-2px); }
+
+.bc-img {
+  flex: 0 0 32%;
+  display: flex; align-items: center; justify-content: center;
+  background: #0c1520;
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+.bc-img img {
+  height: clamp(18px, 1.8vw, 28px); width: auto;
+  opacity: 0.22;
+  filter: grayscale(1) brightness(1.4);
+  user-select: none; pointer-events: none;
+}
+.bc-body {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.bc-cat {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(8px, 0.62vw, 10px); font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase; line-height: 1;
+}
+.blog-card[data-category="cost-demand"]        .bc-cat { color: #5BC8DC; }
+.blog-card[data-category="market-shifts"]      .bc-cat { color: #E8C030; }
+.blog-card[data-category="charging-tech"]      .bc-cat { color: #E07428; }
+.blog-card[data-category="vehicle-efficiency"] .bc-cat { color: #D82020; }
+.bc-title {
+  font-family: "Maven Pro", sans-serif;
+  font-size: clamp(13px, 1.05vw, 17px); font-weight: 800;
+  color: rgba(255,255,255,0.92); line-height: 1.28;
+}
+.bc-excerpt {
+  font-size: clamp(11px, 0.8vw, 13px);
+  color: rgba(255,255,255,0.55); line-height: 1.5;
+}
+.bc-meta {
+  font-size: clamp(9px, 0.7vw, 11px);
+  color: rgba(255,255,255,0.32); font-weight: 500;
+  margin-top: auto; padding-top: 4px;
+}
+.blog-card.is-placeholder .bc-img {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px,
+    transparent 1px, transparent 8px
+  );
+}
+.blog-card.is-placeholder .bc-title { color: rgba(255,255,255,0.25); font-style: italic; }
+.blog-card.is-placeholder .bc-meta  { color: rgba(255,255,255,0.18); text-transform: uppercase; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive — collapse the city strip + side shoulders below
+   1100 px so the blog rail uses the full width.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .blog-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .bs-side-left, .bs-side-right, .cs--blog { display: none; }
+  .cs--hero { display: none; }
+  .bs-main { padding: 28px 0; }
+  .blog-cards { padding: 0 16px; }
+}
+</style>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   GARAGE DOOR — open on load, then close. Unchanged from prev v3.
+   ═════════════════════════════════════════════════════════════ */
+const stage     = document.getElementById('garage-stage') as HTMLElement | null;
+const blogCards = document.getElementById('blog-cards') as HTMLElement | null;
+
+let userScrolled = false;
+window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
+
+function openGarage() {
+  if (!stage) return;
+  stage.classList.add('is-open');
+  setTimeout(() => {
+    if (blogCards) blogCards.classList.add('is-visible');
+    if (!userScrolled) {
+      window.scrollTo({ top: window.innerHeight * 0.55, behavior: 'smooth' });
+    }
+  }, 800);
+  setTimeout(() => { stage.classList.add('is-closed'); }, 3200);
+}
+setTimeout(openGarage, 350);
+
+stage?.querySelectorAll<HTMLElement>('[data-door]').forEach((door) => {
+  door.addEventListener('click', () => {
+    if (door.classList.contains('peek') || !stage.classList.contains('is-closed')) return;
+    door.classList.add('peek');
+    setTimeout(() => door.classList.remove('peek'), 2500);
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════
+   CITY STRIP TRAFFIC SYSTEM — adapted from the Crossroads codepen.
+
+   Two intersections live on the page (one per strip). Each runs
+   its own 9-second light cycle, offset from the other so they
+   don't sync up. Cars carry their own (x,y,spd,dir) and look up
+   the relevant axis state on every frame; once a car has rolled
+   PAST its stop line it commits and clears the intersection
+   regardless of the light, just like real traffic.
+
+   Geometry constants (must match the CSS above):
+     - NS road centred on x=287 (intersection x: 207–367)
+     - Hero EW road centred on y=540 (intersection y: 460–620)
+     - Blog EW road centred on y=660 (intersection y: 580–740)
+     - Stop padding: 5 px before the intersection edge
+     - Strip widths: 573 (both)
+     - Strip heights: 1080 (hero), 2125 (blog)
+   ═════════════════════════════════════════════════════════════ */
+(() => {
+  const SW = 573;                         // strip width (both)
+  const HERO_H = 1080, BLOG_H = 2125;     // strip heights
+  const RW = 160;                         // road width
+  const NS_L = 207, NS_R = 367;           // NS road x bounds
+  const CW = 36, VH_CAR = 36;             // car dimensions
+  const PAD = 5;                          // stop-line padding
+
+  // Hero intersection bounds
+  const H_TOP = 460, H_BOT = 620;
+  // Blog intersection bounds
+  const B_TOP = 580, B_BOT = 740;
+
+  // Stop-line car-corner positions
+  const SX_LR = NS_L - CW - PAD;          // 166
+  const SX_RL = NS_R + PAD;               // 372
+  const HSY_TB = H_TOP - VH_CAR - PAD;    // 419
+  const HSY_BT = H_BOT + PAD;             // 625
+  const BSY_TB = B_TOP - VH_CAR - PAD;    // 539
+  const BSY_BT = B_BOT + PAD;             // 745
+
+  // 9-second cycle — same shape per intersection, different start
+  // offsets so the two are out of phase. Hero starts NS-green;
+  // blog starts mid-cycle (4500 ms in) so it's EW-green when hero
+  // is NS-green.
+  const CYCLE = 9000;
+  const PHASES = [
+    { t:    0, ns: 'green', ew: 'red'   },
+    { t: 4000, ns: 'amber', ew: 'red'   },
+    { t: 4500, ns: 'red',   ew: 'green' },
+    { t: 8500, ns: 'red',   ew: 'amber' },
+  ] as const;
+
+  type State = { ns: string; ew: string; lastPhase: number; tlNs: HTMLElement[]; tlEw: HTMLElement[]; offsetMs: number };
+  const sections: Record<'hero' | 'blog', State> = {
+    hero: {
+      ns: '', ew: '', lastPhase: -1,
+      tlNs: Array.from(document.querySelectorAll<HTMLElement>('.cs-tl--hero[data-tl-axis="ns"]')),
+      tlEw: Array.from(document.querySelectorAll<HTMLElement>('.cs-tl--hero[data-tl-axis="ew"]')),
+      offsetMs: 0,
+    },
+    blog: {
+      ns: '', ew: '', lastPhase: -1,
+      tlNs: Array.from(document.querySelectorAll<HTMLElement>('.cs-tl--blog[data-tl-axis="ns"]')),
+      tlEw: Array.from(document.querySelectorAll<HTMLElement>('.cs-tl--blog[data-tl-axis="ew"]')),
+      offsetMs: 4500,
+    },
+  };
+
+  function paintLight(box: HTMLElement, color: string) {
+    box.querySelectorAll<HTMLElement>('.cs-tl-dot').forEach((d) => {
+      d.classList.remove('on-red', 'on-amber', 'on-green');
+      if (d.dataset.c === color) d.classList.add('on-' + color);
+    });
+  }
+  function applyPhase(state: State, p: { ns: string; ew: string }) {
+    state.tlNs.forEach((el) => paintLight(el, p.ns));
+    state.tlEw.forEach((el) => paintLight(el, p.ew));
+    state.ns = p.ns;
+    state.ew = p.ew;
+  }
+  applyPhase(sections.hero, PHASES[0]);
+  applyPhase(sections.blog, PHASES[2]);  // start blog in EW-green phase
+
+  // Cars — read every `.cs-car` element, parse data attrs.
+  type Car = {
+    el: HTMLElement;
+    section: 'hero' | 'blog';
+    dir: 'lr' | 'rl' | 'tb' | 'bt' | 'op-lr' | 'op-rl';
+    spd: number;
+    x: number;
+    y: number;
+    braking: boolean;
+  };
+  const cars: Car[] = Array.from(document.querySelectorAll<HTMLElement>('.cs-car')).map((el) => {
+    const dirClass = Array.from(el.classList).find((c) => c.startsWith('cs-car-')) || 'cs-car-lr';
+    const dir = dirClass.replace('cs-car-', '') as Car['dir'];
+    return {
+      el,
+      section: (el.dataset.section as 'hero' | 'blog') || 'hero',
+      dir,
+      spd: parseFloat(el.dataset.spd || '90'),
+      x: parseFloat(el.dataset.x || '0'),
+      y: parseFloat(el.dataset.y || '0'),
+      braking: false,
+    };
+  });
+
+  // Smooth approach so cars decelerate into the stop line instead
+  // of snapping. Within 55 px the speed scales from 100% down to
+  // 5% so the last few px feel like easing in.
+  function approach(dist: number, maxSpd: number) {
+    if (dist <= 0) return 0;
+    const factor = dist < 55 ? (dist / 55) * 0.95 + 0.05 : 1;
+    return Math.min(maxSpd * factor, dist);
+  }
+
+  function moveCar(car: Car, dt: number) {
+    const state = sections[car.section];
+    const stripH = car.section === 'hero' ? HERO_H : BLOG_H;
+    const intTop = car.section === 'hero' ? H_TOP : B_TOP;
+    const intBot = car.section === 'hero' ? H_BOT : B_BOT;
+    const sxLr = SX_LR, sxRl = SX_RL;
+    const syTb = car.section === 'hero' ? HSY_TB : BSY_TB;
+    const syBt = car.section === 'hero' ? HSY_BT : BSY_BT;
+
+    const spd = car.spd * dt;
+
+    switch (car.dir) {
+      case 'lr': {
+        const isRed = state.ew === 'red' || state.ew === 'amber';
+        if (isRed && car.x <= sxLr) car.x += approach(sxLr - car.x, spd);
+        else                          car.x += spd;
+        car.braking = isRed && car.x >= sxLr - 1 && car.x <= sxLr + 1;
+        if (car.x > SW + 55) { car.x = -(CW + 10); car.braking = false; }
+        break;
+      }
+      case 'rl': {
+        const isRed = state.ew === 'red' || state.ew === 'amber';
+        if (isRed && car.x >= sxRl) car.x -= approach(car.x - sxRl, spd);
+        else                          car.x -= spd;
+        car.braking = isRed && car.x >= sxRl - 1 && car.x <= sxRl + 1;
+        if (car.x < -(CW + 55)) { car.x = SW + 55; car.braking = false; }
+        break;
+      }
+      case 'tb': {
+        const isRed = state.ns === 'red' || state.ns === 'amber';
+        if (isRed && car.y <= syTb) car.y += approach(syTb - car.y, spd);
+        else                          car.y += spd;
+        car.braking = isRed && car.y >= syTb - 1 && car.y <= syTb + 1;
+        if (car.y > stripH + 55) { car.y = -(VH_CAR + 10); car.braking = false; }
+        break;
+      }
+      case 'bt': {
+        const isRed = state.ns === 'red' || state.ns === 'amber';
+        if (isRed && car.y >= syBt) car.y -= approach(car.y - syBt, spd);
+        else                          car.y -= spd;
+        car.braking = isRed && car.y >= syBt - 1 && car.y <= syBt + 1;
+        if (car.y < -(VH_CAR + 55)) { car.y = stripH + 55; car.braking = false; }
+        break;
+      }
+      // Overpass cars never stop — the bridge is on a different
+      // grade than the NS road, so there's no conflict point.
+      case 'op-lr': {
+        car.x += spd;
+        if (car.x > SW + 55) car.x = -(CW + 10);
+        break;
+      }
+      case 'op-rl': {
+        car.x -= spd;
+        if (car.x < -(CW + 55)) car.x = SW + 55;
+        break;
+      }
+    }
+
+    car.el.style.transform = `translate(${car.x.toFixed(1)}px, ${car.y.toFixed(1)}px)`;
+    car.el.classList.toggle('braking', car.braking);
+  }
+
+  /* Main loop — light phase advance + per-car move. */
+  const startTs = performance.now();
+  let lastTs: number | null = null;
+
+  function tick(ts: number) {
+    if (lastTs === null) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    (['hero', 'blog'] as const).forEach((sec) => {
+      const state = sections[sec];
+      const elapsed = (ts - startTs + state.offsetMs) % CYCLE;
+      let phaseIdx = 0;
+      for (let i = PHASES.length - 1; i >= 0; i--) {
+        if (elapsed >= PHASES[i].t) { phaseIdx = i; break; }
+      }
+      if (phaseIdx !== state.lastPhase) {
+        state.lastPhase = phaseIdx;
+        applyPhase(state, PHASES[phaseIdx]);
+      }
+    });
+
+    for (const c of cars) moveCar(c, dt);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>

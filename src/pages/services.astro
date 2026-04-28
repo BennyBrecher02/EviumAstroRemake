@@ -1,30 +1,32 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+// Service-card images live in /public/images/old-service-images/. They
+// were originally hot-linked from Google's AIDA CDN (aida-public/...);
+// downloaded locally so the page doesn't depend on an external host
+// rotating or expiring those URLs. Designed to be swapped out 1:1
+// when client-final art lands — same dimensions, same composition.
 const topCards = [
   {
     code: 'SITE-REF-01',
     title: 'Multifamily Real Estate',
     subtitle: 'Urban residential ecosystems.',
     href: '/solutions/multifamily',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuByLfilgN7yblv1B6EEK8zlUF1MS9yQVXgvRfzRo6bx5sEBJ2C9Ct-VuA9UbIQ8Lrbo3ekHyldNe0YUgYz_8isUOQtRTolT8Eo089O-Jgl0e9QsVr5VbwePLF-tgiXDr516zrvG3HvE7JuXsiZKo03Z6asApvP1l-7NNP4yBNW6pMYPiaFCktOVVUxMJ0vn8wMs1glAthL_PJFez0ITmg7g__1y_P4R1jqdqwokFTyh-SoCnLeug_-Sl-LbuwXynJ9EcrUR026qkxOi',
+    image: '/images/old-service-images/multifamily.jpg',
   },
   {
     code: 'FLEET-OP-A9',
     title: 'Fleets',
     subtitle: 'Zero-emission logistics scaling.',
     href: '/solutions/fleets',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuB_I1wMSpLGsP2KuSBxuCsJFTtVz-p_h88oUsIqJpQmyiRrGJ1oaN9Su0jB1Y0n7gofgwtzhNk1eflykiDkLF6JRIJZ9-g-1CgG7ZRdvS1ga-MB-eAlM_5DGxCnQxH4wb55iyE1m4WQdQGPFGeD9RiVkklbt_IK8U5_gKoKVJy2R62Ge1sDMlq3Bxpz5D51m-RaovXYQR1AmeyzlDfyrwEu-UtyQFCut8d1W2g6O5y18h0S3q6RGxQjXRICcmLTJ5Dxo4P-xdv5Bjl2',
+    image: '/images/old-service-images/fleets.jpg',
   },
   {
     code: 'TRANSIT-HUB-X',
     title: 'Highway Fast Charging',
     subtitle: 'High-throughput corridor power.',
     href: '/solutions/highway-fast-charging',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDsurjg_-_gGCe0_Dk7CkOQVNa48Aqaw90TmpCGKDNBOmiEI058gFIQtWdyeK8sIrOxBQWXcTfgV1tcwoEtj0ZbrfWH-erOio059LOcO3SO-7QItFZDEMwdHXl-BYfO9SmBwEnpIyScFHBrvj5IXmTI4mlDuAq48ZhWqymcIGFGz_-pi9GaQDkL38F1n5pAS7n7i1W0XCAw7lQJoOI7JzQJ3_f8gUOhwIuPPhGqIDpRCI2AeVZ8S657cvtcQ1ZwK2l8r02nZ8MUinNM',
+    image: '/images/old-service-images/highway-fast-charging.jpg',
   },
 ];
 
@@ -33,15 +35,13 @@ const sideTopCards = [
     code: 'PARTNER-CERT',
     title: 'Electrician Partners',
     href: '/solutions/electrician-partners',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBAoK5_B73O0OtKaKyz7AWnJ_tpYLy17DFngQNJUWvOY8p7IybXOfQdWV9aGHAsLOKHzHelXpTPeLyQMfUAwhX6LhrTA4qUns7x00LTxJX6abpz28kvAEyLsOXP7XgI42or3VxWb1DAXi-ljrppN84Dwju8rSnrRJyRcvuAxQJy5L3HK3vEk5Aew4RwYaUY9NYoC5QlnoZNbhuw67587otRjKXHhC9p3uRxyFRM0XE75yayZSzVAEh4-elznEYMUGa-ZoKcp_mar9sF',
+    image: '/images/old-service-images/electrician-partners.jpg',
   },
   {
     code: 'CORP-OFFICE-01',
     title: 'Commercial',
     href: '/solutions/commercial',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAvxQ1ygKDwOWotOSoZH83wRAibs-yPmQoGmp-HFHriGZdUkobVVdpd467X5N38CflTzdajOZ-LRCYnaMy4-xV9AbEB4Cz2L4bNnGMT71jWZEKkGLViAB_sii7bffOREIkKSbefG7OjBNR283ND0YpFEz8YPOzFjj0oETE_63RRFNcgFOtfzaHZ7-JUwQliOvcHpLRZ8oHKRrAFj0URkWE2Gy-nmxIU4ViLeZIhsp9fpgB9zHh8OYlLPEzYwvpDyRr4LZMlWnKNXvfL',
+    image: '/images/old-service-images/commercial.jpg',
   },
 ];
 
@@ -50,22 +50,19 @@ const sideBottomCards = [
     code: 'COMM-SITE-5',
     title: 'Retail',
     href: '/solutions/retail',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDLq76m30yOIR2ErIFcLC5xmHfXWmiAA_sHItUvl8q0RUttBHtV0Xg5AD-QLBg1Z7PBuUFmhr_0l5uuvW_s4E2DreUvn-asTFp68NwlqbKUp0Od5lAqujGO78XZzz72SF-l2VHj3yYe1IE2eB68e8zAumAvxwYfmpVhawx3JHbgmYNW_rL7FSnAYnNsl7BcxIwlOlTktOQjzEHbI5LSebTVtpU5FABZBVYXq4FN2sMhkDEfaBvuUM2JkPODfUtrITJifV2t_VWWJWVB',
+    image: '/images/old-service-images/retail.jpg',
   },
   {
     code: 'PK-INFRA-G',
     title: 'Parking',
     href: '/solutions/parking',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuC9YfImnBedsmwzPvIJHxXTqsz5cQayKHLSbht57kkhIm16A6b5pTNUHT0Nw3COZ1KUGYc3pHOcHC70F7aa-skSaBnU3K-qusvzoCgYByU8Q-NjXHm0eSmTvWYtmHgv4BrDidh9yJyF4g8QTZp7900dHLTSOneDEOYVAAbr6PU_DOl2V_hC0B_DV8KZXZrOAwUvUoSv9u4TUtEuL85BpZiiI-b5vsPjtYUBcrLPLCZcb-a6arPL54YP19QKM79fFiMZ7AnszMkRfUOV',
+    image: '/images/old-service-images/parking.jpg',
   },
   {
     code: 'HOSPITAL-UNIT',
     title: 'Medical',
     href: '/solutions/medical',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCUiM-CTM2hwZdEYiq3JkaDgrT5BYQRYaSJQeKJGlrSOuH4hPQ_B1aOM4pHjqR1ujTtGDz2Pj2P2J2sar_iogETLaySrEmYiZ76dcsUYSOfxoGJ8snFPkvP1NdxEqt9RrU_-t2A6Cd77Q-DIyquypsfEOGedh7IEcwv7R5zUG4QLw7Ww6a4jGNpmjtvdTFidN4Ch-iTQV_z0xreV7sLYZWkNTbvNj-N1H2uHw9VZ5f76KvJn1Vbb74pNG-hCcxH-e4DL6kn8xmNXSqE',
+    image: '/images/old-service-images/medical.jpg',
   },
 ];
 
@@ -75,8 +72,7 @@ const standards = [
     title: 'Turnkey Delivery',
     body:
       'From site assessment and load analysis to utility coordination, permitting, installation, commissioning, and support, Evium runs the full deployment lifecycle.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuB9xVljZBC6P5zm8kbbF4XlUilEXZv77_EcUShYGMSqFEmDwfyrT5ujegr0HxFyhszS9LCucW0Q3nU2P4U5XjOjORPBU3xwQXazif9piS1900ewuFIyQdFoAa5PRKE2iOgH0EesnZMqgphz0Kfp2_slZCM8JaT86V35HeTDILfhVYjCtaVEqmFL-dPKWum62IufUIY9c_1YZpWVv6x2V-QYkHSfoouuOXrkuh3odSyw2vA_K7YwjURpQIcHaR62aEST6ffbV20Liqys',
+    image: '/images/old-service-images/turnkey-delivery.jpg',
     bullets: [
       'Utility grid integration and site coordination',
       'Permitting, rebates, and compliance management',
@@ -88,8 +84,7 @@ const standards = [
     title: 'Zero Upfront Cost',
     body:
       'Evium’s primary no-cost model removes capital friction for qualified properties while preserving a credible revenue share and long-term operating support structure.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuA0QQ4RLdtpOVx2V246bN_iJ2gJ23_rGHGpD8r8QGKGHmYDt-bM1y5FfiiF-atHwTtlWBGr-lJfEXev0nZ4F-zCybQXrU_8VO_0oZezZCsq1geTsMIMn8HbVGs4E3L7X2fyXNhEzMd1E4QWMtpYN3CyqoXvoIdYU9nwDbZQVQ39m_j00TnH2EdPebwmsGcjA2qy6N6IyYUZ9NOXsLewk8SJxlqUgEISQLwbaivjjD9Tn7eMr7Eat_LbgCRaPUg0gutfNbKHoiHAdQmB',
+    image: '/images/old-service-images/zero-upfront-cost.jpg',
     bullets: [
       '100% CAPEX funded by Evium under the flagship model',
       'Shared revenue structures built around site economics',

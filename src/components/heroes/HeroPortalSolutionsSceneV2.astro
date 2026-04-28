@@ -1,0 +1,1147 @@
+---
+/**
+ * HeroPortalSolutionsScene
+ * ────────────────────────
+ * Combined scroll-driven scene that fuses the product-portal experience
+ * and the solutions hub onto one pinned stage.
+ *
+ * Scroll model
+ * ────────────
+ * - Outer wrapper is 220vh tall. A 100vh sticky stage inside pins to the
+ *   viewport top, giving 120vh of pinned scroll to drive animations.
+ *   (Tuned down from 220vh pinned so the whole transition fits in about
+ *    one viewport-and-a-bit of scrolling — fast enough not to drag, slow
+ *    enough that each parallax window still reads as deliberate motion.)
+ * - Layout of the sticky stage's content matches the solutions page
+ *   EXACTLY: a flex-column, centered vertically, padded 8rem top / 4rem
+ *   bottom, gap: 3rem between header and cards. The logo + subtitle +
+ *   cards sit as one centered block at p=1 — identical to /solutions.
+ *
+ * Parallax — five independent progress variables
+ * ──────────────────────────────────────────────
+ * Each element animates inside its OWN scroll window with its own ease
+ * curve. Because the windows only partly overlap, the elements reach
+ * their targets at different moments — that's what makes it feel like
+ * layered depth instead of a single cross-fade.
+ *
+ *   --p           : logo morph (size + color). Window t=0.15 → 0.65.
+ *   --p-tagline   : portal tagline fade/fall-away. Window t=0.00 → 0.28.
+ *                   Counter-motion: as logo rises, tagline drops + fades.
+ *   --p-subtitle  : solutions subtitle fade-in + rise-up. Window t=0.35 → 0.75.
+ *   --p-cards     : 3-card grid rise. Window t=0.55 → 1.00. Each card
+ *                   has its own stagger distance so all three arrive at
+ *                   different depths.
+ *   --p-portal    : wind-field + slit/charger opacity + upward drift.
+ *                   Window t=0.10 → 0.55.
+ *
+ * (t = scroll progress mapped to 0..1 AFTER the initial 0.15 hold zone.)
+ *
+ * Content preserved
+ * ─────────────────
+ * - Portal: radial-gradient backdrop, wind-field, 16 slit+charger groups,
+ *   "Electrifying the future." tagline (portal state ONLY now).
+ * - Solutions: logo (repositioned + resized), "Solutions" subtitle,
+ *   3-card grid (Hardware / Software / Services) — identical to
+ *   src/pages/solutions/index.astro.
+ */
+
+const portals = [
+  { x: 12, y: 38, side: 'left',  img: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',                                  label: 'EvoCharge Level 2',       productId: 'evocharge-40a'       },
+  { x: 78, y: 52, side: 'right', img: '/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png',                               label: 'MaxiCharger DC 60–240kW', productId: 'maxicharger-dc'      },
+  { x: 24, y: 62, side: 'left',  img: '/images/chargers/tellus/tellus-dc-fast-180kw.png',                                            label: 'Tellus DC Fast 180kW',    productId: 'evium-180kw'         },
+  { x: 68, y: 34, side: 'right', img: '/images/chargers/tellus/tellus-dc-fast-300kw.png',                                            label: 'Tellus DC Fast 300kW',    productId: 'evium-300kw'         },
+  { x: 15, y: 60, side: 'left',  img: '/images/chargers/tellus/evium-dc-fast-outdoor-kiosk-combo.png',                               label: 'DC Fast Outdoor Station', productId: 'evium-outdoor'       },
+  { x: 80, y: 66, side: 'right', img: '/images/chargers/siemens/siemens-versicharge-ac-variants.png',                                label: 'Siemens VersiCharge AC',  productId: 'versicharge-ac'      },
+  { x: 16, y: 76, side: 'left',  img: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',                               label: 'Siemens eMobility L2',    productId: 'versicharge-l2'      },
+  { x: 13, y: 22, side: 'left',  img: '/images/chargers/evocharge/EVOCHARGE-32A-Level-2-Charging-Station-Spec-Sheet-1122-03.png',    label: 'EvoCharge 32A L2',        productId: 'evocharge-32a'       },
+  { x: 23, y: 48, side: 'left',  img: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',       label: 'EvoCharge 40A L2',        productId: 'evocharge-40a'       },
+  { x: 13, y: 85, side: 'left',  img: '/images/chargers/tellus/Evium---AC-48A.png',                                                  label: 'Evium AC 12kW 50A',       productId: 'evium-ac-50a'        },
+  { x: 32, y: 72, side: 'left',  img: '/images/chargers/tellus/Evium---DC-Fast-Charger-60kw.png',                                    label: 'Evium DC Fast 60kW',      productId: 'evium-60kw'          },
+  { x: 86, y: 28, side: 'right', img: '/images/chargers/siemens/Evium---Pedestal-Wallmount-AC-charger.png',                          label: 'VersiCharge AC Pedestal', productId: 'versicharge-pedestal'},
+  { x: 76, y: 42, side: 'right', img: '/images/chargers/tellus/evium-dcfc-120kw.png',                                                label: 'Evium DCFC 120kW',        productId: 'evium-120kw'         },
+  { x: 86, y: 80, side: 'right', img: '/images/chargers/tellus/Evium---IC80A-Gen-2.png',                                             label: 'Evium AC 19.2kW 80A',     productId: 'evium-ac-80a'        },
+  { x: 72, y: 78, side: 'right', img: '/images/chargers/tellus/Evium---Wall-mount-AC-charger.png',                                   label: 'Evium Wall-mount AC',     productId: 'evium-ac-80a'        },
+  { x: 38, y: 24, side: 'left',  img: '/images/chargers/tellus/evium-dcfc-30kw-single-port.png',                                     label: 'Evium DC Fast 30kW',      productId: 'evium-30kw'          },
+];
+
+type CardCrop = 'left' | 'center' | 'right';
+interface Card { label: string; href: string; image: string; crop: CardCrop; }
+const cards: Card[] = [
+  { label: 'Hardware', href: '/products',           image: '/images/TODO-edit-on-our-logo.png',          crop: 'center' },
+  { label: 'Software', href: '#home-app-download',   image: '/images/sofware-solutions-button-light.png', crop: 'center' },
+  { label: 'Services', href: '/services',           image: '/images/solutions-placeholder.jpg',          crop: 'right'  },
+];
+---
+
+<div id="portal-to-solutions" class="pps-scene">
+  <div class="pps-stage">
+    {/* Seam with the hero above is handled from the hero side now — the
+        hero paints the stage's exact gradient UP into its bottom zone,
+        so both sides of the seam meet as one continuous gradient. No
+        top vignette needed. */}
+
+    {/* Wind field — JS appends animated gust lines here. Parallax: drifts
+        up + fades out during the --p-portal window. */}
+    <div id="pps-wind-field" class="pps-wind-field" aria-hidden="true"></div>
+
+    {/* 16 portal groups — slit + charger animations. Parallax: drift
+        upward faster than the wind as they fade (closer-to-camera feel). */}
+    {portals.map((p, pi) => (
+      <div
+        class="portal-group"
+        data-index={pi}
+        data-side={p.side}
+        data-product-id={p.productId}
+        style={`position:absolute; left:${p.x}%; top:${p.y}%; width:0; height:0; z-index:10;`}
+      >
+        <div class="portal-slit">
+          <div class="portal-top-edge" />
+          <div class="portal-interior" />
+          <div class="portal-bot-edge" />
+        </div>
+        <div class="portal-asset">
+          <img src={p.img} alt={p.label} width="250" height="350" class="asset-img" />
+          <div class="asset-underglow" />
+        </div>
+        <div class="portal-label">{p.label}</div>
+      </div>
+    ))}
+
+    {/* CONTENT LAYER — mirrors the solutions-hub layout exactly.
+        Flex-column, vertically centered, with the same padding + gap. */}
+    <div class="pps-content">
+      <div class="pps-header">
+        {/* Centered logo doubles as a link to the products index, matching
+            the pattern where each flying portal routes to its specific
+            product — the logo routes to the top of the full products
+            catalog. */}
+        <a href="/products" class="pps-logo-link" aria-label="See all products">
+          <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="pps-logo" />
+        </a>
+        {/* Portal-only tagline. Visible at --p-tagline=1, collapses to 0-height
+            and slides down while fading. Not rendered in solutions state. */}
+        <p class="pps-tagline">Electrifying the future. One property at a time.</p>
+        {/* Solutions-only subtitle. Collapsed at --p-subtitle=0, expands and
+            rises up from below while fading in. Matches solutions-hub-subtitle. */}
+        <p class="pps-subtitle">Solutions</p>
+      </div>
+
+      {/* 3-card grid + wide calculate-profits card below. Same stagger
+          system (--card-i 0..3), wider card spans all columns and uses
+          a shorter aspect ratio so the row reads as a secondary CTA. */}
+      <div class="pps-cards" data-pps-cards>
+        {cards.map((card, i) => (
+          <a
+            href={card.href}
+            class="pps-card"
+            data-pps-card
+            style={`--card-i: ${i};`}
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <img src={card.image} alt={card.label} class={`pps-card-img pps-card-crop-${card.crop}`} />
+            <div class="pps-card-overlay"></div>
+            <span class="pps-card-label">{card.label}</span>
+          </a>
+        ))}
+        <a
+          href="/solutions/generate-profits"
+          class="pps-card pps-card-wide"
+          data-pps-card
+          style="--card-i: 3;"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <img
+            src="/images/generate-profits-solutions-pic.avif"
+            alt="Calculate generated profits"
+            class="pps-card-img pps-card-crop-center"
+          />
+          <div class="pps-card-overlay"></div>
+          <span class="pps-card-label">Calculate Generated Profits</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════════════
+     SCENE + STAGE
+     ═══════════════════════════════════════════════════════════════════════ */
+  .pps-scene {
+    position: relative;
+    /* Scene height is deliberately taller than vh so the sticky stage
+       has a scroll band to drive the transition AND two hold zones — a
+       front hold before the animation starts (pure portal) and a back
+       hold after it finishes (pure solutions). The back hold is what
+       keeps the user anchored in the final solutions state instead of
+       releasing sticky the instant animation completes. See HOLD_END
+       and HOLD_OUT_START in the JS below for the exact bands. Bumped
+       from 240vh to 270vh so the back-hold band is longer — users
+       stay anchored in the solutions committed state for a bit more
+       scroll distance before the map section appears. This replaces
+       the previous "dead padding between sections" approach, which
+       produced a flat color band that broke the seamless flow. */
+    height: 270vh;
+    background: #0d1a22;
+  }
+
+  .pps-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(ellipse 90% 80% at 50% 46%, #2a4a5e 0%, #1a2f3a 45%, #081420 100%);
+    font-family: 'Maven Pro', sans-serif;
+    /* Scroll-driven variables — set from JS every animation frame. */
+    --p: 0;          /* logo morph (size/opacity)                  */
+    --p-tagline: 1;  /* 1 in portal, 0 in solutions (opacity/drop) */
+    --p-subtitle: 0; /* 0 in portal, 1 in solutions (rise/fade-in) */
+    --p-cards: 0;    /* 0 in portal, 1 in solutions (rise)         */
+    --p-portal: 0;   /* portal content fade-out + upward drift     */
+    /* Portal sizing tokens (same as HeroPlaceholderTesting). */
+    --slit-w: clamp(120px, 20vw, 360px);
+    --slit-h: clamp(48px, 6vw, 108px);
+    --img-w:  clamp(80px, 15vw, 280px);
+  }
+
+  /* (Old .pps-top-vignette removed — the hero's .hh-bottom-seam now
+     extends the stage's exact radial gradient upward, so both sides of
+     the seam paint identical colors at the boundary pixel with no
+     overlay needed here.) */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     WIND FIELD + PORTAL GROUPS
+     Parallax: both drift up as they fade, portals drift slightly faster
+     so there's layered depth between the two.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .pps-wind-field {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
+    opacity: calc(1 - var(--p-portal));
+    transform: translateY(calc(var(--p-portal) * -60px));
+    will-change: opacity, transform;
+  }
+
+  .portal-group {
+    opacity: calc(1 - var(--p-portal));
+    transform: translateY(calc(var(--p-portal) * -90px));
+    will-change: opacity, transform;
+  }
+
+  .portal-slit {
+    position: absolute;
+    width: var(--slit-w);
+    height: var(--slit-h);
+    left: calc(var(--slit-w) / -2);
+    top: calc(var(--slit-h) / -2);
+    transform: scaleY(0);
+    transform-origin: center center;
+    overflow: visible;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .portal-top-edge,
+  .portal-bot-edge {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: #2DC856;
+    z-index: 2;
+  }
+  .portal-top-edge { top: 0;    box-shadow: 0 -8px 24px #2DC856, 0 -2px 50px rgba(45,200,86,0.5); }
+  .portal-bot-edge { bottom: 0; box-shadow: 0  8px 24px #2DC856, 0  2px 50px rgba(45,200,86,0.5); }
+
+  .portal-interior {
+    position: absolute;
+    inset: 2px 0;
+    background: linear-gradient(to bottom,
+      rgba(45,200,86,0.13)  0%,
+      #0d1820              12%,
+      #0b151e              50%,
+      #0d1820              88%,
+      rgba(45,200,86,0.13) 100%
+    );
+    z-index: 1;
+  }
+
+  .portal-asset {
+    position: absolute;
+    bottom: 0;
+    left: calc(var(--img-w) / -2);
+    opacity: 0;
+    transform: translateY(28px) scale(0.6);
+    filter: brightness(4) blur(8px);
+    transition:
+      opacity   0.5s ease,
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      filter    0.65s ease;
+    text-align: center;
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  .asset-img {
+    position: relative;
+    z-index: 1;
+    width: var(--img-w);
+    height: auto;
+    display: block;
+  }
+
+  .asset-underglow {
+    position: absolute;
+    bottom: clamp(16px, 2.5vw, 30px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(var(--img-w) * 0.75);
+    height: clamp(8px, 1vw, 14px);
+    background: rgba(45,200,86,0.45);
+    filter: blur(12px);
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  .portal-label {
+    position: absolute;
+    left: calc(var(--slit-w) / -2);
+    top: calc(var(--slit-h) / -2);
+    width: var(--slit-w);
+    height: var(--slit-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.5rem, 1.1vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow:
+      0 0 16px rgba(45,200,86,0.95),
+      0 0 4px  rgba(45,200,86,0.6);
+    opacity: 0;
+    z-index: 30;
+    pointer-events: none;
+    transition: opacity 0.4s ease 0.35s;
+  }
+
+  /* Per-portal image sizing overrides (same as HeroPlaceholderTesting). */
+  .portal-group[data-index="0"] { --img-w: clamp(80px, 12vw, 210px); }
+  .portal-group[data-index="0"] .asset-img {
+    height: calc(var(--img-w) * 1.1);
+    object-fit: cover;
+    object-position: top center;
+  }
+  .portal-group[data-index="0"] .portal-asset { bottom: calc(var(--slit-h) * -0.4); }
+  .portal-group[data-index="1"] { --img-w: clamp(84px, 14vw, 252px); }
+  .portal-group[data-index="1"] .portal-asset { bottom: clamp(8px, 1.5vw, 22px); }
+  .portal-group[data-index="2"] { --img-w: clamp(98px, 18.2vw, 316px); }
+  .portal-group[data-index="3"] { --img-w: clamp(96px, 18vw, 310px); }
+  .portal-group[data-index="3"] .portal-asset { bottom: clamp(4px, 0.8vw, 14px); }
+  .portal-group[data-index="4"] { --img-w: clamp(110px, 21vw, 360px); }
+  .portal-group[data-index="5"] { --img-w: clamp(80px, 12.5vw, 220px); }
+  .portal-group[data-index="5"] .asset-img {
+    height: calc(var(--img-w) * 0.85);
+    object-fit: cover;
+    object-position: top center;
+  }
+  .portal-group[data-index="5"] .portal-asset { bottom: calc(var(--slit-h) * -0.5); }
+  .portal-group[data-index="6"] { --img-w: clamp(65px, 9vw, 160px); }
+  .portal-group[data-index="6"] .asset-img {
+    height: calc(var(--img-w) * 1.1);
+    object-fit: cover;
+    object-position: top center;
+  }
+  .portal-group[data-index="6"] .portal-asset { bottom: calc(var(--slit-h) * -0.4); }
+
+  .portal-group.is-open .portal-slit {
+    transform: scaleY(1);
+    box-shadow: 0 0 40px rgba(45,200,86,0.2), 0 0 90px rgba(45,200,86,0.07);
+  }
+  .portal-group.is-active .portal-asset {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1.05) blur(0);
+  }
+  .portal-group.is-active .portal-label { opacity: 1; }
+  .portal-group.is-active .portal-asset,
+  .portal-group.is-active .portal-label {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .portal-group.is-active .portal-asset:hover .asset-img {
+    filter: brightness(1.15);
+    transition: filter 0.15s ease;
+  }
+  .portal-group.is-active .portal-label:hover {
+    text-shadow:
+      0 0 20px rgba(45,200,86,1),
+      0 0 6px  rgba(45,200,86,0.8);
+  }
+  .portal-group.is-closing .portal-slit {
+    transform: scaleY(0);
+    transition: transform 0.3s cubic-bezier(0.7, 0, 0.84, 0);
+  }
+  .portal-group.is-closing .portal-asset {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.88);
+    filter: brightness(2.5) blur(5px);
+    transition: opacity 0.3s, transform 0.35s, filter 0.28s;
+  }
+  .portal-group.is-closing .portal-label { opacity: 0; transition: opacity 0.15s; }
+
+  /* Kill portal clicks once the transition is underway. */
+  .pps-stage.is-transitioning .portal-group { pointer-events: none; }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     CONTENT LAYER — matches /solutions page layout exactly
+     (flex-column centered, padding 8rem top / 4rem bottom, gap 3rem)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .pps-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--p-cards) * 3rem);
+    padding: 8rem 1.5rem 4rem;
+    z-index: 20;
+    pointer-events: none;
+    box-sizing: border-box;
+    /* Subtle translate correction: in portal state, centered-with-padding
+       is ~16px below true viewport center. This nudges the block up in
+       portal state and relaxes to natural center as --p grows. */
+    transform: translateY(calc((1 - var(--p)) * -16px));
+  }
+
+  .pps-header {
+    text-align: center;
+    flex-shrink: 0;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  /* ── Logo: center-big → upper-small (driven by flex + size change) ── */
+  /* Anchor wraps the logo image for click-through to /products. Sized to
+     shrink-wrap the image so the clickable area matches the logo bounds
+     (not the full header width). Hover provides a subtle affordance. */
+  .pps-logo-link {
+    display: inline-block;
+    line-height: 0;
+    text-decoration: none;
+    /* Parent .pps-content / .pps-header have pointer-events: none so the
+       flying portal cards behind the content layer can still receive
+       clicks. Re-enable events on the logo link itself so it's clickable
+       as a small island within the otherwise click-through header. */
+    pointer-events: auto;
+    transition: transform 0.22s ease, filter 0.22s ease;
+  }
+  .pps-logo-link:hover {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 16px rgba(45, 200, 86, 0.25));
+  }
+  /* Once the scene starts morphing toward the solutions state, the logo
+     is on its way somewhere else — keeping it a /products link during
+     the transition would be misleading. `.is-transitioning` is already
+     toggled on the stage the moment --p > 0.02 (or the tagline fades),
+     so hooking in there means the logo only acts as a link in its
+     centered portal state. Hover affordance is removed in sync. */
+  .pps-stage.is-transitioning .pps-logo-link {
+    pointer-events: none;
+    cursor: default;
+  }
+  .pps-stage.is-transitioning .pps-logo-link:hover {
+    transform: none;
+    filter: none;
+  }
+  .pps-logo {
+    height: calc(80px - var(--p) * 16px); /* 5rem → 64px */
+    display: block;
+    margin: 0 auto;
+    opacity: calc(1 - var(--p) * 0.12);   /* 1.00 → 0.88 (matches solutions-hub-logo) */
+    will-change: height, opacity;
+  }
+
+  /* ── Tagline (portal only): parallax DROPS downward as it fades out.
+        Counter-motion to the rising logo creates the "logo leaves the
+        tagline behind" feel. Also collapses its layout (margin + max-height)
+        so it doesn't leave dead space in solutions state. ── */
+  .pps-tagline {
+    margin-top: calc(var(--p-tagline) * 1.25rem);
+    max-height: calc(var(--p-tagline) * 60px);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.45);
+    opacity: var(--p-tagline);
+    transform: translateY(calc((1 - var(--p-tagline)) * 34px));
+    overflow: hidden;
+    white-space: nowrap;
+    will-change: opacity, transform, max-height, margin-top;
+  }
+
+  /* ── Subtitle (solutions only): parallax RISES up from below as it
+        fades in. Matches .solutions-hub-subtitle sizing/color exactly. ── */
+  .pps-subtitle {
+    margin-top: calc(var(--p-subtitle) * 14px);
+    max-height: calc(var(--p-subtitle) * 28px);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+    opacity: var(--p-subtitle);
+    transform: translateY(calc((1 - var(--p-subtitle)) * 22px));
+    overflow: hidden;
+    will-change: opacity, transform, max-height, margin-top;
+  }
+
+  /* ── Cards: parallax rise from below, per-card stagger.
+        Each card has --card-i set inline (0, 1, 2). Using that, each
+        card rises from a slightly different start distance AND arrives
+        on a slightly different progress threshold. Pure scroll-driven —
+        no time-based transitions. ── */
+  .pps-cards {
+    /* Bumped from 90vh to accommodate the secondary wide card row below
+       the 3-card grid without clipping at full reveal. */
+    max-height: calc(var(--p-cards) * 120vh);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 56rem;
+    opacity: var(--p-cards);
+    overflow: hidden;
+    /* Whole grid rises up; additionally each child card rises from its
+       own start distance for layered-depth parallax. */
+    transform: translateY(calc((1 - var(--p-cards)) * 40px));
+    pointer-events: none;
+    will-change: opacity, transform, max-height;
+  }
+  .pps-stage.cards-interactive .pps-cards { pointer-events: auto; }
+
+
+  .pps-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    aspect-ratio: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    /* Per-card parallax: card[0] rises 50px, card[1] 80px, card[2] 110px.
+       All fade at the same rate but arrive at different depths. */
+    transform: translateY(calc((1 - var(--p-cards)) * (40px + var(--card-i, 0) * 32px)));
+    opacity: calc(var(--p-cards) - (1 - var(--p-cards)) * var(--card-i, 0) * 0.15);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform, opacity;
+  }
+  .pps-card:hover {
+    border-color: rgba(45, 200, 86, 0.35);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 0 24px rgba(45, 200, 86, 0.08);
+  }
+
+  /* Secondary wide CTA — spans the full row beneath the 3 cards,
+     shorter aspect so it reads as a linked banner. Inherits all
+     .pps-card styling + parallax via the same --card-i system.
+     Compound selector to override the base .pps-card aspect-ratio. */
+  .pps-card.pps-card-wide {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 3.4;
+  }
+
+  .pps-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .pps-card:hover .pps-card-img { transform: scale(1.05); }
+  .pps-card-crop-left   { object-position: 15% center; }
+  .pps-card-crop-center { object-position: 50% center; }
+  .pps-card-crop-right  { object-position: 85% center; }
+
+  .pps-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(8, 20, 32, 0.85) 0%,
+      rgba(8, 20, 32, 0.50) 40%,
+      rgba(8, 20, 32, 0.35) 100%
+    );
+    transition: background 0.3s ease;
+  }
+  .pps-card:hover .pps-card-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(8, 20, 32, 0.75) 0%,
+      rgba(8, 20, 32, 0.38) 40%,
+      rgba(8, 20, 32, 0.22) 100%
+    );
+  }
+
+  /* Editorial label treatment — no pill, no heavy box. A permanent
+     text-shadow keeps the label readable on any photo brightness (the
+     old green-on-image hover failed on lighter photos). On hover the
+     label gets a subtle tracking expansion and a thin brand-accent
+     rule slides in below it, like a premium product page header. */
+  .pps-card-label {
+    position: relative;
+    z-index: 1;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow:
+      0 2px 14px rgba(0, 0, 0, 0.55),
+      0 1px 3px  rgba(0, 0, 0, 0.45);
+    transition:
+      color 260ms ease,
+      letter-spacing 360ms cubic-bezier(.22,1,.36,1),
+      text-shadow 260ms ease;
+  }
+  .pps-card-label::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 44px;
+    height: 1.5px;
+    background: #2DC856;
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    transition:
+      transform 380ms cubic-bezier(.22,1,.36,1),
+      opacity 260ms ease;
+  }
+  .pps-card:hover .pps-card-label {
+    color: #ffffff;
+    letter-spacing: 0.26em;
+    text-shadow:
+      0 3px 18px rgba(0, 0, 0, 0.65),
+      0 1px 3px  rgba(0, 0, 0, 0.55);
+  }
+  .pps-card:hover .pps-card-label::after {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  /* Narrow viewports — single column, wider aspect */
+  @media (max-width: 640px) {
+    .pps-cards {
+      grid-template-columns: 1fr;
+      max-width: 20rem;
+    }
+    .pps-card { aspect-ratio: 16 / 9; }
+    .pps-card-wide { aspect-ratio: 16 / 6; }
+    .pps-tagline { white-space: normal; max-width: 80vw; }
+  }
+</style>
+
+<script>
+  (() => {
+    const scene = document.getElementById('portal-to-solutions') as HTMLElement | null;
+    if (!scene) return;
+    const stage = scene.querySelector<HTMLElement>('.pps-stage');
+    const field = document.getElementById('pps-wind-field');
+    if (!stage || !field) return;
+
+    const groups = Array.from(stage.querySelectorAll<HTMLElement>('.portal-group'));
+    const cardEls = Array.from(scene.querySelectorAll<HTMLElement>('[data-pps-card]'));
+
+    // Click-to-navigate only while portal is active and transition not underway.
+    groups.forEach((g) => {
+      g.addEventListener('click', () => {
+        if (!g.classList.contains('is-active')) return;
+        if (stage.classList.contains('is-transitioning')) return;
+        const pid = g.getAttribute('data-product-id');
+        if (pid) window.location.href = `/products#${pid}`;
+      });
+    });
+
+    function wait(ms: number) { return new Promise<void>(r => setTimeout(r, ms)); }
+    function rnd(lo: number, hi: number) { return lo + Math.random() * (hi - lo); }
+    function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
+    function easeInOut(t: number) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    /**
+     * Eased progress inside a sub-window [start, end] of the overall
+     * normalized transition progress t. Returns 0 before start, 1 after end.
+     * This is what gives each layer its own rate — shifted/scaled easing.
+     */
+    function windowProgress(t: number, start: number, end: number): number {
+      if (t <= start) return 0;
+      if (t >= end) return 1;
+      return easeInOut((t - start) / (end - start));
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // SCROLL-DRIVEN TRANSITION  (parallax — five layered windows)
+    //
+    //   raw 0.00 → 0.08   HOLD FRONT (pure portal state, nothing moves)
+    //   raw 0.08 → 0.80   transition (normalized into local t = 0..1)
+    //   raw 0.80 → 1.00   HOLD BACK (pure solutions state, nothing moves)
+    //
+    //   The HOLD BACK band is what anchors the user in the solutions
+    //   final state — without it, sticky releases the instant the
+    //   animation hits t=1, which makes "solutions" feel unstable. With
+    //   it, the user has ~20 % of the scene's scroll band where the
+    //   stage stays pinned in its committed solutions layout.
+    //
+    //   Within t = 0..1 each element still has its own window:
+    //     --p-tagline  : 1 - window(t, 0.00, 0.28)   fade + fall away
+    //     --p-portal   :     window(t, 0.10, 0.55)   fade + drift up
+    //     --p          :     window(t, 0.15, 0.65)   logo size/opacity
+    //     --p-subtitle :     window(t, 0.35, 0.75)   rise + fade in
+    //     --p-cards    :     window(t, 0.55, 1.00)   rise (staggered)
+    // ────────────────────────────────────────────────────────────────
+    let ticking = false;
+    const HOLD_END        = 0.08;  // raw at which animation starts
+    const HOLD_OUT_START  = 0.80;  // raw at which animation completes
+    const TRANS_RANGE     = HOLD_OUT_START - HOLD_END;
+
+    function computeProgress() {
+      const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
+      const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
+      const raw = scrolled / scrollable;
+
+      let p = 0, pTagline = 1, pSubtitle = 0, pCards = 0, pPortal = 0;
+
+      if (raw > HOLD_END) {
+        // clamp01 handles the back-hold band by forcing t=1 once raw
+        // passes HOLD_OUT_START → every window stays at its committed
+        // end value through the rest of the scene.
+        const t = clamp01((raw - HOLD_END) / TRANS_RANGE);
+        pTagline  = 1 - windowProgress(t, 0.00, 0.28);
+        pPortal   =     windowProgress(t, 0.10, 0.55);
+        p         =     windowProgress(t, 0.15, 0.65);
+        pSubtitle =     windowProgress(t, 0.35, 0.75);
+        pCards    =     windowProgress(t, 0.55, 1.00);
+      }
+
+      stage!.style.setProperty('--p',          p.toFixed(4));
+      stage!.style.setProperty('--p-tagline',  pTagline.toFixed(4));
+      stage!.style.setProperty('--p-subtitle', pSubtitle.toFixed(4));
+      stage!.style.setProperty('--p-cards',    pCards.toFixed(4));
+      stage!.style.setProperty('--p-portal',   pPortal.toFixed(4));
+
+      stage!.classList.toggle('is-transitioning', p > 0.02 || pTagline < 0.98);
+      stage!.classList.toggle('cards-interactive', pCards > 0.5);
+
+      // Cards a11y: add to tab order only once half-visible.
+      const cardsReady = pCards > 0.4;
+      cardEls.forEach((c) => {
+        if (cardsReady) {
+          c.removeAttribute('aria-hidden');
+          c.removeAttribute('tabindex');
+        } else {
+          c.setAttribute('aria-hidden', 'true');
+          c.setAttribute('tabindex', '-1');
+        }
+      });
+    }
+
+    // Track the last scroll direction so the snap-on-idle handler
+    // commits toward the direction the user was already going. Updated
+    // on every scroll event, ignored while our own programmatic snap
+    // scroll is settling (otherwise the snap would think the user
+    // scrolled against their intent and flip direction on the next
+    // idle). `null` means we haven't observed any direction yet — on
+    // first-visit-to-scene we default to `'down'` (user entered by
+    // scrolling down).
+    let lastScrollY: number = window.scrollY;
+    let lastScrollDirection: 'down' | 'up' = 'down';
+
+    function onScroll() {
+      const curY = window.scrollY;
+      if (!snapping) {
+        if (curY > lastScrollY + 1)       lastScrollDirection = 'down';
+        else if (curY < lastScrollY - 1)  lastScrollDirection = 'up';
+      }
+      lastScrollY = curY;
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { computeProgress(); ticking = false; });
+      scheduleSnap();
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    computeProgress();
+
+    // ────────────────────────────────────────────────────────────────
+    // SNAP-ON-IDLE
+    //
+    // If the user stops scrolling while the scene is mid-transition,
+    // gently finish the movement so they don't sit in an awkward
+    // half-morphed state. Direction-driven: the snap commits toward
+    // whichever direction the user was already scrolling. Scrolling
+    // down and pausing → commits forward (into solutions). Scrolling
+    // up and pausing → commits back (into portal). This matches user
+    // intent instead of a positional threshold that sometimes flipped
+    // the commit direction against the user's momentum.
+    //
+    // Still deliberately quiet:
+    //   - Waits SNAP_IDLE_MS after the last scroll before committing
+    //     so intentional micro-pauses don't trigger.
+    //   - Skipped when the user is already near a committed state
+    //     (raw < SNAP_LOW_SKIP or raw > SNAP_HIGH_SKIP) — the front
+    //     and back hold zones are already resting states.
+    //   - Skipped when `prefers-reduced-motion` is set.
+    //   - Skipped when a hash-driven auto-scroll (#solutions) is in
+    //     flight, and during its own smooth-scroll settle.
+    // ────────────────────────────────────────────────────────────────
+    let snapTimer: number | null = null;
+    let snapping = false;
+    // Idle threshold — time after the last scroll before the snap
+    // fires. Tuned to feel responsive: long enough that a user
+    // actively scrolling doesn't trigger it, short enough that a
+    // deliberate stop doesn't feel like it's hanging.
+    const SNAP_IDLE_MS      = 400;
+    // Duration of the custom rAF-driven snap scroll (ms). A browser-
+    // default smooth scroll is short (~300 ms) which read as jerky
+    // here; this slows + eases the motion so the commit feels like
+    // a deliberate glide rather than a whip.
+    const SNAP_DURATION_MS  = 1400;
+    // Snap is only active inside the animation band — front hold and
+    // back hold are already committed states, so the user is free to
+    // rest there without getting nudged. A small buffer inside each
+    // hold keeps us from snapping users who are one pixel away from a
+    // committed state just because they're mid-scroll.
+    const SNAP_LOW_SKIP     = HOLD_END - 0.02;        // ≈ 0.06
+    const SNAP_HIGH_SKIP    = HOLD_OUT_START + 0.02;  // ≈ 0.82
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function currentRaw() {
+      const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
+      const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
+      return { raw: scrolled / scrollable, scrollable, sceneTopAbs: window.scrollY + rect.top };
+    }
+
+    function scheduleSnap() {
+      if (prefersReducedMotion.matches) return;
+      if (snapping) return;
+      if (snapTimer !== null) window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(runSnap, SNAP_IDLE_MS);
+    }
+
+    function runSnap() {
+      snapTimer = null;
+      if (snapping) return;
+      // Don't fight a hash-driven jump in progress.
+      if (window.location.hash === '#solutions') return;
+      const { raw, scrollable, sceneTopAbs } = currentRaw();
+      // Skip if we're effectively at a committed state already.
+      if (raw <= SNAP_LOW_SKIP || raw >= SNAP_HIGH_SKIP) return;
+      // Skip if the scene isn't currently the pinned element on screen
+      // (e.g. user is scrolling way above/below — rect math can read
+      // within the range even when the sticky band isn't active).
+      const rect = scene!.getBoundingClientRect();
+      if (rect.top > 1 || rect.bottom < window.innerHeight - 1) return;
+
+      // Direction-driven commit — whichever way the user was
+      // scrolling is the way the snap finishes. Respects momentum /
+      // intent instead of flipping based on mid-animation position.
+      const goForward = lastScrollDirection === 'down';
+      // Commit targets:
+      //   forward → solutionsAnchorY (mid-back-hold, raw ≈ 0.90) so
+      //             the user is firmly anchored with sticky still
+      //             active and buffer in both directions.
+      //   back    → just inside the front HOLD zone so we land in
+      //             pure portal state without hopping out of sticky.
+      const targetY = goForward
+        ? solutionsAnchorY()
+        : Math.round(sceneTopAbs + 0.03 * scrollable);
+
+      snapping = true;
+      smoothScrollTo(targetY, SNAP_DURATION_MS);
+      // Release the flag after the animation's had time to finish.
+      // Buffer a bit past SNAP_DURATION_MS so the last scroll event
+      // doesn't flip direction tracking before we mark it complete.
+      window.setTimeout(() => { snapping = false; }, SNAP_DURATION_MS + 120);
+    }
+
+    // rAF-based smooth scroll with cubic ease-in-out. Fires scroll
+    // events along the way (which the direction tracker ignores
+    // because `snapping` is true) and lands exactly on the target.
+    function smoothScrollTo(targetY: number, durationMs: number) {
+      const startY = window.scrollY;
+      const dist   = targetY - startY;
+      if (Math.abs(dist) < 1) return;
+      const startTs = performance.now();
+      function step(now: number) {
+        const t = Math.min(1, (now - startTs) / durationMs);
+        // Symmetrical ease-in-out — gentle start and stop at both ends.
+        const eased = t < 0.5
+          ? 2 * t * t
+          : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        window.scrollTo(0, Math.round(startY + dist * eased));
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // #solutions HASH HANDLER
+    //
+    // Clicking "Solutions" in the navbar routes to /#solutions. We
+    // intercept that hash and jump the page to the scroll position
+    // where the sticky stage is still pinned AND the transition has
+    // reached its final state — i.e. the "solutions centered in view"
+    // layout that replaces the old /solutions page.
+    //
+    //   Target scroll_y = scene.top + (scene.height - viewport.height) - 1
+    //
+    //   The -1 keeps us just inside the sticky range so the stage is
+    //   guaranteed pinned (one pixel further and sticky releases).
+    // ────────────────────────────────────────────────────────────────
+    // Target raw for the "solutions anchored" state: halfway inside the
+    // back hold band so the user has equal buffer in both directions
+    // before sticky releases or animation reverses.
+    const SOLUTIONS_ANCHOR_RAW = HOLD_OUT_START + (1 - HOLD_OUT_START) * 0.5; // 0.90
+
+    function solutionsAnchorY() {
+      const rect = scene!.getBoundingClientRect();
+      const sceneH = scene!.offsetHeight;
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, sceneH - vh);
+      const sceneTopAbs = window.scrollY + rect.top;
+      return Math.round(sceneTopAbs + SOLUTIONS_ANCHOR_RAW * scrollable);
+    }
+
+    function scrollToSolutionsFinalState(behavior: ScrollBehavior) {
+      window.scrollTo({ top: solutionsAnchorY(), behavior });
+    }
+
+    function maybeJumpToSolutions(behavior: ScrollBehavior) {
+      if (window.location.hash !== '#solutions') return;
+      // Two rAFs so any post-DOM layout settling (fonts, images) is done.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        scrollToSolutionsFinalState(behavior);
+      }));
+    }
+
+    // Initial load: jump instantly so the user lands on the final state
+    // without watching an autoscroll animation run.
+    maybeJumpToSolutions('auto');
+
+    // Re-jump once images/fonts fully resolve in case layout shifted.
+    window.addEventListener('load', () => maybeJumpToSolutions('auto'));
+
+    // Same-page clicks on the navbar Solutions link only update the hash;
+    // smooth-scroll those so the user sees the travel.
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#solutions') scrollToSolutionsFinalState('smooth');
+    });
+
+    // Edge case: the nav link is clicked while already at /#solutions.
+    // The hash doesn't change → no hashchange event. Intercept clicks on
+    // any link targeting /#solutions or #solutions and re-scroll.
+    document.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement | null)?.closest?.('a[href="/#solutions"], a[href="#solutions"]');
+      if (!t) return;
+      // Only handle if we're already on the homepage (otherwise the browser
+      // will navigate and our load handler takes over).
+      if (window.location.pathname !== '/') return;
+      if (window.location.hash === '#solutions') {
+        e.preventDefault();
+        scrollToSolutionsFinalState('smooth');
+      }
+    });
+
+    // ────────────────────────────────────────────────────────────────
+    // PORTAL WIND + CHARGER ANIMATIONS
+    //   (Identical to HeroPlaceholderTesting. The --p-portal variable
+    //    handles the visual fade; the animation loop itself keeps
+    //    running so reversal-on-scroll-up restores behavior cleanly.)
+    // ────────────────────────────────────────────────────────────────
+    let portalQueue: number[] = [];
+    function nextPortalIdx() {
+      if (!portalQueue.length) {
+        portalQueue = Array.from({ length: groups.length }, (_, i) => i)
+          .sort(() => Math.random() - 0.5);
+      }
+      return portalQueue.pop()!;
+    }
+
+    let lastDir: 'left' | 'right' = 'left';
+    function nextDir(): 'left' | 'right' {
+      const flip = Math.random() > 0.20;
+      lastDir = flip ? (lastDir === 'left' ? 'right' : 'left') : lastDir;
+      return lastDir;
+    }
+
+    function spawnGustLine(fromDir: 'left' | 'right', delayMs: number, clusterY?: number) {
+      const vw = stage!.offsetWidth;
+      const heavy  = Math.random() < 0.25;
+      const w      = heavy ? rnd(180, 310) : rnd(30, 220);
+      const alpha  = heavy ? rnd(0.35, 0.60) : rnd(0.04, 0.42);
+      const h      = heavy ? 2 : (Math.random() < 0.45 ? 2 : 1);
+      const spd    = heavy ? rnd(1800, 4200) : rnd(380, 2600);
+
+      let y: number;
+      if (clusterY !== undefined && Math.random() < 0.38) {
+        y = Math.max(12, Math.min(93, clusterY + rnd(-10, 10)));
+      } else {
+        y = rnd(12, 93);
+      }
+
+      const comet = Math.random() < 0.45;
+      let bg: string;
+      if (comet) {
+        if (fromDir === 'left') {
+          bg = `linear-gradient(to right,
+            rgba(45,200,86,0) 0%,
+            rgba(45,200,86,${(alpha * 0.3).toFixed(2)}) 35%,
+            rgba(45,200,86,${alpha.toFixed(2)}) 82%,
+            rgba(45,200,86,${(alpha * 0.5).toFixed(2)}) 93%,
+            rgba(45,200,86,0) 100%)`;
+        } else {
+          bg = `linear-gradient(to right,
+            rgba(45,200,86,0) 0%,
+            rgba(45,200,86,${(alpha * 0.5).toFixed(2)}) 7%,
+            rgba(45,200,86,${alpha.toFixed(2)}) 18%,
+            rgba(45,200,86,${(alpha * 0.3).toFixed(2)}) 65%,
+            rgba(45,200,86,0) 100%)`;
+        }
+      } else {
+        bg = `linear-gradient(to right,
+          rgba(45,200,86,0) 0%,
+          rgba(45,200,86,${alpha.toFixed(2)}) 20%,
+          rgba(45,200,86,${alpha.toFixed(2)}) 80%,
+          rgba(45,200,86,0) 100%)`;
+      }
+
+      const el = document.createElement('div');
+      Object.assign(el.style, {
+        position:   'absolute',
+        top:        `${y.toFixed(1)}%`,
+        height:     `${h}px`,
+        width:      `${w}px`,
+        background: bg,
+        pointerEvents: 'none',
+        willChange: 'transform',
+      });
+      field!.appendChild(el);
+
+      const fromX = fromDir === 'left' ? -(w + 20) : vw + 20;
+      const toX   = fromDir === 'left' ?  vw + 20  : -(w + 20);
+      el.style.transform = `translateX(${fromX}px)`;
+
+      setTimeout(() => {
+        el.animate(
+          [{ transform: `translateX(${fromX}px)` }, { transform: `translateX(${toX}px)` }],
+          { duration: spd, easing: 'linear', fill: 'forwards' }
+        ).onfinish = () => el.remove();
+      }, delayMs);
+    }
+
+    async function doGust() {
+      const fromDir  = nextDir();
+      const g        = groups[nextPortalIdx()];
+      const vw       = stage!.offsetWidth;
+      const sRect    = stage!.getBoundingClientRect();
+      const gRect    = g.getBoundingClientRect();
+      const anchorX  = gRect.left - sRect.left;
+      const anchorY  = gRect.top  - sRect.top;
+      const anchorYpct = (anchorY / stage!.offsetHeight) * 100;
+      const slitW    = g.querySelector<HTMLElement>('.portal-slit')!.offsetWidth;
+      const landX    = anchorX - slitW / 2;
+
+      const lineCount     = Math.round(rnd(5, 14));
+      const staggerBase   = rnd(18, 65);
+      const triggerOffset = rnd(80, 560);
+      const triggerSpeed  = rnd(300, 680);
+      const holdMs        = rnd(40, 300);
+      const slitOpenMs    = rnd(340, 580);
+      const chargerDwell  = rnd(1900, 3800);
+      const fadeMs        = rnd(350, 500);
+
+      for (let i = 0; i < lineCount; i++) {
+        const jitter  = rnd(-20, 20);
+        const stagger = i * staggerBase + jitter;
+        spawnGustLine(fromDir, Math.max(0, stagger), anchorYpct);
+      }
+
+      await wait(triggerOffset);
+
+      const tl = document.createElement('div');
+      Object.assign(tl.style, {
+        position:   'absolute',
+        top:        `${anchorY - 1}px`,
+        height:     '2px',
+        width:      `${slitW}px`,
+        background: 'linear-gradient(to right, rgba(45,200,86,0) 0%, rgba(45,200,86,0.88) 26%, rgba(45,200,86,0.88) 74%, rgba(45,200,86,0) 100%)',
+        pointerEvents: 'none',
+        willChange: 'transform',
+        zIndex:     '8',
+      });
+      field!.appendChild(tl);
+
+      const startX = fromDir === 'left' ? -(slitW + 30) : vw + 30;
+      tl.style.transform = `translateX(${startX}px)`;
+
+      await new Promise<void>(resolve => {
+        tl.animate(
+          [{ transform: `translateX(${startX}px)` }, { transform: `translateX(${landX}px)` }],
+          { duration: triggerSpeed, easing: 'cubic-bezier(0.16, 0, 0.06, 1)', fill: 'forwards' }
+        ).onfinish = () => resolve();
+      });
+
+      await wait(holdMs);
+      const tearSpeed = Math.round(rnd(280, 700));
+      const slitEl = g.querySelector<HTMLElement>('.portal-slit')!;
+      slitEl.style.transition = `transform ${tearSpeed}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+      g.classList.add('is-open');
+      tl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+      await wait(slitOpenMs);
+
+      const labelEl = g.querySelector<HTMLElement>('.portal-label');
+      if (labelEl) {
+        labelEl.style.fontSize = '';
+        let fs = parseFloat(getComputedStyle(labelEl).fontSize);
+        while (labelEl.scrollWidth > labelEl.offsetWidth && fs > 6) {
+          fs -= 0.4;
+          labelEl.style.fontSize = fs + 'px';
+        }
+      }
+      g.classList.add('is-active');
+      await wait(chargerDwell);
+
+      g.classList.remove('is-active');
+      slitEl.style.transition = '';
+      g.classList.add('is-closing');
+      await wait(fadeMs);
+      g.classList.remove('is-open', 'is-closing');
+      tl.remove();
+    }
+
+    async function loop() {
+      while (true) {
+        await doGust();
+        await wait(rnd(120, 950));
+      }
+    }
+
+    setTimeout(loop, 800);
+  })();
+</script>

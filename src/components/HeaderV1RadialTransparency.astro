@@ -1,0 +1,1153 @@
+---
+/**
+ * HeaderV1RadialTransparency  (ARCHIVED — NOT IMPORTED ANYWHERE)
+ * ──────────────────────────────────────────────────────────────
+ * This file used to be `HeaderV2.astro` and carried our first
+ * sandbox treatment of the site header: a radial-ellipse
+ * "obscuring band" painted behind the desktop battery on scroll,
+ * so that content scrolling underneath the nav softened behind a
+ * backdrop-blur instead of peeking through uncovered. The core
+ * of that work lives in the `.desktop-header::before` rule —
+ * anchored radial-gradient mask (`ellipse 50% 80% at 50% -6%`)
+ * with a tuned stop range (`black 76%, transparent 80%`) for a
+ * tight horizontal fade past the battery's edges.
+ *
+ * It's archived here (not imported by Layout or any page) after
+ * we pivoted to a completely different HeaderV2 approach — a
+ * left-side vertical "lefter" nav. Keeping the file around so
+ * the work isn't lost; if we ever want to resurrect the
+ * radial-transparency treatment, import this component as-is
+ * and wire it through Layout.astro again.
+ *
+ * Everything else in this file is identical to Header.astro's
+ * nav logic + markup (copied at the time of fork).
+ */
+const SKEW_OFFSET = 16;
+const SKEW_DEG = -18;
+
+// Battery order: Solutions · Products · Blog · How It Works · Contact
+const navItems = [
+  {
+    // Solutions no longer has its own page — clicking navigates to the
+    // homepage and the hash handler inside HeroPortalSolutionsScene scrolls
+    // the user to the end of the pinned-scroll transition, i.e. the final
+    // solutions state centered in view.
+    label: 'Solutions',
+    href: '/#solutions',
+    sub: [
+      { label: 'Hardware', href: '/products'                   },
+      { label: 'Software', href: '/solutions/software'         },
+      { label: 'Services', href: '/services'                   },
+      { label: 'Profits',  href: '/solutions/generate-profits' },
+    ],
+  },
+  {
+    label: 'Services',
+    href: '/services',
+    sub: [
+      { label: 'Multifamily Real Estate', href: '/solutions/multifamily'          },
+      { label: 'Fleets',                  href: '/solutions/fleets'               },
+      { label: 'Highway Fast Charging',   href: '/solutions/highway-fast-charging'},
+      { label: 'Commercial',              href: '/solutions/commercial'           },
+      { label: 'Retail',                  href: '/solutions/retail'               },
+      { label: 'Parking',                 href: '/solutions/parking'              },
+      { label: 'Medical',                 href: '/solutions/medical'              },
+      // Calculate Profits removed from Services — already linked from the
+      // Solutions column (as "Profits"), so listing it twice was redundant.
+      // Electrician Partners moved to the Contact dropdown — it's a
+      // recruiting page for contractors, not a service Evium sells.
+    ],
+  },
+  {
+    label: 'Products',
+    href: '/products',
+    sub: [
+      { label: 'Level 2', href: '/products#panel-l2' },
+      { label: 'Level 3', href: '/products#panel-l3' },
+    ],
+  },
+  {
+    label: 'Blog',
+    href: '/blog',
+    sub: [
+      { label: 'All Posts',     href: '/blog'                },
+      { label: 'News',          href: '/blog/news'           },
+      { label: 'Case Studies',  href: '/blog/case-studies'   },
+      { label: 'Newsletter',    href: '/blog/newsletter'     },
+    ],
+  },
+  {
+    // Site v2 — dropdown index of every v2-sandbox page. See the
+    // matching entry in Header.astro for the full rationale.
+    // Trigger navigates to /home-v2; chevron + hover dropdown
+    // surfaces every v2 variant (Home v2, Products v2, …). Dev-only.
+    label: 'Site v2',
+    href: '/home-v2',
+    devOnly: true,
+    hasChevron: true,
+    sub: [
+      { label: 'Home v2',     href: '/home-v2'     },
+      { label: 'Products v2', href: '/products-v2' },
+    ],
+  },
+  {
+    // Testing — sandbox/WIP pages. Gated behind dev mode.
+    label: 'Testing',
+    href: '/testing',
+    noNavigate: true,
+    devOnly: true,
+    sub: [
+      { label: 'Mobile Blogs',         href: '/testing/mobile-blogs'       },
+      { label: 'Product Portal',       href: '/testing/product-portal'     },
+      { label: 'Software (no footer)', href: '/testing/software'           },
+      { label: 'Old footer concept',   href: '/testing/footer-concept'     },
+    ],
+  },
+  {
+    label: 'How It Works',
+    href: '/how-it-works',
+    sub: [
+      // Single scrollable page — sub-items deep-link to section anchors.
+      { label: 'Overview',    href: '/how-it-works#overview'  },
+      { label: 'Our Process', href: '/how-it-works#process'   },
+      { label: 'Financing',   href: '/how-it-works#financing' },
+      { label: 'Rebates',     href: '/how-it-works#rebates'   },
+      { label: 'FAQ',         href: '/how-it-works#faq'       },
+    ],
+  },
+  {
+    label: 'Contact',
+    href: '/contact',
+    sub: [
+      { label: 'Schedule a Call',      href: '/contact/schedule'               },
+      { label: 'Support',              href: '/contact/support'                },
+      { label: 'Referral Program',     href: '/contact/referral'               },
+    ],
+  },
+  {
+    // "Other" — grouping dropdown for action-style pages that don't
+    // fit neatly under Contact (message-style) or the product /
+    // solutions columns. Also gated behind dev mode for now.
+    //
+    // As of the Home v2 split, this dropdown also holds the three
+    // items that used to live under the retired "AI BS" slot —
+    // Old Saved Sections, Old Electrician Partners, and the dev
+    // "Toggle the toggle" item that hides/shows the floating
+    // dev-mode pill.
+    label: 'Other',
+    href: '#',
+    noNavigate: true,
+    devOnly: true,
+    sub: [
+      { label: 'Get a Quote',             href: '/contact/quote'                  },
+      { label: 'Electrician Partners',    href: '/solutions/electrician-partners' },
+      { label: 'Old Saved Sections',      href: '/ai-bs/old-saved-sections'       },
+      { label: 'Old Electrician Partners',href: '/ai-bs/old-electrician-partners' },
+      // Dev convenience — hides/reveals the floating dev-mode pill
+      // in the bottom-right. Hash href + devSwitch flag keep it
+      // from ever navigating; the JS hook in DevToggle picks it up.
+      { label: 'Toggle the toggle',       href: '#',                             devSwitch: true },
+    ],
+  },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MOBILE NAV — vertical-battery burger + expanding panel.
+     Only rendered at ≤860px (CSS @media); desktop viewports see the
+     horizontal battery below instead. Built as its own fixed element
+     so it sits outside the desktop nav's layout and can't interfere
+     with resize transitions. The battery icon + slots mirror the
+     desktop nav's visual vocabulary; the expanding panel uses the
+     same glass backdrop + green dividers as the desktop dropdowns.
+     ═══════════════════════════════════════════════════════════════════ -->
+<header class="mobile-header" data-mobile-header>
+  {/* Left: Evium logo → home */}
+  <a href="/" class="mobile-logo" aria-label="Evium Charging — home">
+    <img src="/images/logos/evium/logo.webp" alt="Evium Charging" />
+  </a>
+
+  {/* Right: battery burger */}
+  <button
+    type="button"
+    class="mobile-battery"
+    aria-label="Open navigation menu"
+    aria-expanded="false"
+    aria-controls="mobile-nav-panel"
+    data-mobile-battery
+  >
+    {/* Vertical battery mirror of the desktop horizontal battery nav.
+        Hollow outline (stroke only, no fill), small nub on top, three
+        thin divider lines inside the body. The SVG IS the button. */}
+    <svg class="mobile-battery-icon" viewBox="0 0 28 44" aria-hidden="true">
+      {/* Nub */}
+      <rect class="mb-nub"  x="10"  y="0"  width="8"   height="4"   rx="1"/>
+      {/* Body (hollow outline) */}
+      <rect class="mb-body" x="2"   y="5"  width="24"  height="37"  rx="2.5"/>
+      {/* Horizontal divider slots — thin lines, not filled blocks */}
+      <line class="mb-divider" x1="6"  y1="14"   x2="22" y2="14"/>
+      <line class="mb-divider" x1="6"  y1="23.5" x2="22" y2="23.5"/>
+      <line class="mb-divider" x1="6"  y1="33"   x2="22" y2="33"/>
+    </svg>
+  </button>
+</header>
+
+<!-- Mobile panel sits in its own layer so it can animate independent
+     of the toggle button and never affect layout when closed. -->
+<div
+  id="mobile-nav-panel"
+  class="mobile-nav-panel"
+  data-mobile-nav-panel
+  aria-hidden="true"
+>
+  <div class="mobile-nav-inner">
+    {navItems.map((item) => (
+      <div class:list={['m-nav-group', (item as any).devOnly ? 'is-dev-only' : '']} data-m-nav-group>
+        {item.sub.length > 0 ? (
+          <>
+            <button
+              type="button"
+              class="m-nav-row m-nav-row--parent"
+              data-m-nav-row
+              aria-expanded="false"
+            >
+              <span class="m-nav-label">{item.label}</span>
+              <svg class="m-nav-chev" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="m-nav-subs" data-m-nav-subs>
+              <div class="m-nav-subs-inner">
+                {!(item as any).noNavigate && !(item as any).hasChevron && (
+                  <a href={item.href} class="m-nav-sub m-nav-sub--primary">
+                    All {item.label}
+                  </a>
+                )}
+                {item.sub.map((sub) => (
+                  <a
+                    href={sub.href}
+                    class="m-nav-sub"
+                    data-toggle-devswitch={(sub as any).devSwitch ? '' : undefined}
+                  >{sub.label}</a>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <a href={item.href} class="m-nav-row">
+            <span class="m-nav-label">{item.label}</span>
+          </a>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-center px-6 py-4 desktop-header" data-desktop-header>
+  <!-- Inner div sizes to battery content, not to a fixed 900px. The
+       outer header stays `flex justify-center`, so the battery+nub
+       unit is always centered regardless of how long the battery
+       is. Max-width cap prevents overflow at tiny mobile widths. -->
+  <div class="flex items-center max-w-full">
+
+    <nav class="battery-body">
+
+      <!-- Logo → home -->
+      <a href="/" class="group relative flex items-center px-5 shrink-0">
+        <span
+          class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+          style={`clip-path: polygon(0% 0%, 100% 0%, calc(100% - ${SKEW_OFFSET}px) 100%, 0% 100%); background: rgba(45,200,86,0.1);`}
+        ></span>
+        <!-- Logo: slightly larger than before -->
+        <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="relative z-10" style="height:32px;width:auto;" />
+      </a>
+
+      {navItems.map((item) => (
+        <>
+          <span class:list={['divider', (item as any).devOnly ? 'is-dev-only' : '']} aria-hidden="true" />
+          <div class:list={['nav-item-wrap', (item as any).devOnly ? 'is-dev-only' : '']} data-nav-item>
+            <a
+              href={item.href}
+              data-no-navigate={(item as any).noNavigate ? '' : undefined}
+              class:list={[
+                // `flex-1` and `w-full` removed — battery + slots
+                // now content-size themselves so the whole battery
+                // physically extends/retracts as dev-only slots
+                // show/hide. `px-5` gives each slot comfortable
+                // breathing room at the battery's natural width
+                // (longest visible label "How It Works" now fits
+                // without any fight).
+                'nav-trigger group relative flex items-center justify-center px-5 text-[0.8rem] font-semibold tracking-[0.03em] uppercase transition-colors duration-150 whitespace-nowrap h-full no-underline',
+                currentPath.startsWith(item.href) ? 'is-active' : ''
+              ]}
+              aria-expanded="false"
+            >
+              <span
+                class:list={[
+                  'absolute inset-0 transition-opacity duration-150 pointer-events-none',
+                  currentPath.startsWith(item.href) ? 'opacity-100' : 'opacity-0'
+                ]}
+                style={`clip-path: polygon(${SKEW_OFFSET}px 0%, 100% 0%, calc(100% - ${SKEW_OFFSET}px) 100%, 0% 100%); background: rgba(45,200,86,${currentPath.startsWith(item.href) ? '0.13' : '0.09'});`}
+              ></span>
+              <span class="relative z-10 nav-trigger-label">
+                {item.label}
+                {((item as any).noNavigate || (item as any).hasChevron) && (
+                  <svg class="nav-chevron" viewBox="0 0 10 6" width="9" height="6" aria-hidden="true">
+                    <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                )}
+              </span>
+            </a>
+
+            <!-- Dropdown (only rendered if there are sub-items) -->
+            {item.sub.length > 0 && (
+              <div class="nav-dropdown" aria-hidden="true">
+                <div class="dropdown-inner">
+                  {item.sub.map((sub) => (
+                    <a
+                      href={sub.href}
+                      class="dropdown-item"
+                      data-toggle-devswitch={(sub as any).devSwitch ? '' : undefined}
+                    >
+                      <span>{sub.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ))}
+
+    </nav>
+
+    <div class="battery-nub" aria-hidden="true" />
+  </div>
+</header>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     MOBILE NAV — hidden on ≥861px, visible below. Inverse for desktop.
+     ═══════════════════════════════════════════════════════════════ */
+  /* Mobile header: hidden by default on every viewport; the media
+     query below activates it at ≤860px. The grid layout tokens are
+     kept on the base rule so they're ready to apply whenever display
+     flips to grid — declaring them once avoids re-stating in media. */
+  /* Mobile header behavior:
+     - At scroll = 0 (i.e. top of the page) the header sits in normal
+       document flow as a sticky block. It occupies real layout space,
+       so nothing beneath it is covered — the hero/content starts BELOW
+       the header, fully visible.
+     - As the user scrolls down, `position: sticky; top: 0` pins the
+       header to the viewport top. At that point the header IS allowed
+       to cover content — exactly the behavior the user asked for.
+     Styling at rest is a two-layer composition: a deep vertical gradient
+     from near-black at top to the brand teal-dark at bottom, PLUS a
+     subtle radial green halo rising from the center-bottom (anchored
+     under the battery icon, tying the nav to the brand accent). A
+     hairline green→transparent edge sits under it all via ::after so
+     the header visually terminates with a crafted seam instead of a
+     hard line. On scroll we swap in a translucent glass layer (blur +
+     saturate) for the floating feel. */
+  .mobile-header {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding: 14px 18px;
+    /* Two-column layout: Evium logo (left) + battery burger (right).
+       Previously a three-column (logo · battery · Owner Portal) grid;
+       the Owner Portal CTA has been removed and the battery moved from
+       centre to the right edge. `1fr auto` lets the logo take the
+       remaining horizontal space on the left while the battery hugs
+       its content width on the right. */
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    /* At-rest background: a vertical fade that starts fully transparent
+       at the very top edge and darkens down to the brand teal at the
+       bottom. Combined with a backdrop-blur, this means the top ~20%
+       of the bar is effectively a frosted glass that picks up whatever
+       color sits behind it (white ceiling on the garage photo, dark
+       teal on hero pages) — no hard-edge clash with the content. The
+       green halo + hairline green bottom edge stay for brand signature. */
+    background:
+      radial-gradient(ellipse 55% 120% at 50% 140%, rgba(45, 200, 86, 0.10), transparent 65%),
+      linear-gradient(
+        180deg,
+        rgba(7, 19, 27, 0) 0%,
+        rgba(8, 22, 30, 0.22) 35%,
+        rgba(10, 26, 36, 0.48) 75%,
+        rgba(12, 29, 40, 0.62) 100%
+      );
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 10px 24px -14px rgba(0, 0, 0, 0.55);
+    transition:
+      background 0.3s ease,
+      backdrop-filter 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  /* Hairline bottom accent — thin line that glows green under the
+     battery and fades to transparent at the edges. Gives the header
+     a deliberate termination instead of a flat cut. */
+  .mobile-header::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0.08) 18%,
+      rgba(45, 200, 86, 0.55) 50%,
+      rgba(45, 200, 86, 0.08) 82%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    pointer-events: none;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+  .mobile-header.is-scrolled {
+    background:
+      radial-gradient(ellipse 55% 120% at 50% 140%, rgba(45, 200, 86, 0.08), transparent 65%),
+      linear-gradient(
+        180deg,
+        rgba(7, 19, 27, 0.82) 0%,
+        rgba(12, 29, 40, 0.72) 70%,
+        rgba(12, 29, 40, 0.55) 100%
+      );
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 32px -14px rgba(0, 0, 0, 0.75);
+  }
+  .mobile-header.is-scrolled::after {
+    opacity: 1;
+  }
+  .mobile-header .mobile-logo    { justify-self: start; }
+  .mobile-header .mobile-battery { justify-self: end;   }
+
+  /* Desktop header: visible by default on every viewport (Tailwind's
+     `flex` utility class also applies but this explicit rule guarantees
+     display survives scoped-CSS specificity). */
+  .desktop-header {
+    display: flex;
+    /* Establish a new stacking context so the ::before band paints
+       BELOW the battery + nub (which sit at their natural z-index
+       inside the header) but still clears any page content
+       scrolling underneath the header zone. */
+    position: fixed; /* already applied by Tailwind `fixed` — restated for clarity */
+    isolation: isolate;
+  }
+
+  /* ─── HeaderV2 obscuring band ─────────────────────────────
+     Manager-review note: the point of the band is to soften
+     content that's scrolling UP into the battery from below —
+     the zone directly behind the battery needs obscuring, and
+     especially the sliver above it where items are about to
+     be covered. The sides of the viewport (where the battery
+     isn't) don't need obscuring at all, and neither does the
+     strip below the battery (nothing's scrolling *out* of the
+     header on the bottom side).
+
+     The mask is a radial ellipse ANCHORED AT THE TOP CENTER of
+     the header, sized to just cover the battery horizontally,
+     and 60% tall so it fades to fully transparent right around
+     the battery's vertical midline. Result: strong frost at the
+     very top (above / behind the battery), tapering out
+     diagonally so there's no rectangular edge at the sides or
+     below the nav.
+     ──────────────────────────────────────────────────────── */
+  .desktop-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(13, 26, 34, 0.22);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    /* Mask shape — radial ellipse, anchored slightly ABOVE the
+       top edge of the header.
+       ──────────────────────────────────────────────────────
+       Two tuning changes from the last pass:
+
+       (1) "Touch the top border" — center moved from `at 50% 0%`
+           to `at 50% -6%`. Anchoring the ellipse 6% above the
+           top means the top pixel row of the header is no
+           longer at the mathematical center of the ellipse
+           (where browsers sometimes render a thin artifact at
+           the gradient singularity). Instead, the top row sits
+           at ~7% of the gradient — well inside the solid zone
+           — so the obscuration paints all the way up to and
+           through the top border with zero visible gap.
+
+       (2) "Harder left/right fade" — stops tightened from
+           `black 70%, transparent 80%` to `black 76%, transparent 80%`.
+           That compresses the horizontal fade region from 5% of
+           viewport width each side down to 2% each side. The
+           fade-zone WIDTH (the part of the horizontal axis where
+           the taper happens) stays in the same place, but the
+           taper now drops to zero much faster — so the ghost
+           tail past the battery is barely visible.
+
+       Vertical radius is 80% (up from 60%) so the fade completes
+       before the battery's bottom edge — no visible line under
+       the nav. */
+    mask-image: radial-gradient(
+      ellipse 50% 80% at 50% -6%,
+      black 0%,
+      black 76%,
+      transparent 80%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 50% 80% at 50% -6%,
+      black 0%,
+      black 76%,
+      transparent 80%
+    );
+    pointer-events: none;
+  }
+
+  /* Mobile header already carries its own translucent gradient
+     + blur treatment from the base Header styles (see the
+     .mobile-header + .mobile-header.is-scrolled rules below),
+     so the v2 band is desktop-only here. If the manager later
+     wants the obscuring treatment on mobile too, extend it
+     via an @media query on the same ::before rule. */
+
+  /* ≤860px: flip to mobile, hide desktop. */
+  @media (max-width: 860px) {
+    .mobile-header  { display: grid; }
+    .desktop-header { display: none !important; }
+  }
+
+  .mobile-logo {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+  }
+  .mobile-logo img {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+
+  /* Battery toggle button — the SVG IS the button. No background, no
+     border, no box. Padding preserves the 44×44 tap target; the visible
+     mark is only the hollow battery outline + dividers. */
+  .mobile-battery {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 8px;
+    background: transparent;
+    border: 0;
+    color: var(--nav-border);
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-battery:hover { color: #48E672; }
+  .mobile-battery:active { transform: scale(0.94); }
+  .mobile-battery:focus-visible {
+    outline: 2px solid #2DC856;
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .mobile-battery-icon {
+    width: 26px;
+    height: 40px;
+    display: block;
+  }
+  /* Hollow battery — stroke only on body + dividers; nub is the only
+     filled element so it reads as the battery terminal. */
+  .mb-nub {
+    fill: currentColor;
+  }
+  .mb-body {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .mb-divider {
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: opacity 0.22s ease;
+  }
+  /* When menu is open, dim the dividers so the shell reads as the
+     "state indicator" without any further decoration. */
+  .mobile-battery[aria-expanded="true"] .mb-divider {
+    opacity: 0.3;
+  }
+
+  /* ── Mobile panel ──────────────────────────────────────────────
+     Slides down from behind the header. Full viewport width, max
+     height is 100vh minus header so it can scroll if content grows. */
+  .mobile-nav-panel {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 55;
+    padding: 86px 18px 28px;
+    background: rgba(10, 22, 30, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 2px solid #2DC856;
+    max-height: 100vh;
+    overflow-y: auto;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      transform 0.36s cubic-bezier(.22, 1, .36, 1),
+      opacity 0.24s ease,
+      visibility 0s linear 0.36s;
+  }
+  .mobile-nav-panel.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition:
+      transform 0.36s cubic-bezier(.22, 1, .36, 1),
+      opacity 0.24s ease,
+      visibility 0s linear 0s;
+  }
+  @media (min-width: 861px) {
+    .mobile-nav-panel { display: none !important; }
+  }
+
+  .mobile-nav-inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .m-nav-group + .m-nav-group {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Mobile dev-mode gating — same idea as desktop, but the axis is
+     vertical. When dev-mode is off, dev-only groups collapse via
+     max-height + opacity + padding/margin so the divider line
+     between visible rows doesn't leave a stray stripe behind. */
+  .m-nav-group {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.28s ease,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-width 0.4s ease;
+  }
+  body.dev-mode-off .m-nav-group.is-dev-only {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    border-top-width: 0;
+    pointer-events: none;
+  }
+
+  .m-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 18px 4px;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.88);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .m-nav-row:hover,
+  .m-nav-row[aria-expanded="true"] {
+    color: #2DC856;
+  }
+  .m-nav-label {
+    display: inline-block;
+    line-height: 1;
+  }
+  .m-nav-chev {
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    transition: transform 0.28s cubic-bezier(.22, 1, .36, 1), color 0.18s ease;
+  }
+  .m-nav-row[aria-expanded="true"] .m-nav-chev {
+    transform: rotate(180deg);
+    color: #2DC856;
+  }
+
+  /* Grid-row collapse trick — needs ONE inner track child that gets
+     min-height: 0 + overflow: hidden so the content collapses cleanly
+     when the outer's grid-template-rows is 0fr. */
+  .m-nav-subs {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s cubic-bezier(.22, 1, .36, 1);
+  }
+  .m-nav-subs-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .m-nav-row[aria-expanded="true"] + .m-nav-subs {
+    grid-template-rows: 1fr;
+  }
+  .m-nav-sub {
+    display: block;
+    padding: 12px 4px 12px 18px;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+    text-decoration: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    margin-left: 4px;
+    transition: color 0.18s ease, border-left-color 0.18s ease;
+  }
+  .m-nav-sub:hover {
+    color: #2DC856;
+    border-left-color: #2DC856;
+  }
+  .m-nav-sub--primary {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.82rem;
+  }
+  .m-nav-sub--primary:hover { color: #2DC856; }
+
+  /* Locked body state while menu is open — prevents scroll leak. */
+  :global(body.mobile-nav-open) { overflow: hidden; }
+
+  /* ── Battery shell ─────────────────────────────────────────── */
+  .battery-body {
+    /* Content-sized: sums logo + all visible slot widths + dividers.
+       When dev-only slots collapse to max-width:0 via the transition
+       below, this width literally shrinks — the battery physically
+       retracts in length. When dev-mode toggles back on, the slots
+       animate open and the battery extends. */
+    flex: 0 1 auto;
+    display: flex;
+    align-items: stretch;
+    height: 48px;
+    border: 2px solid var(--nav-border);
+    border-radius: 4px 0 0 4px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(var(--nav-blur));
+    /* Smooth the width change as dev-only slots collapse. Even
+       though individual slots are what animate, this transition
+       ensures the battery-body itself keeps up gracefully. */
+    transition: background 0.2s ease;
+  }
+
+  .battery-nub {
+    width: 8px;
+    height: 22px;
+    background: var(--nav-border);
+    border-radius: 0 3px 3px 0;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .divider {
+    display: block;
+    width: 2px;
+    background: var(--nav-border);
+    flex-shrink: 0;
+    transform: skewX(-18deg);
+    opacity: var(--nav-divider-alpha);
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: stretch;
+    /* Smooth collapse to 0 when a dev-only sibling slot hides —
+       keeps the divider edge animation in sync with the slot. */
+    transition: width 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease;
+  }
+
+  .nav-item-wrap {
+    /* Content-sized slots. The nav-trigger inside carries `px-5`
+       so each slot has its label's natural width + 40 px padding.
+       No overflow/transition on the base rule — those are scoped
+       to `.is-dev-only` below so they only apply to slots that
+       can collapse. "How It Works" etc. render at full width. */
+    flex: 0 0 auto;
+    position: relative;
+    display: flex;
+  }
+
+  /* ─── Dev-mode gating ─────────────────────────────────────
+     `body.dev-mode-off` is set by DevToggle in its OFF state
+     (the default). When that's present, every `.is-dev-only`
+     slot and its preceding divider collapse to 0 width with a
+     smooth animation. Because slots are content-sized (see
+     `.nav-item-wrap`), the battery body literally shrinks to
+     match the visible content — the whole battery physically
+     retracts in length. Flipping dev-mode back ON reverses it. */
+  .nav-item-wrap.is-dev-only {
+    overflow: hidden;
+    /* Expanded max-width cap is generous so any dev-only label
+       can render fully in the "open" state. Collapse target is
+       0 (set below under body.dev-mode-off). */
+    max-width: 260px;
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.28s ease 0.06s,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.dev-mode-off .nav-item-wrap.is-dev-only {
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    opacity: 0;
+    pointer-events: none;
+    /* Opacity fades out first (no delay on the reverse), then
+       width collapses — so the label doesn't linger as a
+       squished strip during the shrink. */
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                opacity 0.2s ease,
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s;
+  }
+
+  body.dev-mode-off .divider.is-dev-only {
+    width: 0;
+    opacity: 0;
+    /* Divider collapses in sync with the slot on the same easing. */
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.08s,
+                opacity 0.2s ease;
+  }
+
+  .nav-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--nav-text);
+    text-decoration: none;
+  }
+  .nav-trigger.is-active {
+    color: var(--nav-text-active);
+  }
+
+  .nav-trigger:hover,
+  .nav-trigger[aria-expanded="true"] {
+    color: var(--nav-text-active);
+  }
+
+  /* Wraps the label text + optional chevron (for noNavigate items).
+     Inline-flex so the chevron sits beside the label and centers nicely. */
+  .nav-trigger-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .nav-chevron {
+    opacity: 0.75;
+    transform: translateY(0.5px);
+    transition: transform 0.22s ease, opacity 0.22s ease;
+  }
+  .nav-trigger[aria-expanded="true"] .nav-chevron {
+    transform: translateY(0.5px) rotate(180deg);
+    opacity: 1;
+  }
+
+  .nav-trigger:hover .absolute,
+  .nav-trigger[aria-expanded="true"] .absolute {
+    opacity: 1 !important;
+  }
+
+  /* ── Dropdown ──────────────────────────────────────────────── */
+  .nav-dropdown {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    /* -400px right + bottom bleed: content can never be clipped no matter
+       how wide or tall the list grows */
+    clip-path: inset(0 -400px 100% -400px);
+    transition: clip-path 0.22s ease;
+  }
+
+  .nav-dropdown.is-open {
+    clip-path: inset(0 -400px -400px -400px);
+    pointer-events: auto;
+  }
+
+  .dropdown-inner {
+    transform: skewX(-18deg);
+    transform-origin: top left;
+    background: var(--nav-drop-bg);
+    border: 2px solid var(--nav-border);
+    border-top: 2px solid rgba(45,200,86,0.35);
+    padding: 6px 0 10px;
+    backdrop-filter: blur(var(--nav-drop-blur));
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  }
+
+  .dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--nav-drop-text);
+    text-decoration: none;
+    transition: color 0.1s, background 0.1s;
+    white-space: nowrap;
+  }
+
+  /* Counter-skew only the text, not the row itself — this lets the
+     hover background fill the full parallelogram shape of the dropdown */
+  .dropdown-item span {
+    display: inline-block;
+    transform: skewX(18deg);
+  }
+
+  .dropdown-item:hover {
+    color: var(--nav-drop-hover);
+    background: var(--nav-drop-hover-bg);
+  }
+</style>
+
+<script>
+  // Dev-switch toggle — intercepts clicks on any dropdown item
+  // marked `data-toggle-devswitch` and flips the #dev-toggle
+  // floating pill between visible and hidden. Used from the AI
+  // BS dropdown's "Toggle the toggle" entry for clean screenshots.
+  //
+  // State persists in localStorage under `ev-devswitch-hidden` so
+  // the hidden choice survives navigation — the floating pill
+  // stays hidden across page changes until the user toggles it
+  // back on. Default (no key set) = visible on a fresh session.
+  // DevToggle.astro reads the same key on mount so the applied
+  // state is consistent before first paint.
+  document.addEventListener('click', (e) => {
+    const trigger = (e.target as HTMLElement | null)?.closest?.('[data-toggle-devswitch]');
+    if (!trigger) return;
+    e.preventDefault();
+    const devToggle = document.getElementById('dev-toggle');
+    if (!devToggle) return;
+    const currentlyHidden = devToggle.getAttribute('data-hidden') === 'true';
+    if (currentlyHidden) {
+      devToggle.style.display = '';
+      devToggle.removeAttribute('data-hidden');
+      try { localStorage.removeItem('ev-devswitch-hidden'); } catch {}
+    } else {
+      devToggle.style.display = 'none';
+      devToggle.setAttribute('data-hidden', 'true');
+      try { localStorage.setItem('ev-devswitch-hidden', '1'); } catch {}
+    }
+  });
+
+  const items = document.querySelectorAll<HTMLElement>('[data-nav-item]');
+  const batteryBody = document.querySelector<HTMLElement>('.battery-body')!;
+
+  // ── Position a dropdown flush below its trigger button ──────
+  function positionDrop(btn: HTMLElement, drop: HTMLElement) {
+    const r     = btn.getBoundingClientRect();
+    const bRect = batteryBody.getBoundingClientRect();
+    const w     = Math.round(r.width);
+    const GAP   = 3;
+
+    // Align the dropdown's left slant with the button's left divider line —
+    // the same geometry the dividers use so the slant continues through the gap.
+    const tanSkew   = Math.tan(18 * Math.PI / 180);
+    const innerH    = bRect.height - 4;
+    const lineShift = Math.round((innerH / 2 + 2 + GAP) * tanSkew);
+
+    drop.style.top       = (bRect.height + GAP) + 'px';
+    drop.style.left      = (Math.round(r.left) - bRect.left - lineShift) + 'px';
+    drop.style.transform = '';
+    drop.style.width     = 'max-content';
+    drop.style.minWidth  = w + 'px';
+
+    // If the dropdown rendered wider than its button (e.g. Solutions with many
+    // long items), re-centre it under the button's midpoint so it's not
+    // ambiguous which tab it belongs to. Normal-width dropdowns are untouched.
+    requestAnimationFrame(() => {
+      const dRect = drop.getBoundingClientRect();
+      if (dRect.width <= w) return; // already fits — leave original alignment
+
+      const tanSkew = Math.tan(18 * Math.PI / 180);
+      const H       = dRect.height;
+      const MARGIN  = 8;
+
+      // Align the top edge of the dropdown centred under the button — the top
+      // is the visual "attachment point" that tells the user which tab owns the dropdown.
+      const btnCenterLocal = Math.round(r.left - bRect.left + w / 2);
+      let newLeft = btnCenterLocal - Math.round(dRect.width / 2);
+
+      // Clamp: visual left is the bottom-left corner (drifts furthest left)
+      const visualLeftVp  = bRect.left + newLeft - H * tanSkew;
+      const visualRightVp = bRect.left + newLeft + dRect.width;
+      if (visualLeftVp < MARGIN)                          newLeft += MARGIN - visualLeftVp;
+      else if (visualRightVp > window.innerWidth - MARGIN) newLeft -= visualRightVp - (window.innerWidth - MARGIN);
+
+      drop.style.left = newLeft + 'px';
+    });
+  }
+
+  function closeAll(except?: HTMLElement) {
+    items.forEach((item) => {
+      if (item === except) return;
+      item.querySelector<HTMLElement>('.nav-trigger')?.setAttribute('aria-expanded', 'false');
+      item.querySelector<HTMLElement>('.nav-dropdown')?.classList.remove('is-open');
+    });
+  }
+
+  items.forEach((item) => {
+    const btn  = item.querySelector<HTMLElement>('.nav-trigger')!;
+    const drop = item.querySelector<HTMLElement>('.nav-dropdown');
+    if (!btn || !drop) return;
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function openItem() {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      closeAll(item);
+      positionDrop(btn, drop);
+      btn.setAttribute('aria-expanded', 'true');
+      drop.classList.add('is-open');
+    }
+
+    function scheduleClose() {
+      closeTimer = setTimeout(() => {
+        btn.setAttribute('aria-expanded', 'false');
+        drop.classList.remove('is-open');
+        closeTimer = null;
+      }, 180);  // 180 ms gap tolerance — enough to cross the 3 px gap to the dropdown
+    }
+
+    function cancelClose() {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    }
+
+    // ── Hover to open ──
+    btn.addEventListener('mouseenter', openItem);
+
+    // ── Click behaviour: items marked data-no-navigate don't go to their
+    //    href — instead they toggle the submenu open/closed. Used for parent
+    //    items that are just group headers (e.g. Testing).
+    if (btn.hasAttribute('data-no-navigate')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // prevent document-level closeAll from firing
+        if (drop.classList.contains('is-open')) {
+          btn.setAttribute('aria-expanded', 'false');
+          drop.classList.remove('is-open');
+        } else {
+          openItem();
+        }
+      });
+    }
+
+    // Schedule close when leaving the battery cell …
+    item.addEventListener('mouseleave', scheduleClose);
+    // … but cancel if mouse re-enters the cell …
+    item.addEventListener('mouseenter', cancelClose);
+    // … or enters the dropdown panel itself
+    drop.addEventListener('mouseenter', cancelClose);
+    drop.addEventListener('mouseleave', scheduleClose);
+  });
+
+  document.addEventListener('click', () => closeAll());
+
+  // ════════════════════════════════════════════════════════════════
+  // MOBILE NAV — battery toggle + panel + accordion sub-groups
+  // ════════════════════════════════════════════════════════════════
+  // Toggle .is-scrolled on the mobile header once the user has left
+  // the top of the page. At scroll=0 the header is opaque and lives
+  // in document flow (sticky) so nothing is covered; once scrolled,
+  // the translucent gradient + blur kicks in so the header can float
+  // over content as usual.
+  const mHeader = document.querySelector<HTMLElement>('[data-mobile-header]');
+  if (mHeader) {
+    const onScroll = () => {
+      mHeader.classList.toggle('is-scrolled', window.scrollY > 4);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  const mBattery = document.querySelector<HTMLButtonElement>('[data-mobile-battery]');
+  const mPanel   = document.querySelector<HTMLElement>('[data-mobile-nav-panel]');
+  if (mBattery && mPanel) {
+    const openMenu = () => {
+      mBattery.setAttribute('aria-expanded', 'true');
+      mPanel.setAttribute('aria-hidden', 'false');
+      mPanel.classList.add('is-open');
+      document.body.classList.add('mobile-nav-open');
+    };
+    const closeMenu = () => {
+      mBattery.setAttribute('aria-expanded', 'false');
+      mPanel.setAttribute('aria-hidden', 'true');
+      mPanel.classList.remove('is-open');
+      document.body.classList.remove('mobile-nav-open');
+      // Collapse any expanded sub-rows so the next open starts fresh
+      mPanel.querySelectorAll<HTMLButtonElement>('[data-m-nav-row][aria-expanded="true"]')
+        .forEach((r) => r.setAttribute('aria-expanded', 'false'));
+    };
+    const toggleMenu = () => {
+      if (mPanel.classList.contains('is-open')) closeMenu();
+      else openMenu();
+    };
+
+    mBattery.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Sub-groups are accordion-style: clicking the parent row toggles its
+    // sublist. Multiple can be open so users can compare categories.
+    mPanel.querySelectorAll<HTMLButtonElement>('[data-m-nav-row]').forEach((row) => {
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cur = row.getAttribute('aria-expanded') === 'true';
+        row.setAttribute('aria-expanded', cur ? 'false' : 'true');
+      });
+    });
+
+    // Close menu when a leaf link inside the panel is activated — the
+    // user is navigating, they don't want a still-open menu on top.
+    mPanel.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => {
+      a.addEventListener('click', () => closeMenu());
+    });
+
+    // Close when clicking outside the panel (but not the battery itself).
+    document.addEventListener('click', (e) => {
+      if (!mPanel.classList.contains('is-open')) return;
+      const t = e.target as Node;
+      if (mPanel.contains(t) || mBattery.contains(t)) return;
+      closeMenu();
+    });
+
+    // Escape closes.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mPanel.classList.contains('is-open')) closeMenu();
+    });
+
+    // If the user resizes up past the mobile breakpoint with the panel
+    // open, shut it so the desktop nav takes over cleanly.
+    const mql = window.matchMedia('(min-width: 861px)');
+    const onChange = () => { if (mql.matches) closeMenu(); };
+    if (mql.addEventListener) mql.addEventListener('change', onChange);
+    else mql.addListener(onChange);
+  }
+</script>

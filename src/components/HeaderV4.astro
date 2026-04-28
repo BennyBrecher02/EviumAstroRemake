@@ -1,0 +1,2406 @@
+---
+/**
+ * HeaderV4 — Tesla PRNDL gear-selector nav rail.
+ * ───────────────────────────────────────────────
+ * Rendered EXCLUSIVELY by /home-v2 (via Layout's `headerVariant`
+ * prop). A reimagining of the Tesla Model S/X/3/Y touchscreen
+ * gear selector, repurposed as a left-pinned "navigation rail"
+ * (Material-Design term for a narrow persistent vertical nav).
+ *
+ * What it does
+ * ────────────
+ * Inside the rail:
+ *  - A "Parked" label at the top
+ *  - A fixed dot-grid "track" running the full height
+ *  - Up + down chevron arrows indicating drive/reverse direction
+ *  - A plan-view (top-down) car icon floating in the middle of
+ *    the track that the user can drag vertically — just like
+ *    swiping on a real Tesla gear shifter
+ *  - A "Neutral" label at the bottom, with a small gear-state
+ *    pill beneath
+ *
+ * Interaction model (implemented in the <script> at bottom)
+ * ────────────────────────────────────────────────────────
+ *  1. Pointer down anywhere on the track captures the pointer.
+ *  2. Drag → car follows the finger with spring-damped easing,
+ *     clamped to [12%, 88%] of the track so it never disappears
+ *     off the edges.
+ *  3. Dots near the car OR near the current pointer position
+ *     darken + grow smoothly on a radial falloff (their
+ *     "excitement" is a normalized 0–1 value driven by an rAF
+ *     loop and pushed through a CSS custom property `--x`).
+ *  4. Release → car springs back to the track's vertical center.
+ *     Dots fade out as their excitement decays to 0.
+ *
+ * This is a purely decorative / interactive sandbox — no actual
+ * navigation happens here. Other pages of /home-v2 still handle
+ * their own routing (e.g. hero pill, in-body CTAs, SiteFooter).
+ */
+
+// Dot grid dimensions — feel free to tune.
+// 3 cols × 28 rows = 84 dots; plenty of resolution for the
+// excitement pattern without swamping the rAF loop's per-frame
+// custom-property writes.
+const DOT_COLS = 3;
+const DOT_ROWS = 28;
+const DOT_COUNT = DOT_COLS * DOT_ROWS;
+
+const currentPath = Astro.url.pathname;
+
+/**
+ * Menu categories — same data V3's mega-menu uses and the
+ * production Header consumes, with descriptive subtitles + icon
+ * keys baked in. Sub-links render inside each card so the menu
+ * is a one-click shot at any destination on the site. Dev-only
+ * items carry `devOnly: true` so CSS hides them when dev-mode
+ * is off — matches the contract in every other header.
+ */
+type Cat = {
+  label: string;
+  href: string;
+  icon: 'lightbulb' | 'hammer' | 'bolt' | 'article' | 'question' | 'envelope' | 'home-v2' | 'testing' | 'other';
+  desc: string;
+  devOnly?: boolean;
+  sub: Array<{ label: string; href: string }>;
+};
+
+const categories: Cat[] = [
+  {
+    label: 'Solutions',
+    href:  '/#solutions',
+    icon:  'lightbulb',
+    desc:  'Turnkey EV charging tailored to every property type.',
+    sub: [
+      { label: 'Hardware',  href: '/products'                   },
+      { label: 'Software',  href: '/solutions/software'         },
+      { label: 'Services',  href: '/services'                   },
+      { label: 'Profits',   href: '/solutions/generate-profits' },
+    ],
+  },
+  {
+    label: 'Services',
+    href:  '/services',
+    icon:  'hammer',
+    desc:  'Industries we serve — from multifamily to highway fast charging.',
+    sub: [
+      { label: 'Multifamily Real Estate', href: '/solutions/multifamily'          },
+      { label: 'Fleets',                  href: '/solutions/fleets'               },
+      { label: 'Highway Fast Charging',   href: '/solutions/highway-fast-charging'},
+      { label: 'Commercial',              href: '/solutions/commercial'           },
+      { label: 'Retail',                  href: '/solutions/retail'               },
+      { label: 'Parking',                 href: '/solutions/parking'              },
+      { label: 'Medical',                 href: '/solutions/medical'              },
+    ],
+  },
+  {
+    label: 'Products',
+    href:  '/products',
+    icon:  'bolt',
+    desc:  'Level 2 and DC fast charging hardware for every site.',
+    sub: [
+      { label: 'Level 2', href: '/products#panel-l2' },
+      { label: 'Level 3', href: '/products#panel-l3' },
+    ],
+  },
+  {
+    /* Blog — sub-list reflects the variants that actually exist
+       (the 4-door garage desktop, the mobile experiment, plus
+       the future v2 placeholder) instead of the stub category
+       pages from the original scaffolding. */
+    label: 'Blog',
+    href:  '/blog',
+    icon:  'article',
+    desc:  'Case studies, company news, and industry insight.',
+    sub: [
+      /* 3 desktop variants first, then the 2 mobile variants —
+         keeps the dropdown grouped by form-factor. */
+      { label: 'Desktop v1', href: '/blog'                  },
+      { label: 'Desktop v2', href: '/blog-v2'               },
+      { label: 'Desktop v3', href: '/blog-v3'               },
+      { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
+      { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
+    ],
+  },
+  {
+    label: 'How It Works',
+    href:  '/how-it-works',
+    icon:  'question',
+    desc:  'From site assessment to ongoing revenue share, explained.',
+    sub: [
+      { label: 'Overview',    href: '/how-it-works#overview'  },
+      { label: 'Our Process', href: '/how-it-works#process'   },
+      { label: 'Financing',   href: '/how-it-works#financing' },
+      { label: 'Rebates',     href: '/how-it-works#rebates'   },
+      { label: 'FAQ',         href: '/how-it-works#faq'       },
+    ],
+  },
+  {
+    label: 'Contact',
+    href:  '/contact',
+    icon:  'envelope',
+    desc:  'Schedule a call, reach support, or join the referral program.',
+    sub: [
+      { label: 'Schedule a Call',  href: '/contact/schedule' },
+      { label: 'Support',          href: '/contact/support'  },
+      { label: 'Referral Program', href: '/contact/referral' },
+    ],
+  },
+  {
+    /* Site v2 — dropdown index of every v2-sandbox page. Card
+       header still routes to /home-v2 so a direct click lands on
+       the flagship v2 page, but the sub-link list surfaces every
+       v2 variant (Home v2, Products v2, …) as its own entry. */
+    label: 'Site v2',
+    href:  '/home-v2',
+    icon:  'home-v2',
+    desc:  'Dev-only sandbox pages running the PRNDL-lefter layout.',
+    devOnly: true,
+    sub: [
+      { label: 'Home v2',                       href: '/home-v2'                          },
+      { label: 'Products v2',                   href: '/products-v2'                      },
+      { label: 'Service — Multifamily v2',      href: '/service-testing/multifamily'      },
+      { label: 'Service — Multifamily v3',      href: '/service-testing/multifamily-v3'   },
+    ],
+  },
+  {
+    label: 'Testing',
+    href:  '/testing',
+    icon:  'testing',
+    desc:  'Sandbox pages and WIP experiments.',
+    devOnly: true,
+    sub: [
+      /* Mobile Blogs has moved to the Blog dropdown — it's a blog
+         variant, not a generic sandbox page. */
+      { label: 'Intersection (codepen)', href: '/testing/intersection'   },
+      { label: 'Product Portal',         href: '/testing/product-portal' },
+      { label: 'Software (no footer)',   href: '/testing/software'       },
+      { label: 'Old footer concept',     href: '/testing/footer-concept' },
+    ],
+  },
+  {
+    label: 'Other',
+    href:  '#',
+    icon:  'other',
+    desc:  'Apply / transact surfaces and dev shortcuts.',
+    devOnly: true,
+    sub: [
+      { label: 'Get a Quote',              href: '/contact/quote'                  },
+      { label: 'Electrician Partners',     href: '/solutions/electrician-partners' },
+      { label: 'Old Saved Sections',       href: '/ai-bs/old-saved-sections'       },
+      { label: 'Old Electrician Partners', href: '/ai-bs/old-electrician-partners' },
+    ],
+  },
+];
+---
+
+<aside class="lefter-v4" aria-label="Gear-selector rail (decorative)">
+  <div class="prndl" data-prndl>
+
+    <!-- Top slot — Evium logo BUTTON. Clicking opens the
+         full-screen futuristic expand-menu (.lv4-menu below)
+         that covers the viewport right of the lefter. Subtle
+         brightness also shifts when the car sits in the top
+         region ("upper-active"). -->
+    <button
+      type="button"
+      class="prndl-state-label prndl-state-label--park prndl-brand-btn"
+      data-prndl-park
+      data-menu-toggle
+      aria-label="Open menu"
+      aria-controls="lv4-menu"
+      aria-expanded="false"
+    >
+      <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="prndl-brand-logo" />
+    </button>
+
+    <!-- Track: the main interactive surface. Pointer events are
+         captured on this element so dragging anywhere on the
+         rail drives the car position. -->
+    <div class="prndl-track" data-prndl-track>
+
+      <!-- Dot grid — a fixed pattern that "excites" (darken +
+           grow) near the car and near the pointer. Each dot
+           carries a `--x` CSS custom property driven by JS. -->
+      <div class="prndl-dots" data-prndl-dots aria-hidden="true">
+        {Array.from({ length: DOT_COUNT }).map((_, i) => (
+          <span class="prndl-dot" data-dot-i={i}></span>
+        ))}
+      </div>
+
+      <!-- Up arrow — click to navigate to the PREVIOUS section
+           in the home-v2 flow. Pulses while the car is in the
+           upper half of the track. -->
+      <button
+        type="button"
+        class="prndl-arrow prndl-arrow--up"
+        data-prndl-up
+        aria-label="Previous section"
+      >
+        <svg viewBox="0 0 20 14" aria-hidden="true">
+          <path d="M3 11L10 3l7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+
+      <!-- Down arrow — click to navigate to the NEXT section. -->
+      <button
+        type="button"
+        class="prndl-arrow prndl-arrow--down"
+        data-prndl-down
+        aria-label="Next section"
+      >
+        <svg viewBox="0 0 20 14" aria-hidden="true">
+          <path d="M3 3l7 8 7-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+
+      <!-- Plan-view (top-down) car icon. Uses the newer custom
+           car graphic at /images/updated-ev-icon.svg (which is a
+           base64-PNG-inside-SVG — black on transparent). We apply
+           `filter: invert(1)` at the CSS level to flip black →
+           white so the car reads clearly against the dark rail.
+           Positioned via JS transform on pointer drag. -->
+      <div class="prndl-car" data-prndl-car>
+        <img
+          src="/images/updated-ev-icon.svg"
+          alt=""
+          class="prndl-car-icon"
+          draggable="false"
+          aria-hidden="true"
+        />
+      </div>
+
+    </div>
+
+    <!-- Bottom state label + gear indicator. The "N" pill below
+         is visually the "Neutral" gear state echo, but also
+         doubles as a quiet escape hatch back to the ORIGINAL
+         Home v1 at "/" — clicking it leaves the home-v2
+         sandbox. Visual treatment unchanged from a pure gear
+         pill; hover adds a subtle brand-green tint so the
+         interactivity is discoverable without shouting. -->
+    <span class="prndl-state-label prndl-state-label--neutral" data-prndl-neutral>Neutral</span>
+    <a href="/" class="prndl-gear" data-prndl-gear aria-label="Home (v1)">N</a>
+  </div>
+</aside>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     SCROLL HINT — a subtle mouse glyph with an internally-animated
+     scroll-wheel dot (the dot itself animates inside the icon;
+     the icon as a whole does NOT jiggle or float). Sits a short
+     distance in from the bottom-left corner of the content area
+     with a small "Scroll" label beneath it. Fades in shortly after
+     page load and then occasionally during long idle stretches —
+     but ONLY if there's still a section below to navigate to.
+     Hides on any user interaction.
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="lv4-hint" data-lv4-hint aria-hidden="true" role="status">
+  {/* Three ↓-shaped arrows (each a vertical stem + chevron head)
+      arranged SIDE BY SIDE. Each arrow falls down through the SVG
+      via its own staggered translateY animation, producing three
+      parallel raindrop-style downward trails. Small cascade
+      offset (0 / 0.25s / 0.5s) so they fall slightly out of
+      phase — left arrow leads, right arrow trails. */}
+  <svg class="lv4-hint-wind" viewBox="0 0 42 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <g class="lv4-hint-arrow" style="--d: 0s;">
+      <line x1="9" y1="5" x2="9" y2="19"/>
+      <path d="M5 15 L9 19 L13 15"/>
+    </g>
+    <g class="lv4-hint-arrow" style="--d: 0.25s;">
+      <line x1="21" y1="5" x2="21" y2="19"/>
+      <path d="M17 15 L21 19 L25 15"/>
+    </g>
+    <g class="lv4-hint-arrow" style="--d: 0.5s;">
+      <line x1="33" y1="5" x2="33" y2="19"/>
+      <path d="M29 15 L33 19 L37 15"/>
+    </g>
+  </svg>
+  <span class="lv4-hint-label">Scroll</span>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     FULL-SCREEN MENU — triggered by tapping the Evium logo in the
+     rail. Covers every pixel of the viewport EXCEPT the lefter on
+     the left (so the logo button stays visible + clickable — a
+     second click re-closes the menu). Dark-gradient panel with a
+     brand-green grid pattern overlay + scanline for the modern
+     futuristic feel. Category cards stagger-in on open.
+     ═════════════════════════════════════════════════════════════════ -->
+<div
+  id="lv4-menu"
+  class="lv4-menu"
+  data-lv4-menu
+  aria-hidden="true"
+  aria-label="Main menu"
+  role="dialog"
+  aria-modal="true"
+>
+  <!-- Decorative grid background — pure CSS, zero-cost to render. -->
+  <div class="lv4-menu-grid-bg" aria-hidden="true"></div>
+
+  <!-- Close button (top-right). -->
+  <button type="button" class="lv4-close" data-menu-close aria-label="Close menu">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <div class="lv4-menu-inner">
+    <header class="lv4-menu-head">
+      <span class="lv4-menu-eyebrow">Evium · Nav</span>
+      <h2 class="lv4-menu-title">Where to?</h2>
+      <p class="lv4-menu-sub">Electrifying the future — one property at a time.</p>
+    </header>
+
+    <nav class="lv4-menu-grid" aria-label="Main navigation">
+      {categories.map((cat, i) => (
+        <!--
+          Each card is a DIV, not an <a> — nesting real <a> sub-
+          links inside an <a> wrapper is invalid HTML and browsers
+          silently break the DOM to "fix" it (V3's own history
+          comment explains this in detail). Card is keyboard-
+          activatable via tabindex + the Enter/Space handler in
+          the <script> below; the data-href carries the nav target.
+        -->
+        <div
+          class:list={[
+            'lv4-tile',
+            cat.devOnly ? 'is-dev-only' : '',
+            currentPath.startsWith(cat.href) && cat.href !== '/' && cat.href !== '#' ? 'is-active' : '',
+          ]}
+          style={`--i: ${i};`}
+          data-menu-card
+          data-href={cat.href}
+          role="link"
+          tabindex="0"
+          aria-label={`${cat.label} — ${cat.desc}`}
+        >
+          <div class="lv4-tile-head">
+            <span class="lv4-tile-icon" aria-hidden="true">
+              {cat.icon === 'lightbulb' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18h6"/>
+                  <path d="M10 22h4"/>
+                  <path d="M8 14a6 6 0 1 1 8 0c-.7.7-1 1.5-1 2.4V18H9v-1.6c0-.9-.3-1.7-1-2.4z"/>
+                </svg>
+              )}
+              {cat.icon === 'hammer' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/>
+                  <path d="m18 15 4-4"/>
+                  <path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/>
+                </svg>
+              )}
+              {cat.icon === 'bolt' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                </svg>
+              )}
+              {cat.icon === 'article' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4" y="4" width="16" height="16" rx="1.5"/>
+                  <line x1="8" y1="9"  x2="16" y2="9"/>
+                  <line x1="8" y1="13" x2="16" y2="13"/>
+                  <line x1="8" y1="17" x2="13" y2="17"/>
+                </svg>
+              )}
+              {cat.icon === 'question' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9"/>
+                  <path d="M9.3 9.3a2.7 2.7 0 1 1 3.9 3.7c-.8.6-1.2 1-1.2 2"/>
+                  <circle cx="12" cy="17.5" r="0.5" fill="currentColor"/>
+                </svg>
+              )}
+              {cat.icon === 'envelope' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="1.5"/>
+                  <path d="M3 7l9 7 9-7"/>
+                </svg>
+              )}
+              {cat.icon === 'home-v2' && (
+                /* heroicons "home" — same path used in the v2
+                   service-page narrative cards (Market Reality
+                   → "Tenants Search for Charging"). Single
+                   source of truth for the brand's "home" mark
+                   across the lefter rail and the service-page
+                   narrative iconography. */
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+              )}
+              {cat.icon === 'testing' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2v5l-5.2 9a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 7V2"/>
+                  <path d="M9 2h6"/>
+                </svg>
+              )}
+              {cat.icon === 'other' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="6"  cy="12" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="18" cy="12" r="2"/>
+                </svg>
+              )}
+            </span>
+            <h3 class="lv4-tile-label">{cat.label}</h3>
+          </div>
+
+          <p class="lv4-tile-copy">{cat.desc}</p>
+
+          {cat.sub.length > 0 && (
+            <ul class="lv4-tile-sub" role="list">
+              {cat.sub.map((sub) => (
+                <li class="lv4-tile-sub-item">
+                  <a href={sub.href} class="lv4-tile-sublink">
+                    <svg class="lv4-tile-sub-bullet" viewBox="0 0 12 12" aria-hidden="true">
+                      <path d="M3 6h6M7 3l2 3-2 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                    <span>{sub.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </nav>
+
+    <footer class="lv4-menu-foot">
+      <a href="/contact/quote" class="lv4-foot-cta">
+        <span>Request a Quote</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+      <span class="lv4-foot-sep" aria-hidden="true"></span>
+      <a href="mailto:contact@eviumcharging.com" class="lv4-foot-link">contact@eviumcharging.com</a>
+    </footer>
+  </div>
+</div>
+
+<style>
+  :root {
+    --lefter-width: 80px;
+  }
+  @media (max-width: 860px) {
+    :root { --lefter-width: 64px; }
+  }
+
+  /* ─── Rail shell ─────────────────────────────────────
+     Solid dark background (not a gradient like V3) — matches
+     the Tesla display's flat near-black background. Subtle
+     right-edge hairline in brand green for continuity. */
+  .lefter-v4 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--lefter-width);
+    z-index: 50;
+
+    background: #0a1218;
+    box-shadow:
+      2px 0 0 rgba(45, 200, 86, 0.10),
+      6px 0 36px rgba(0, 0, 0, 0.42);
+
+    font-family: 'Maven Pro', sans-serif;
+    color: rgba(255, 255, 255, 0.92);
+
+    /* Prevent native scrolling / highlight on touch drag */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ─── PRNDL container (fills the rail vertically) ────── */
+  .prndl {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(14px, 2vh, 22px) 0 clamp(14px, 2vh, 22px);
+  }
+
+  /* ─── Top / bottom state labels ───────────────────────
+     Small muted text at the very top + bottom. They brighten
+     when the pointer is in their half of the track (controlled
+     by `body.prndl-upper-active` / `body.prndl-lower-active`
+     classes — see the <script> below). */
+  .prndl-state-label {
+    font-size: clamp(0.58rem, 0.8vw, 0.72rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.38);
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+  }
+  .prndl-state-label--park {
+    /* The "Parked" slot now hosts the Evium logo BUTTON.
+       Override the text-label rules so the button wraps the
+       image cleanly without extra space; color: transparent
+       neutralizes any inherited text-color rules for the image. */
+    margin-bottom: clamp(10px, 1.4vh, 16px);
+    padding: 4px 6px;
+    color: transparent;
+  }
+  .prndl-state-label--neutral {
+    margin-top: clamp(8px, 1.2vh, 14px);
+    margin-bottom: 6px;
+  }
+
+  /* Logo-as-button — reset button defaults, no border, no bg. */
+  .prndl-brand-btn {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+  }
+  .prndl-brand-btn:hover,
+  .prndl-brand-btn:focus-visible {
+    background: rgba(45, 200, 86, 0.08);
+    outline: none;
+  }
+  .prndl-brand-btn[aria-expanded="true"] {
+    background: rgba(45, 200, 86, 0.14);
+  }
+
+  /* Evium brand mark — significantly bigger than before (was
+     ~18-24px, now ~32-44px) so the top of the rail anchors the
+     user's eye and clearly reads as an interactive menu trigger.
+
+     Three-tier brightness ladder:
+       RESTING       opacity: 0.94, soft brand-green halo via
+                     drop-shadow. The logo always reads as alive
+                     and lit — never dull. (Was opacity: 0.72,
+                     no halo — that was the "dull 99% of the time"
+                     the brand was suffering from.)
+       HOVER / FOCUS opacity: 1, scale 1.05, halo size + alpha
+                     bumped — clearly more lit than resting.
+       MENU OPEN     opacity: 1, scale 1.05, biggest halo —
+                     the menu trigger is "fully on", brightest.
+     Each tier transitions on the same eased curve so movement
+     between states reads as one continuous motion. */
+  .prndl-brand-logo {
+    height: clamp(32px, 4.2vh, 44px);
+    width: auto;
+    display: block;
+    opacity: 0.94;
+    filter: drop-shadow(0 0 7px rgba(45, 200, 86, 0.22));
+    transition:
+      opacity 0.25s ease,
+      transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.28s ease;
+  }
+  .prndl-brand-btn:hover .prndl-brand-logo,
+  .prndl-brand-btn:focus-visible .prndl-brand-logo {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(45, 200, 86, 0.5));
+  }
+  .prndl-brand-btn[aria-expanded="true"] .prndl-brand-logo {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 18px rgba(45, 200, 86, 0.68));
+  }
+  .prndl[data-upper-active] .prndl-brand-logo {
+    opacity: 1;
+  }
+  .prndl[data-lower-active]  .prndl-state-label--neutral { color: rgba(255, 255, 255, 0.78); }
+
+  /* ═══════════════════════════════════════════════════════════
+     SCROLL HINT (.lv4-hint)
+     Mouse glyph + "Scroll" label. No pill / background / border
+     — just the icon and caption themselves, semi-transparent
+     brand green. The ICON IS STATIC; only the scroll-wheel dot
+     inside it animates (lv4-hint-scroll keyframe). Whole thing
+     fades in/out as a block via .is-visible.
+     ═══════════════════════════════════════════════════════════ */
+  .lv4-hint {
+    position: fixed;
+    /* Pushed farther in from the corner (+16 px on each axis)
+       so the hint sits well away from the viewport edge. */
+    left: calc(var(--lefter-width) + 46px);
+    bottom: 58px;
+    z-index: 30;
+
+    /* Icon and label side-by-side. */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+
+    color: rgba(45, 200, 86, 0.32);
+    font-family: 'Maven Pro', sans-serif;
+
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition:
+      opacity 0.6s ease,
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lv4-hint.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Arrow-stream SVG — three ↓-shaped arrows (stem + chevron
+     head) arranged side-by-side, each animating a vertical
+     fall through the SVG via its own staggered translateY.
+     ViewBox is now 42×48 (wider + taller than the previous
+     stacked-chevron layout) to host the three side-by-side
+     arrows with room for each to travel down without clipping. */
+  .lv4-hint-wind {
+    width: 48px;
+    height: 54px;
+    display: block;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.38));
+  }
+
+  /* Each arrow is a <g> wrapping its stem <line> and chevron
+     <path>, so the whole arrow translates together as one unit.
+     Animation: fade in from slightly above base, fall down the
+     SVG, fade out near the bottom. Loop. The three arrows run
+     this 1.8s keyframe with 0 / 0.25 / 0.5s stagger (via the
+     inline `--d` prop in the markup), so the left arrow leads
+     the fall and the right arrow trails — a gentle cascading
+     rain feel rather than three identical copies in lockstep.
+       `animation-fill-mode: backwards` applies the 0% keyframe
+     (opacity 0, translateY(-6px)) DURING each arrow's delay
+     window so delayed arrows stay invisible at start instead
+     of appearing at their default position waiting. */
+  .lv4-hint-arrow {
+    animation: lv4-hint-drop 1.8s ease-in-out var(--d, 0s) infinite;
+    animation-fill-mode: backwards;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes lv4-hint-drop {
+    0%   { opacity: 0;    transform: translateY(-6px); }
+    20%  { opacity: 0.85; transform: translateY(0);    }
+    75%  { opacity: 0.85; transform: translateY(22px); }
+    100% { opacity: 0;    transform: translateY(28px); }
+  }
+
+  /* Small uppercase caption. Slightly bumped to match the
+     larger icon, but still dialed back to whisper-level. */
+  .lv4-hint-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  @media (max-width: 640px) {
+    .lv4-hint {
+      left: calc(var(--lefter-width) + 16px);
+      bottom: 28px;
+      gap: 8px;
+    }
+    .lv4-hint-wind { width: 36px; height: 42px; }
+    .lv4-hint-label { font-size: 0.58rem; letter-spacing: 0.2em; }
+  }
+
+  /* Directional hint variants (used in service-testing free-
+     scroll zones). The default hint chevrons drop downward
+     (encouraging downward scroll). For free-scroll zones where
+     the user moves UPWARD (e.g. anchored scope → free-scroll
+     UP into the pain parallax section), we flip the chevrons
+     to point/animate upward via scaleY(-1). The label is
+     left rotated upright via a counter-flip on the wrapper
+     children that aren't the SVG. */
+  .lv4-hint--up .lv4-hint-wind {
+    transform: scaleY(-1);
+  }
+  /* The down variant matches the default hint, but adding
+     this class makes the trigger logic explicit (no implicit
+     "default direction"). */
+  .lv4-hint--down .lv4-hint-wind {
+    transform: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FULL-SCREEN MENU (.lv4-menu)
+     Pinned from the right edge of the lefter to the right edge
+     of the viewport. Futuristic dark-gradient backdrop + a grid
+     pattern overlay that adds subtle depth without reading as
+     "styled-up" clutter. Category tiles stagger-in on open.
+     ═══════════════════════════════════════════════════════════ */
+  .lv4-menu {
+    position: fixed;
+    top: 0;
+    left: var(--lefter-width);
+    right: 0;
+    bottom: 0;
+    z-index: 40;   /* below the lefter itself (z-50) so the logo stays clickable to close */
+
+    background:
+      radial-gradient(circle at 78% 20%, rgba(45, 200, 86, 0.16) 0%, transparent 55%),
+      linear-gradient(160deg, #070e13 0%, #0b1820 55%, #0d1a22 100%);
+
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.28s ease,
+      visibility 0s linear 0.28s;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Block native touch panning when the menu is closed to
+       prevent ghost-taps registering while it's fading out. */
+    pointer-events: none;
+  }
+  .lv4-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 0.28s ease,
+      visibility 0s linear 0s;
+  }
+
+  /* Grid pattern overlay — pure CSS, drawn as two perpendicular
+     repeating linear-gradients. Adds a subtle "HUD" backdrop. */
+  .lv4-menu-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(45, 200, 86, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 200, 86, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 90%);
+    pointer-events: none;
+  }
+
+  /* Close (X) — ported from V3's site-menu-close: the slight
+     brightness bump (0.06 vs 0.05 at rest, 0.18 hover vs 0.20)
+     is what the user liked about the V3 version; the faster
+     0.18s rotation transition also feels crisper than the
+     earlier 0.22s. Same data-menu-close attribute → existing
+     JS picks it up unchanged. */
+  .lv4-close {
+    position: absolute;
+    top: clamp(18px, 2vw, 28px);
+    right: clamp(18px, 2vw, 28px);
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    z-index: 2;
+  }
+  .lv4-close:hover {
+    background: rgba(45, 200, 86, 0.18);
+    color: #2DC856;
+    transform: rotate(90deg);
+  }
+  .lv4-close svg { width: 18px; height: 18px; display: block; }
+
+  .lv4-menu-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 96px) clamp(32px, 4vw, 72px);
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  /* Head block — eyebrow + big title + subtitle */
+  .lv4-menu-head {
+    margin-bottom: clamp(32px, 4vw, 56px);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.32s ease 0.05s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+  }
+  .lv4-menu.is-open .lv4-menu-head {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lv4-menu-eyebrow {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid rgba(45, 200, 86, 0.4);
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2DC856;
+  }
+  .lv4-menu-title {
+    margin: 14px 0 6px;
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #fff;
+  }
+  .lv4-menu-sub {
+    margin: 0;
+    font-size: 0.96rem;
+    color: rgba(255, 255, 255, 0.55);
+    max-width: 44ch;
+  }
+
+  /* ─── Tile grid ──────────────────────────────────────────
+     Rebuilt to match V3's mega-menu pattern: each card is an
+     icon+title head, a short description, then a flex-grow
+     sub-link list so short cards (Products, Contact) don't read
+     top-heavy. Equal-height rows so the grid reads as a clean
+     3×N layout even when sub counts vary (2 for Products,
+     7 for Services). */
+  .lv4-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(14px, 1.4vw, 20px);
+    grid-auto-rows: 1fr;
+    flex: 1;
+  }
+
+  /* Each card — clickable <div role="link">. Uses flex-column so
+     head / desc / sublinks stack cleanly and the card stretches
+     to the row height. The scanline accent from the earlier V4
+     tile style is preserved as a subtle futuristic flourish that
+     V3's plain card didn't have — distinctive to v4 but not
+     fighting the list-first layout. */
+  .lv4-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 2vw, 26px);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .lv4-menu.is-open .lv4-tile {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.06s + var(--i, 0) * 0.04s);
+  }
+  /* Dev-only tiles hidden when DevToggle is OFF. */
+  :global(body.dev-mode-off) .lv4-tile.is-dev-only { display: none; }
+
+  /* Scanline accent — top-edge hairline that grows from the
+     left on hover. Pure pseudo-element, no extra DOM. */
+  .lv4-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 30%;
+    background: linear-gradient(to right, transparent, #2DC856, transparent);
+    opacity: 0.5;
+    transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  }
+  .lv4-tile:hover,
+  .lv4-tile:focus-visible {
+    background: rgba(45, 200, 86, 0.06);
+    border-color: rgba(45, 200, 86, 0.38);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), 0 0 40px rgba(45, 200, 86, 0.10);
+    transform: translateY(-2px);
+    outline: none;
+  }
+  .lv4-tile:hover::before,
+  .lv4-tile:focus-visible::before {
+    width: 100%;
+    opacity: 1;
+  }
+  .lv4-tile.is-active {
+    background: rgba(45, 200, 86, 0.08);
+    border-color: rgba(45, 200, 86, 0.5);
+  }
+
+  /* Head row — icon + title inline, tight spacing so the card's
+     identity reads at a glance. */
+  .lv4-tile-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .lv4-tile-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(45, 200, 86, 0.13);
+    color: #2DC856;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .lv4-tile:hover .lv4-tile-icon,
+  .lv4-tile:focus-visible .lv4-tile-icon {
+    background: #2DC856;
+    color: #0d1a22;
+    transform: scale(1.06);
+  }
+  .lv4-tile-icon svg { width: 22px; height: 22px; display: block; }
+  .lv4-tile-label {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.25vw, 1.25rem);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .lv4-tile-copy {
+    margin: 0 0 14px;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.64);
+  }
+
+  /* Sub-link list — each sub is a pill-row with an arrow bullet
+     that slides right on hover. flex-grow: 1 pushes everything
+     above it to the top so short cards don't look top-heavy —
+     empty space becomes padding under the last sub-link rather
+     than a gap above the sub-link list. */
+  .lv4-tile-sub {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-grow: 1;
+  }
+  .lv4-tile-sub-item { margin: 0; }
+  .lv4-tile-sublink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color 0.15s ease, transform 0.18s ease, background 0.15s ease;
+  }
+  .lv4-tile-sublink:hover,
+  .lv4-tile-sublink:focus-visible {
+    color: #2DC856;
+    outline: none;
+    transform: translateX(3px);
+  }
+  .lv4-tile-sub-bullet {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    color: rgba(45, 200, 86, 0.55);
+    transition: color 0.15s ease, transform 0.2s ease;
+  }
+  .lv4-tile-sublink:hover .lv4-tile-sub-bullet,
+  .lv4-tile-sublink:focus-visible .lv4-tile-sub-bullet {
+    color: #2DC856;
+    transform: translateX(1px);
+  }
+
+  /* ─── Footer row — CTA + contact line ─────────────────── */
+  .lv4-menu-foot {
+    margin-top: clamp(32px, 4vw, 56px);
+    padding-top: clamp(20px, 2vw, 28px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 2vw, 24px);
+    flex-wrap: wrap;
+
+    opacity: 0;
+    transform: translateY(8px);
+    /* Stagger delay lands AFTER the last possible tile. With the
+       three dev-only tiles the max --i is 8, so we delay by
+       `0.12 + 9 * 0.05 = 0.57s`. When dev-mode is off and those
+       tiles are display:none, this delay is slightly longer than
+       strictly needed but only by ~0.15s — imperceptible in
+       practice, and keeps the footer landing consistent whether
+       or not dev-mode is on. */
+    transition:
+      opacity 0.28s ease calc(0.12s + 9 * 0.05s),
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) calc(0.12s + 9 * 0.05s);
+  }
+  .lv4-menu.is-open .lv4-menu-foot {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lv4-foot-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 24px;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: #2DC856;
+    color: #0d1a22;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 10px 26px rgba(45, 200, 86, 0.38);
+    transition: background 0.18s ease, transform 0.18s ease, gap 0.18s ease, box-shadow 0.2s ease;
+  }
+  .lv4-foot-cta:hover {
+    background: #36e464;
+    gap: 13px;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 32px rgba(45, 200, 86, 0.48);
+  }
+  .lv4-foot-cta svg { width: 14px; height: 14px; display: block; }
+  .lv4-foot-sep {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .lv4-foot-link {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .lv4-foot-link:hover { color: #2DC856; }
+
+  /* Responsive — grid reflow + tighter head padding */
+  @media (max-width: 960px) {
+    .lv4-menu-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .lv4-menu-grid { grid-template-columns: 1fr; }
+    .lv4-menu-head { margin-bottom: 24px; }
+  }
+
+  /* Body scroll lock while menu is open — set by JS */
+  :global(body.lv4-menu-open) { overflow: hidden; }
+
+  /* ─── Track (dot-grid + car + arrows) ─────────────────
+     flex: 1 so it absorbs remaining vertical space between
+     the top and bottom labels. All children inside are
+     absolute-positioned relative to this container. */
+  .prndl-track {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    cursor: grab;
+    /* `touch-action: none` prevents the browser from
+       interpreting vertical drags as page scrolls — critical
+       for the pointer-based car drag to work on touch. */
+    touch-action: none;
+  }
+  .prndl-track:active { cursor: grabbing; }
+
+  /* Dot grid — absolutely positioned to fill the track.
+     CSS Grid places dots in a DOT_COLS × DOT_ROWS matrix. */
+  .prndl-dots {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(28, 1fr);
+    justify-items: center;
+    align-items: center;
+    padding: 6px 10px;
+    pointer-events: none;
+  }
+
+  /* Each dot. Base state is small + dim. `--x` is driven by
+     JS each frame; CSS interpolates opacity, scale, and glow
+     from that single scalar. */
+  .prndl-dot {
+    --x: 0;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, calc(0.14 + var(--x) * 0.78));
+    transform: scale(calc(1 + var(--x) * 1.2));
+    box-shadow: 0 0 calc(var(--x) * 6px) rgba(255, 255, 255, calc(var(--x) * 0.4));
+    /* No transition — JS updates are per-frame so
+       transitions would actually make it feel laggy. */
+  }
+
+  /* Up / down chevrons — centered horizontally, positioned
+     at 18% and 82% of the track. Now buttons: click to navigate
+     prev/next section. Opacity responds to the car's position
+     via JS-set data attributes. Hit-target padded (with padding
+     + negative margins to keep the visual glyph the same size)
+     so taps don't miss on touch. */
+  .prndl-arrow {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Hit target slightly bumped: 32×26 → 40×32 so taps / clicks
+       just outside the visible chevron still land on the arrow
+       instead of triggering the car drag underneath. SVG glyph
+       stays the same 18×12 size (centered via flex). */
+    width: 40px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.22s ease, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 2;
+  }
+  .prndl-arrow svg {
+    width: 18px;
+    height: 12px;
+    display: block;
+    pointer-events: none;
+  }
+  .prndl-arrow:hover,
+  .prndl-arrow:focus-visible {
+    color: #2DC856;
+    outline: none;
+  }
+  /* Position offsets use half the new height (32/2 = 16) so the
+     chevron stays centered on the 18% / 82% track mark. */
+  .prndl-arrow--up   { top:    calc(18% - 16px); }
+  .prndl-arrow--down { bottom: calc(18% - 16px); }
+  .prndl[data-upper-active] .prndl-arrow--up {
+    color: #2DC856;
+    transform: translate(-50%, -2px);
+  }
+  .prndl[data-lower-active] .prndl-arrow--down {
+    color: #2DC856;
+    transform: translate(-50%, 2px);
+  }
+
+  /* ─── Car (plan view) ─────────────────────────────────
+     Pinned at the horizontal center of the track; vertical
+     position is driven by the JS spring-follower. `top: 50%`
+     gives a sane default before the rAF loop starts; JS
+     overrides `transform` each frame. */
+  .prndl-car {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Container significantly larger than before to compensate
+       for the internal padding around the car in the source
+       PNG-in-SVG. Was 0.54 width + 56/96 aspect → the car inside
+       rendered at ~28×40 px which read as "too small". Now 0.88
+       width + 1/1 aspect → the PNG fills almost the entire rail
+       width, and the car inside scales up proportionally. */
+    width: calc(var(--lefter-width) * 0.88);
+    aspect-ratio: 1 / 1;
+    /* Center on the (left, top) anchor, then add translateY
+       for the car's track position. JS sets the full transform. */
+    transform: translate(-50%, -50%);
+    transition: filter 0.18s ease;
+    color: rgba(255, 255, 255, 0.94);
+    will-change: transform;
+  }
+  .prndl-car-icon {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* Source PNG-in-SVG is pure black on transparent — invert
+       flips it to pure white without retouching the file. */
+    filter: invert(1);
+    /* Preserve the car's square aspect inside the portrait
+       car container; center it so margins show equally top/
+       bottom. Native drag disabled so the pointer gesture
+       stays with our drag handler. */
+    object-fit: contain;
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+
+  /* Subtle green underglow when the car is being dragged
+     away from center — reinforces "you're shifting" feel. */
+  .prndl[data-dragging] .prndl-car {
+    filter: drop-shadow(0 0 8px rgba(45, 200, 86, 0.5));
+  }
+
+  /* ─── Gear state pill ───────────────────────────────
+     Visually a static "N" badge — semantically a link to
+     home v1 ("/"). Unchanged look at rest; hover adds a
+     subtle brand-green tint so the discoverability exists
+     without visually breaking the gear-pill metaphor. */
+  .prndl-gear {
+    width: 26px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .prndl-gear:hover,
+  .prndl-gear:focus-visible {
+    background: rgba(45, 200, 86, 0.14);
+    color: #2DC856;
+    border-color: rgba(45, 200, 86, 0.45);
+    outline: none;
+  }
+
+  /* ─── Reduced-motion accommodation ──────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .prndl-arrow { transition: none; }
+    .prndl-car   { transition: none; }
+  }
+</style>
+
+<script>
+  /**
+   * PRNDL interaction engine.
+   *
+   *  State:
+   *   - carY        : current normalized car position (0 = top, 1 = bottom)
+   *   - carTargetY  : where the car is trying to go (pointer-derived)
+   *   - pointerY    : pointer Y in track-local px (null when not dragging)
+   *
+   *  Main loop:
+   *   Each animation frame:
+   *     carY += (carTargetY - carY) * SPRING     // spring-damped follower
+   *     dot excitement pass (see earlier comments)
+   *
+   *  Section navigation (NEW):
+   *    Home-v2's section anchors are collected at mount and
+   *    navigated via:
+   *      - Click the up/down arrow button → prev/next section,
+   *        smooth-scrolled to their anchor.
+   *      - Drag the car PAST the up-arrow row (y < UP_THRESH):
+   *        on release, navigate prev section.
+   *      - Drag PAST the down-arrow row (y > DOWN_THRESH):
+   *        on release, navigate next section.
+   *      - Drag WITHIN the arrow band (between the two rows):
+   *        no navigation on release; car simply springs back
+   *        to REST_Y. Page scroll untouched during drag so the
+   *        portal scene's existing sticky/snap behavior stays
+   *        in charge of its scroll flow.
+   *    "Best POV" per section = `element.scrollIntoView({ block: 'start' })`,
+   *    which is exactly what the regular nav uses — keeps the
+   *    anchor behavior identical to every other entry point into
+   *    each section.
+   */
+  (() => {
+    const root   = document.querySelector<HTMLElement>('[data-prndl]');
+    if (!root) return;
+    const track  = root.querySelector<HTMLElement>('[data-prndl-track]');
+    const car    = root.querySelector<HTMLElement>('[data-prndl-car]');
+    const dots   = Array.from(root.querySelectorAll<HTMLElement>('.prndl-dot'));
+    const btnUp   = root.querySelector<HTMLButtonElement>('[data-prndl-up]');
+    const btnDown = root.querySelector<HTMLButtonElement>('[data-prndl-down]');
+    if (!track || !car || dots.length === 0) return;
+
+    /* Car drag bounds — extended equally on both ends by 0.04
+       from the original (0.12/0.88 → 0.08/0.92) so the car can
+       travel visibly further past either arrow without smashing
+       into the top brand logo or the bottom "Neutral" label. */
+    const CAR_BOUNDS    = { min: 0.08, max: 0.92 };
+    const REST_Y        = 0.50;   // normalized center position when released
+    const SPRING        = 0.18;
+    const RADIUS_CAR    = 70;     // px of influence around car
+    const RADIUS_POINTER = 90;    // px of influence around finger/cursor
+    const HALF_ACTIVE_Y  = 0.42;  // below 0.42 = "upper active", above 0.58 = "lower active"
+    /* Arrow thresholds — the up arrow sits at ≈18% of the track
+       and the down at ≈82%. Crossing either during a drag
+       IMMEDIATELY commits to prev/next section (no waiting for
+       release) — see onPointerMove below. */
+    const UP_THRESH   = 0.18;
+    const DOWN_THRESH = 0.82;
+    /* Peek-scroll scale — how much of the drag distance is
+       translated into page scroll while the car is between the
+       two arrows. 0.4 = "scroll 40% of the finger's travel
+       from track-center". Feels proportional to the drag
+       without matching it 1:1 (which would scroll too much).
+       Not clamped to a max — let the scroll grow naturally with
+       the drag until the pointer crosses an arrow, at which
+       point immediate-nav takes over. On release the page
+       smooth-scrolls back to where the drag started. */
+    const PEEK_SCROLL_FACTOR = 0.4;
+
+    /* ─── Navigation anchors ──────────────────────────────
+       Each anchor resolves its Y-coordinate lazily via getY()
+       so viewport resizes / dynamic content don't invalidate
+       a cached list. Order matches top-to-bottom on the page.
+
+       CRITICAL: HeroPortalSolutionsSceneV2 is a SINGLE 270vh-tall
+       section containing TWO distinct visual states — the
+       "portal" view at scroll progress 0 and the "solutions"
+       view at progress 0.90. We expose each as its own anchor
+       so drag-past-arrow / arrow-click both land naturally on
+       whichever is the nearest next/prev stop, instead of
+       leapfrogging the in-scene solutions state.
+
+       Scene internal math (see HeroPortalSolutionsSceneV2 src):
+         scene.height = 270vh
+         scene.sticky = 100vh   (pinned range)
+         scrollable   = 170vh   (scroll distance over which
+                                 raw progresses 0 → 1)
+         SOLUTIONS_ANCHOR_RAW = 0.90   (mid back-hold band)
+       So the solutions anchor's absolute Y =
+         sceneTop + 0.90 × 170vh  =  sceneTop + 1.53 × innerHeight.
+     */
+    type Anchor = {
+      getY: () => number;
+      label: string;
+      /** Optional side-effect that runs BEFORE the scroll kicks off.
+          Used on products-v2 to switch the Level 2 / Level 3 tab so
+          the right panel is visible when the scroll arrives. */
+      onBeforeNav?: () => void;
+      /** Optional visibility predicate. If returns false, the anchor
+          is filtered out of `currentAnchors()` — the rail ignores it
+          for nav / current-section / safety-snap entirely. Used on
+          products-v2 where the L2 / L3 panels only become nav stops
+          once the user has opened them from the selector. Defaults
+          to "always visible" when omitted. */
+      isVisible?: () => boolean;
+    };
+    function queryY(selector: string): number {
+      const el = document.querySelector<HTMLElement>(selector);
+      return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+    }
+
+    /* ─── Per-page anchor set ─────────────────────────────
+       HeaderV4 is shared by every v2-sandbox page, but each
+       page has its own vertical rhythm — /home-v2 flows through
+       hero → portal → solutions → map → faq → app → footer,
+       while /products-v2 has a simpler hero → L2 → L3 → footer
+       loop gated by a tab switch. We pick the right set at
+       init by reading body class flags set in Layout.astro. No
+       hardcoded page list inside the header component itself
+       beyond this one switch — new v2 pages add a body class
+       + a branch here.
+       ─────────────────────────────────────────────────────── */
+    const pageBottomAnchor: Anchor = {
+      label: 'page-bottom',
+      getY: () => {
+        const doc = document.documentElement;
+        return Math.max(0, doc.scrollHeight - window.innerHeight);
+      },
+    };
+
+    const isProductsV2 = document.body.classList.contains('page-products-v2');
+    const isServiceTesting = document.body.classList.contains('page-service-testing');
+
+    const anchors: Anchor[] = isProductsV2
+      ? [
+          /* products-v2 has exactly 3 rail stops now — the page
+             is architecturally TWO sections: a pedestal hero and
+             a single "mega" section that contains the picker
+             cards + every tier / brand expansion. All
+             in-mega navigation (clicking a card, switching tabs,
+             expanding/collapsing a view) is handled by the
+             page's own script and scroll triggers; the rail just
+             moves the user between the two structural sections
+             and the page bottom. */
+          { label: 'hero',     getY: () => queryY('[data-lv4-anchor="products-hero"]') },
+          { label: 'selector', getY: () => queryY('[data-lv4-anchor="products-selector"]') },
+          pageBottomAnchor,
+        ]
+      : isServiceTesting
+      ? (() => {
+          /* service-testing/<segment> pages — rail surfaces every
+             section of the shared ServicePageV2 template that's
+             actually present on the page. The template writes a
+             stable data-lv4-anchor on each section it renders; we
+             resolve them by attribute and gate each by an
+             isVisible predicate so sections the page omits don't
+             create phantom rail stops at scrollY=0 (queryY's
+             not-found return value). */
+          const svc = (label: string, attr: string) => ({
+            label,
+            getY: () => queryY(`[data-lv4-anchor="${attr}"]`),
+            isVisible: () =>
+              !!document.querySelector(`[data-lv4-anchor="${attr}"]`),
+          });
+          return [
+            svc('hero',     'service-hero'),
+            svc('market',   'service-market'),
+            svc('pain',     'service-pain'),
+            svc('scope',    'service-scope'),
+            svc('hardware', 'service-hardware'),
+            svc('models',   'service-financialModels'),
+            svc('software', 'service-software'),
+            svc('proof',    'service-proof'),
+            svc('faq',      'service-faq'),
+            svc('contact',  'service-cta'),
+            pageBottomAnchor,
+          ];
+        })()
+      : [
+          { label: 'hero',      getY: () => queryY('.home-hero') },
+          { label: 'portal',    getY: () => queryY('#portal-to-solutions') },
+          /* Virtual anchor for the solutions state — same DOM element
+             as the portal anchor, but offset 1.53 viewports down to
+             land inside the scene's back-hold (pure-solutions) band. */
+          { label: 'solutions', getY: () => queryY('#portal-to-solutions') + 1.53 * window.innerHeight },
+          { label: 'map',       getY: () => queryY('#locations-map') },
+          { label: 'faq',       getY: () => queryY('#home-faq') },
+          { label: 'app',       getY: () => queryY('#home-app-download') },
+          /* Virtual "page-bottom" anchor — the max scroll position.
+             Clicking the down arrow / dragging past it from the app
+             section lands the user on the footer, which ISN'T a
+             section proper but is still a valid nav target via the
+             rail. Safety-net snap skips the app↔page-bottom zone
+             (see runSafetyNetSnap below) so once the user has passed
+             the app anchor, they can free-scroll the footer without
+             being yanked back. */
+          pageBottomAnchor,
+        ];
+
+    /** Visible anchors at the current moment. Filters out anchors
+        whose isVisible predicate returns false — e.g. products-v2's
+        L2 / L3 stops are only visible once the user has opened that
+        level via the selector. Called fresh per consumer so state
+        changes (open / close a level panel) are reflected immediately
+        without a rebuild. */
+    function currentAnchors(): Anchor[] {
+      return anchors.filter((a) => !a.isVisible || a.isVisible());
+    }
+
+    /** Determine the index of the anchor currently in view.
+        We consider an anchor "active" if its Y has crossed the
+        viewport's upper-third — matches what the user perceives
+        as "the section/state I'm on right now". With virtual
+        anchors inside the portal scene, this cleanly distinguishes
+        "I'm in portal view" from "I'm in solutions view" based
+        on actual scroll position rather than the DOM element. */
+    function getCurrentSectionIndex(): number {
+      const act = currentAnchors();
+      if (act.length === 0) return 0;
+      const activeY = window.scrollY + window.innerHeight * 0.33;
+      let idx = 0;
+      for (let i = 0; i < act.length; i++) {
+        if (act[i].getY() - 8 <= activeY) idx = i;
+      }
+      return idx;
+    }
+
+    /* ─── Retargetable smooth scroll ─────────────────────
+       Previously this was split into `smoothScrollTo` (eased)
+       and `instantScrollTo` (snap). That split caused the
+       "rocket" feel on cancel: the peek-scroll during an in-
+       band drag after a nav was cancelled would teleport the
+       page in a single frame, bypassing the eased revert that
+       had just started.
+
+       This version runs a SINGLE rAF loop that always eases
+       toward `animTarget`. Any call to scrollAnimTo() just
+       updates the target (and optionally the duration + start
+       time). The loop picks up the new target on the next
+       frame, so nav → cancel → peek transitions are all
+       seamlessly smooth — no instant jumps anywhere. */
+    let scrollRafId: number | null = null;
+    let animStart   = 0;           // ms timestamp of current animation start
+    let animStartY  = 0;           // scrollY at animStart
+    let animTarget  = 0;           // scrollY we're heading to
+    let animDur     = 0;           // ms total duration of current animation
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    let activeEase: (t: number) => number = easeInOutCubic;
+
+    /** True while our own eased scroll animation is in flight.
+        Used by the scroll listener (safety-net snap) and hint
+        logic to ignore programmatic scroll events so they don't
+        count as user activity. */
+    let scrollAnimActive = false;
+
+    function scrollAnimStep(now: number) {
+      const elapsed = now - animStart;
+      const t = animDur <= 0 ? 1 : Math.min(1, elapsed / animDur);
+      const eased = activeEase(t);
+      /* Round to integer pixels per frame — matches home-v2's
+         smoothScrollTo. Sub-pixel scroll positions can cause
+         scroll-driven layouts (sticky bands, view-timeline rules)
+         to subpixel-jitter, which reads as visible chop. */
+      const y = Math.round(animStartY + (animTarget - animStartY) * eased);
+      /* Explicit 'instant' bypasses the html-level
+         scroll-behavior: smooth that service-v3 sets for navtab
+         anchor links. Without this, the legacy 2-arg scrollTo()
+         inherits 'smooth' on service-v3 → browser starts a NEW
+         smooth-scroll animation per rAF frame, each cancelling
+         the last. The compounding smoothing read as the "train
+         chugging" feel. With 'instant', each frame applies our
+         own eased target immediately and the curve we computed
+         is the curve the user sees. */
+      window.scrollTo({ top: y, behavior: 'instant' });
+      if (t < 1) {
+        scrollRafId = requestAnimationFrame(scrollAnimStep);
+      } else {
+        window.scrollTo({ top: Math.round(animTarget), behavior: 'instant' });
+        scrollRafId = null;
+        scrollAnimActive = false;
+      }
+    }
+
+    /**
+     * Animate to a new scroll target. If a previous animation
+     * is in flight, the CURRENT scroll position becomes the new
+     * animation's startY — no teleport. Duration auto-scales
+     * with distance unless explicitly provided.
+     *   - `durationOverride` lets callers tighten the animation
+     *     for high-frequency updates (e.g. the peek during drag,
+     *     which retargets every pointermove and wants quick
+     *     response, not a slow 1s ease each time).
+     */
+    function scrollAnimTo(
+      targetY: number,
+      durationOverride?: number,
+      easeOverride?: (t: number) => number,
+    ) {
+      animStartY = window.scrollY;
+      animTarget = targetY;
+      animStart  = performance.now();
+      const absD = Math.abs(targetY - animStartY);
+      animDur = durationOverride !== undefined
+        ? durationOverride
+        : Math.max(750, Math.min(1400, absD * 0.5 + 500));
+      activeEase = easeOverride || easeInOutCubic;
+      scrollAnimActive = true;
+      if (scrollRafId === null) {
+        scrollRafId = requestAnimationFrame(scrollAnimStep);
+      }
+    }
+
+    function navigateToSection(targetIndex: number) {
+      const act = currentAnchors();
+      if (act.length === 0) return;
+      const clamped = Math.max(0, Math.min(act.length - 1, targetIndex));
+      const a = act[clamped];
+      /* onBeforeNav: runs BEFORE the scroll fires. Used on
+         products-v2 so switching to the L2 / L3 anchor flips the
+         catalog tab first (making the target panel visible), then
+         the scroll lands on a non-collapsed element. Run in a
+         try/catch so a broken side-effect can't break the nav. */
+      try { a.onBeforeNav?.(); } catch (_) {}
+      scrollAnimTo(a.getY());   // auto-scaled duration (~750-1400ms)
+    }
+
+    let trackRect: DOMRect | null = null;
+    let trackHeight = 0;
+    /** Cached dot-center Y (in track-local coords). */
+    const dotYs: number[] = [];
+    let carY       = REST_Y;
+    let carTargetY = REST_Y;
+    let pointerY: number | null = null;
+    let pointerActive = false;
+    /** Scroll position at the moment the drag began — so we can
+        (a) peek relative to it during in-band drags, and
+        (b) tether back to it on release. */
+    let anchorScrollY  = 0;
+    /** Section index at the moment the drag began. Using a
+        captured index (rather than getCurrentSectionIndex() on
+        release) means in-band peek-scroll crossing a section
+        boundary can't accidentally flip the "current section"
+        and send us somewhere unexpected on release. */
+    let anchorSection  = 0;
+    /** Which arrow (if any) the pointer is currently PAST in
+        THIS drag. Tracks state as the pointer moves in and out
+        of the arrow zones during a single drag, so we can:
+         - Fire immediate-nav on first crossing out of the band
+         - CANCEL that nav (scroll back to the drag's anchor) the
+           moment the pointer re-enters the band
+         - Re-fire (possibly opposite-direction) nav if the user
+           then pushes past the other arrow in the same drag
+        'none' = pointer is within the arrow band (peek-scroll active)
+        'up'   = pointer is above UP_THRESH (prev-section flow active)
+        'down' = pointer is below DOWN_THRESH (next-section flow active) */
+    let committedDir: 'none' | 'up' | 'down' = 'none';
+
+    function measureTrack() {
+      trackRect   = track!.getBoundingClientRect();
+      trackHeight = trackRect.height;
+      // Cache each dot's vertical center in track-local px.
+      dotYs.length = 0;
+      dots.forEach((d) => {
+        const r = d.getBoundingClientRect();
+        dotYs.push(r.top + r.height / 2 - trackRect!.top);
+      });
+    }
+
+    function pointerYInTrack(e: PointerEvent): number {
+      const y = e.clientY - (trackRect?.top ?? 0);
+      return Math.max(0, Math.min(trackHeight, y));
+    }
+
+    /** Is this pointer event targeting an arrow button?
+        Used to skip drag initiation so the arrow's own click
+        handler runs cleanly instead. */
+    function isArrowTarget(e: PointerEvent): boolean {
+      const t = e.target as Element | null;
+      return !!(t && t.closest('[data-prndl-up], [data-prndl-down]'));
+    }
+
+    function onPointerDown(e: PointerEvent) {
+      if (isArrowTarget(e)) return;        // arrow button handles its own click
+      e.preventDefault();
+      measureTrack();
+      track!.setPointerCapture(e.pointerId);
+      pointerActive   = true;
+      committedDir    = 'none';
+      anchorScrollY   = window.scrollY;
+      anchorSection   = getCurrentSectionIndex();
+      pointerY        = pointerYInTrack(e);
+      carTargetY      = clamp(pointerY / trackHeight, CAR_BOUNDS.min, CAR_BOUNDS.max);
+      root!.setAttribute('data-dragging', '');
+    }
+
+    function onPointerMove(e: PointerEvent) {
+      if (!pointerActive) return;
+      pointerY = pointerYInTrack(e);
+      const norm = pointerY / trackHeight;
+      /* Car follows the pointer throughout the drag — including
+         after nav fires AND after the pointer re-enters the band
+         to cancel that nav — so the drag always feels alive. */
+      carTargetY = clamp(norm, CAR_BOUNDS.min, CAR_BOUNDS.max);
+
+      /* Determine which zone the pointer is currently in. */
+      let currentDir: 'none' | 'up' | 'down' = 'none';
+      if (norm < UP_THRESH)        currentDir = 'up';
+      else if (norm > DOWN_THRESH) currentDir = 'down';
+
+      /* State transition — pointer moved into a different zone
+         than what's currently committed. Three transitions
+         matter: enter up-zone, enter down-zone, re-enter band.
+         Each fires exactly one scroll action (the one the new
+         state expects). Because anchorSection was captured at
+         pointerdown, every nav call uses the same base — so
+         "cross down, cross back, cross down again" correctly
+         ends up navigating to (anchorSection + 1) regardless
+         of how many crossings happened. */
+      if (currentDir !== committedDir) {
+        if (currentDir === 'up') {
+          navigateToSection(anchorSection - 1);
+        } else if (currentDir === 'down') {
+          navigateToSection(anchorSection + 1);
+        } else {
+          /* Back in the arrow band — user is un-committing the
+             flow. Ease back to the pre-drag anchor via the same
+             single-target rAF controller that nav uses, so the
+             cancel flows in sympathy with the forward motion.
+             Further pointermoves inside the band will just
+             retarget this animation (not cancel-and-restart) via
+             scrollAnimTo below — no teleports. */
+          scrollAnimTo(anchorScrollY);
+        }
+        committedDir = currentDir;
+      }
+
+      /* Peek-scroll — only active while the pointer is currently
+         in the band (currentDir === 'none'). Outside the band the
+         page is already flowing to a new section (committedDir is
+         'up' or 'down'); we don't want to fight that with a peek.
+         Scale grows naturally with the drag distance from center;
+         no cap. `behavior: 'instant'` keeps the page tight to the
+         finger while also overriding any lingering smooth-scroll
+         that was kicked off by a prior revert. */
+      if (currentDir === 'none') {
+        const dragPx    = pointerY - trackHeight / 2;  // -ve = drag up, +ve = drag down
+        const peekOffset = dragPx * PEEK_SCROLL_FACTOR;
+        /* Retarget the scroll controller with a SHORT duration
+           (180ms) instead of teleporting. Each pointermove
+           updates the target; the rAF loop eases toward it.
+           That means when the user cancels a nav by dragging
+           back into the band, the page smoothly transitions
+           from mid-nav-position to the new peek target —
+           no single-frame jump, no "rocket" feel. */
+        scrollAnimTo(anchorScrollY + peekOffset, 180);
+      }
+    }
+
+    function onPointerEnd(e: PointerEvent) {
+      if (!pointerActive) return;
+      pointerActive = false;
+      root!.removeAttribute('data-dragging');
+      try { track!.releasePointerCapture(e.pointerId); } catch {}
+
+      pointerY = null;
+      carTargetY = REST_Y;
+
+      /* If the pointer was still past an arrow at release, leave
+         the in-flight nav alone — the page is smooth-scrolling
+         to the new section, that's the user's committed action. */
+      if (committedDir !== 'none') return;
+
+      /* Pointer was in the band at release — regardless of how
+         many times it crossed an arrow and came back during this
+         drag, the final state is "still uncommitted", so tether
+         the user back to the pre-drag anchor. Single-target
+         controller auto-scales the duration by distance; fires
+         standard scroll events for the portal scene / any other
+         handlers to see. */
+      scrollAnimTo(anchorScrollY);
+    }
+
+    function clamp(n: number, lo: number, hi: number) {
+      return Math.max(lo, Math.min(hi, n));
+    }
+
+    // Arrow buttons — plain click handlers for prev/next nav.
+    btnUp?.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateToSection(getCurrentSectionIndex() - 1);
+    });
+    btnDown?.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateToSection(getCurrentSectionIndex() + 1);
+    });
+
+    /* ─── Full-screen menu open/close ──────────────────── */
+    const menu = document.querySelector<HTMLElement>('[data-lv4-menu]');
+    const menuToggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const menuClose  = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+    /* Tiles are now role="link" DIVs driven by data-href (nested
+       <a> sub-links forced the switch from <a> wrappers — same
+       reason V3 documented). Real anchor elements still need to
+       close the menu on click: sub-links, footer CTA, footer
+       link. */
+    const menuCards   = menu ? Array.from(menu.querySelectorAll<HTMLElement>('[data-menu-card]')) : [];
+    const menuAnchors = menu ? Array.from(menu.querySelectorAll<HTMLAnchorElement>('.lv4-tile-sublink, .lv4-foot-cta, .lv4-foot-link')) : [];
+    let lastFocused: Element | null = null;
+
+    function openMenu() {
+      if (!menu || !menuToggle) return;
+      lastFocused = document.activeElement;
+      menu.classList.add('is-open');
+      menu.setAttribute('aria-hidden', 'false');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('lv4-menu-open');
+      // Auto-focus the close button for keyboard users
+      setTimeout(() => menuClose?.focus(), 10);
+    }
+
+    function closeMenu() {
+      if (!menu || !menuToggle) return;
+      menu.classList.remove('is-open');
+      menu.setAttribute('aria-hidden', 'true');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('lv4-menu-open');
+      (lastFocused as HTMLElement)?.focus?.();
+    }
+
+    function menuIsOpen() {
+      return !!menu?.classList.contains('is-open');
+    }
+
+    menuToggle?.addEventListener('click', (e) => {
+      e.preventDefault();
+      menuIsOpen() ? closeMenu() : openMenu();
+    });
+
+    menuClose?.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeMenu();
+    });
+
+    /* Card clicks (the card DIV itself, not its sub-links) —
+       data-href drives the nav. Cards with href="#" (Other) just
+       close the menu instead of navigating to "#". Sub-link clicks
+       are ignored here so the real <a> handles navigation. Small
+       60ms delay before the nav kick so the close transition
+       starts visibly — keeps the exit feeling intentional. */
+    menuCards.forEach((card) => {
+      const go = () => {
+        const href = card.getAttribute('data-href');
+        if (!href || href === '#') { closeMenu(); return; }
+        closeMenu();
+        setTimeout(() => { window.location.href = href; }, 60);
+      };
+
+      card.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('.lv4-tile-sublink')) return;
+        e.preventDefault();
+        go();
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('.lv4-tile-sublink')) return;
+        e.preventDefault();
+        go();
+      });
+    });
+
+    /* Real anchor clicks (sub-links + footer links) — native
+     navigation handles the href; we just close the menu on the
+     next frame so the fade-out animation kicks in before the
+     new page loads. */
+    menuAnchors.forEach((a) => {
+      a.addEventListener('click', () => {
+        requestAnimationFrame(() => closeMenu());
+      });
+    });
+
+    /* Escape key closes the menu globally. */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuIsOpen()) {
+        e.preventDefault();
+        closeMenu();
+      }
+    });
+
+    /* ─── Safety-net snap ─────────────────────────────────────
+       If the user stops scrolling while parked in an awkward
+       "between two anchors" zone, pull them to the nearest one
+       in the direction they were last moving. Mirrors what the
+       portal scene does internally for its raw 0.08–0.80
+       transition range, but covers the gaps the scene DOESN'T
+       own — between hero and portal, solutions and map, map
+       and FAQ, FAQ and app-download.
+
+       Explicitly SKIPPED zones (snap deferred to their owners):
+        - portal ↔ solutions: scene's own raw-based snap handles
+        - past app-download: free-scroll reserved for the phone
+          download + SiteFooter UX that belongs down there
+
+       A small NEAR-anchor dead zone (40 px) prevents the
+       safety-net from re-firing after it completes (the scroll
+       settles within a pixel or two of the target, already
+       "at" the anchor). */
+    /* Idle window before the between-section safety-net snap
+       fires. Kept tight (was 600ms) so users who stop between
+       sections don't sit parked in the gap for long before the
+       snap kicks in. 350ms is close to the portal scene's own
+       400ms snap window, so the feel is consistent across the
+       page's snap-owners. */
+    const SAFETY_IDLE_MS  = 70;
+    const SAFETY_NEAR_PX  = 40;
+    let safetyTimer: number | null = null;
+    let lastScrollDir: 'up' | 'down' | null = null;
+    let lastScrollY = window.scrollY;
+
+    /* ─── Pain content-bottom resolver (service-testing) ─────────
+       Pain's DOM section often has trailing empty padding (V3
+       has ~160px) and scope has leading empty padding (~140px),
+       so pain.getBoundingClientRect().bottom is well below where
+       the user perceives "pain is out of the way" — they're
+       reading scope content in viewport while our DOM math still
+       sees pain occupying the upper fold.
+
+       This helper resolves the absolute Y of pain's last
+       VISIBLE content element (deepest meaningful descendant
+       with non-trivial size), so the snap rule can ask "is pain
+       CONTENT out?" instead of "is pain SECTION out?". Cached on
+       first call; invalidated on resize (layout shifts). */
+    let painContentBottomCache: number | null = null;
+    let painContentBottomCacheW = 0;
+    function getPainContentBottomY(): number {
+      if (painContentBottomCache !== null && painContentBottomCacheW === window.innerWidth) {
+        return painContentBottomCache;
+      }
+      const pain = document.getElementById('service-pain');
+      if (!pain) return 0;
+      let maxBottom = 0;
+      pain.querySelectorAll('*').forEach((el) => {
+        const r = (el as Element).getBoundingClientRect();
+        // Filter out invisible / tiny elements (decorative spans,
+        // SR-only text). 30×30 threshold matches "real readable
+        // content".
+        if (r.height > 30 && r.width > 30) {
+          const b = window.scrollY + r.bottom;
+          if (b > maxBottom) maxBottom = b;
+        }
+      });
+      painContentBottomCache = maxBottom || (window.scrollY + pain.getBoundingClientRect().bottom);
+      painContentBottomCacheW = window.innerWidth;
+      return painContentBottomCache;
+    }
+    window.addEventListener('resize', () => {
+      painContentBottomCache = null;
+    });
+
+    function onPageScroll() {
+      const sy = window.scrollY;
+      /* Only track scroll direction from user-driven scrolls;
+         our own programmatic animations shouldn't count. */
+      if (!scrollAnimActive) {
+        if (sy > lastScrollY + 1) lastScrollDir = 'down';
+        else if (sy < lastScrollY - 1) lastScrollDir = 'up';
+      }
+      lastScrollY = sy;
+
+      /* Reset the idle timer on every scroll — but skip while
+         user is dragging the rail (peek scroll shouldn't trigger
+         snap) or while our own animation is running. */
+      if (pointerActive || scrollAnimActive) return;
+      if (safetyTimer !== null) clearTimeout(safetyTimer);
+      safetyTimer = window.setTimeout(runSafetyNetSnap, SAFETY_IDLE_MS);
+    }
+
+    function runSafetyNetSnap() {
+      if (pointerActive || scrollAnimActive || menuIsOpen()) return;
+
+      const sy = window.scrollY;
+      const act = currentAnchors();
+      /* Find the anchor pair surrounding the current scroll
+         position — `prevIdx` = last anchor whose Y ≤ sy,
+         `nextIdx` = first anchor whose Y > sy. */
+      let prevIdx = -1, nextIdx = -1;
+      for (let i = 0; i < act.length; i++) {
+        const y = act[i].getY();
+        if (y <= sy) prevIdx = i;
+        else if (nextIdx === -1) nextIdx = i;
+      }
+      /* At the very top (before hero) or past the last anchor
+         (past app-download → footer zone) — no snap. The past-
+         app case preserves the free-scroll flow into the phone
+         download / footer section. */
+      if (prevIdx === -1 || nextIdx === -1) return;
+
+      /* Page-specific skip zones. The safety-net snap is useful
+         for most anchor pairs, but a few zones intentionally
+         preserve free scroll (so the rail doesn't fight the
+         user's own reading pace) or defer to another snap
+         controller that owns that range.
+
+         home-v2:
+           portal↔solutions (anchors 1↔2) — the portal scene
+             runs its own raw-based snap between HOLD_FRONT
+             (0.06) and HOLD_BACK (0.82). Skip so we don't
+             double-snap and compete.
+           app↔page-bottom (anchors n-2↔n-1) — phone download
+             + footer should read as a free-scroll finale.
+
+         products-v2:
+           cards↔page-bottom (anchors n-2↔n-1) — the catalog
+             cards scroll naturally into the footer. Snapping
+             would feel like a yank while the user is reading
+             card specs. The selector↔cards zone (anchors 1↔2)
+             SHOULD snap, so we don't share home-v2's 1↔2 rule
+             here.
+
+         service-testing:
+           Asymmetric per-zone snap rules to match the user's
+           specified flow:
+
+           - Zone 0↔1 (hero→market): SNAP both directions —
+             the hero+navtab band → market entry experience.
+
+           - Zone 1↔2 (market→pain): SKIP both directions —
+             pain is a long parallax dwell section; users
+             scroll naturally into it without snap.
+
+           - Zone 2↔3 (pain→scope): ASYMMETRIC.
+               - direction UP   → SKIP (free back into pain
+                 from anchored scope, per user spec).
+               - direction DOWN → only SNAP to scope when the
+                 pain section is FULLY OUT of viewport. Until
+                 then (i.e. while pain is still partially in
+                 view) the user is mid-parallax — leave them
+                 alone. This is the "make scope an anchor
+                 only when objection cards are fully out of
+                 the viewport" rule.
+
+           - Zones 3↔4, 4↔5, 5↔6, 6↔7 (scope ↔ hardware ↔
+             financial ↔ software ↔ faq): SNAP both
+             directions — section-per-viewport flow. Each
+             section is a full 100vh; scrolling either way
+             flows the user to the adjacent section's perfect
+             POV via the safety-net's direction-based pick.
+
+           - Zone 7↔8 (faq→contact): ASYMMETRIC.
+               - direction UP   → SNAP to faq (smooth flow
+                 back from contact, but mostly: when user
+                 scrolls UP from faq's anchor, no skip
+                 happens because they're entering 6↔7 which
+                 IS a snap zone — snaps to software).
+               - direction DOWN → SKIP (free scroll into
+                 footer per user spec).
+
+           - Zone 8↔9 (contact→page-bottom): SKIP (already
+             handled by the generic last-zone rule below).
+           */
+      if (!isProductsV2 && !isServiceTesting && prevIdx === 1 && nextIdx === 2) return;
+      if (isServiceTesting && prevIdx === 1) return;
+      /* Track when pain→scope is committing because pain CONTENT
+         is out (vs. user is mid-parallax). When set, we force a
+         forward snap to scope regardless of last direction AND
+         skip the near-anchor guard, because the dead zone runs
+         right up to scope's anchor and the user being "10px from
+         scope" still warrants a final commit. */
+      let forceForwardToScope = false;
+      if (isServiceTesting && prevIdx === 2) {
+        const painContentBottomAbs = getPainContentBottomY();
+        const painContentInFold = painContentBottomAbs > 0
+          ? (painContentBottomAbs - sy) > 50
+          : true; // be conservative if helper failed
+        if (painContentInFold) {
+          /* Pain content still readable in viewport. Original
+             dual rule: scrolling UP = user is reading pain, leave
+             them alone. Scrolling DOWN = mid-parallax dwell,
+             defer snap until pain content leaves the fold. */
+          return;
+        }
+        /* Pain content is fully out — user is in the dead zone of
+           pain's trailing padding + scope's leading padding,
+           sitting around scope's anchor with nothing readable.
+           Snap forward to scope regardless of last direction.
+           This covers the case where the user scrolled up by a
+           hair past scope (lastScrollDir='up') without pulling
+           themselves into pain content — they meant scope. */
+        forceForwardToScope = true;
+      }
+      if (isServiceTesting && prevIdx === 7 && lastScrollDir === 'down') return;
+      if (prevIdx === act.length - 2 && nextIdx === act.length - 1) return;
+
+      const prevY = act[prevIdx].getY();
+      const nextY = act[nextIdx].getY();
+      const distPrev = sy - prevY;
+      const distNext = nextY - sy;
+      /* Already "at" an anchor (within SAFETY_NEAR_PX of one)
+         — nothing to snap. Prevents re-firing after the snap
+         itself lands at a pixel-quantized final position.
+         Bypassed when forceForwardToScope is set: the pain-out
+         dead zone extends right up to scope's anchor and we
+         want a clean snap even from very close in. */
+      if (!forceForwardToScope && (distPrev < SAFETY_NEAR_PX || distNext < SAFETY_NEAR_PX)) return;
+
+      /* Snap target. Direction-based by default (lets the user's
+         momentum complete the trip), with two exceptions:
+
+           products-v2 hero ↔ selector zone (prevIdx = 0,
+             nextIdx = 1) → ALWAYS proximity-based. This gives
+             the selector a real "gravity well" feel — wiggling
+             up slightly from the selector anchor pulls the
+             user back DOWN to selector (since selector is the
+             closer anchor to where they stopped) rather than
+             launching them all the way up to pedestal. The
+             user has to scroll up past the midpoint between
+             selector and hero to commit to the pedestal
+             anchor.
+
+           service-testing hero ↔ market zone (prevIdx = 0,
+             nextIdx = 1) → SAME proximity-based gravity well.
+             First-impression scroll on a service page should
+             "lock onto" the Market Reality narrative — small
+             nudges from the hero pull the user into market;
+             small nudges from market pull them back to the
+             hero. Commits only when they cross the midpoint. */
+      let targetAnchor: Anchor;
+      const productsV2Gravity   = isProductsV2   && prevIdx === 0 && nextIdx === 1;
+      const serviceFirstGravity = isServiceTesting && prevIdx === 0 && nextIdx === 1;
+      if (forceForwardToScope) {
+        /* Pain-out dead zone — always snap forward to scope,
+           overriding both gravity rules and direction picker. */
+        targetAnchor = act[nextIdx];
+      } else if (productsV2Gravity) {
+        targetAnchor = distPrev < distNext ? act[prevIdx] : act[nextIdx];
+      } else if (serviceFirstGravity) {
+        /* Hero pull WEAKENED on service-testing. The midpoint
+           rule (used by products-v2) was tugging users back to
+           the hero on small initial downward scrolls — half a
+           viewport into market and the gravity was still flipping
+           home-ward. We bias 2× toward market: hero only commits
+           when the user is in the top ~33% of the gap (very close
+           to hero). Past that, a small downward nudge commits
+           forward to market instead of yanking back up. */
+        targetAnchor = (distPrev * 2 < distNext) ? act[prevIdx] : act[nextIdx];
+      } else if (lastScrollDir === 'down')      targetAnchor = act[nextIdx];
+      else if (lastScrollDir === 'up')   targetAnchor = act[prevIdx];
+      else                               targetAnchor = distPrev < distNext ? act[prevIdx] : act[nextIdx];
+
+      /* Fire onBeforeNav so products-v2's tab-switch anchors land
+         on the correct panel even when the user got here via a
+         safety-net snap instead of an arrow click. */
+      try { targetAnchor.onBeforeNav?.(); } catch (_) {}
+      /* Service-testing snaps use the rAF scrollAnimTo with a
+         tuned duration + easing. The previous "chugga" feel
+         from rAF was a bug: html-level scroll-behavior: smooth
+         (set on service-v3 for navtab anchor links) was making
+         the per-frame scrollTo() compound-smooth on top of our
+         own easing — browser falling behind, frame after frame.
+         scrollAnimStep now uses {behavior: 'instant'} per frame
+         to bypass that, so the curve we compute IS the curve
+         the user sees. With that fixed, rAF gives us the
+         duration control native smooth-scroll lacks (browser
+         default native is ~300ms — felt "too fast" to the user
+         on this snap-heavy page). */
+      let svcDur: number | undefined;
+      let svcEase: ((t: number) => number) | undefined;
+      if (isServiceTesting) {
+        const dist = Math.abs(targetAnchor.getY() - window.scrollY);
+        /* 750–1050ms range. Single-section hops (~1vh ≈ 1080px)
+           land near the upper bound — feels like a deliberate
+           glide, not a whip. easeOutCubic decelerates smoothly
+           into the destination without easeInOutCubic's
+           perceptible mid-flight inflection. */
+        svcDur = Math.max(750, Math.min(1050, dist * 0.5 + 550));
+        svcEase = (t: number) => 1 - Math.pow(1 - t, 3);
+      }
+      scrollAnimTo(targetAnchor.getY(), svcDur, svcEase);
+    }
+
+    /* Passive scroll listener — safety-net trigger + direction
+       tracking + hint reset (see below). Doesn't preventDefault,
+       doesn't call scrollTo — purely observational. */
+    window.addEventListener('scroll', onPageScroll, { passive: true });
+
+    /* ─── Idle swipe hint ──────────────────────────────────────
+       Fades a small pill into the bottom-left of the content
+       area (right of the rail) to teach new users the rail is
+       drag-interactive. Shows:
+        - Soon (but not instantly) after first page load
+        - Occasionally after long idle stretches
+       Hides the moment the user interacts again (scroll or
+       pointerdown). Also suppressed while the menu overlay is
+       open so it doesn't peek through from behind. */
+    const HINT_FIRST_DELAY   = 2000;     // first appearance — soon after landing so the rail is discovered quickly
+    const HINT_VISIBLE_MS    = 3800;     // how long it stays up
+    const HINT_IDLE_MS       = 9000;     // deterministic: after N ms of no user activity, hint reappears (gated by hasSectionBelowCurrent)
+
+    const hintEl    = document.querySelector<HTMLElement>('[data-lv4-hint]');
+    let hintShowTimer: number | null = null;
+    let hintHideTimer: number | null = null;
+
+    function clearHintTimers() {
+      if (hintShowTimer !== null) { clearTimeout(hintShowTimer); hintShowTimer = null; }
+      if (hintHideTimer !== null) { clearTimeout(hintHideTimer); hintHideTimer = null; }
+    }
+
+    function hideHint() {
+      if (!hintEl) return;
+      hintEl.classList.remove('is-visible');
+      hintEl.setAttribute('aria-hidden', 'true');
+      if (hintHideTimer !== null) { clearTimeout(hintHideTimer); hintHideTimer = null; }
+    }
+
+    /** True if the user still has a real content section below
+        the current scroll position. Excludes the final virtual
+        "page-bottom" anchor since that's just the footer / free-
+        scroll zone, not a section worth hinting toward. */
+    function hasSectionBelowCurrent(): boolean {
+      const sy = window.scrollY + 60;
+      const act = currentAnchors();
+      /* Skip the last anchor (page-bottom) — it's the footer
+         landing, not a nav target worth pointing at. */
+      for (let i = 0; i < act.length - 1; i++) {
+        if (act[i].getY() > sy) return true;
+      }
+      return false;
+    }
+
+    function showHintNow() {
+      if (!hintEl) return;
+      /* Suppress if the user is mid-interaction, the menu is
+         open, or there's no real section below to navigate to.
+         In any of those cases, defer to a later idle window
+         rather than give up entirely. */
+      if (pointerActive || menuIsOpen() || !hasSectionBelowCurrent()) {
+        scheduleHint(HINT_IDLE_MS);
+        return;
+      }
+      hintEl.classList.add('is-visible');
+      hintEl.setAttribute('aria-hidden', 'false');
+      if (hintHideTimer !== null) clearTimeout(hintHideTimer);
+      hintHideTimer = window.setTimeout(() => {
+        hintEl.classList.remove('is-visible');
+        hintEl.setAttribute('aria-hidden', 'true');
+        scheduleHint(HINT_IDLE_MS);
+      }, HINT_VISIBLE_MS);
+    }
+
+    function scheduleHint(delayMs: number) {
+      if (hintShowTimer !== null) clearTimeout(hintShowTimer);
+      hintShowTimer = window.setTimeout(showHintNow, delayMs);
+    }
+
+    function onUserActivity() {
+      /* Programmatic animations (our own scrollAnimTo) shouldn't
+         count as user activity. */
+      if (scrollAnimActive) return;
+      hideHint();
+      scheduleHint(HINT_IDLE_MS);
+    }
+
+    /* First appearance soon after landing — not instant so the
+       page has a beat to settle in, but quickly enough that the
+       rail is discovered early. */
+    scheduleHint(HINT_FIRST_DELAY);
+    window.addEventListener('scroll', onUserActivity, { passive: true });
+    window.addEventListener('pointerdown', onUserActivity);
+
+    /* ─── Service-testing: directional hint on flow→free
+       transitions ──────────────────────────────────────────────
+       The page's safety-net snap is intentionally OFF in two
+       free-scroll zones (pain area and faq→contact). When the
+       user transitions from a flow zone (anchored, snap on)
+       INTO one of these free zones, surface the same idle
+       hint with a direction-modifier class so the chevrons
+       point in the natural scroll direction:
+
+         - Pain area: direction follows the user's last scroll
+           direction. If they came DOWN from the hero, the hint
+           points DOWN — "keep going to scope". If they came UP
+           from scope, it points UP — "back to hero". The pain
+           zone is reachable from both sides, so a hard-coded
+           direction was wrong half the time.
+         - FAQ→contact: only reachable on the way down from
+           software, so the hint is always DOWN (continue into
+           the contact / footer free zone).
+
+       The hint always re-asserts visibility while in a free zone
+       (even on every scroll event) so onUserActivity's hide
+       doesn't suppress it. Cheap — classList.add is idempotent. */
+    let prevServiceFreeZone: 'pain' | 'faq' | null = null;
+    let prevServiceFreeDir: 'up' | 'down' | null = null;
+    function checkServiceFreeZone() {
+      if (!isServiceTesting || !hintEl || scrollAnimActive) return;
+      const sy = window.scrollY;
+      const act = currentAnchors();
+      let pIdx = -1;
+      for (let i = act.length - 1; i >= 0; i--) {
+        if (act[i].getY() <= sy) { pIdx = i; break; }
+      }
+      let zone: 'pain' | 'faq' | null = null;
+      if (pIdx === 1 || pIdx === 2)      zone = 'pain';
+      else if (pIdx === 7)               zone = 'faq';
+
+      // Out of any free zone — hide hint if we were previously
+      // in one, then bail.
+      if (!zone) {
+        if (prevServiceFreeZone !== null) {
+          prevServiceFreeZone = null;
+          prevServiceFreeDir = null;
+          hintEl.classList.remove('lv4-hint--up', 'lv4-hint--down');
+          hideHint();
+        }
+        return;
+      }
+
+      /* In a free zone. Pick direction: pain follows user's
+         last scroll direction so the hint matches the way they
+         were already moving (down from hero → down to scope, up
+         from scope → up to hero). FAQ is always down (only
+         reachable scrolling down from software). lastScrollDir
+         can be null on first paint — fall back to 'up' for pain
+         (back-to-top is the safer default early in the page) and
+         'down' for faq. */
+      let direction: 'up' | 'down';
+      if (zone === 'pain') {
+        direction = lastScrollDir === 'down' ? 'down' : 'up';
+      } else {
+        direction = 'down';
+      }
+      if (zone !== prevServiceFreeZone || direction !== prevServiceFreeDir) {
+        hintEl.classList.remove('lv4-hint--up', 'lv4-hint--down');
+        hintEl.classList.add(`lv4-hint--${direction}`);
+        prevServiceFreeZone = zone;
+        prevServiceFreeDir = direction;
+      }
+      // ALWAYS re-assert visibility while in a free zone.
+      // The scroll-listener order is: onUserActivity (hides
+      // hint) → checkServiceFreeZone (re-shows). Re-asserting
+      // here on every scroll event guarantees the hint stays
+      // up while the user is in the free-scroll zone instead
+      // of getting hidden by the first scroll movement after
+      // entry. Cheap — classList.add is idempotent. */
+      clearHintTimers();
+      hintEl.classList.add('is-visible');
+      hintEl.setAttribute('aria-hidden', 'false');
+    }
+    if (isServiceTesting) {
+      window.addEventListener('scroll', checkServiceFreeZone, { passive: true });
+    }
+
+    function tick() {
+      // Spring-damped follower
+      carY += (carTargetY - carY) * SPRING;
+      const carPixelY = carY * trackHeight;
+
+      // Car transform — keep horizontal centering, set vertical
+      car!.style.transform = `translate(-50%, calc(${carPixelY - trackHeight / 2}px - 50%))`;
+
+      // Dot excitement pass
+      for (let i = 0; i < dots.length; i++) {
+        const y = dotYs[i];
+        let e = 0;
+
+        const carDist = Math.abs(y - carPixelY);
+        if (carDist < RADIUS_CAR) {
+          e = Math.max(e, (1 - carDist / RADIUS_CAR) * 0.55);
+        }
+        if (pointerY !== null) {
+          const pd = Math.abs(y - pointerY);
+          if (pd < RADIUS_POINTER) {
+            e = Math.max(e, (1 - pd / RADIUS_POINTER));
+          }
+        }
+
+        dots[i].style.setProperty('--x', e.toFixed(3));
+      }
+
+      // State labels — "upper / lower active" driven by car pos
+      if (carY < HALF_ACTIVE_Y) {
+        root!.setAttribute('data-upper-active', '');
+        root!.removeAttribute('data-lower-active');
+      } else if (carY > 1 - HALF_ACTIVE_Y) {
+        root!.setAttribute('data-lower-active', '');
+        root!.removeAttribute('data-upper-active');
+      } else {
+        root!.removeAttribute('data-upper-active');
+        root!.removeAttribute('data-lower-active');
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    // Kick off
+    measureTrack();
+    requestAnimationFrame(tick);
+
+    // Remeasure on resize / font-load (dot positions shift when
+    // the track height changes, and CSS grid centers can move).
+    window.addEventListener('resize', () => measureTrack());
+    if ('fonts' in document) {
+      (document as any).fonts?.ready?.then(measureTrack);
+    }
+
+    track.addEventListener('pointerdown',   onPointerDown);
+    track.addEventListener('pointermove',   onPointerMove);
+    track.addEventListener('pointerup',     onPointerEnd);
+    track.addEventListener('pointercancel', onPointerEnd);
+    track.addEventListener('lostpointercapture', () => onPointerEnd({ pointerId: -1 } as PointerEvent));
+  })();
+</script>

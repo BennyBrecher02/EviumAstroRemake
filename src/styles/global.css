@@ -71,18 +71,31 @@ body::-webkit-scrollbar {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   THEME TOKENS  (3 modes, toggled via data-theme on <html>)
+   NAVBAR THEME TOKENS — LIGHT-NAV (PERMANENT DEFAULT)
    ═══════════════════════════════════════════════════════════
-   (none)           → Dark mode  +  Dark navbar   (default)
-   dark-light       → Dark mode  +  Light navbar
-   light            → Apple-white light mode
+   The navbar settled on its lighter teal / stronger blur palette
+   as of 2026-04-22. The DevToggle's dark/light theme switcher
+   was retired — there's no longer a data-theme attribute on
+   <html>, and no way to switch back at runtime.
+
+   OLD DARK-NAV VALUES  (kept here as a single-comment reference
+   in case we ever want to resurrect the darker navbar look):
+
+       --nav-bg:        rgba(15, 28, 38, 0.97);   // very dark teal
+       --nav-blur:      4px;
+       --nav-drop-bg:   rgba(12, 24, 32, 0.98);   // near-black dropdown
+       --nav-drop-blur: 8px;
+
+   The other nav tokens (border, text, divider, hover states) were
+   identical across both themes — only these four background/blur
+   values differed, so that's all we need to preserve.
    ─────────────────────────────────────────────────────── */
 :root {
   /* Navbar */
-  --nav-bg:            rgba(15, 28, 38, 0.97);
-  --nav-blur:          4px;
-  --nav-drop-bg:       rgba(12, 24, 32, 0.98);
-  --nav-drop-blur:     8px;
+  --nav-bg:            rgba(26, 47, 58, 0.85);
+  --nav-blur:          8px;
+  --nav-drop-bg:       rgba(18, 35, 45, 0.97);
+  --nav-drop-blur:     16px;
   --nav-border:        #2DC856;
   --nav-divider-alpha: 0.7;
   --nav-text:          rgba(255,255,255,0.75);
@@ -90,14 +103,6 @@ body::-webkit-scrollbar {
   --nav-drop-text:     rgba(255,255,255,0.65);
   --nav-drop-hover-bg: rgba(45,200,86,0.08);
   --nav-drop-hover:    #2DC856;
-}
-
-/* ── Dark + Light Navbar ───────────────────────────────── */
-html[data-theme="dark-light"] {
-  --nav-bg:            rgba(26, 47, 58, 0.85);
-  --nav-blur:          8px;
-  --nav-drop-bg:       rgba(18, 35, 45, 0.97);
-  --nav-drop-blur:     16px;
 }
 
 
