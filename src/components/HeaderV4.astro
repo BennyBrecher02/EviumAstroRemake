@@ -65,6 +65,57 @@ type Cat = {
 };
 
 const categories: Cat[] = [
+  /* Order: Site v2 → Blog → Products → Solutions → Services →
+     How It Works → Contact → Testing → Other.
+     The first three are the surfaces under active iteration so
+     they sit at the top of the menu where the eye lands first;
+     the public-facing pages follow.                              */
+  {
+    /* Site v2 — dropdown index of every v2-sandbox page. Card
+       header still routes to /home-v2 so a direct click lands on
+       the flagship v2 page, but the sub-link list surfaces every
+       v2 variant (Home v2, Products v2, …) as its own entry. */
+    label: 'Site v2',
+    href:  '/home-v2',
+    icon:  'home-v2',
+    desc:  'Dev-only sandbox pages running the PRNDL-lefter layout.',
+    devOnly: true,
+    sub: [
+      { label: 'Home v2',                       href: '/home-v2'                          },
+      { label: 'Products v2',                   href: '/products-v2'                      },
+      { label: 'Service — Multifamily v2',      href: '/service-testing/multifamily'      },
+      { label: 'Service — Multifamily v3',      href: '/service-testing/multifamily-v3'   },
+    ],
+  },
+  {
+    /* Blog — sub-list reflects the variants that actually exist
+       (the 4-door garage desktop, the mobile experiment, plus
+       the future v2 placeholder) instead of the stub category
+       pages from the original scaffolding. */
+    label: 'Blog',
+    href:  '/blog',
+    icon:  'article',
+    desc:  'Case studies, company news, and industry insight.',
+    sub: [
+      /* 3 desktop variants first, then the 2 mobile variants —
+         keeps the dropdown grouped by form-factor. */
+      { label: 'Desktop v1', href: '/blog'                  },
+      { label: 'Desktop v2', href: '/blog-v2'               },
+      { label: 'Desktop v3', href: '/blog-v3'               },
+      { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
+      { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
+    ],
+  },
+  {
+    label: 'Products',
+    href:  '/products',
+    icon:  'bolt',
+    desc:  'Level 2 and DC fast charging hardware for every site.',
+    sub: [
+      { label: 'Level 2', href: '/products#panel-l2' },
+      { label: 'Level 3', href: '/products#panel-l3' },
+    ],
+  },
   {
     label: 'Solutions',
     href:  '/#solutions',
@@ -93,35 +144,6 @@ const categories: Cat[] = [
     ],
   },
   {
-    label: 'Products',
-    href:  '/products',
-    icon:  'bolt',
-    desc:  'Level 2 and DC fast charging hardware for every site.',
-    sub: [
-      { label: 'Level 2', href: '/products#panel-l2' },
-      { label: 'Level 3', href: '/products#panel-l3' },
-    ],
-  },
-  {
-    /* Blog — sub-list reflects the variants that actually exist
-       (the 4-door garage desktop, the mobile experiment, plus
-       the future v2 placeholder) instead of the stub category
-       pages from the original scaffolding. */
-    label: 'Blog',
-    href:  '/blog',
-    icon:  'article',
-    desc:  'Case studies, company news, and industry insight.',
-    sub: [
-      /* 3 desktop variants first, then the 2 mobile variants —
-         keeps the dropdown grouped by form-factor. */
-      { label: 'Desktop v1', href: '/blog'                  },
-      { label: 'Desktop v2', href: '/blog-v2'               },
-      { label: 'Desktop v3', href: '/blog-v3'               },
-      { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
-      { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
-    ],
-  },
-  {
     label: 'How It Works',
     href:  '/how-it-works',
     icon:  'question',
@@ -143,23 +165,6 @@ const categories: Cat[] = [
       { label: 'Schedule a Call',  href: '/contact/schedule' },
       { label: 'Support',          href: '/contact/support'  },
       { label: 'Referral Program', href: '/contact/referral' },
-    ],
-  },
-  {
-    /* Site v2 — dropdown index of every v2-sandbox page. Card
-       header still routes to /home-v2 so a direct click lands on
-       the flagship v2 page, but the sub-link list surfaces every
-       v2 variant (Home v2, Products v2, …) as its own entry. */
-    label: 'Site v2',
-    href:  '/home-v2',
-    icon:  'home-v2',
-    desc:  'Dev-only sandbox pages running the PRNDL-lefter layout.',
-    devOnly: true,
-    sub: [
-      { label: 'Home v2',                       href: '/home-v2'                          },
-      { label: 'Products v2',                   href: '/products-v2'                      },
-      { label: 'Service — Multifamily v2',      href: '/service-testing/multifamily'      },
-      { label: 'Service — Multifamily v3',      href: '/service-testing/multifamily-v3'   },
     ],
   },
   {
@@ -271,15 +276,19 @@ const categories: Cat[] = [
 
     </div>
 
-    <!-- Bottom state label + gear indicator. The "N" pill below
-         is visually the "Neutral" gear state echo, but also
-         doubles as a quiet escape hatch back to the ORIGINAL
-         Home v1 at "/" — clicking it leaves the home-v2
-         sandbox. Visual treatment unchanged from a pure gear
-         pill; hover adds a subtle brand-green tint so the
-         interactivity is discoverable without shouting. -->
-    <span class="prndl-state-label prndl-state-label--neutral" data-prndl-neutral>Neutral</span>
-    <a href="/" class="prndl-gear" data-prndl-gear aria-label="Home (v1)">N</a>
+    <!-- Bottom slot — escape hatch back to the ORIGINAL Home v1
+         at "/". Used to ape the PRNDL gear-selector pattern with
+         an "N" pill labelled "Neutral", but neither the letter
+         nor the gear metaphor were teaching the user where the
+         link goes. Replaced with the same heroicons home glyph
+         used in the v4 menu's home-v2 card so the brand's "home"
+         mark stays consistent across surfaces. -->
+    <span class="prndl-state-label prndl-state-label--neutral" data-prndl-neutral>Home V1</span>
+    <a href="/" class="prndl-gear" data-prndl-gear aria-label="Home (v1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+    </a>
   </div>
 </aside>
 
@@ -1265,13 +1274,16 @@ const categories: Cat[] = [
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 6px;
-    font-size: 0.78rem;
-    font-weight: 700;
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .prndl-gear svg {
+    width: 14px;
+    height: 14px;
+    display: block;
   }
   .prndl-gear:hover,
   .prndl-gear:focus-visible {
@@ -1421,8 +1433,17 @@ const categories: Cat[] = [
 
     const isProductsV2 = document.body.classList.contains('page-products-v2');
     const isServiceTesting = document.body.classList.contains('page-service-testing');
+    /* page-blog-v3 opts out of anchoring entirely — the page is a
+       free-scroll experiment with no canonical sections, so giving
+       the rail an empty anchor list makes navigateToSection() and
+       runSafetyNetSnap() both bail (their length-0 guards take it
+       from there). The PRNDL car stays put at the top of the rail
+       and nothing snaps the user during scroll.                    */
+    const isBlogV3 = document.body.classList.contains('page-blog-v3');
 
-    const anchors: Anchor[] = isProductsV2
+    const anchors: Anchor[] = isBlogV3
+      ? []
+      : isProductsV2
       ? [
           /* products-v2 has exactly 3 rail stops now — the page
              is architecturally TWO sections: a pedestal hero and

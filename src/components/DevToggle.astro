@@ -132,10 +132,11 @@
   } catch {}
 
   /* ─── Dev-mode on/off ──────────────────────────────────
-     Persisted under `evium-dev-mode`: 'on' → dev-mode on
-     (slots visible, body class removed); anything else (or
-     missing) → dev-mode off (the default — body.dev-mode-off
-     set, dev-only slots collapsed).
+     Persisted under `evium-dev-mode`. Anything other than the
+     literal string 'off' is treated as ON, so a fresh visitor
+     (no key in localStorage) sees the full nav including
+     Site v2. The pill below the rail still flips to OFF on
+     demand and that choice persists.
   */
   function applyDevMode(mode: 'on' | 'off') {
     if (mode === 'on') {
@@ -150,12 +151,15 @@
     try { localStorage.setItem('evium-dev-mode', mode); } catch {}
   }
 
-  /* Initial apply. We default to OFF — the public-facing nav
-     should be clean on every fresh session. Devs opt in by
-     clicking the pill once. */
+  /* Initial apply. Default is ON now — Site v2 + the active
+     iteration surfaces (Blog, Testing, Other) all live behind
+     the dev-mode flag, and a fresh visitor with no key in
+     localStorage was previously stuck on the public-only menu
+     with no way to discover them. Switching the default makes
+     them visible by default; an explicit OFF still persists. */
   let saved: string | null = null;
   try { saved = localStorage.getItem('evium-dev-mode'); } catch {}
-  applyDevMode(saved === 'on' ? 'on' : 'off');
+  applyDevMode(saved === 'off' ? 'off' : 'on');
 
   toggle.addEventListener('click', () => {
     const current = body.classList.contains('dev-mode-off') ? 'off' : 'on';
