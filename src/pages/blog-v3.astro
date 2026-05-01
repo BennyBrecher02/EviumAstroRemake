@@ -134,8 +134,13 @@ const postsByCat = Object.fromEntries(
       </div>
 
       <div class="garage-stage" id="garage-stage">
+        <!-- Base photo: OPEN garage scene. Replaces garage1-cropped1.png
+             so the door rolling up reveals the lit interior behind it
+             instead of dead matte. New image is 1920×2881 (vs the old
+             1920×2635), so --garage-w + door slot percentages below
+             use the new ratio. -->
         <img
-          src="/images/blog-hero/single-door/garage1-cropped1.png"
+          src="/images/blog-hero/single-door/garage1-open-option1-light.png"
           alt="" class="garage-base" aria-hidden="true" draggable="false"
         />
         <div class="door-overlay" data-door>
@@ -148,6 +153,13 @@ const postsByCat = Object.fromEntries(
 
       <!-- ─── City strip: hero portion (1 main intersection) ─── -->
       <div class="city-strip cs--hero" data-section="hero" aria-hidden="true">
+        <!-- River — full-strip water layer. Sits FIRST in DOM so
+             quadrants, roads, intersection, overpass, etc. all
+             render on top of it. Visible only where nothing else
+             covers — i.e. the T-shaped gap to the right of the NS
+             road and below the lower quadrants. -->
+        <div class="cs-river-bg"></div>
+
         <!-- 4 quadrants of buildings (one per intersection corner) -->
         <div class="cs-quad cs-quad-tl"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
         <div class="cs-quad cs-quad-tr"><div class="cs-bld cs-bld-1"></div><div class="cs-bld cs-bld-2"></div><div class="cs-bld cs-bld-3"></div></div>
@@ -241,6 +253,12 @@ const postsByCat = Object.fromEntries(
 
       <!-- ─── City strip: blog portion (intersection 2 + overpass) ─── -->
       <div class="city-strip cs--blog" data-section="blog" aria-hidden="true">
+        <!-- River — see hero strip above for the rationale. Same
+             water layer; the gap on this side is bigger (extends
+             below BL/BR through the bottom slab) so the river
+             reads more clearly here. -->
+        <div class="cs-river-bg"></div>
+
         <!-- Quadrants — 6 of them this time, one per region between
              the NS road and the strip edges, sliced by intersection 2
              AND by the overpass.                                       -->
@@ -261,6 +279,9 @@ const postsByCat = Object.fromEntries(
         <div class="cs-lm cs-lm-hr cs-lm--blog"></div>
         <div class="cs-lm cs-lm-vt cs-lm--blog"></div>
         <div class="cs-lm cs-lm-vb-int cs-lm--blog"></div>
+        <div class="cs-lm cs-lm-vb-bot cs-lm--blog"></div><!-- NS road dashes BELOW the overpass — was missing -->
+
+
 
         <!-- Zebra crossings around int 2. -->
         <div class="cs-zebra cs-zebra-t cs-zebra--blog"></div>
@@ -316,9 +337,11 @@ const postsByCat = Object.fromEntries(
 }
 
 .garage-section {
-  --garage-w: min(calc(100vh * 1920 / 2635), 100%);
-  --door-pct-l: 12%;
-  --door-pct-w: 76%;
+  --garage-w: min(calc(100vh * 1920 / 2881), 100%);
+  /* Left edge nudged from 14% to 13.5%; width adjusted to 74.5% so
+     the RIGHT edge stays pinned at 88% (13.5 + 74.5 = 88). */
+  --door-pct-l: 13.5%;
+  --door-pct-w: 74.5%;
   width: 100%;
   position: relative;
   background: #1A2F3A;
@@ -329,7 +352,13 @@ const postsByCat = Object.fromEntries(
   height: 100vh;
   overflow: hidden;
   position: relative;
-  z-index: 2;
+  /* No z-index / isolation — same trick mobile-v1 uses on its
+     `.mbi-hero`. The clip needs to share the root stacking context
+     with the blog section below it so cards (blog-section z:1) can
+     render ABOVE the garage base photo (z:0) but BELOW the door
+     overlay (z:2). That layering is what lets a card sitting at the
+     tuck position be HIDDEN when the door is down (door covers it)
+     and VISIBLE when the door rolls up. */
   background: linear-gradient(to bottom, #1A2F3A 0%, #1c3240 50%, #1A2F3A 100%);
 }
 
@@ -377,11 +406,40 @@ const postsByCat = Object.fromEntries(
 }
 
 .door-overlay {
+  /* The new base image (garage1-open-option1-light.png, 1920×2881)
+     is the same scene as the old garage1-cropped1.png (1920×2635)
+     with extra ceiling added at the top (~246 px) and the closed
+     door edited off. So the door slot in scene coordinates is
+     identical — top at the yellow CLEARANCE pole, bottom at the
+     concrete floor where the closed door used to rest.
+
+     Pixel-scan of the new image:
+       – yellow bar         y=925–1014  (top 32.11%, bot 35.20%)
+       – bar sides          x=242–1689  (12.60%, 87.97%)
+     Floor isn't reliably detected by brightness because the new
+     image's lit interior creates a bright band ABOVE the actual
+     floor. Instead we use the SAME scene-relative position as the
+     old image (floor at 89.15% of old image height) translated
+     into new-image coords:
+       – old door slot pixel height: 2349 − 780 = 1569 px
+       – new floor:    1014 + 1569 = 2583  → 89.66% of new height
+     Door height = 89.66% − 35.20% ≈ 54.5%.
+
+     The slot's aspect (≈0.93 w/h) is close to the door PNG's natural
+     (0.854 w/h) so `object-fit: cover` only crops a thin sliver off
+     the PNG's top — `object-position: bottom` puts that crop at the
+     PNG's stopper bar (which would otherwise stack on the avif's
+     bar). Result: the door panels meet the avif's yellow bar at the
+     top and rest on the floor at the bottom — just like with the
+     old image.                                                      */
   position: absolute;
   left: var(--door-pct-l);
-  top: 22%;
+  top: 35.2%;
   width: var(--door-pct-w);
-  aspect-ratio: 1396 / 1634;
+  /* Bottom at 93.7% — splits the difference between the previous
+     54.5% (which ended above the visible floor) and the 62.5%
+     attempt (which over-shot into the foreground concrete). */
+  height: 58.5%;
   z-index: 2;
   overflow: hidden;
   transform-origin: top center;
@@ -392,7 +450,17 @@ const postsByCat = Object.fromEntries(
 }
 .door-img {
   width: 100%; height: 100%;
-  object-fit: fill; display: block;
+  object-fit: cover;
+  /* Anchor the PNG's BOTTOM to the slot's bottom so the door's
+     bottom edge meets the avif's floor. The PNG's natural aspect
+     (0.854 w/h) is taller than the slot (≈1.29), so cover crops
+     vertically — with `object-position: bottom` the crop happens
+     at the TOP of the PNG, removing the PNG's own yellow stopper
+     bar (which would otherwise stack with the avif's bar visible
+     above the slot). Result: just clean corrugated panels filling
+     the slot, with the avif's bar reading clearly above.            */
+  object-position: bottom;
+  display: block;
   user-select: none;
 }
 .garage-stage.is-open .door-overlay { transform: scaleY(0); }
@@ -490,12 +558,11 @@ const postsByCat = Object.fromEntries(
   overflow: hidden;
   z-index: 0;
 }
-.cs-quad::before {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(circle at 30% 70%, #1a3a1a, transparent 60%),
-    radial-gradient(circle at 80% 20%, #122a12, transparent 50%);
-}
+/* Removed `.cs-quad::before` — was painting two dark radial spots
+   (at 30% 70% and 80% 20%) for "atmosphere" but they had no logical
+   relationship to anything in the scene; just random shading. The
+   grass is now uniform `var(--grass)`, and the only shading below
+   the overpass is the bridge's actual cast shadow.                  */
 
 /* Hero quadrants — 4 corners of the single intersection. */
 .cs-quad-tl { top: 0;     left: 0;  width: 207px; height: 460px; }
@@ -598,6 +665,10 @@ const postsByCat = Object.fromEntries(
 .cs-lm-hr.cs-lm--blog     { top: 660px; height: 2px; transform: translateY(-50%); left: 367px; right: 0; --lm-dir: 90deg; --lm-anim: cs-dashH; }
 .cs-lm-vt.cs-lm--blog     { left: 287px; width: 2px; transform: translateX(-50%); top: 0; height: 580px; --lm-dir: 180deg; --lm-anim: cs-dashV; }
 .cs-lm-vb-int.cs-lm--blog { left: 287px; width: 2px; transform: translateX(-50%); top: 740px; height: 710px; --lm-dir: 180deg; --lm-anim: cs-dashV; }
+/* Below-overpass dashes — extends from the overpass bottom (1560)
+   down to the strip's end so the NS road has a continuous yellow
+   centre line for its full length. Was missing in the first cut. */
+.cs-lm-vb-bot.cs-lm--blog { left: 287px; width: 2px; transform: translateX(-50%); top: 1560px; bottom: 0; --lm-dir: 180deg; --lm-anim: cs-dashV; }
 
 /* ── Zebra crossings ─────────────────────────────────────────── */
 .cs-zebra { position: absolute; z-index: 7; opacity: .55; }
@@ -642,11 +713,81 @@ const postsByCat = Object.fromEntries(
    Horizontal road on a bridge crossing OVER the NS road in the
    blog strip. Higher z-index than the NS road; a dark-gradient
    shadow strip just below the bridge sells the depth.            */
-.cs-overpass-shadow {
+/* ── River background ────────────────────────────────────────
+   Full-strip water layer that sits at the BOTTOM of the strip's
+   stacking order. Quadrants (#0d1f0f grass) and roads (#16213e
+   asphalt) cover it where they exist, so the river only shows
+   through the T-shape gap to the right of the NS road and the
+   horizontal slab below the bottom quadrants. Two animated
+   gradient layers drift vertically to sell the flow. The river
+   spans both hero AND blog strips so the water reads as one
+   continuous channel running the full page height.               */
+.cs-river-bg {
   position: absolute;
-  left: 207px; width: 160px;
-  top: 1565px; height: 38px;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.0) 100%);
+  inset: 0;
+  /* Uniform deep-blue base — no arbitrary darkening at the strip's
+     top + bottom (was a 5-stop gradient with #061a30 bookends that
+     read as "random dark areas"). The animated wave layers above
+     carry the surface motion; the only intentional shading happens
+     beneath the overpass via `.cs-overpass-shadow`.                  */
+  background: #0e3258;
+  overflow: hidden;
+}
+.cs-river-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(190deg,
+      rgba(180, 220, 250, 0.10) 0,
+      rgba(180, 220, 250, 0.10) 16px,
+      transparent 16px,
+      transparent 56px
+    ),
+    repeating-linear-gradient(170deg,
+      rgba(120, 200, 240, 0.07) 0,
+      rgba(120, 200, 240, 0.07) 10px,
+      transparent 10px,
+      transparent 32px
+    );
+  animation: cs-river-flow-1 11s linear infinite;
+}
+.cs-river-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(180deg,
+    rgba(220, 240, 255, 0.05) 0,
+    rgba(220, 240, 255, 0.05) 26px,
+    transparent 26px,
+    transparent 90px
+  );
+  animation: cs-river-flow-2 17s linear infinite reverse;
+}
+@keyframes cs-river-flow-1 {
+  from { background-position: 0 0,    0 0; }
+  to   { background-position: 0 72px, 0 -50px; }
+}
+@keyframes cs-river-flow-2 {
+  from { background-position: 0 0; }
+  to   { background-position: 0 116px; }
+}
+
+.cs-overpass-shadow {
+  /* Full-strip-width shadow — the bridge above blocks light from
+     reaching anything below it, so the road, the river, AND any
+     ground beside the river all darken in the band immediately
+     under the overpass. Was 160 px wide (NS road only); now spans
+     left:0 → right:0 so the river (which lives outside the road's
+     column) gets the same logical shadow.                            */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1560px;
+  height: 60px;
+  background: linear-gradient(to bottom,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.42) 35%,
+    rgba(0, 0, 0, 0)    100%
+  );
   z-index: 4;
   pointer-events: none;
 }
@@ -804,7 +945,10 @@ const postsByCat = Object.fromEntries(
   position: relative;
   background: #16213e;
   padding: 36px 0;
-  overflow: hidden;
+  /* No `overflow: hidden` — cards need to be able to TRANSFORM up
+     out of this column into the hero garage area when tucked, then
+     fly back down into the column as they emerge. (Same reason
+     mobile-v1's `.mbi-road` doesn't clip its overflow.) */
 }
 .bs-main::before, .bs-main::after {
   content: '';
@@ -849,17 +993,55 @@ const postsByCat = Object.fromEntries(
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 4px;
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(-40vh);
-  transition:
-    opacity 0.6s ease,
-    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-    background 0.18s, border-color 0.18s;
-  transition-delay: var(--card-delay, 0s);
+
+  /* ─── Tucked-in-the-garage initial state ─────────────────────
+     JS sets --tuck-x/y/scale/rot per card to a transform that
+     places each card visually INSIDE the door area, scaled small
+     with a tiny rotation jitter (mobile-v1's "stack of mail"
+     pattern). The CSS keeps the card laid out in its natural flex
+     position so the rest of the page reflows normally; the
+     transform is purely visual. */
+  opacity: 1;
+  transform:
+    translate(var(--tuck-x, 0), var(--tuck-y, -85vh))
+    scale(var(--tuck-scale, 0.16))
+    rotate(var(--tuck-rot, 0deg));
+  will-change: transform;
+  transform-origin: center center;
+  /* Only animate non-transform properties for hover; the emerge
+     keyframe owns `transform`. */
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.blog-cards.is-visible .blog-card { opacity: 1; transform: translateY(0); }
-.blog-card:hover { background: #0f1720; border-color: rgba(45, 200, 86, 0.3); }
-.blog-cards.is-visible .blog-card:hover { transform: translateY(-2px); }
+.blog-cards.is-visible .blog-card {
+  animation: blog-card-emerge 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--card-delay, 0s);
+}
+@keyframes blog-card-emerge {
+  0% {
+    opacity: 1;
+    transform:
+      translate(var(--tuck-x, 0), var(--tuck-y, -85vh))
+      scale(var(--tuck-scale, 0.16))
+      rotate(var(--tuck-rot, 0deg));
+  }
+  88% {
+    opacity: 1;
+    transform: translate(0, 8px) scale(1.015) rotate(0.4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blog-card { opacity: 1; transform: none; }
+  .blog-cards.is-visible .blog-card { animation: none; }
+}
+.blog-card:hover {
+  background: #0f1720;
+  border-color: rgba(45, 200, 86, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
 
 .bc-img {
   flex: 0 0 32%;
@@ -931,9 +1113,67 @@ const postsByCat = Object.fromEntries(
 /* ═════════════════════════════════════════════════════════════
    GARAGE DOOR — open on load, then close. Unchanged from prev v3.
    ═════════════════════════════════════════════════════════════ */
-const stage     = document.getElementById('garage-stage') as HTMLElement | null;
-const blogCards = document.getElementById('blog-cards') as HTMLElement | null;
+const stage       = document.getElementById('garage-stage') as HTMLElement | null;
+const blogCards   = document.getElementById('blog-cards') as HTMLElement | null;
+const doorOverlay = stage?.querySelector<HTMLElement>('.door-overlay') ?? null;
+const cards       = blogCards ? Array.from(blogCards.querySelectorAll<HTMLElement>('.blog-card')) : [];
 
+/* ─── Tuck cards inside the garage doorway ─────────────────────
+   Mirrors mobile-v1's tuckAllCardsInGarage. Reset each card's
+   tuck vars to identity, force a layout flush, measure each
+   card's natural position via getBoundingClientRect, then compute
+   the per-card translate that places its centre at the door
+   overlay's centre (78% down the door — like a stack of mail
+   resting on the garage floor). Apply scale 0.15 plus a tiny
+   deterministic rotation jitter so the pile looks natural without
+   re-rendering randomly on every layout. */
+function tuckAllCardsInGarage() {
+  if (!doorOverlay || cards.length === 0) return;
+
+  cards.forEach((c) => {
+    c.style.setProperty('--tuck-x',     '0px');
+    c.style.setProperty('--tuck-y',     '0px');
+    c.style.setProperty('--tuck-scale', '1');
+    c.style.setProperty('--tuck-rot',   '0deg');
+  });
+  void document.body.offsetHeight;
+
+  const dr = doorOverlay.getBoundingClientRect();
+  const doorCenterX  = dr.left + dr.width  / 2;
+  const stackCenterY = dr.top  + dr.height * 0.78;
+
+  cards.forEach((card, idx) => {
+    const r  = card.getBoundingClientRect();
+    const cx = r.left + r.width  / 2;
+    const cy = r.top  + r.height / 2;
+    /* Deterministic pseudo-random jitter — same seed = same layout
+       so re-runs don't shuffle the stack. */
+    const jitterX = ((idx * 73)  % 11 - 5) * 2.2;
+    const jitterY = ((idx * 47)  % 9  - 4) * 1.4;
+    const jitterR = ((idx * 131) % 13 - 6) * 1.1;
+
+    card.style.setProperty('--tuck-x',     `${(doorCenterX  - cx) + jitterX}px`);
+    card.style.setProperty('--tuck-y',     `${(stackCenterY - cy) + jitterY}px`);
+    card.style.setProperty('--tuck-rot',   `${jitterR}deg`);
+    card.style.setProperty('--tuck-scale', '0.15');
+  });
+}
+
+tuckAllCardsInGarage();
+window.addEventListener('resize', () => {
+  /* Skip during the emerge animation so cards don't snap mid-flight. */
+  if (!blogCards?.classList.contains('is-visible')) tuckAllCardsInGarage();
+}, { passive: true });
+
+/* ─── Garage open / cards emerge / garage close ───────────────
+   t=0      door starts rolling up                 (1.4s transition)
+   t=0.6s   cards begin emerging from the doorway  (1.5s + stagger)
+   t=1.2s   gentle auto-scroll so the user actually FOLLOWS the
+            cards out of the garage and into the road below — the
+            cards' tuck position is in document coords, so scrolling
+            doesn't break the animation; the user just gets a moving
+            camera pan along the cards' flight path.
+   t=3.4s   door rolls back down (cards have settled in the road) */
 let userScrolled = false;
 window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
 
@@ -942,13 +1182,21 @@ function openGarage() {
   stage.classList.add('is-open');
   setTimeout(() => {
     if (blogCards) blogCards.classList.add('is-visible');
+  }, 600);
+  setTimeout(() => {
     if (!userScrolled) {
       window.scrollTo({ top: window.innerHeight * 0.55, behavior: 'smooth' });
     }
-  }, 800);
-  setTimeout(() => { stage.classList.add('is-closed'); }, 3200);
+  }, 1200);
+  setTimeout(() => {
+    stage.classList.remove('is-open');
+    stage.classList.add('is-closed');
+  }, 3400);
 }
-setTimeout(openGarage, 350);
+/* Two rAFs so the browser has painted the tuck transforms first —
+   otherwise the emerge animation kicks off from the wrong starting
+   position the very first frame. */
+requestAnimationFrame(() => requestAnimationFrame(openGarage));
 
 stage?.querySelectorAll<HTMLElement>('[data-door]').forEach((door) => {
   door.addEventListener('click', () => {
