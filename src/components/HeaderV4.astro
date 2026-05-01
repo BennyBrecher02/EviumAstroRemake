@@ -85,6 +85,8 @@ const categories: Cat[] = [
       { label: 'Products v2',                   href: '/products-v2'                      },
       { label: 'Service — Multifamily v2',      href: '/service-testing/multifamily'      },
       { label: 'Service — Multifamily v3',      href: '/service-testing/multifamily-v3'   },
+      { label: 'Service — Fleets v2',           href: '/service-testing/fleets-v2'        },
+      { label: 'Service — Highway v2',          href: '/service-testing/highway-v2'       },
     ],
   },
   {
@@ -104,6 +106,27 @@ const categories: Cat[] = [
       { label: 'Desktop v3', href: '/blog-v3'               },
       { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
       { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
+    ],
+  },
+  {
+    /* Testing — promoted into row 1 (3rd column) so it sits in the
+       prominent top-right slot the eye lands on first. Demoting
+       Products to row 2 is intentional while v2 sandbox pages are
+       under active iteration. */
+    label: 'Testing',
+    href:  '/testing',
+    icon:  'testing',
+    desc:  'Sandbox pages and WIP experiments.',
+    devOnly: true,
+    sub: [
+      /* Mobile Blogs has moved to the Blog dropdown — it's a blog
+         variant, not a generic sandbox page. */
+      { label: 'Old Fleets replica',     href: '/testing/fleets-old-replica'  },
+      { label: 'Old Highway replica',    href: '/testing/highway-old-replica' },
+      { label: 'Intersection (codepen)', href: '/testing/intersection'       },
+      { label: 'Product Portal',         href: '/testing/product-portal'     },
+      { label: 'Software (no footer)',   href: '/testing/software'           },
+      { label: 'Old footer concept',     href: '/testing/footer-concept'     },
     ],
   },
   {
@@ -165,21 +188,6 @@ const categories: Cat[] = [
       { label: 'Schedule a Call',  href: '/contact/schedule' },
       { label: 'Support',          href: '/contact/support'  },
       { label: 'Referral Program', href: '/contact/referral' },
-    ],
-  },
-  {
-    label: 'Testing',
-    href:  '/testing',
-    icon:  'testing',
-    desc:  'Sandbox pages and WIP experiments.',
-    devOnly: true,
-    sub: [
-      /* Mobile Blogs has moved to the Blog dropdown — it's a blog
-         variant, not a generic sandbox page. */
-      { label: 'Intersection (codepen)', href: '/testing/intersection'   },
-      { label: 'Product Portal',         href: '/testing/product-portal' },
-      { label: 'Software (no footer)',   href: '/testing/software'       },
-      { label: 'Old footer concept',     href: '/testing/footer-concept' },
     ],
   },
   {
@@ -276,15 +284,16 @@ const categories: Cat[] = [
 
     </div>
 
-    <!-- Bottom slot — escape hatch back to the ORIGINAL Home v1
+    <!-- Bottom slot — escape hatch back to the ORIGINAL Site v1
          at "/". Used to ape the PRNDL gear-selector pattern with
          an "N" pill labelled "Neutral", but neither the letter
          nor the gear metaphor were teaching the user where the
          link goes. Replaced with the same heroicons home glyph
          used in the v4 menu's home-v2 card so the brand's "home"
-         mark stays consistent across surfaces. -->
-    <span class="prndl-state-label prndl-state-label--neutral" data-prndl-neutral>Home V1</span>
-    <a href="/" class="prndl-gear" data-prndl-gear aria-label="Home (v1)">
+         mark stays consistent across surfaces. Label is "Site V1"
+         (not "Home V1") to match the desktop nav's "Site v2" slot. -->
+    <span class="prndl-state-label prndl-state-label--neutral" data-prndl-neutral>Site V1</span>
+    <a href="/" class="prndl-gear" data-prndl-gear aria-label="Site (v1)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
       </svg>
@@ -1433,15 +1442,30 @@ const categories: Cat[] = [
 
     const isProductsV2 = document.body.classList.contains('page-products-v2');
     const isServiceTesting = document.body.classList.contains('page-service-testing');
-    /* page-blog-v3 opts out of anchoring entirely — the page is a
-       free-scroll experiment with no canonical sections, so giving
-       the rail an empty anchor list makes navigateToSection() and
-       runSafetyNetSnap() both bail (their length-0 guards take it
-       from there). The PRNDL car stays put at the top of the rail
-       and nothing snaps the user during scroll.                    */
-    const isBlogV3 = document.body.classList.contains('page-blog-v3');
+    /* These pages OPT OUT of rail anchoring entirely — they're
+       free-scroll experiments / sandboxes with no canonical
+       sections yet, so giving the rail an empty anchor list
+       makes navigateToSection() and runSafetyNetSnap() both
+       bail (their length-0 guards take it from there). The
+       PRNDL car stays put at the top of the rail and nothing
+       snaps the user during scroll.
 
-    const anchors: Anchor[] = isBlogV3
+         · page-blog-v3        — free-scroll blog v3 sandbox
+         · page-fleets-v2      — fleets-v2 sandbox (sections
+                                 still being finalized; once
+                                 the structure is stable this
+                                 will get its own anchor list).
+         · page-highway-v2     — highway-v2 sandbox (hero being
+                                 rebuilt from scratch; rail will
+                                 get its own anchor list once the
+                                 content structure is stable).
+    */
+    const isFreeScroll =
+      document.body.classList.contains('page-blog-v3') ||
+      document.body.classList.contains('page-fleets-v2') ||
+      document.body.classList.contains('page-highway-v2');
+
+    const anchors: Anchor[] = isFreeScroll
       ? []
       : isProductsV2
       ? [

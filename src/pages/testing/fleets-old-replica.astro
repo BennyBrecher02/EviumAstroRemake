@@ -1,0 +1,465 @@
+---
+/**
+ * /testing/fleets-old-replica
+ *
+ * Pixel-faithful recreation of the OLD eviumcharging.com Fleets
+ * service page (the pre-redesign version) as a sandbox reference
+ * surface. Used when comparing the new fleets-v2 hero / sections
+ * back against the original layout the customer has lived with.
+ *
+ * Layout sections (top → bottom):
+ *   1. Dark "Fleets" header band + breadcrumb + intro paragraph
+ *   2. Wide rounded hero photo (depot trucks)
+ *   3. Three light-sage benefit cards
+ *   4. Centered italic positioning statement (green)
+ *   5. Two-column band — three sage feature cards on the left,
+ *      vertical truck photo on the right
+ *   6. Bottom CTA strip with "Talk to us" button
+ *
+ * Notes:
+ *   - The intentional typo "MANAGMENET" in card 2's title is
+ *     preserved from the original site and is NOT a bug.
+ *   - Uses the original site Header (not HeaderV4) because the
+ *     replica is meant to mirror the old surface end-to-end.
+ */
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Fleets — Old Site Replica · Evium Charging"
+  description="Replica of the original Evium Charging fleets service page, kept as a reference surface for the redesign."
+>
+  <main class="ofr">
+
+    <!-- ─── 1. Dark header band ────────────────────────────── -->
+    <section class="ofr-header" aria-labelledby="ofr-header-title">
+      <div class="ofr-header-inner">
+        <p class="ofr-breadcrumb">
+          <a href="/">Home</a>
+          <span class="ofr-breadcrumb-sep" aria-hidden="true">»</span>
+          <span aria-current="page">Fleets</span>
+        </p>
+        <h1 id="ofr-header-title" class="ofr-header-title">Fleets</h1>
+        <p class="ofr-header-lede">
+          As electrification transforms transportation, commercial vehicles
+          and heavy-duty trucks are also adopting electric solutions to
+          reduce operational costs and emissions. Our platform offers an
+          integrated, hassle-free approach tailored to the specific needs
+          of this sector.
+        </p>
+      </div>
+
+      <!-- Decorative angled green accent on the right edge — matches
+           the original site's diagonal slash motif. -->
+      <div class="ofr-header-accent" aria-hidden="true"></div>
+    </section>
+
+    <!-- ─── 2. Wide rounded hero image ─────────────────────── -->
+    <section class="ofr-hero-photo" aria-hidden="true">
+      <div class="ofr-hero-photo-frame">
+        <img
+          src="/images/heroes/fleet-depot-hero-evium.png"
+          alt=""
+          loading="lazy"
+        />
+      </div>
+    </section>
+
+    <!-- ─── 3. Three benefit cards ─────────────────────────── -->
+    <section class="ofr-benefits" aria-label="Fleet electrification benefits">
+      <div class="ofr-benefits-inner">
+        <article class="ofr-card">
+          <h3 class="ofr-card-title">Capacity for Large Fleets</h3>
+          <p class="ofr-card-body">
+            Our infrastructure is engineered to support extensive fleets,
+            ensuring that every vehicle is ready when it's needed without
+            creating bottlenecks at the depot or limiting daily routes.
+          </p>
+        </article>
+
+        <article class="ofr-card">
+          <h3 class="ofr-card-title">Cost-Effective Solutions</h3>
+          <p class="ofr-card-body">
+            We help reduce operational expenses through smart energy
+            management and tailored financing models — pay nothing
+            upfront and watch your fuel costs shrink month over month.
+          </p>
+        </article>
+
+        <article class="ofr-card">
+          <h3 class="ofr-card-title">Future-Proofing</h3>
+          <p class="ofr-card-body">
+            Built on a scalable, modular platform, our chargers grow with
+            your fleet — adding new vehicles or expanding to new routes
+            never means starting the infrastructure conversation over.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ─── 4. Centered italic positioning line ────────────── -->
+    <section class="ofr-pitch" aria-label="Ideal customer profile">
+      <p class="ofr-pitch-text">
+        Our service is ideal for logistics operators, warehouses, and
+        transport companies looking to optimize operations while reducing
+        their environmental impact.
+      </p>
+    </section>
+
+    <!-- ─── 5. Two-column: sage cards (left) + vertical truck (right) -->
+    <section class="ofr-pillars" aria-label="How we electrify your fleet">
+      <div class="ofr-pillars-inner">
+
+        <div class="ofr-pillars-cards">
+          <article class="ofr-card ofr-card--pillar">
+            <h3 class="ofr-card-title ofr-card-title--upper">Custom Planning</h3>
+            <p class="ofr-card-body">
+              Site assessments, load analysis, and route-aware design —
+              every depot rollout is engineered around how your fleet
+              actually operates day-to-day.
+            </p>
+          </article>
+
+          <article class="ofr-card ofr-card--pillar">
+            <!-- Intentional typo "MANAGMENET" preserved from the original
+                 site copy. Do not "correct" this. -->
+            <h3 class="ofr-card-title ofr-card-title--upper">Installation and Managmenet</h3>
+            <p class="ofr-card-body">
+              Turnkey installation and ongoing management — from utility
+              coordination and permit pulls through round-the-clock uptime
+              monitoring once your chargers are live.
+            </p>
+          </article>
+
+          <article class="ofr-card ofr-card--pillar">
+            <h3 class="ofr-card-title ofr-card-title--upper">Efficiency and Cost Reduction</h3>
+            <p class="ofr-card-body">
+              Smart load balancing, off-peak charging, and demand-response
+              participation drive operating costs down and keep route
+              uptime where it needs to be.
+            </p>
+          </article>
+        </div>
+
+        <div class="ofr-pillars-photo">
+          <img
+            src="/images/trucks/truck-vertical.png"
+            alt="Electric delivery truck plugged in at an Evium-equipped depot"
+            loading="lazy"
+          />
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── 6. Bottom CTA strip ────────────────────────────── -->
+    <section class="ofr-cta" aria-label="Get in touch">
+      <div class="ofr-cta-inner">
+        <p class="ofr-cta-line">
+          Contact us today to learn how we can help electrify your fleet
+          and boost efficiency!
+        </p>
+        <a class="ofr-cta-btn" href="/contact">
+          <svg class="ofr-cta-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1-.9-1zm3 4h10M7 12h7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>Talk to us</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  /* ─── Page tokens ─────────────────────────────────────────
+     Local-only tokens for the replica so the styling never
+     leaks into other pages. The two greens — a saturated brand
+     green for accents/CTA and a desaturated sage for the benefit
+     cards — match the original site's palette.                */
+  .ofr {
+    --ofr-green:        #2DC856;
+    --ofr-green-deep:   #24a347;
+    --ofr-sage:         #DDE9D6;
+    --ofr-sage-2:       #E6EFDD;
+    --ofr-sage-border:  #C7D8BD;
+    --ofr-ink:          #1A2F3A;
+    --ofr-ink-soft:     #3A4A55;
+    --ofr-paper:        #FFFFFF;
+
+    --ofr-radius-card:  18px;
+    --ofr-radius-photo: 28px;
+
+    --ofr-pad-x:        clamp(20px, 6vw, 96px);
+    --ofr-section-gap:  clamp(48px, 7vw, 96px);
+
+    background: var(--ofr-paper);
+    color: var(--ofr-ink);
+    font-family: 'Maven Pro', system-ui, sans-serif;
+  }
+
+  /* ─── 1. Dark header band ─────────────────────────────── */
+  .ofr-header {
+    position: relative;
+    background: var(--ofr-ink);
+    color: #fff;
+    padding: clamp(32px, 6vw, 72px) var(--ofr-pad-x) clamp(40px, 7vw, 88px);
+    overflow: hidden;
+  }
+  .ofr-header-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .ofr-breadcrumb {
+    margin: 0 0 clamp(14px, 2vw, 22px);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: #cfd5da;
+  }
+  .ofr-breadcrumb a {
+    color: #cfd5da;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.18s ease, border-color 0.18s ease;
+  }
+  .ofr-breadcrumb a:hover {
+    color: #fff;
+    border-bottom-color: rgba(255, 255, 255, 0.5);
+  }
+  .ofr-breadcrumb-sep {
+    margin: 0 0.45em;
+    opacity: 0.55;
+  }
+  .ofr-header-title {
+    margin: 0 0 clamp(16px, 2.4vw, 26px);
+    font-size: clamp(48px, 8vw, 92px);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .ofr-header-lede {
+    margin: 0;
+    max-width: 720px;
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.55;
+    color: #d8dde2;
+  }
+
+  /* Diagonal green accent slash on the right edge — large
+     parallelogram angled at -16deg, partially clipped off-canvas
+     so it reads as a corner accent rather than a full shape. */
+  .ofr-header-accent {
+    position: absolute;
+    top: -40px;
+    right: -120px;
+    width: 320px;
+    height: calc(100% + 80px);
+    background: var(--ofr-green);
+    transform: skewX(-16deg);
+    opacity: 0.92;
+    z-index: 1;
+  }
+  .ofr-header-accent::after {
+    /* Soft inner highlight band to keep it from looking flat. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0)   55%
+    );
+    pointer-events: none;
+  }
+
+  /* ─── 2. Wide rounded hero photo ──────────────────────── */
+  .ofr-hero-photo {
+    padding: clamp(32px, 5vw, 64px) var(--ofr-pad-x) 0;
+  }
+  .ofr-hero-photo-frame {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: var(--ofr-radius-photo);
+    overflow: hidden;
+    aspect-ratio: 16 / 6;
+    background: #f0f2f4;
+    box-shadow:
+      0 24px 48px -24px rgba(26, 47, 58, 0.28),
+      0 6px 16px -8px rgba(26, 47, 58, 0.14);
+  }
+  .ofr-hero-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 60%;
+    display: block;
+  }
+
+  /* ─── 3. Benefit cards ────────────────────────────────── */
+  .ofr-benefits {
+    padding: var(--ofr-section-gap) var(--ofr-pad-x) 0;
+  }
+  .ofr-benefits-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 2vw, 28px);
+  }
+  .ofr-card {
+    background: var(--ofr-sage);
+    border: 1px solid var(--ofr-sage-border);
+    border-radius: var(--ofr-radius-card);
+    padding: clamp(20px, 2.4vw, 32px);
+    color: var(--ofr-ink);
+  }
+  .ofr-card-title {
+    margin: 0 0 clamp(8px, 1vw, 14px);
+    font-size: clamp(18px, 1.7vw, 22px);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+  .ofr-card-title--upper {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: clamp(13px, 1.1vw, 15px);
+  }
+  .ofr-card-body {
+    margin: 0;
+    font-size: clamp(14px, 1.05vw, 15px);
+    line-height: 1.55;
+    color: var(--ofr-ink-soft);
+  }
+
+  /* ─── 4. Centered italic positioning line ─────────────── */
+  .ofr-pitch {
+    padding: var(--ofr-section-gap) var(--ofr-pad-x);
+    display: flex;
+    justify-content: center;
+  }
+  .ofr-pitch-text {
+    margin: 0;
+    max-width: 880px;
+    text-align: center;
+    font-size: clamp(18px, 1.8vw, 24px);
+    line-height: 1.45;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ofr-green-deep);
+  }
+
+  /* ─── 5. Two-column pillars + vertical truck ──────────── */
+  .ofr-pillars {
+    padding: 0 var(--ofr-pad-x) var(--ofr-section-gap);
+  }
+  .ofr-pillars-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(24px, 3vw, 56px);
+    align-items: stretch;
+  }
+  .ofr-pillars-cards {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: clamp(14px, 1.6vw, 22px);
+  }
+  .ofr-card--pillar {
+    background: var(--ofr-sage-2);
+  }
+  .ofr-pillars-photo {
+    border-radius: var(--ofr-radius-photo);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: #ecedef;
+    box-shadow:
+      0 24px 48px -24px rgba(26, 47, 58, 0.28),
+      0 6px 16px -8px rgba(26, 47, 58, 0.14);
+  }
+  .ofr-pillars-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  /* ─── 6. Bottom CTA strip ─────────────────────────────── */
+  .ofr-cta {
+    padding: var(--ofr-section-gap) var(--ofr-pad-x);
+    background: var(--ofr-sage-2);
+    border-top: 1px solid var(--ofr-sage-border);
+  }
+  .ofr-cta-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(20px, 2.5vw, 32px);
+    text-align: center;
+  }
+  .ofr-cta-line {
+    margin: 0;
+    max-width: 760px;
+    font-size: clamp(18px, 1.7vw, 22px);
+    line-height: 1.45;
+    color: var(--ofr-ink);
+    font-weight: 500;
+  }
+  .ofr-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--ofr-green);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    box-shadow: 0 8px 22px -8px rgba(45, 200, 86, 0.55);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+  .ofr-cta-btn:hover {
+    background: var(--ofr-green-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -10px rgba(45, 200, 86, 0.7);
+  }
+  .ofr-cta-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ─── Responsive — collapse multi-col grids ──────────── */
+  @media (max-width: 880px) {
+    .ofr-benefits-inner {
+      grid-template-columns: 1fr;
+    }
+    .ofr-pillars-inner {
+      grid-template-columns: 1fr;
+    }
+    .ofr-pillars-photo {
+      aspect-ratio: 4 / 3;
+      max-height: 520px;
+    }
+    .ofr-hero-photo-frame {
+      aspect-ratio: 16 / 9;
+    }
+    .ofr-header-accent {
+      width: 220px;
+      right: -90px;
+    }
+  }
+</style>

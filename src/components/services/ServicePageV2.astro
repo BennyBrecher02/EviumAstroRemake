@@ -754,6 +754,36 @@ const ICONS: Record<IconName, { viewBox: string; body: string }> = {
           </section>
         )}
 
+        {/* ─────────────────────────────────────────────────────────
+             FUTURE WORK — per-service customer-review section.
+             ─────────────────────────────────────────────────────────
+             A `socialProofCarousel` section type was prototyped here
+             (multi-testimonial scroll track sourced from
+             `src/data/customers.ts`) and rolled back. Reviews will
+             come back via a different mechanism — the section type
+             will likely be opt-in on a per-service basis so services
+             with no customer reviews don't render an empty proof
+             zone, and services with reviews can choose between the
+             single-testimonial `socialProof` block and a multi-card
+             treatment.
+
+             Current review inventory (from `src/data/customers.ts`,
+             10 verified customers with edited reviews):
+               ┌──────────────────────────────┬─────────────────┐
+               │  Multifamily Residences      │  7 reviews      │
+               │  Commercial (incl. Office)   │  3 reviews      │
+               │  Retail                      │  1 review       │
+               │  Fleets                      │  0 reviews      │
+               │  Highway Fast Charging       │  0 reviews      │
+               │  Parking                     │  0 reviews      │
+               │  Medical                     │  0 reviews      │
+               └──────────────────────────────┴─────────────────┘
+             So whatever opt-in mechanism replaces the prototype
+             needs to gracefully handle 0-review services (skip the
+             section entirely or show a non-testimonial proof block
+             like stats / partners / press logos instead).
+             ───────────────────────────────────────────────────── */}
+
         {/* ── FAQ — v1's "Frequently Asked Questions" ported 1:1.
              Dark teal bg, centered header (eyebrow + 2-line title),
              stack of dark accordion cards with chevron toggles
@@ -3563,4 +3593,5 @@ const ICONS: Record<IconName, { viewBox: string; body: string }> = {
     .svc-cta-row { width: 100%; }
     .svc-cta-row .svc-cta { flex: 1 1 auto; justify-content: center; }
   }
+
 </style>

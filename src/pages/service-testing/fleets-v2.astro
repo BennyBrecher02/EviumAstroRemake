@@ -1,0 +1,2031 @@
+---
+/**
+ * /service-testing/fleets-v2 — sandbox for the Fleets v2 redesign.
+ *
+ * Render path: Layout (with `headerVariant="v4"`) → HeaderV4 (the
+ * Lefter sidebar) + this page's body. Layout already pads the body
+ * with `padding-left: var(--lefter-width)` so we don't have to
+ * hand-offset the hero around the sidebar.
+ *
+ * NOT yet wired through the ServicePageV2 template — this is a
+ * scratch surface to iterate the design before formalizing into
+ * the template. Below the hero, the body still carries the
+ * pre-existing AI-slop sections from /solutions/fleets — those
+ * will be gutted next.
+ *
+ * SCROLL BEHAVIOR — intentionally FREE-SCROLLING for now.
+ * No scroll-snap, no pinned sections, no parallax, no scroll-
+ * tied animations on this page. Once the section list is
+ * finalized, the next iteration will introduce a "section
+ * flowing motion" pattern (likely scroll-snap on a vertical
+ * track, or pinned-with-progress segments). Don't add scroll-
+ * controlling CSS or JS here until the content structure is
+ * stable.
+ */
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Fleet Charging Solutions — Evium Charging"
+  description="Turnkey EV fleet charging infrastructure. Depot design, load management, phased rollout, and 24/7 monitoring — engineered for fleets that can't afford downtime."
+  headerVariant="v4"
+  bodyClass="page-fleets-v2"
+>
+
+  {/* ═══════════════════════════════════════════════════════
+       HERO — Round 5: centered cinematic premium
+       ───────────────────────────────────────────────────────
+       Pattern: Apple / Tesla / Stripe-style centered hero.
+       Different in shape from every prior round (all of which
+       were left- or bottom-anchored).
+
+         · Cinematic full-bleed photo with a soft 4-edge
+           atmospheric vignette + a focused radial darken
+           behind the centered type. No chrome pills, no
+           floating elements, no competing visual blocks.
+         · Optically centered content (~46% from top — slight
+           upward bias from dead center, where the eye
+           naturally lands). Photo breathes top + bottom.
+         · Editorial type composition:
+             eyebrow (small dash-bookended caps)
+             headline (parallel two-statement: "Always
+                       charged. / Always running.")
+             green hairline accent
+             subhead (one focused sentence)
+             primary CTA (premium gradient green pill)
+             text link (magazine-style "Or see what we
+                       build for fleets")
+         · Buttons: gradient pill with subtle vertical sheen,
+           multi-layer shadow stack (inset highlight + dark
+           bottom edge + green outer halo + dark drop shadow),
+           hover lift+scale. Secondary is an animated-
+           underline magazine link in caps.
+       ═══════════════════════════════════════════════════════ */}
+  <section class="fv2-hero" aria-label="Fleet Charging — Evium">
+
+    {/* Photo — full saturation, full bleed. Updated to the
+        Evium-branded depot rendering (chargers carry the
+        Evium wordmark instead of OEM branding). */}
+    <picture class="fv2-hero-photo" aria-hidden="true">
+      <img
+        src="/images/heroes/fleet-depot-hero-evium.png"
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        draggable="false"
+      />
+    </picture>
+
+    {/* Veil — left-anchored darken so the typography zone
+        on the LEFT half stays legible while the right half
+        of the photo (chargers, vans, sky) plays at full
+        saturation. Plus subtle top + bottom cinematic edge
+        fade for the framed-photo feel. */}
+    <div class="fv2-hero-veil" aria-hidden="true"></div>
+
+    {/* Top-left content block — eyebrow + headline + subhead.
+        Sits above the row of vans in the photo's middle band. */}
+    <div class="fv2-hero-content">
+      <p class="fv2-hero-eyebrow">
+        <span class="fv2-hero-eyebrow-dash" aria-hidden="true"></span>
+        <span>For Fleets That Don't Stop</span>
+      </p>
+
+      <h1 class="fv2-hero-title">
+        <span class="fv2-hero-title-line">We run the chargers.</span>
+        <span class="fv2-hero-title-line fv2-hero-title-line--accent">You run the fleet.</span>
+      </h1>
+
+      <p class="fv2-hero-sub">
+        Evium handles every step of your EV depot transition &mdash;
+        design, install, monitor, maintain &mdash; so going electric
+        actually cuts both your operating costs and your emissions.
+      </p>
+    </div>
+
+    {/* Bottom-left action block — primary CTA + magazine link.
+        Sits BELOW the vans, over the photo's asphalt band so
+        the depot scene plays uncovered between the text above
+        and the buttons below. */}
+    <div class="fv2-hero-actions">
+      <!-- href targets #final-cta so the page smooth-scrolls
+           to the closing CTA band instead of jumping cross-
+           page. The smooth-scroll handler below intercepts the
+           click for an animated transition. -->
+      <a class="fv2-cta-primary" href="#final-cta" data-fv2-scroll>
+        <span class="fv2-cta-primary-face" aria-hidden="true"></span>
+        <span class="fv2-cta-primary-inner">
+          <span>Talk to a fleet specialist</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+
+      <a class="fv2-link" href="#fleet-strategy">
+        <span>Or see what we build</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       FLEETS-V2 — HERO (Round 5: centered cinematic premium)
+       ═══════════════════════════════════════════════════════ */
+
+    .fv2-hero {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      background: #0a1822;
+      isolation: isolate;
+      /* Block layout — content + actions are both absolutely
+         positioned to occupy the upper-left and lower-left
+         zones respectively, leaving the photo's middle band
+         (warehouse + vans + chargers) UNCOVERED. */
+      --fv2-skew: -14deg;
+      /* Single source of truth for the left-edge inset of
+         both content blocks, so they line up vertically. */
+      --fv2-edge: clamp(56px, 7vw, 110px);
+    }
+
+    /* ── Photo ──────────────────────────────────────────────
+       Slight grading lift only — saturation 1.08 + contrast
+       1.05 to compensate for the cinematic veil over it. */
+    .fv2-hero-photo {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .fv2-hero-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 60% 42%;
+      filter: saturate(1.08) contrast(1.05);
+      user-select: none;
+    }
+
+    /* ── Veil — TWO-ZONE darken ─────────────────────────────
+       Content lives in the upper-left, actions live in the
+       lower-left, the depot photo plays UNCOVERED in between.
+       So the veil has two focused darken zones (one for each
+       content block) plus subtle top + bottom edge fades.
+       The middle band (~30%-70% vertical) — where the vans
+       and chargers live — stays fully transparent. */
+    .fv2-hero-veil {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        /* Upper-left text-zone darken */
+        radial-gradient(
+          ellipse 55% 38% at 22% 18%,
+          rgba(6, 18, 26, 0.88) 0%,
+          rgba(6, 18, 26, 0.62) 26%,
+          rgba(6, 18, 26, 0.30) 52%,
+          rgba(6, 18, 26, 0.08) 78%,
+          rgba(6, 18, 26, 0)    100%
+        ),
+        /* Lower CTA-zone darken — centered ~50% horizontal
+           and slightly lower (90% vs 86%) to follow the CTAs
+           to their new bottom-right position. Stays clear of
+           the road arrow on the left and the curb on the
+           right; photo plays at full saturation on both. */
+        radial-gradient(
+          ellipse 38% 26% at 48% 90%,
+          rgba(6, 18, 26, 0.78) 0%,
+          rgba(6, 18, 26, 0.5)  28%,
+          rgba(6, 18, 26, 0.22) 56%,
+          rgba(6, 18, 26, 0.05) 80%,
+          rgba(6, 18, 26, 0)    100%
+        ),
+        /* Top + bottom edge fades — bridges the page chrome
+           above and the next section below without a hard
+           rectangle of darken. */
+        linear-gradient(
+          to bottom,
+          rgba(6, 18, 26, 0.40) 0%,
+          rgba(6, 18, 26, 0.05) 14%,
+          rgba(6, 18, 26, 0)    32%,
+          rgba(6, 18, 26, 0)    68%,
+          rgba(6, 18, 26, 0.10) 86%,
+          rgba(6, 18, 26, 0.40) 100%
+        );
+    }
+
+    /* ── Left-anchored content ──────────────────────────────
+       Vertically centered, LEFT-aligned in the left ~50%
+       of the viewport. Generous padding from the lefter
+       sidebar's edge gives premium breathing room. */
+    /* ── Top-left content block (eyebrow + headline + sub) ── */
+    .fv2-hero-content {
+      position: absolute;
+      top: clamp(60px, 7vh, 100px);
+      left: var(--fv2-edge);
+      right: clamp(40px, 5vw, 80px);
+      max-width: 920px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    /* ── Eyebrow ────────────────────────────────────────────
+       Single dash on the LEFT only (left-aligned content),
+       attention-grabbing copy. */
+    .fv2-hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 0 clamp(22px, 2.2vw, 32px);
+      font-family: 'Maven Pro', sans-serif;
+      font-size: clamp(0.66rem, 0.78vw, 0.78rem);
+      font-weight: 900;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #2DC856;
+      text-shadow:
+        0 1px 12px rgba(0, 0, 0, 0.75),
+        0 0 22px rgba(0, 0, 0, 0.45);
+    }
+    .fv2-hero-eyebrow-dash {
+      width: clamp(32px, 3.4vw, 50px);
+      height: 1.5px;
+      background: linear-gradient(to right, #2DC856, rgba(45, 200, 86, 0));
+      border-radius: 1px;
+    }
+
+    /* ── Headline ───────────────────────────────────────────
+       Two parallel statements: "We run the chargers." (white)
+       / "You run the fleet." (green accent). Same size,
+       same weight — color carries the contrast. */
+    .fv2-hero-title {
+      margin: 0;
+      font-family: 'Maven Pro', sans-serif;
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(4px, 0.5vw, 10px);
+      /* No max-width — let lines wrap only if container shrinks */
+    }
+    .fv2-hero-title-line {
+      font-size: clamp(2.2rem, 4.6vw, 4.6rem);
+      white-space: nowrap;
+      text-shadow:
+        0 6px 40px rgba(0, 0, 0, 0.78),
+        0 2px 16px rgba(0, 0, 0, 0.55);
+    }
+    .fv2-hero-title-line--accent {
+      color: #2DC856;
+      text-shadow:
+        0 6px 40px rgba(0, 0, 0, 0.72),
+        0 0 50px rgba(45, 200, 86, 0.28);
+    }
+
+    /* ── Subhead ────────────────────────────────────────────
+       Editorial treatment: a green vertical hairline rule
+       on the left edge anchors it to a typographic column
+       (magazine-style), and a multi-layer text-shadow gives
+       it real lift off the photo behind. The rule ALSO
+       gives the subhead a clear visual identity separate
+       from the headline above. */
+    .fv2-hero-sub {
+      position: relative;
+      margin: clamp(22px, 2.2vw, 32px) 0 0;
+      padding: clamp(4px, 0.4vw, 8px) 0 clamp(4px, 0.4vw, 8px) clamp(16px, 1.6vw, 22px);
+      font-family: 'Maven Pro', sans-serif;
+      font-size: clamp(1rem, 1.16vw, 1.16rem);
+      line-height: 1.55;
+      letter-spacing: 0.005em;
+      color: rgba(255, 255, 255, 0.92);
+      max-width: 48ch;
+      text-wrap: pretty;
+      /* Multi-layer shadow — first a tight dark halo for
+         crisp legibility, then a softer wider one for
+         depth against the photo. */
+      text-shadow:
+        0 1px 6px rgba(0, 0, 0, 0.85),
+        0 2px 18px rgba(0, 0, 0, 0.55),
+        0 0 28px rgba(0, 0, 0, 0.35);
+    }
+    /* Green vertical hairline on the LEFT edge — fades from
+       transparent at top to bright green in the middle and
+       back to transparent at the bottom, so it reads as a
+       deliberate editorial column-mark, not a hard rule. */
+    .fv2-hero-sub::before {
+      content: '';
+      position: absolute;
+      top: 4%;
+      bottom: 4%;
+      left: 0;
+      width: 2px;
+      background: linear-gradient(
+        to bottom,
+        rgba(45, 200, 86, 0)    0%,
+        rgba(45, 200, 86, 0.55) 18%,
+        rgba(45, 200, 86, 0.7)  50%,
+        rgba(45, 200, 86, 0.55) 82%,
+        rgba(45, 200, 86, 0)    100%
+      );
+      border-radius: 1px;
+    }
+
+    /* ── Bottom action block ────────────────────────────────
+       Positioned with breathing room on BOTH sides:
+         · Left edge sits past the directional arrow on the
+           asphalt (which spans roughly 15-30% from viewport
+           left), with a clear gap.
+         · Right edge stops well short of the curb / parking-
+           platform transition (which begins around ~60% from
+           viewport left), so the button doesn't touch the
+           sidewalk. */
+    .fv2-hero-actions {
+      position: absolute;
+      bottom: clamp(40px, 5vh, 80px);
+      /* Pushed slightly further right (was 39vw, now 41vw)
+         to balance the bigger button size below. */
+      left: clamp(380px, 41vw, 590px);
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: clamp(16px, 1.6vw, 22px);
+    }
+
+    /* ── Primary CTA — brand-skewed parallelogram ───────────
+       NOT a generic pill. The button SHAPE is skewed at the
+       same -14° angle as Evium's nav battery dividers, then
+       the inner content is counter-skewed back to upright so
+       the text reads horizontally inside a slanted shape.
+       Result: an industrial, brand-cohesive button shape that
+       can't be mistaken for a generic pill.
+
+       Construction:
+         · The <a> element is the skewed parallelogram.
+         · A `.face` ::before sub-layer paints the green
+           gradient + multi-layer shadows, also skewed.
+         · The inner span counter-skews the text +14° so the
+           type reads upright while the shape stays slanted. */
+    .fv2-cta-primary {
+      position: relative;
+      display: inline-flex;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      isolation: isolate;
+      transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+    }
+    /* Skewed face — the visible green parallelogram. Sits
+       behind the inner content, paints the gradient + shadows. */
+    .fv2-cta-primary-face {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, #3bd866 0%, #2DC856 50%, #25b04d 100%);
+      transform: skewX(var(--fv2-skew));
+      border-radius: 4px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 1px 0 0 rgba(255, 255, 255, 0.10),
+        inset -1px 0 0 rgba(0, 0, 0, 0.10),
+        0 22px 50px rgba(45, 200, 86, 0.45),
+        0 8px 22px rgba(0, 0, 0, 0.5);
+      transition:
+        background 0.32s ease,
+        box-shadow 0.4s cubic-bezier(.22, 1, .36, 1),
+        transform 0.4s cubic-bezier(.22, 1, .36, 1);
+    }
+    /* Inner content — counter-skewed so text reads upright.
+       Slightly larger size: bumped padding + font so the
+       button has more visual presence on the photo. */
+    .fv2-cta-primary-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: clamp(19px, 1.95vw, 25px) clamp(38px, 4vw, 56px);
+      color: #0a1822;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: clamp(0.82rem, 0.98vw, 0.98rem);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: gap 0.32s cubic-bezier(.22, 1, .36, 1);
+    }
+    .fv2-cta-primary-inner svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .fv2-cta-primary:hover,
+    .fv2-cta-primary:focus-visible {
+      transform: translateY(-3px);
+      outline: none;
+    }
+    .fv2-cta-primary:hover .fv2-cta-primary-face,
+    .fv2-cta-primary:focus-visible .fv2-cta-primary-face {
+      background: linear-gradient(180deg, #4ae07a 0%, #38d562 50%, #2DC856 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 1px 0 0 rgba(255, 255, 255, 0.14),
+        inset -1px 0 0 rgba(0, 0, 0, 0.10),
+        0 30px 64px rgba(45, 200, 86, 0.6),
+        0 12px 30px rgba(0, 0, 0, 0.55);
+    }
+    .fv2-cta-primary:hover .fv2-cta-primary-inner,
+    .fv2-cta-primary:focus-visible .fv2-cta-primary-inner {
+      gap: 18px;
+    }
+    .fv2-cta-primary:hover svg,
+    .fv2-cta-primary:focus-visible svg {
+      transform: translateX(4px);
+    }
+    .fv2-cta-primary:active {
+      transform: translateY(-1px);
+    }
+
+    /* ── Secondary text link — magazine style ───────────────
+       Sits below the primary CTA. Animated underline scales
+       from 55% → 100% on hover; arrow slides; color shifts
+       to green. NO box, NO outline — integrates with the
+       photo's atmosphere via type alone. */
+    .fv2-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      padding: 4px 2px;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: clamp(0.74rem, 0.86vw, 0.86rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.22s ease, gap 0.32s cubic-bezier(.22, 1, .36, 1);
+    }
+    .fv2-link span {
+      position: relative;
+      display: inline-block;
+    }
+    .fv2-link span::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      height: 1px;
+      background: currentColor;
+      transform-origin: center;
+      transform: scaleX(0.55);
+      opacity: 0.6;
+      transition:
+        transform 0.42s cubic-bezier(.22, 1, .36, 1),
+        opacity 0.22s ease,
+        background 0.22s ease;
+    }
+    .fv2-link svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      transition: transform 0.32s cubic-bezier(.22, 1, .36, 1);
+    }
+    .fv2-link:hover,
+    .fv2-link:focus-visible {
+      color: #2DC856;
+      gap: 14px;
+      outline: none;
+    }
+    .fv2-link:hover span::after,
+    .fv2-link:focus-visible span::after {
+      transform: scaleX(1);
+      opacity: 1;
+      background: #2DC856;
+    }
+    .fv2-link:hover svg,
+    .fv2-link:focus-visible svg {
+      transform: translateX(4px);
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 759px) {
+      /* On mobile the dual-block layout collapses: text and
+         CTAs both anchor to the TOP-left as a single stacked
+         column. The narrow viewport means there's no room
+         for the photo's middle band to play uncovered between
+         them anyway, so a unified darken serves better. */
+      .fv2-hero-photo img { object-position: 70% 40%; }
+      .fv2-hero-title-line { white-space: normal; }
+      .fv2-hero-veil {
+        background:
+          linear-gradient(
+            to right,
+            rgba(6, 18, 26, 0.92) 0%,
+            rgba(6, 18, 26, 0.78) 38%,
+            rgba(6, 18, 26, 0.48) 72%,
+            rgba(6, 18, 26, 0.28) 100%
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(6, 18, 26, 0.45) 0%,
+            rgba(6, 18, 26, 0.05) 16%,
+            rgba(6, 18, 26, 0.05) 78%,
+            rgba(6, 18, 26, 0.55) 100%
+          );
+      }
+      .fv2-hero-content {
+        position: relative;
+        top: auto;
+        right: auto;
+        left: auto;
+        max-width: 100%;
+        padding: clamp(60px, 9vh, 100px) 20px 0 24px;
+      }
+      .fv2-hero-actions {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        padding: clamp(28px, 4vw, 40px) 24px clamp(48px, 7vh, 80px) 24px;
+      }
+      .fv2-cta-primary { width: auto; }
+      .fv2-hero-sub { max-width: 100%; }
+    }
+  </style>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       VALUE-PROP BRIDGE  (NEW — sourced from OG replica)
+       Lighter sage-on-cream register that breaks up the dark-
+       teal section run and gives skimmers a 30-second exit
+       ramp before the deeper pain-points / strategy / hardware
+       blocks. Two pieces:
+         1. ICP italic line — names the target customer in one
+            breath so visitors self-qualify in seconds.
+         2. 3-up benefit cards (Capacity / Cost / Future-Proofing)
+            — at-a-glance value prop adopted from the OG layout.
+  ═══════════════════════════════════════════════════════ -->
+  <section class="fv2-bridge" aria-labelledby="fv2-bridge-icp">
+    <div class="fv2-bridge-inner">
+
+      <header class="fv2-bridge-head">
+        <p class="fv2-bridge-eyebrow">
+          <span class="fv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+          <span>For Fleet Operators</span>
+          <span class="fv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+        </p>
+        <p id="fv2-bridge-icp" class="fv2-bridge-icp">
+          Built for logistics operators, last-mile delivery, regional
+          transport, and warehouses optimizing operations and
+          <em>reducing their emissions.</em>
+        </p>
+      </header>
+
+      <div class="fv2-bridge-grid">
+
+        <!-- Card 1 — Capacity. Box-truck silhouette etched into
+             the lower-right corner as an editorial watermark. -->
+        <article class="fv2-bridge-card" data-fv2-card="capacity">
+          <svg class="fv2-bridge-card-mark" viewBox="0 0 64 48" aria-hidden="true">
+            <rect x="3" y="10" width="34" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M37 16h11l8 8v10h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M43 34h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <circle cx="14" cy="38" r="4.2" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="46" cy="38" r="4.2" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+          <div class="fv2-bridge-card-body-wrap">
+            <h3 class="fv2-bridge-card-title">Capacity for Large Fleets</h3>
+            <p class="fv2-bridge-card-body">
+              Our infrastructure is engineered to support extensive
+              fleets, ensuring that every vehicle is ready when it's
+              needed without creating bottlenecks at the depot or
+              limiting daily routes.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 2 — Cost-Effective. Bold $ in a circle —
+             unambiguous "money/cost" symbol that reads at any
+             size as a watermark. -->
+        <article class="fv2-bridge-card" data-fv2-card="cost">
+          <svg class="fv2-bridge-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="2.5" />
+            <path d="M32 14v36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M42 22c-2-3-5-4-10-4-5 0-9 3-9 7 0 4 5 5 9 6s10 2 10 7c0 4-4 7-10 7-5 0-8-2-10-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="fv2-bridge-card-body-wrap">
+            <h3 class="fv2-bridge-card-title">Cost-Effective Solutions</h3>
+            <p class="fv2-bridge-card-body">
+              We help reduce operational expenses through smart energy
+              management and tailored financing models — pay nothing
+              upfront and watch your fuel costs shrink month over
+              month.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 3 — Future-Proofing. Original first-watermark
+             version of the chart icon, restored verbatim (bars
+             + jagged trend line + corner-style arrowhead). All
+             subsequent "fix" attempts were rejected; this is
+             the version to keep. -->
+        <article class="fv2-bridge-card" data-fv2-card="future">
+          <svg class="fv2-bridge-card-mark" viewBox="0 0 64 48" aria-hidden="true">
+            <path d="M4 42h56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <rect x="9"  y="30" width="7" height="12" fill="none" stroke="currentColor" stroke-width="2" />
+            <rect x="22" y="22" width="7" height="20" fill="none" stroke="currentColor" stroke-width="2" />
+            <rect x="35" y="14" width="7" height="28" fill="none" stroke="currentColor" stroke-width="2" />
+            <rect x="48" y="6"  width="7" height="36" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M6 26L18 14l8 6L52 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M44 2h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="fv2-bridge-card-body-wrap">
+            <h3 class="fv2-bridge-card-title">Future-Proofing</h3>
+            <p class="fv2-bridge-card-body">
+              Built on a scalable, modular platform, our chargers grow
+              with your fleet — adding new vehicles or expanding to
+              new routes never means starting the infrastructure
+              conversation over.
+            </p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ─── .fv2-bridge — light value-prop band ─────────────
+       Sage-on-cream register, sits between the dark hero and
+       the dark pain-points section to give the page tonal
+       contrast and a magazine-spread cadence. */
+    .fv2-bridge {
+      position: relative;
+      padding: clamp(72px, 9vw, 120px) clamp(20px, 6vw, 96px);
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%,
+          rgba(45, 200, 86, 0.07) 0%,
+          rgba(45, 200, 86, 0) 70%),
+        linear-gradient(180deg, #FBFCF8 0%, #F4F8EE 100%);
+      color: #1A2F3A;
+      font-family: 'Maven Pro', system-ui, sans-serif;
+      isolation: isolate;
+      /* Safety net so no future decorative element escapes the
+         section bounds and re-introduces horizontal scroll. */
+      overflow: hidden;
+    }
+    .fv2-bridge-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+    /* ─── Section header ──────────────────────────────────
+       Eyebrow + ICP statement, recomposed as a single quiet
+       editorial unit so the cards below carry the visual
+       weight. */
+    .fv2-bridge-head {
+      max-width: 1000px;
+      margin: 0 auto clamp(48px, 6vw, 80px);
+    }
+    /* Eyebrow with thin hairline rules either side — small-cap
+       label that breathes into the page rather than shouting
+       at it. */
+    .fv2-bridge-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 0 0 clamp(20px, 2.4vw, 30px);
+      color: rgba(36, 163, 71, 0.78);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+    }
+    .fv2-bridge-eyebrow-rule {
+      display: block;
+      width: clamp(28px, 3.2vw, 44px);
+      height: 1px;
+      background: linear-gradient(90deg,
+        rgba(45, 200, 86, 0)   0%,
+        rgba(45, 200, 86, 0.6) 100%);
+    }
+    .fv2-bridge-eyebrow-rule + span + .fv2-bridge-eyebrow-rule {
+      background: linear-gradient(90deg,
+        rgba(45, 200, 86, 0.6) 0%,
+        rgba(45, 200, 86, 0)   100%);
+    }
+    /* ICP statement — promoted into the section's primary
+       heading. Larger, lighter weight, italic only on the
+       closing emphasis so the rest reads as a calm
+       declarative line. */
+    .fv2-bridge-icp {
+      margin: 0 auto;
+      max-width: 940px;
+      text-align: center;
+      font-size: clamp(24px, 2.7vw, 38px);
+      line-height: 1.22;
+      font-weight: 500;
+      color: #1A2F3A;
+      letter-spacing: -0.018em;
+    }
+    .fv2-bridge-icp em {
+      color: #24a347;
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    /* ─── Card grid ───────────────────────────────────────
+       Larger gap and tighter max-width keeps the cards
+       reading as deliberate spreads rather than UI tiles. */
+    .fv2-bridge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(20px, 2.2vw, 32px);
+    }
+
+    /* ─── Card body ───────────────────────────────────────
+       Premium editorial card. Content flows from the top with
+       no flex-end alignment so titles and bodies fill the card
+       without leaving a deadspace cap. Watermark icons sit in
+       the lower-right corner, partially clipped — out of the
+       reading zone. */
+    .fv2-bridge-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      min-height: clamp(240px, 23vw, 300px);
+      padding: clamp(30px, 3.2vw, 44px) clamp(26px, 2.6vw, 36px);
+      border-radius: 22px;
+      border: 1px solid rgba(45, 200, 86, 0.10);
+      background:
+        linear-gradient(155deg,
+          rgba(255, 255, 255, 1) 0%,
+          rgba(248, 252, 240, 0.95) 60%,
+          rgba(232, 244, 220, 0.65) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 0 rgba(26, 47, 58, 0.04),
+        0 28px 48px -36px rgba(26, 47, 58, 0.22),
+        0 6px 14px -8px rgba(26, 47, 58, 0.05);
+      transition:
+        transform 0.36s cubic-bezier(.2, .9, .25, 1),
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background 0.5s ease;
+    }
+    .fv2-bridge-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(45, 200, 86, 0.32);
+      background:
+        linear-gradient(155deg,
+          rgba(255, 255, 255, 1) 0%,
+          rgba(244, 251, 232, 0.95) 60%,
+          rgba(218, 238, 198, 0.78) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 0 rgba(26, 47, 58, 0.04),
+        0 36px 56px -32px rgba(26, 47, 58, 0.30),
+        0 12px 22px -10px rgba(45, 200, 86, 0.18);
+    }
+
+    /* The watermark icon — huge, low-opacity brand-green
+       outline, partially clipped by the card's overflow so it
+       reads as an editorial motif rather than a UI icon. All
+       three icons live in the bottom-right so they consistently
+       sit *below* the reading zone and don't compete with the
+       text up top. */
+    .fv2-bridge-card-mark {
+      position: absolute;
+      pointer-events: none;
+      color: rgba(45, 200, 86, 0.11);
+      transition: color 0.36s ease, transform 0.5s cubic-bezier(.2, .9, .25, 1);
+      z-index: 0;
+    }
+    .fv2-bridge-card:hover .fv2-bridge-card-mark {
+      color: rgba(45, 200, 86, 0.22);
+      transform: scale(1.04) rotate(-1.5deg);
+    }
+
+    /* Per-card icon placement — anchored to different corners
+       so the three cards don't read as visual triplets. Card 1
+       lower-right, Card 2 upper-right (so the eye finds the
+       money sigil where it expects a "header"), Card 3
+       lower-right but on a slightly different aspect ratio. */
+    .fv2-bridge-card[data-fv2-card="capacity"] .fv2-bridge-card-mark {
+      width: clamp(190px, 18.5vw, 270px);
+      height: clamp(143px, 13.9vw, 203px);
+      bottom: -28px;
+      right:  -42px;
+    }
+    .fv2-bridge-card[data-fv2-card="cost"] .fv2-bridge-card-mark {
+      width: clamp(180px, 18vw, 250px);
+      height: clamp(180px, 18vw, 250px);
+      top:   -64px;
+      right: -64px;
+    }
+    .fv2-bridge-card[data-fv2-card="future"] .fv2-bridge-card-mark {
+      width: clamp(190px, 18.5vw, 270px);
+      /* viewBox 64×48 → 4:3 aspect ratio */
+      height: clamp(143px, 13.9vw, 203px);
+      bottom: -28px;
+      right:  -42px;
+    }
+
+    /* Foreground text wrapper — sits above the watermark
+       (z-index) at the natural top of the card and is
+       constrained to a comfortable reading measure so the
+       body doesn't run into the icon corner. */
+    .fv2-bridge-card-body-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 30ch;
+    }
+    .fv2-bridge-card-title {
+      margin: 0 0 clamp(12px, 1.4vw, 18px);
+      font-size: clamp(22px, 2.1vw, 28px);
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: -0.018em;
+      color: #1A2F3A;
+    }
+    /* Body text — bumped up in size and contrast (darker
+       slate, slightly heavier weight) so it stays clearly
+       legible even where the watermark feathers up into the
+       reading column. */
+    .fv2-bridge-card-body {
+      margin: 0;
+      font-size: clamp(15px, 1.15vw, 16.5px);
+      line-height: 1.6;
+      font-weight: 450;
+      color: #1F3340;
+    }
+
+    @media (max-width: 880px) {
+      .fv2-bridge-grid { grid-template-columns: 1fr; }
+      .fv2-bridge-card { min-height: 260px; }
+    }
+  </style>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       WHAT EVIUM DESIGNS FOR FLEETS
+       Full-viewport section: content on the left (vertically
+       centered, comfortable max-width), full-bleed truck photo
+       on the right that hits the right edge of the viewport
+       and runs the entire height of the section. No frame, no
+       radius, no shadow on the photo — confident editorial
+       full-bleed treatment. */
+  ═══════════════════════════════════════════════════════ -->
+  <section id="fleet-strategy" class="bg-[#0d1f2b] min-h-screen flex items-stretch">
+
+    <!-- Left: content column. Three vertical regions:
+           1. HEADER  — eyebrow kicker w/ hairline rule, dual-
+              color headline, lede with green pull-quote rule
+           2. LIST    — 5 numbered editorial entries (01–05)
+              with hairline dividers between each
+           3. ANCHOR  — small uppercase footer line pinned to
+              the bottom of the column via mt-auto, claiming
+              the bottom edge so the layout never floats. -->
+    <div class="flex-1 flex min-w-0">
+      <div class="w-full max-w-2xl mx-auto px-6 md:px-12 lg:px-16 py-8 flex flex-col">
+
+        <!-- ── HEADER ─────────────────────────────────── -->
+        <header>
+          <!-- Kicker label with fading hairline that bleeds
+               toward the column edge. Magazine-style header
+               marker, not a tag-shaped pill. -->
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-evium-green text-xs font-extrabold tracking-[0.22em] uppercase whitespace-nowrap">Engineered for Your Operation</span>
+            <span class="flex-1 h-px bg-gradient-to-r from-evium-green/35 to-transparent"></span>
+          </div>
+
+          <h2 class="text-white font-black text-4xl md:text-5xl leading-[1.0] tracking-[-0.02em] mb-4">
+            A Charging Strategy.<br />
+            <span class="text-evium-green">Not Just Hardware.</span>
+          </h2>
+
+          <!-- Lede framed as a pull-quote: thin brand-green
+               vertical rule on the left edge, slightly brighter
+               text than the bullet bodies so the lede leads. -->
+          <div class="border-l-2 border-evium-green/55 pl-5">
+            <p class="text-white/75 text-base leading-snug">
+              Evium starts with your fleet — its size, vehicle types, shift patterns, and depot layout — and works backward to design an infrastructure solution that fits. Every depot is different. Every solution we deliver is built for that depot.
+            </p>
+          </div>
+        </header>
+
+        <!-- ── EDITORIAL LIST ─────────────────────────── -->
+        <!-- 5 entries, each as a row with a refined checkmark
+             badge (thin brand-green hairline ring, bold
+             outlined check inside), title + body on the right,
+             hairline divider above each row. -->
+        <ul class="my-5 space-y-0">
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-2 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-3.5 h-3.5 text-evium-green" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4 4L19 7" />
+              </svg>
+            </span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Depot Site Assessment &amp; Layout Design</h4>
+              <p class="text-white/65 text-sm leading-tight">Electrical survey, cable routing, and charger placement engineered around your depot's actual traffic flow — every spec locked in before a single shovel hits the ground.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-2 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-3.5 h-3.5 text-evium-green" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4 4L19 7" />
+              </svg>
+            </span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Smart Load Management</h4>
+              <p class="text-white/65 text-sm leading-tight">Chargers communicate with your utility in real time (using the Open ADR 2.0b grid standard), automatically pulling less power during peak-cost hours and spreading draw across every active port — flattening demand-charge spikes on your utility bill while keeping every vehicle on its schedule.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-2 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-3.5 h-3.5 text-evium-green" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4 4L19 7" />
+              </svg>
+            </span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Two Charging Speeds, One Depot</h4>
+              <p class="text-white/65 text-sm leading-tight">Slower Level 2 chargers (overnight, ~8-hour fills) for vehicles with standard depot dwell, and DC fast chargers (30-minute fills) for the ones that need a quick turn between routes — sized to your actual shift pattern, not a default product sheet.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-2 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-3.5 h-3.5 text-evium-green" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4 4L19 7" />
+              </svg>
+            </span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Start Small. Scale at Your Pace.</h4>
+              <p class="text-white/65 text-sm leading-tight">Begin with a small pilot — usually 10 to 20 vehicles — to prove the system in your real operation, then expand the depot as more of your fleet goes electric. The conduit, panels, and software we install on day one are sized to grow with you, so adding trucks never means rebuilding.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-2 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-3.5 h-3.5 text-evium-green" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4 4L19 7" />
+              </svg>
+            </span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">All the Paperwork, Handled.</h4>
+              <p class="text-white/65 text-sm leading-tight">City permits, utility interconnection applications, inspections, federal program compliance — Evium files every form and chases every signature the project needs, so your team can stay focused on running the fleet instead of decoding municipal energy code.</p>
+            </div>
+          </li>
+        </ul>
+
+        <!-- ── BOTTOM ANCHOR ──────────────────────────── -->
+        <!-- Pinned to the bottom of the column via mt-auto.
+             On tall viewports the empty space lands BETWEEN
+             the bullets and this anchor (not above the
+             header), so the layout reads top-anchored AND
+             bottom-anchored simultaneously. -->
+        <div class="mt-auto flex items-center gap-4 pt-4 border-t border-white/[0.10]">
+          <span class="text-white/55 text-[11px] tracking-[0.22em] uppercase font-bold whitespace-nowrap">Design. Install. Operate.</span>
+          <span class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: flush-right full-bleed photo. Hits the viewport
+         right edge, runs the entire height of the section, no
+         frame, no radius, no shadow. -->
+    <div class="hidden lg:block flex-shrink-0 w-[42%] xl:w-[40%]">
+      <img
+        src="/images/trucks/truck-vertical.png"
+        alt="Electric delivery truck plugged in at an Evium-equipped fleet depot"
+        class="block w-full h-full object-cover"
+        loading="lazy"
+      />
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       HARDWARE FOR FLEET DEPOTS
+       Two equal cards, each redesigned around the JOB the
+       charger does (use-case headline first, SKU as meta).
+       Bullet specs replaced with horizontal pills. Bottom
+       Siemens badge replaced with a horizontal trust-signal
+       masthead spanning multiple standards/partnerships.
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-24 lg:py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <!-- ── HEADER ─────────────────────────────────────── -->
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <p class="text-evium-green text-xs font-extrabold tracking-[0.22em] uppercase mb-4">Proven Fleet Hardware</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-5">
+          The Right Charger<br />
+          <span class="text-evium-green">for Every Role.</span>
+        </h2>
+        <p class="text-white/65 text-lg leading-relaxed">
+          Fleet depots need a mix of charging speeds. Every charger Evium deploys comes from GSA-approved manufacturers — including our Siemens eMobility partnership — and is built for commercial duty cycles.
+        </p>
+      </div>
+
+      <!-- ── EQUAL-WEIGHT PRODUCT CARDS ─────────────────── -->
+      <!-- L2 + DC Fast share an identical card system. The
+           difference is content (use-case + SKU + spec pills),
+           not visual weight. -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- ─── L2 ────────────────────────────────────── -->
+        <article class="group flex flex-col bg-evium-dark-light border border-white/[0.08] p-8 lg:p-10 hover:border-evium-green/40 transition-colors duration-300">
+
+          <!-- Use-case pill (hairline, not solid fill — feels
+               more confident than the previous tag-style pill) -->
+          <span class="self-start inline-flex items-center text-evium-green text-[10px] font-extrabold tracking-[0.22em] uppercase border border-evium-green/45 rounded-full px-3 py-1 mb-7">
+            Overnight Depot · Level 2
+          </span>
+
+          <!-- Use-case headline — the JOB this charger does,
+               not the SKU. Same dual-line rhythm across both
+               cards for visual consistency. -->
+          <h3 class="text-white font-black text-3xl lg:text-[34px] leading-[1.05] tracking-[-0.02em] mb-2">
+            For the trucks that<br />come home at night.
+          </h3>
+
+          <!-- SKU + headline spec range demoted to small meta
+               line, where it belongs once the use-case leads. -->
+          <p class="text-white/40 text-[11px] font-bold tracking-[0.18em] uppercase mb-7">
+            L2 Wall-Mount &amp; Pedestal · 7.2–19.2 kW
+          </p>
+
+          <!-- Image + body inline 2-col. Image gets a richer
+               drop-shadow with a brand-green tint for lift. -->
+          <div class="grid grid-cols-[7rem_1fr] sm:grid-cols-[8rem_1fr] gap-5 sm:gap-7 items-center mb-7">
+            <img
+              src="/images/chargers/evocharge/evium-evocharge-l2-wallmount.png"
+              alt="Level 2 Wall-Mount Charger"
+              class="w-full h-44 object-contain drop-shadow-[0_8px_36px_rgba(45,200,86,0.20)]"
+              loading="lazy"
+            />
+            <p class="text-white/70 text-[15px] leading-relaxed">
+              Standard dwell time — last vehicle in at night, first out in the morning. The bulk of any fleet's charging at the lowest infrastructure cost per port.
+            </p>
+          </div>
+
+          <!-- Spec pills — replaces the 4-bullet vertical list.
+               3 pills max, hairline borders, push to the bottom
+               via mt-auto so both cards' pill rows align across
+               the grid no matter the body length. -->
+          <div class="mt-auto flex flex-wrap gap-2 pt-5 border-t border-white/[0.08]">
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold tabular-nums bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">7.2–19.2 kW</span>
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">OCPP 1.6+</span>
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">Smart Load Ready</span>
+          </div>
+        </article>
+
+        <!-- ─── DC Fast ───────────────────────────────── -->
+        <article class="group flex flex-col bg-evium-dark-light border border-white/[0.08] p-8 lg:p-10 hover:border-evium-green/40 transition-colors duration-300">
+          <span class="self-start inline-flex items-center text-evium-green text-[10px] font-extrabold tracking-[0.22em] uppercase border border-evium-green/45 rounded-full px-3 py-1 mb-7">
+            Quick Turn · DC Fast
+          </span>
+
+          <h3 class="text-white font-black text-3xl lg:text-[34px] leading-[1.05] tracking-[-0.02em] mb-2">
+            For the trucks that<br />turn around fast.
+          </h3>
+
+          <p class="text-white/40 text-[11px] font-bold tracking-[0.18em] uppercase mb-7">
+            MaxiCharger DC Fast · 60–240 kW
+          </p>
+
+          <div class="grid grid-cols-[7rem_1fr] sm:grid-cols-[8rem_1fr] gap-5 sm:gap-7 items-center mb-7">
+            <img
+              src="/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png"
+              alt="MaxiCharger DC Fast Charger 60-240kW"
+              class="w-full h-44 object-contain drop-shadow-[0_8px_36px_rgba(45,200,86,0.20)]"
+              loading="lazy"
+            />
+            <p class="text-white/70 text-[15px] leading-relaxed">
+              Vehicles that return mid-shift or need range replenishment in 20–45 minutes. Critical for transit, last-mile delivery, and emergency fleets.
+            </p>
+          </div>
+
+          <div class="mt-auto flex flex-wrap gap-2 pt-5 border-t border-white/[0.08]">
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold tabular-nums bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">60–240 kW</span>
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">CCS / CHAdeMO / NACS</span>
+            <span class="inline-flex items-center text-white/65 text-xs font-semibold bg-white/[0.03] border border-white/[0.10] rounded-full px-3 py-1.5">Remote Diagnostics</span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- ── TRUST-SIGNAL MASTHEAD ──────────────────────── -->
+      <!-- Replaces the old corner-tucked Siemens badge. Reads
+           as a magazine masthead — small caps, tabular spacing,
+           green dots between standards. Promotes credibility
+           from afterthought to a proper closing note. -->
+      <div class="mt-12 lg:mt-16">
+        <div class="flex items-center justify-center gap-3 mb-5">
+          <span class="h-px w-10 bg-gradient-to-r from-transparent to-evium-green/40"></span>
+          <span class="text-evium-green text-[10px] font-extrabold tracking-[0.32em] uppercase">Built to Standard</span>
+          <span class="h-px w-10 bg-gradient-to-l from-transparent to-evium-green/40"></span>
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 max-w-4xl mx-auto">
+          <span class="text-white/65 text-xs font-bold tracking-[0.14em] uppercase">GSA-Approved</span>
+          <span class="w-1 h-1 rounded-full bg-evium-green/70"></span>
+          <span class="text-white/65 text-xs font-bold tracking-[0.14em] uppercase">Siemens eMobility Partner</span>
+          <span class="w-1 h-1 rounded-full bg-evium-green/70"></span>
+          <span class="text-white/65 text-xs font-bold tracking-[0.14em] uppercase">OCPP 1.6+</span>
+          <span class="w-1 h-1 rounded-full bg-evium-green/70"></span>
+          <span class="text-white/65 text-xs font-bold tracking-[0.14em] uppercase">ENERGY STAR</span>
+          <span class="w-1 h-1 rounded-full bg-evium-green/70"></span>
+          <span class="text-white/65 text-xs font-bold tracking-[0.14em] uppercase">NEC Compliant</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       SOFTWARE & MONITORING
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+
+        <!-- Left: terminal-style UI mock -->
+        <div class="relative order-2 lg:order-1">
+          <div class="bg-[#0a1520] border border-evium-green/20 rounded-sm overflow-hidden">
+            <!-- Window bar -->
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/8 bg-[#0c1b28]">
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-white/15"></div>
+              <span class="text-white/30 text-xs ml-2 font-mono">Evium Fleet Portal — Live Status</span>
+            </div>
+            <!-- Mock data rows -->
+            <div class="p-6 space-y-3 font-mono text-xs">
+              <div class="flex justify-between items-center py-2 border-b border-white/5">
+                <span class="text-white/40">PORT</span>
+                <span class="text-white/40">VEHICLE</span>
+                <span class="text-white/40">STATUS</span>
+                <span class="text-white/40">SOC</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-01</span>
+                <span class="text-white/50">VAN-004</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">74%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-02</span>
+                <span class="text-white/50">VAN-011</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">52%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-03</span>
+                <span class="text-white/50">TRUCK-02</span>
+                <span class="text-yellow-400 font-bold">SCHEDULED</span>
+                <span class="text-white/70">88%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">DCFC-01</span>
+                <span class="text-white/50">BUS-07</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">31%</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">DCFC-02</span>
+                <span class="text-white/50">—</span>
+                <span class="text-white/35 font-bold">AVAILABLE</span>
+                <span class="text-white/35">—</span>
+              </div>
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-white/70">L2-04</span>
+                <span class="text-white/50">VAN-008</span>
+                <span class="text-evium-green font-bold">CHARGING</span>
+                <span class="text-white/70">97%</span>
+              </div>
+              <div class="mt-4 pt-4 border-t border-white/8 flex justify-between text-white/30">
+                <span>Grid load: <span class="text-evium-green">68%</span></span>
+                <span>Peak demand: <span class="text-white/60">142 kW</span></span>
+                <span>Updated: <span class="text-white/60">live</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: copy -->
+        <div class="order-1 lg:order-2">
+          <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">OCPP Fleet Platform</p>
+          <h2 class="text-white font-black text-4xl md:text-5xl leading-tight mb-6">
+            Total Visibility.<br />Zero Surprises.
+          </h2>
+          <p class="text-white/55 text-lg leading-relaxed mb-10">
+            The Evium owner portal gives fleet managers a live view of every charger, every vehicle, and every kilowatt. Alerts surface before problems compound. Usage data informs fleet planning. The system runs — you supervise.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Real-Time Charger Status</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Live port-by-port status, charge rates, and session data. Any fault or anomaly triggers immediate alerts.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Fleet-Level Load Management</h4>
+              <p class="text-white/45 text-xs leading-relaxed">OCPP 1.6+ load balancing dynamically distributes power. Set charging windows and priority levels by vehicle or group.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Maintenance Alerts & Remote Diagnostics</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Proactive fault detection with remote stop/start and OTA firmware updates. Most issues resolved without a truck roll.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Utilization & Energy Reporting</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Session history, kWh delivered, demand peaks, and utilization rates — exportable for fleet accounting and sustainability reporting.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">Remote Start / Stop</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Dispatch can initiate or halt charging sessions remotely. Full access control by user role.</p>
+            </div>
+
+            <div class="bg-evium-dark border border-white/8 p-5">
+              <h4 class="text-white font-bold text-sm mb-2">24/7 Operations Support</h4>
+              <p class="text-white/45 text-xs leading-relaxed">Evium's team monitors your depot and responds to critical events around the clock — no additional staffing required on your end.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FINANCING — adapted from multifamily-v3's financialModels
+       pattern. Light-register section, white cards with 22px
+       radius, layered shadow stack, featured card variant with
+       green-tinted gradient + "MOST COMMON" badge, hover green
+       glow, bullet check-ticks, bottom highlight callout, and
+       a footnote about rebates with a green link.
+
+       Content is fact-checked against the Evium materials:
+         • Revenue Share — real, ~60/40 host favor per the
+           Sales Revenue Calculator. 5-year typical term per
+           preliminary proposal templates.
+         • Lease — real but lightly documented (Entertainment
+           Deck mentions "leasing model" as an option). No
+           specific monthly amounts fabricated.
+         • Rebates — Evium files for applicable programs
+           ("Management of paperwork and applicable incentives"
+           per proposal templates). NEVI / EV Gateway
+           partnership is real (Oregon ODOT press release).
+  ═══════════════════════════════════════════════════════ -->
+  <section class="fv2-fin">
+    <div class="fv2-fin-inner">
+
+      <!-- ── HEADER (centered, light register) ───────────── -->
+      <header class="fv2-fin-head">
+        <p class="fv2-fin-eyebrow">
+          <span class="fv2-fin-eyebrow-dash" aria-hidden="true"></span>
+          <span>Financial Models</span>
+          <span class="fv2-fin-eyebrow-dash" aria-hidden="true"></span>
+        </p>
+        <h2 class="fv2-fin-title">
+          You Choose How<br />You Want to Work With Us.
+        </h2>
+        <p class="fv2-fin-sub">
+          Most fleet operators start with our Revenue Share model. If you'd rather lock in a predictable monthly cost and keep every dollar of charging revenue, we have an option for that too.
+        </p>
+      </header>
+
+      <!-- ── CARDS GRID ──────────────────────────────────── -->
+      <div class="fv2-fin-grid">
+
+        <!-- ─── FEATURED: Revenue Share ───────────────── -->
+        <article class="fv2-fin-card is-featured">
+          <span class="fv2-fin-badge">Most Common</span>
+
+          <span class="fv2-fin-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9.5" />
+              <path d="M12 6.5v11" />
+              <path d="M15.5 9C14.5 7.7 13.2 7 12 7c-2 0-3.5 1-3.5 2.5S10 12 12 12s3.5 1 3.5 2.5S14 17 12 17c-1.5 0-2.7-.6-3.5-1.5" />
+            </svg>
+          </span>
+
+          <h3 class="fv2-fin-name">Revenue Share</h3>
+          <p class="fv2-fin-tagline">$0 upfront — Evium covers everything</p>
+          <p class="fv2-fin-body">
+            Evium funds 100% of hardware, installation, software, and ongoing operations. You host the chargers and collect approximately 60% of charging revenue; the remaining ~40% goes to Evium.
+          </p>
+
+          <ul class="fv2-fin-bullets">
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>Zero capital required to deploy.</span>
+            </li>
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>~60/40 revenue split, host favored.</span>
+            </li>
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>Typical 5-year term, fully managed by Evium.</span>
+            </li>
+          </ul>
+
+          <div class="fv2-fin-highlight">
+            <span class="fv2-fin-highlight-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5" />
+                <circle cx="12" cy="16" r="0.6" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="fv2-fin-highlight-text">
+              The fastest path to electrified depots — passive revenue, zero capital at risk, no operational burden.
+            </span>
+          </div>
+        </article>
+
+        <!-- ─── REGULAR: Lease ──────────────────────────── -->
+        <article class="fv2-fin-card">
+          <span class="fv2-fin-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M3 10h18" />
+              <path d="M8 3v4M16 3v4" />
+              <path d="M8 14h2M14 14h2M8 18h2M14 18h2" />
+            </svg>
+          </span>
+
+          <h3 class="fv2-fin-name">Lease</h3>
+          <p class="fv2-fin-tagline">Fixed monthly · full revenue retention</p>
+          <p class="fv2-fin-body">
+            Pay a predictable monthly cost for the hardware, software, and ongoing management. Every dollar of charging revenue stays with you. Lease terms are scoped to your deployment size and timeline.
+          </p>
+
+          <ul class="fv2-fin-bullets">
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>Predictable monthly cost — simple to budget.</span>
+            </li>
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>100% of charging revenue stays with you.</span>
+            </li>
+            <li>
+              <span class="fv2-fin-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4 4L19 7" />
+                </svg>
+              </span>
+              <span>Hardware, software, and management included.</span>
+            </li>
+          </ul>
+        </article>
+
+      </div>
+
+      <!-- ── FOOTNOTE — rebates & grants ────────────────── -->
+      <p class="fv2-fin-footnote">
+        Rebates, incentives, and grants — including NEVI applications via our
+        <a class="fv2-fin-footnote-link" href="/contact">EV Gateway partnership</a>
+        — handled by Evium where applicable.
+      </p>
+
+    </div>
+  </section>
+
+  <style>
+    /* ─── .fv2-fin — light-register financial models band.
+       Adapted from multifamily-v3's financialModels rendered
+       by ServicePageV2.astro (.svc-fin-* classes). Replicates:
+       cream-on-white surface, white cards with hairline border
+       + 22px radius, layered shadow stack, featured-card variant
+       (green tint + badge + green border), hover lift with real
+       green glow (no-offset blur halos), bullet check-ticks,
+       bottom highlight callout, and centered footnote with
+       green-link. */
+
+    .fv2-fin {
+      --fin-ease: cubic-bezier(.2, .9, .25, 1);
+      position: relative;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%,
+          rgba(45, 200, 86, 0.05) 0%,
+          rgba(45, 200, 86, 0)    70%),
+        linear-gradient(180deg, #FBFCF8 0%, #F4F8EE 100%);
+      padding: clamp(40px, 6vw, 76px) clamp(20px, 4vw, 60px);
+      font-family: 'Maven Pro', system-ui, sans-serif;
+      color: #1d1d1f;
+      isolation: isolate;
+    }
+    .fv2-fin-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .fv2-fin-head {
+      max-width: 720px;
+      margin: 0 auto clamp(24px, 3vw, 40px);
+      text-align: center;
+    }
+    .fv2-fin-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(9px, 1vw, 14px);
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      font-size: clamp(0.6rem, 0.7vw, 0.72rem);
+      font-weight: 900;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: #2DC856;
+      line-height: 1;
+    }
+    .fv2-fin-eyebrow-dash {
+      display: inline-block;
+      flex: 0 0 auto;
+      width: clamp(22px, 2.4vw, 32px);
+      height: 1.5px;
+      background: linear-gradient(90deg, #2DC856, rgba(45, 200, 86, 0));
+      border-radius: 1px;
+    }
+    .fv2-fin-eyebrow-dash:last-child {
+      background: linear-gradient(90deg, rgba(45, 200, 86, 0), #2DC856);
+    }
+    .fv2-fin-title {
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.024em;
+      color: #1d1d1f;
+      text-wrap: balance;
+    }
+    .fv2-fin-sub {
+      margin: 0 auto;
+      font-size: clamp(0.96rem, 1.1vw, 1.08rem);
+      line-height: 1.6;
+      color: #4d5963;
+      max-width: 60ch;
+      text-wrap: pretty;
+    }
+
+    /* ── Cards grid ─────────────────────────────────── */
+    .fv2-fin-grid {
+      display: grid;
+      gap: clamp(16px, 2vw, 22px);
+      align-items: stretch;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 880px) {
+      .fv2-fin-grid {
+        grid-template-columns: 1.25fr 1fr;
+      }
+    }
+
+    /* ── Card base ──────────────────────────────────── */
+    .fv2-fin-card {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid rgba(13, 28, 36, 0.08);
+      border-radius: 22px;
+      padding: clamp(22px, 2.4vw, 32px);
+      box-shadow:
+        0 1px 2px rgba(13, 28, 36, 0.04),
+        0 6px 16px rgba(13, 28, 36, 0.06),
+        0 22px 48px rgba(13, 28, 36, 0.10);
+      display: flex;
+      flex-direction: column;
+      transition:
+        transform 0.4s var(--fin-ease),
+        box-shadow 0.4s var(--fin-ease),
+        border-color 0.4s var(--fin-ease);
+    }
+    .fv2-fin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #2DC856;
+      transform: scaleX(0);
+      transform-origin: 50% 50%;
+      transition: transform 0.45s var(--fin-ease);
+      z-index: 2;
+      pointer-events: none;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+    }
+    .fv2-fin-card:hover {
+      transform: translateY(-9px);
+      box-shadow:
+        /* Pure-glow halos (no offset) */
+        0 0 0 1px rgba(45, 200, 86, 0.32),
+        0 0 22px rgba(45, 200, 86, 0.34),
+        0 0 56px rgba(45, 200, 86, 0.22),
+        /* Directional drops */
+        0 12px 26px rgba(13, 28, 36, 0.10),
+        0 32px 70px rgba(13, 28, 36, 0.16);
+      border-color: rgba(45, 200, 86, 0.4);
+    }
+    .fv2-fin-card:hover::before { transform: scaleX(0.7); }
+
+    /* ── Featured card ──────────────────────────────── */
+    .fv2-fin-card.is-featured {
+      border: 1.5px solid rgba(45, 200, 86, 0.45);
+      background: linear-gradient(180deg, #ffffff 0%, #f0fff4 100%);
+      box-shadow:
+        0 0 0 1px rgba(45, 200, 86, 0.18),
+        0 0 22px rgba(45, 200, 86, 0.18),
+        0 8px 22px rgba(45, 200, 86, 0.16),
+        0 28px 60px rgba(13, 28, 36, 0.12);
+    }
+    .fv2-fin-card.is-featured::before {
+      left: 26px;
+      right: 26px;
+      height: 3px;
+      border-radius: 999px;
+      transform-origin: center center;
+      transform: scaleX(0);
+    }
+    .fv2-fin-card.is-featured:hover::before {
+      transform: scaleX(0.5);
+    }
+    .fv2-fin-card.is-featured:hover {
+      border-color: rgba(45, 200, 86, 0.7);
+      box-shadow:
+        0 0 0 1.5px rgba(45, 200, 86, 0.5),
+        0 0 28px rgba(45, 200, 86, 0.5),
+        0 0 72px rgba(45, 200, 86, 0.32),
+        0 0 140px rgba(45, 200, 86, 0.16),
+        0 16px 34px rgba(13, 28, 36, 0.12),
+        0 40px 86px rgba(13, 28, 36, 0.18);
+    }
+
+    /* ── Badge — top-right corner tab ───────────────── */
+    .fv2-fin-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 7px 14px 7px 16px;
+      background: #2DC856;
+      color: #ffffff;
+      border-radius: 0 22px 0 14px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      z-index: 3;
+      box-shadow:
+        0 2px 6px rgba(45, 200, 86, 0.32),
+        0 6px 16px rgba(45, 200, 86, 0.28);
+    }
+
+    /* ── Icon block ─────────────────────────────────── */
+    .fv2-fin-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: rgba(13, 28, 36, 0.05);
+      color: rgba(13, 28, 36, 0.5);
+      margin-bottom: clamp(12px, 1.2vw, 16px);
+    }
+    .fv2-fin-icon svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+    .fv2-fin-card.is-featured .fv2-fin-icon {
+      background: rgba(45, 200, 86, 0.14);
+      color: #1d9942;
+    }
+
+    /* ── Name + tagline ─────────────────────────────── */
+    .fv2-fin-name {
+      margin: 0 0 4px;
+      font-size: clamp(1.15rem, 1.4vw, 1.35rem);
+      font-weight: 900;
+      letter-spacing: -0.018em;
+      color: #1d1d1f;
+    }
+    .fv2-fin-tagline {
+      margin: 0 0 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #2DC856;
+    }
+    .fv2-fin-card:not(.is-featured) .fv2-fin-tagline {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(13, 28, 36, 0.45);
+    }
+    .fv2-fin-body {
+      margin: 0 0 12px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #4d5963;
+    }
+
+    /* ── Bullets w/ green check ticks ───────────────── */
+    .fv2-fin-bullets {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .fv2-fin-bullets li {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: #3a4753;
+    }
+    .fv2-fin-tick {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: rgba(45, 200, 86, 0.14);
+      color: #1d9942;
+    }
+    .fv2-fin-tick svg {
+      width: 11px;
+      height: 11px;
+      display: block;
+    }
+
+    /* ── Bottom highlight callout (featured only) ───── */
+    .fv2-fin-highlight {
+      margin: auto 0 0;
+      margin-top: clamp(14px, 1.6vw, 20px);
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      padding: clamp(11px, 1.2vw, 14px) clamp(12px, 1.4vw, 16px);
+      background: linear-gradient(
+        180deg,
+        rgba(45, 200, 86, 0.10) 0%,
+        rgba(45, 200, 86, 0.05) 100%
+      );
+      border: 1px solid rgba(45, 200, 86, 0.28);
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .fv2-fin-highlight-icon {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      color: #1d9942;
+      margin-top: 2px;
+    }
+    .fv2-fin-highlight-icon svg { width: 16px; height: 16px; display: block; }
+    .fv2-fin-highlight-text {
+      font-size: 0.84rem;
+      line-height: 1.5;
+      font-weight: 500;
+      color: #2c4150;
+    }
+
+    /* ── Footnote ───────────────────────────────────── */
+    .fv2-fin-footnote {
+      margin: clamp(20px, 2.2vw, 30px) auto 0;
+      text-align: center;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: rgba(77, 89, 99, 0.9);
+    }
+    .fv2-fin-footnote-link {
+      color: #1d9942;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+      transition: color 0.18s ease, text-decoration-thickness 0.18s ease;
+    }
+    .fv2-fin-footnote-link:hover {
+      color: #2DC856;
+      text-decoration-thickness: 2px;
+    }
+  </style>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-4xl mx-auto px-6 md:px-12">
+
+      <div class="text-center mb-14">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Fleet Charging FAQ</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight">
+          Answers for Fleet Managers.
+        </h2>
+      </div>
+
+      <div class="space-y-0 border border-white/8">
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What size fleet depot can Evium handle?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Evium scales from small municipal fleets of 10–20 vehicles up to large commercial depots with 200+ vehicles and multi-megawatt charging loads. Our site assessment process accounts for current fleet size, projected EV adoption timeline, and available electrical capacity — and designs an infrastructure plan that fits all three.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">How does load management actually work?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Our OCPP 1.6+ platform uses real-time demand data to dynamically distribute available electrical capacity across all active chargers. When grid demand rises or a circuit approaches its limit, the system automatically throttles lower-priority sessions and boosts higher-priority ones — without interrupting charging. Open ADR 2.0b integration allows the system to respond to utility demand response signals, which can also generate revenue or credits for your operation.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What does ongoing maintenance look like?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Evium's platform monitors all chargers 24/7 with automated fault detection. Most software-level issues are resolved remotely via OTA firmware updates or remote session management without requiring a site visit. For hardware faults, Evium dispatches a certified technician. Under our operations agreements, we also conduct scheduled preventive maintenance visits to inspect connectors, check electrical connections, and update firmware — before problems affect uptime.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">When should a fleet use L2 vs. DC fast charging?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Level 2 (7–19 kW) is the right choice for vehicles that sit overnight or for extended periods — it's lower cost per port, gentler on batteries, and sufficient for most light and medium-duty EVs. DC fast charging (60–240 kW) is for vehicles that need a meaningful charge in under an hour — quick-turn delivery vehicles, transit buses on layover, or emergency vehicles that must return to service rapidly. Most depot designs use both: L2 as the primary backbone with a small number of DCFC stalls for peak demand.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Does Evium handle permits and utility coordination?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Yes — completely. Evium manages the full permitting process including electrical, building, and ADA permits where required. We also handle all utility company coordination: interconnection applications, service upgrades, demand response enrollment, and rebate applications. This is often the most time-consuming and technically complex part of a depot build, and it's entirely off your plate.
+            </p>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Can we start with a pilot and scale later?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Absolutely — and we recommend it. Evium designs every depot with expansion in mind: conduit runs are sized for future ports, electrical panels are specced with headroom, and software is configured to add new chargers without re-platforming. Starting with 10–20 ports for your first EV cohort lets you validate workflows, collect real utilization data, and build an evidence-based case for full fleet electrification — all while keeping your infrastructure investment right-sized.
+            </p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FINAL CTA
+       Bus-fleet photo as the section background — sets the
+       "this is who we serve" stage for the closing call to
+       action. Image gets a layered scrim stack so the headline
+       and copy stay legible without losing the photo's energy:
+         1. dark-teal base (under the image)
+         2. the photo itself with object-cover
+         3. a vertical gradient (top transparent → bottom dark)
+            so the image fades into the page below
+         4. a center-radial green glow tying it to the brand
+         5. thin top + bottom hairlines that match the rest of
+            the page's section seams
+  ═══════════════════════════════════════════════════════ -->
+  <section id="final-cta" class="relative bg-[#0a1822] py-28 lg:py-32 overflow-hidden scroll-mt-0">
+
+    <!-- Photo background -->
+    <img
+      src="/images/heroes/bus-fleet.png"
+      alt=""
+      aria-hidden="true"
+      class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+      loading="lazy"
+    />
+
+    <!-- Scrim stack for legibility -->
+    <div class="absolute inset-0 pointer-events-none">
+      <!-- Base vertical scrim — heavier overall coverage so
+           the photo reads as atmosphere, not foreground. -->
+      <div class="absolute inset-0 bg-gradient-to-b from-[#0a1822]/75 via-[#0a1822]/72 to-[#0a1822]/90"></div>
+      <!-- Centered radial darken — creates a "spotlight"
+           focal zone right where the headline and lede sit so
+           the body copy doesn't muddy against bus paint and
+           sky in the middle of the photo. -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(10,24,34,0.55),transparent_75%)]"></div>
+      <!-- Subtle green halo at center — ties to the brand. -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(45,200,86,0.08),transparent_70%)]"></div>
+      <!-- Section seams — same hairline treatment as the rest
+           of the page. -->
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/20 to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-12 text-center">
+      <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-6 [text-shadow:0_2px_24px_rgba(10,24,34,0.85),0_0_12px_rgba(10,24,34,0.7)]">Ready to Electrify Your Fleet?</p>
+      <h2 class="text-white font-black leading-tight mb-6 [text-shadow:0_4px_32px_rgba(10,24,34,0.9),0_2px_8px_rgba(10,24,34,0.7)]" style="font-size: clamp(2.2rem, 5vw, 4.5rem);">
+        Talk to a Fleet<br />Charging Specialist.
+      </h2>
+      <p class="text-white/80 text-xl leading-relaxed mb-12 max-w-2xl mx-auto [text-shadow:0_2px_18px_rgba(10,24,34,0.95),0_1px_4px_rgba(10,24,34,0.85)]">
+        Tell us about your fleet — vehicle count, depot layout, shift schedule. We'll come back with a charging strategy, hardware recommendation, and financial model tailored to your operation. No commitment required.
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a
+          href="/contact/quote"
+          class="inline-block bg-evium-green text-[#0a1822] font-black text-xs tracking-[0.18em] uppercase px-10 py-5 hover:bg-white transition-colors duration-200 shadow-[0_8px_28px_-6px_rgba(45,200,86,0.5)]"
+        >
+          Start the Conversation
+        </a>
+        <a
+          href="/solutions"
+          class="inline-block text-white font-semibold text-xs tracking-[0.15em] uppercase px-10 py-5 border border-white/40 backdrop-blur-sm bg-white/[0.03] hover:border-evium-green hover:text-evium-green hover:bg-evium-green/[0.08] transition-colors duration-200"
+        >
+          View All Solutions
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* ─── Hero CTA → Final CTA animated smooth scroll ────
+       The hero's "Talk to a fleet specialist" button targets
+       #final-cta. We intercept the click so we can drive a
+       custom rAF-eased animation instead of relying on the
+       browser's default `scroll-behavior: smooth` (which is
+       inconsistent across browsers and ignores reduced-motion
+       preference under some configurations).
+
+       Easing: cubic ease-in-out, ~900ms. Falls back to the
+       default anchor behavior if prefers-reduced-motion is on.
+    ════════════════════════════════════════════════════════ */
+    (function () {
+      var triggers = document.querySelectorAll('a[data-fv2-scroll]');
+      if (!triggers.length) return;
+
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      function animateScrollTo(targetY, duration) {
+        duration = duration || 900;
+        var startY = window.scrollY;
+        var distance = targetY - startY;
+        if (Math.abs(distance) < 2) return;
+        var startT = performance.now();
+        function step(now) {
+          var elapsed = now - startT;
+          var t = Math.min(elapsed / duration, 1);
+          var eased = easeInOutCubic(t);
+          window.scrollTo(0, startY + distance * eased);
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      triggers.forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var hash = a.getAttribute('href');
+          if (!hash || hash.charAt(0) !== '#') return;
+          var target = document.querySelector(hash);
+          if (!target) return;
+          e.preventDefault();
+          if (reduceMotion) {
+            target.scrollIntoView({ behavior: 'auto', block: 'start' });
+            return;
+          }
+          var rect = target.getBoundingClientRect();
+          var targetY = window.scrollY + rect.top;
+          animateScrollTo(targetY);
+          /* Update the URL hash without triggering another
+             default jump. */
+          history.replaceState(null, '', hash);
+        });
+      });
+    })();
+  </script>
+
+</Layout>

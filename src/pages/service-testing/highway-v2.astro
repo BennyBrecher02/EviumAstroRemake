@@ -1,0 +1,1704 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Highway Fast Charging v2 — Evium Charging"
+  description="Turn your highway corridor location into a high-utilization EV charging destination. NEVI-compliant, no-cost deployments managed end-to-end by Evium."
+  headerVariant="v4"
+  bodyClass="page-highway-v2"
+>
+
+  <!-- ═══════════════════════════════════════════════════
+       1. HERO — full-viewport image with bottom gradient.
+       Copy lives at the bottom on the calm pavement zone.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-hero relative w-full h-screen min-h-[640px] overflow-hidden bg-evium-dark">
+    <img
+      src="/images/heroes/highway-hero-fuzzy.png"
+      alt=""
+      aria-hidden="true"
+      class="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+      loading="eager"
+      fetchpriority="high"
+      draggable="false"
+    />
+
+    <!-- Top scrim — keeps the upper-left copy column legible
+         against the bright sky / canopy without washing the
+         chargers in the center-right of the frame. -->
+    <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_75%_60%_at_15%_22%,rgba(10,24,34,0.78),transparent_60%)]"></div>
+
+    <!-- Bottom gradient — fades the lower portion to dark
+         so the photo transitions smoothly into the page. -->
+    <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0a1822] via-[#0a1822]/55 to-transparent pointer-events-none"></div>
+
+    <!-- Copy — top-left -->
+    <div class="absolute inset-x-0 top-0 px-6 md:px-10 lg:px-16 pt-12 md:pt-16 lg:pt-20">
+      <div class="max-w-3xl">
+        <!-- Editorial brow — short hairline rule + tracked caps.
+             Magazine convention that reads as confident and
+             editorial without resorting to a backdrop pill. -->
+        <div class="flex items-center gap-4 mb-7">
+          <div class="w-10 h-px bg-evium-green flex-shrink-0"></div>
+          <span class="text-evium-green text-xs font-extrabold tracking-[0.34em] uppercase [text-shadow:0_1px_2px_rgba(10,24,34,1),0_2px_14px_rgba(10,24,34,0.95),0_4px_24px_rgba(10,24,34,0.7)]">The new fuel stop</span>
+        </div>
+        <h1 class="font-black leading-[0.95] tracking-tight mb-9 [text-shadow:0_2px_24px_rgba(10,24,34,0.85),0_1px_4px_rgba(10,24,34,0.7)]" style="font-size: clamp(2.2rem, 5.4vw, 4.75rem);">
+          <span class="text-white">Your highway exit.</span><br /><span class="text-evium-green">Our gear and grid.</span>
+        </h1>
+        <a
+          href="/contact/quote"
+          class="group inline-flex items-center gap-3 text-white font-semibold text-sm tracking-[0.12em] uppercase border-b border-evium-green pb-2 hover:text-evium-green transition-colors duration-200 [text-shadow:0_1px_8px_rgba(10,24,34,0.7)]"
+        >
+          See if your site qualifies
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pavement-band action — primary CTA on the lower
+         portion of the photo (the parking-lot pavement band).
+         Mirrors the fleets-v2 hero pattern: skewed green
+         parallelogram face + counter-skewed inner text + arrow
+         that translates on hover. data-hwv2-scroll triggers
+         the rAF-eased smooth scroll to #revenue-projections. -->
+    <div class="hwv2-hero-actions">
+      <a
+        class="hwv2-cta-primary"
+        href="#revenue-projections"
+        data-hwv2-scroll
+        aria-label="See the revenue projections"
+      >
+        <span class="hwv2-cta-primary-face" aria-hidden="true"></span>
+        <span class="hwv2-cta-primary-inner">
+          <span>See what you'd earn</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       2. AUDIENCE BRIDGE — sage benefit cards on white.
+       Lift of /testing/highway-old-replica §3 (Highway
+       charging benefits). Card visual style is verbatim
+       from the replica per request — the layout enforces
+       a square aspect ratio per card and adds a centered
+       eyebrow above the grid that ties back to the hero's
+       "The new fuel stop" framing.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-bridge" aria-labelledby="hwv2-bridge-icp">
+    <div class="hwv2-bridge-inner">
+
+      <header class="hwv2-bridge-head">
+        <p class="hwv2-bridge-eyebrow">
+          <span class="hwv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+          <span>For Highway Hosts</span>
+          <span class="hwv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+        </p>
+        <!-- Headline — same role + sizing as fleets-v2's
+             .fv2-bridge-icp. Synthesized from the replica's
+             page title + Partner pitch + 3 pillars (premium
+             destination, next-gen highway service, state DOTs,
+             dwell-time tuning). Italic clause carries the
+             rhetorical lift. -->
+        <p id="hwv2-bridge-icp" class="hwv2-bridge-icp">
+          Premium fast-charging destinations along major travel
+          corridors —
+          <em>built alongside state DOTs, tuned to dwell time.</em>
+        </p>
+      </header>
+
+      <div class="hwv2-bridge-grid">
+
+        <!-- Card 1 — Commercial Output. Lightning bolt watermark
+             in the lower-right corner; speed / energy motif. -->
+        <article class="hwv2-card" data-hwv2-card="output">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M37 4 L18 36 L30 36 L25 60 L48 26 L34 26 L37 4 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">Commercial Output</h3>
+            <p class="hwv2-card-body">
+              Our Level 3 stations allow drivers to quickly recharge
+              their batteries, adding hundreds of miles of range in
+              just 20 to 30 minutes.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 2 — Strategic Placement. Map pin watermark
+             upper-right; location / placement motif. -->
+        <article class="hwv2-card" data-hwv2-card="placement">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 4 C19 4, 9 14, 9 27 C9 44, 32 60, 32 60 C32 60, 55 44, 55 27 C55 14, 45 4, 32 4 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+            <circle cx="32" cy="25" r="7" fill="none" stroke="currentColor" stroke-width="2.6" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">Strategic Placement</h3>
+            <p class="hwv2-card-body">
+              Stations are installed at high-traffic points such as
+              rest stops, gas stations, and food courts, providing
+              easy and practical access for drivers.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 3 — High Availability. Shield + check watermark
+             lower-right; reliability motif. -->
+        <article class="hwv2-card" data-hwv2-card="availability">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 4 L8 12 L8 32 C8 47 32 60 32 60 C32 60 56 47 56 32 L56 12 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+            <path d="M20 32 L29 41 L44 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">High Availability</h3>
+            <p class="hwv2-card-body">
+              Robust infrastructure and continuous maintenance ensure
+              our stations are always ready to meet demand.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 4 — High Turnover. Clock watermark, lower-right;
+             24/7 demand / time-on-clock motif. -->
+        <article class="hwv2-card" data-hwv2-card="turnover">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="2.6" />
+            <path d="M32 13 L32 32 L46 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="32" cy="32" r="2" fill="currentColor" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">High Turnover</h3>
+            <p class="hwv2-card-body">
+              Designed to serve large volumes of vehicles with 24/7
+              demand, especially during holidays and peak travel
+              seasons.
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       3. HOW NEVI WORKS — and Why Evium Is Your CPO
+       Layout lifted from fleets-v2's "Engineered for Your
+       Operation" section: full-viewport split with a left
+       editorial column (kicker → dual-color headline →
+       pull-quote lede → numbered list → bottom GSA anchor)
+       and a flush-right full-bleed photo on lg+. All v1
+       content preserved verbatim — only the layout vehicle
+       has changed.
+       ═══════════════════════════════════════════════════ -->
+  <section id="opportunity" class="bg-[#0d1f2b] min-h-screen flex items-stretch">
+
+    <!-- Left: content column. Header → lede → credentials →
+         numbered list → GSA bottom anchor. Mirrors the
+         fleets section's vertical regions. -->
+    <div class="flex-1 flex min-w-0">
+      <div class="w-full max-w-3xl mx-auto px-6 md:px-10 lg:px-10 py-8 flex flex-col">
+
+        <!-- ── HEADER ─────────────────────────────────── -->
+        <header>
+          <!-- Kicker label with fading hairline that bleeds
+               toward the column edge. Same magazine-style
+               header marker as fleets. -->
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-evium-green text-xs font-extrabold tracking-[0.22em] uppercase whitespace-nowrap">Federal Grant Program</span>
+            <span class="flex-1 h-px bg-gradient-to-r from-evium-green/35 to-transparent"></span>
+          </div>
+
+          <!-- Headline (h2) — two lines, dual color. Sized so
+               the longer green line "and Why Evium Is Your CPO."
+               holds on a single line within the wider max-w-3xl
+               column. whitespace-nowrap on each line guarantees
+               no wrap regardless of viewport breakpoint. -->
+          <h2 class="text-white font-black text-[1.85rem] md:text-[2.05rem] leading-[1.05] tracking-[-0.022em] mb-3">
+            <span class="block whitespace-nowrap">How NEVI Works —</span>
+            <span class="block whitespace-nowrap text-evium-green">and Why Evium Is Your CPO.</span>
+          </h2>
+
+          <!-- Deck — third headline line at smaller scale so the
+               full triplet ("One federal program. One operator.
+               Zero cost to you.") holds on a single line. Three
+               phrases, alternating white / green / white so the
+               middle clause (Evium's identity) reads as the
+               visual hinge. -->
+          <p class="font-black text-base md:text-lg leading-tight tracking-[-0.014em] whitespace-nowrap mb-6">
+            <span class="text-white">One federal program.</span>
+            <span class="text-evium-green">One operator.</span>
+            <span class="text-white">Zero cost to you.</span>
+          </p>
+
+          <!-- Lede framed as a pull-quote (thin brand-green
+               left rule). Carries the NEVI program definition
+               from v1 verbatim. -->
+          <div class="border-l-2 border-evium-green/55 pl-5 mb-3">
+            <p class="text-white/75 text-[15px] leading-snug">
+              The National Electric Vehicle Infrastructure (NEVI) Formula Program distributes $7.5 billion in federal funding to build a national charging network. States issue grants to qualified Charging Point Operators (CPOs) to deploy hardware on designated Alternative Fuel Corridors (AFCs) — with a station required at least every 50 miles along major U.S. travel routes.
+            </p>
+          </div>
+
+          <!-- Credentials paragraph — Evium's CPO awards
+               (NM, CEC, NJ BPU). v1 verbatim. -->
+          <p class="text-white/65 text-[13px] leading-snug">
+            Evium is a federally recognized CPO and has already secured NEVI site awards in New Mexico, grants from the California Energy Commission ($6MM+), and funding through the New Jersey BPU program. We've navigated every level of this bureaucracy — so you don't have to.
+          </p>
+        </header>
+
+        <!-- ── EDITORIAL LIST ─────────────────────────── -->
+        <!-- 5 numbered entries, each as a row with a ringed
+             number badge (fleets uses checkmarks; sequential
+             steps want numerals). Same hairline divider
+             treatment as fleets. -->
+        <ul class="my-4 space-y-0">
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">1</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Evium assesses your corridor location</h4>
+              <p class="text-white/65 text-sm leading-tight">We evaluate your site's AFC corridor status, utility access, traffic patterns, and grant eligibility in a single consult.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">2</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">We submit the NEVI application on your behalf</h4>
+              <p class="text-white/65 text-sm leading-tight">All federal, state, and utility paperwork is handled entirely by Evium. You sign where needed — nothing more.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">3</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Hardware is installed at no cost to you</h4>
+              <p class="text-white/65 text-sm leading-tight">Grant funding covers the full cost of DC fast hardware, installation, and utility work. Zero capital expenditure for the site host.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">4</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">5-year contract + 5-year renewal option</h4>
+              <p class="text-white/65 text-sm leading-tight">You secure long-term infrastructure at your site with renewal rights, ensuring competitive advantage well into the decade.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">5</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">You earn a percentage of every charging session</h4>
+              <p class="text-white/65 text-sm leading-tight">Site hosts receive a share of charging revenue. Evium handles billing, settlements, and compliance reporting — you receive a monthly payment.</p>
+            </div>
+          </li>
+        </ul>
+
+        <!-- ── BOTTOM ANCHOR ──────────────────────────── -->
+        <!-- GSA / NEVI-compliant credential, pinned to the
+             bottom of the column via mt-auto. Replaces the
+             fleets section's plain "Design. Install. Operate."
+             tagline with the v1 GSA shield-badge content,
+             rebuilt in the same fleets bottom-anchor pattern
+             so we don't lose the GSA / qualified-hands line. -->
+        <div class="mt-auto flex items-center gap-4 pt-4 border-t border-white/[0.10]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-evium-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span class="text-white/70 text-[11px] tracking-[0.18em] uppercase font-bold leading-[1.55]">
+            GSA-Approved · NEVI-Compliant CPO<br />
+            Your Site Is in Qualified Hands
+          </span>
+          <span class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: flush-right full-bleed photo. object-cover so the
+         image touches the top and bottom of the section and fills
+         the entire column vertically. Wider than the fleets truck
+         column (62% / 60%) so a much larger portion of the photo's
+         horizontal extent shows while still preserving the
+         cover-fill behavior at top and bottom. -->
+    <div class="hidden lg:block flex-shrink-0 w-[63%] xl:w-[61%]">
+      <img
+        src="/images/heroes/highway-charging-station.png"
+        alt="Evium-equipped highway charging station alongside a corridor location"
+        class="block w-full h-full object-cover object-center"
+        loading="lazy"
+      />
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       4. HARDWARE — DC Fast Hardware for Every Corridor.
+       Lifted from /solutions/highway-fast-charging (v1).
+       Section sized to a full viewport (min-h-screen) with
+       content vertically centered via flex. Card body keeps
+       v2's tighter typography. Cards seat v1 product images
+       on a multifamily-v3-style "showroom" stage.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-hardware-section bg-evium-dark-light min-h-screen flex flex-col justify-center py-8 lg:py-12">
+    <div class="max-w-7xl mx-auto w-full px-6 lg:px-12">
+
+      <!-- Header — v1 content, centered. Compressed to fit
+           the section in a single viewport. -->
+      <div class="text-center max-w-3xl mx-auto mb-7 lg:mb-9">
+        <div class="text-evium-green text-xs font-bold uppercase tracking-[0.22em] mb-3">DC Fast Hardware</div>
+        <h2 class="text-3xl lg:text-[2.4rem] font-black text-white leading-[1.05] mb-4">
+          Infrastructure-Grade Hardware
+          <span class="text-evium-green">for Every Corridor.</span>
+        </h2>
+        <p class="text-[15px] text-white/60 leading-snug max-w-2xl mx-auto">
+          Highway charging demands more than a standard EV install. Every unit Evium deploys is a high-power DC fast charger built for continuous-duty, multi-vehicle throughput with NEVI compliance baked in.
+        </p>
+      </div>
+
+      <!-- Grid uses explicit column ratios so the middle card
+           is ~15% wider than its siblings — gives the central
+           card visual weight without resorting to a transform
+           scale that would break grid alignment. -->
+      <div class="hwv2-hardware-grid">
+
+        <!-- Tellus 180kW -->
+        <article class="hwv2-hardware-card group">
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/tellus/tellus-dc-fast-180kw.png"
+              alt="Tellus DC Fast 180kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">Tellus Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">180<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">The corridor workhorse. Dual CCS + CHAdeMO connectors, weatherproof outdoor enclosure, OCPP 1.6+ connectivity, and NEVI uptime compliance built in. Adds 100+ miles in under 20 minutes.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">180kW Output</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">CCS + CHAdeMO</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">NEVI Compliant</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- MaxiCharger 60–240kW (now MIDDLE — promoted to the
+             center slot per request, sized slightly larger via
+             the wider middle column. Showroom floor card. -->
+        <article class="hwv2-hardware-card hwv2-hardware-card--middle group">
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png"
+              alt="MaxiCharger DC Fast 60–240kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">MaxiCharger Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">60–240<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">Scalable modular architecture for sites with growing demand. Deploy at 60kW and upgrade to 240kW without replacing hardware. Ideal for sites entering the corridor market with room to scale.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">60–240kW</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Modular</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Upgradeable</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tellus 300kW (featured "Top Spec" — now on the right) -->
+        <article class="hwv2-hardware-card hwv2-hardware-card--featured group">
+          <span class="hwv2-hardware-flag" aria-label="Top spec">
+            <span class="hwv2-hardware-flag-dot" aria-hidden="true"></span>
+            <span class="hwv2-hardware-flag-text">Top Spec</span>
+          </span>
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/tellus/tellus-dc-fast-300kw.png"
+              alt="Tellus DC Fast 300kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">Tellus Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">300<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">Maximum throughput for high-traffic corridors. Supports dynamic power sharing across multiple vehicles simultaneously, ultra-fast 10-minute sessions for capable vehicles, and future-proof power delivery.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">300kW Output</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Dynamic Sharing</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Future-Proof</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <p class="text-center text-white/40 text-sm mt-8">Multi-stall configurations available. All hardware is GSA-approved and meets NEVI technical specifications. Evium handles equipment procurement, installation, and certification.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       5. REVENUE PROJECTIONS
+       Lifted from /solutions/highway-fast-charging (v1).
+       v1's structure (centered header, dual-number cards
+       with monthly + 5-year, "Typical Site" featured card,
+       multi-stall multiplier callout) is verbatim. The
+       only refinements pulled from v2 are tighter editorial
+       label sizes (text-xs / 0.22em tracking) where v2's
+       labels read cleaner. Section bg is bg-evium-dark
+       (v1's surface) so the page no longer has two
+       consecutive bg-evium-dark-light sections.
+       ═══════════════════════════════════════════════════ -->
+  <section id="revenue-projections" class="bg-evium-dark py-28 relative overflow-hidden">
+    <div
+      class="absolute left-0 bottom-0 w-1/2 h-full opacity-5 pointer-events-none"
+      style="background: radial-gradient(ellipse at left bottom, #2DC856 0%, transparent 60%);"
+    ></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="text-evium-green text-xs font-bold uppercase tracking-[0.22em] mb-4">Revenue Projections</div>
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
+          Passive Revenue From Day One
+        </h2>
+        <p class="text-lg text-white/60 leading-relaxed">
+          Per a single 180kW NEVI-funded charger. Site hosts receive a percentage of charging revenue while Evium manages all operations. These are conservative estimates from our NEVI program proposals.
+        </p>
+      </div>
+
+      <!-- Flip cards — front shows the headline projection,
+           back shows the math behind the number + source.
+           Hover flips on desktop; tap toggles on mobile via
+           the script at the page bottom. Back content is
+           strictly derived (×12 for annual, ×4 for 4-stall)
+           or pulled verbatim from the documented Evium NEVI
+           Proposal source. -->
+      <div class="grid md:grid-cols-3 gap-6 mb-12">
+
+        <!-- Low utilization -->
+        <div class="hwv2-rev-flip" tabindex="0" aria-label="Low utilization revenue projection — click to see breakdown">
+          <div class="hwv2-rev-flip-inner">
+            <!-- FRONT -->
+            <div class="hwv2-rev-face hwv2-rev-front bg-evium-dark-light rounded-2xl p-8 border border-white/8 text-center">
+              <div class="text-white/45 text-xs font-bold uppercase tracking-[0.22em] mb-6">Low Utilization</div>
+              <div class="text-5xl font-black text-white mb-2">$900</div>
+              <div class="text-white/40 text-sm mb-8">/ month per charger</div>
+              <div class="w-full h-px bg-white/10 mb-8"></div>
+              <div class="text-3xl font-black text-evium-green mb-2">$54,000</div>
+              <div class="text-white/50 text-sm">Projected over 5 years</div>
+              <p class="text-white/35 text-xs mt-6 leading-relaxed">Based on approximately 2–3 charging sessions per day at off-peak highway volumes.</p>
+              <span class="hwv2-rev-flip-hint" aria-hidden="true">Hover or tap for breakdown</span>
+            </div>
+            <!-- BACK -->
+            <div class="hwv2-rev-face hwv2-rev-back bg-evium-dark-light rounded-2xl p-8 border border-white/12 text-center">
+              <div class="text-white/45 text-xs font-bold uppercase tracking-[0.22em] mb-5">Low Utilization · Breakdown</div>
+              <dl class="hwv2-rev-back-list">
+                <div>
+                  <dt>Per month</dt>
+                  <dd>$900</dd>
+                </div>
+                <div>
+                  <dt>Per year (× 12)</dt>
+                  <dd>$10,800</dd>
+                </div>
+                <div>
+                  <dt>5-year total</dt>
+                  <dd class="is-accent">$54,000</dd>
+                </div>
+                <div>
+                  <dt>4-stall site, 5 yr</dt>
+                  <dd>$216,000</dd>
+                </div>
+              </dl>
+              <p class="text-white/40 text-[11px] leading-relaxed mt-5">
+                Per a single Tellus 180kW DC fast charger.<br />
+                Source: Evium NEVI Proposal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medium utilization — highlighted "Typical Site" -->
+        <div class="hwv2-rev-flip hwv2-rev-flip--featured" tabindex="0" aria-label="Medium utilization revenue projection — click to see breakdown">
+          <div class="hwv2-rev-flip-inner">
+            <!-- FRONT -->
+            <div class="hwv2-rev-face hwv2-rev-front bg-evium-dark-light rounded-2xl p-8 border-2 border-evium-green/40 text-center relative shadow-xl shadow-evium-green/10">
+              <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-evium-green text-evium-dark text-[10px] font-black uppercase tracking-[0.22em] px-4 py-1.5 rounded-full">Typical Site</div>
+              <div class="text-evium-green text-xs font-bold uppercase tracking-[0.22em] mb-6">Medium Utilization</div>
+              <div class="text-5xl font-black text-white mb-2">$1,500</div>
+              <div class="text-white/40 text-sm mb-8">/ month per charger</div>
+              <div class="w-full h-px bg-white/10 mb-8"></div>
+              <div class="text-3xl font-black text-evium-green mb-2">$90,000</div>
+              <div class="text-white/50 text-sm">Projected over 5 years</div>
+              <p class="text-white/35 text-xs mt-6 leading-relaxed">Based on steady corridor traffic of 4–6 sessions per day at most U.S. highway sites.</p>
+              <span class="hwv2-rev-flip-hint" aria-hidden="true">Hover or tap for breakdown</span>
+            </div>
+            <!-- BACK -->
+            <div class="hwv2-rev-face hwv2-rev-back bg-evium-dark-light rounded-2xl p-8 border-2 border-evium-green/40 text-center shadow-xl shadow-evium-green/10">
+              <div class="text-evium-green text-xs font-bold uppercase tracking-[0.22em] mb-5">Medium Utilization · Breakdown</div>
+              <dl class="hwv2-rev-back-list">
+                <div>
+                  <dt>Per month</dt>
+                  <dd>$1,500</dd>
+                </div>
+                <div>
+                  <dt>Per year (× 12)</dt>
+                  <dd>$18,000</dd>
+                </div>
+                <div>
+                  <dt>5-year total</dt>
+                  <dd class="is-accent">$90,000</dd>
+                </div>
+                <div>
+                  <dt>4-stall site, 5 yr</dt>
+                  <dd class="is-accent">$360,000+</dd>
+                </div>
+              </dl>
+              <p class="text-white/40 text-[11px] leading-relaxed mt-5">
+                Per a single Tellus 180kW DC fast charger.<br />
+                Source: Evium NEVI Proposal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- High utilization -->
+        <div class="hwv2-rev-flip" tabindex="0" aria-label="High utilization revenue projection — click to see breakdown">
+          <div class="hwv2-rev-flip-inner">
+            <!-- FRONT -->
+            <div class="hwv2-rev-face hwv2-rev-front bg-evium-dark-light rounded-2xl p-8 border border-white/8 text-center">
+              <div class="text-white/45 text-xs font-bold uppercase tracking-[0.22em] mb-6">High Utilization</div>
+              <div class="text-5xl font-black text-white mb-2">$2,100</div>
+              <div class="text-white/40 text-sm mb-8">/ month per charger</div>
+              <div class="w-full h-px bg-white/10 mb-8"></div>
+              <div class="text-3xl font-black text-evium-green mb-2">$126,000</div>
+              <div class="text-white/50 text-sm">Projected over 5 years</div>
+              <p class="text-white/35 text-xs mt-6 leading-relaxed">Based on peak-corridor demand at major travel plazas, rest areas, and gas stations on high-volume routes.</p>
+              <span class="hwv2-rev-flip-hint" aria-hidden="true">Hover or tap for breakdown</span>
+            </div>
+            <!-- BACK -->
+            <div class="hwv2-rev-face hwv2-rev-back bg-evium-dark-light rounded-2xl p-8 border border-white/12 text-center">
+              <div class="text-white/45 text-xs font-bold uppercase tracking-[0.22em] mb-5">High Utilization · Breakdown</div>
+              <dl class="hwv2-rev-back-list">
+                <div>
+                  <dt>Per month</dt>
+                  <dd>$2,100</dd>
+                </div>
+                <div>
+                  <dt>Per year (× 12)</dt>
+                  <dd>$25,200</dd>
+                </div>
+                <div>
+                  <dt>5-year total</dt>
+                  <dd class="is-accent">$126,000</dd>
+                </div>
+                <div>
+                  <dt>4-stall site, 5 yr</dt>
+                  <dd>$504,000</dd>
+                </div>
+              </dl>
+              <p class="text-white/40 text-[11px] leading-relaxed mt-5">
+                Per a single Tellus 180kW DC fast charger.<br />
+                Source: Evium NEVI Proposal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-evium-dark-light rounded-2xl p-8 border border-white/8">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed">
+            <strong class="text-white">Multi-stall multiplier:</strong> Most highway deployments include 4–8 charging stalls per site. At medium utilization, a 4-stall site projects <strong class="text-evium-green">$360,000+ in site host revenue over 5 years</strong> — with zero capital investment from the site host. Evium's team will build a custom revenue model for your specific location.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       5. SOFTWARE & COMPLIANCE
+       Replaces the prior What-Evium-Handles + Uptime
+       sections. Single section. Narrative left, certs right.
+       ═══════════════════════════════════════════════════ -->
+  <section class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Left: narrative -->
+        <div>
+          <div class="text-evium-green text-sm font-bold uppercase tracking-widest mb-4">Software & Compliance</div>
+          <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
+            Federal Uptime, Handled by Software.
+          </h2>
+          <p class="text-lg text-white/60 leading-relaxed mb-6">
+            The NEVI program mandates 97% network uptime as a condition of continued federal funding. Meeting it requires real-time monitoring, automatic fault detection, and dispatched on-site response — built into the platform from day one.
+          </p>
+          <p class="text-lg text-white/60 leading-relaxed mb-8">
+            Evium's software platform monitors every charger continuously, detects faults automatically, and triggers remote restarts before drivers report problems. When hardware needs hands on it, certified field technicians are dispatched. Federal compliance reporting runs on the same platform.
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">24/7 monitoring across every connected charger</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">Automatic fault detection with remote restart and diagnostics</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">Certified field technicians dispatched for hardware faults</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">NEVI compliance reporting handled end-to-end</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: certifications -->
+        <div>
+          <div class="grid grid-cols-2 gap-5 mb-5">
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">OCPP 1.6+</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Charge Point Protocol</div>
+              <p class="text-white/55 text-xs leading-relaxed">Industry-standard open protocol for charger management and telemetry.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">OpenADR 2.0b</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Demand Response</div>
+              <p class="text-white/55 text-xs leading-relaxed">Grid-smart load management for utility programs and peak shaving.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">PCI DSS</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Certified Payments</div>
+              <p class="text-white/55 text-xs leading-relaxed">Payment processing certified to the Payment Card Industry Data Security Standard.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">FIPS 140.2</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Data at Rest</div>
+              <p class="text-white/55 text-xs leading-relaxed">Federal standard for cryptographic data protection at rest.</p>
+            </div>
+          </div>
+
+          <!-- Owner Portal — now an interactive button. Links
+               to the owner portal product page; group hover
+               brightens the border + green accents and shifts
+               the trailing arrow right. -->
+          <a
+            href="/products/owner-portal"
+            class="group block bg-evium-dark-light rounded-2xl p-7 border border-white/8 hover:border-evium-green/45 hover:bg-evium-green/[0.04] transition-colors duration-300"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 border border-evium-green/30 flex items-center justify-center flex-shrink-0 group-hover:bg-evium-green/25 group-hover:border-evium-green/55 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between gap-3 mb-1">
+                  <div class="text-white font-bold text-base group-hover:text-evium-green transition-colors duration-200">Owner Portal</div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-evium-green/70 group-hover:text-evium-green group-hover:translate-x-1 transition-all duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h11M11 5l5 5-5 5"/>
+                  </svg>
+                </div>
+                <p class="text-white/55 text-sm leading-relaxed">Live usage data, session history, revenue tracking, and uptime status — for the site host, with no management burden.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       6. FAQ — fleets-v2 styling 100%: bg-[#0d1f2b], single
+       outlined container, hairline dividers between items,
+       plus-icon-rotates green-bordered badge, larger
+       summary text.
+       ═══════════════════════════════════════════════════ -->
+  <section class="bg-[#0d1f2b] py-28">
+    <div class="max-w-4xl mx-auto px-6 md:px-12">
+
+      <div class="text-center mb-14">
+        <p class="text-evium-green text-xs font-bold tracking-[0.22em] uppercase mb-4">Highway Charging FAQ</p>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight">
+          Answers for Highway Hosts.
+        </h2>
+      </div>
+
+      <div class="space-y-0 border border-white/8">
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What exactly is the NEVI program?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              NEVI — the National Electric Vehicle Infrastructure Formula Program — is a $7.5 billion federal initiative funded by the 2021 Infrastructure Investment and Jobs Act. It distributes grants through state DOTs to build a national network of EV charging stations along Alternative Fuel Corridors. States contract with Charging Point Operators like Evium to deploy and operate the hardware.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Does my site qualify?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Eligibility depends on proximity to a federally designated Alternative Fuel Corridor, the state's NEVI program status, utility capacity at the site, and other technical criteria. Gas stations, travel plazas, rest stops, truck stops, and retail near highway exits are common candidates. Evium's free site assessment evaluates your location and reports back on which programs apply.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">What does this cost me as a site host?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Under Evium's no-cost model, nothing. Federal and state grant funding combined with Evium's investment cover hardware, installation, permitting, software, and ongoing maintenance. You provide the site and the electrical access point. Hybrid and ownership models are available for site hosts who want to co-invest.
+            </p>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex justify-between items-center p-8 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-lg pr-8">Who handles maintenance when something breaks?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-8 pb-8">
+            <p class="text-white/55 text-base leading-relaxed">
+              Evium does. The 24/7 monitoring platform detects faults automatically — most are resolved remotely. For hardware failures requiring hands-on work, certified field technicians are dispatched. Maintenance, repair, and federal compliance reporting are Evium's responsibility under the service agreement.
+            </p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       8. FINAL CTA
+       Forest-road corridor photo as the section background —
+       sets the "this is the road you're claiming" stage for
+       the closing call to action. Layered scrim stack for
+       legibility (mirrors the fleets-v2 bus-fleet pattern).
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative bg-[#0a1822] py-28 overflow-hidden">
+
+    <!-- Photo background -->
+    <img
+      src="/images/heroes/highway-hero.jpg"
+      alt=""
+      aria-hidden="true"
+      class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+      loading="lazy"
+    />
+
+    <!-- Scrim stack — tuned so the road in the photo's
+         vertical center stays present while copy stays
+         legible. Side scrims (left + right) carry the
+         legibility load instead of one big center darken;
+         the road column reads through unobstructed. -->
+    <div class="absolute inset-0 pointer-events-none">
+      <!-- Base vertical scrim — lighter overall than before
+           so the photo reads more present. Top/bottom still
+           anchor the section into the surrounding page. -->
+      <div class="absolute inset-0 bg-gradient-to-b from-[#0a1822]/65 via-[#0a1822]/45 to-[#0a1822]/85"></div>
+      <!-- Side scrims — darken the LEFT and RIGHT thirds
+           where the trees frame the road. The center column
+           (the actual road) stays clearer. Headline + lede
+           keep their text-shadow stack for legibility on
+           top of this. -->
+      <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,24,34,0.55)_0%,transparent_28%,transparent_72%,rgba(10,24,34,0.55)_100%)]"></div>
+      <!-- Subtle vertical light strip down the center to
+           lift the road as the focal element of the photo. -->
+      <div class="absolute inset-0 bg-[linear-gradient(90deg,transparent_38%,rgba(255,255,255,0.04)_50%,transparent_62%)]"></div>
+      <!-- Subtle green halo center — brand tie-in, lifted
+           to the headline area instead of full-section. -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_50%_38%_at_50%_45%,rgba(45,200,86,0.10),transparent_70%)]"></div>
+      <!-- Section seams — same hairline treatment as the rest
+           of the page. -->
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/20 to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center">
+      <div class="inline-flex items-center gap-2 bg-evium-green/15 border border-evium-green/40 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8">
+        <span class="w-2 h-2 rounded-full bg-evium-green animate-pulse"></span>
+        <span class="text-evium-green text-sm font-semibold tracking-widest uppercase [text-shadow:0_2px_12px_rgba(10,24,34,0.7)]">NEVI Applications Open Now</span>
+      </div>
+
+      <h2 class="text-5xl lg:text-6xl font-black text-white leading-tight mb-6 [text-shadow:0_4px_32px_rgba(10,24,34,0.9),0_2px_8px_rgba(10,24,34,0.7)]">
+        Claim Your Corridor Site Before Your Competitor Does
+      </h2>
+
+      <p class="text-xl text-white/75 leading-relaxed mb-12 max-w-2xl mx-auto [text-shadow:0_2px_18px_rgba(10,24,34,0.95),0_1px_4px_rgba(10,24,34,0.85)]">
+        NEVI site awards are issued state by state. Highway locations are competitive — sites that engage first secure the grants. Get Evium's free eligibility assessment and move first.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <!-- Primary CTA — group hover for arrow translate +
+             card lift + brightness pop + bigger green halo. -->
+        <a
+          href="/contact/quote"
+          class="hwv2-final-cta-primary group inline-flex items-center gap-3 bg-evium-green text-evium-dark font-black text-lg px-10 py-5 rounded-xl w-full sm:w-auto justify-center"
+        >
+          <span>Check NEVI Eligibility</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+        <!-- Secondary CTA — outlined; on hover, fills with a
+             tinted green wash, brightens border + text, and
+             lifts in unison with the primary. -->
+        <a
+          href="/contact/quote"
+          class="hwv2-final-cta-secondary group inline-flex items-center gap-3 border border-white/25 text-white/85 font-semibold text-lg px-10 py-5 rounded-xl backdrop-blur-sm w-full sm:w-auto justify-center"
+        >
+          <span>Request a Revenue Estimate</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 -translate-x-1 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+
+      <p class="text-white/45 text-sm mt-10 [text-shadow:0_1px_8px_rgba(10,24,34,0.8)]">
+        No commitment required. Free site assessment within 48 hours.
+      </p>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════
+     Audience bridge section
+     ───────────────────────────────────────────────────────
+     Lift of /testing/highway-old-replica §3 styling. The
+     card visuals (sage fill, hairline border, ink title +
+     soft-ink body) are verbatim from the replica's `.ohr-card`
+     so this beat reads as a faithful transplant. The layout
+     above adds a white surface, centered tracked-caps
+     eyebrow with flanking hairline rules (mirrors the
+     fleets-v2 bridge pattern), and forces each card to a
+     1:1 square at desktop / tablet widths.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-bridge {
+    --hwv2-sage:        #DDE9D6;
+    --hwv2-sage-border: #C7D8BD;
+    --hwv2-ink:         #1A2F3A;
+    --hwv2-ink-soft:    #3A4A55;
+    --hwv2-green:       #2DC856;
+
+    background: #ffffff;
+    padding: clamp(48px, 7vw, 96px) clamp(20px, 6vw, 96px);
+    font-family: 'Maven Pro', system-ui, sans-serif;
+  }
+  .hwv2-bridge-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header wrapper — eyebrow + headline together. */
+  .hwv2-bridge-head {
+    margin: 0 auto clamp(36px, 4.4vw, 64px);
+    text-align: center;
+  }
+
+  /* Centered eyebrow with flanking hairline rules — same
+     editorial pattern as fleets-v2's bridge. */
+  .hwv2-bridge-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 1.4vw, 20px);
+    margin: 0 0 clamp(20px, 2.2vw, 30px);
+    color: var(--hwv2-green);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+  }
+  .hwv2-bridge-eyebrow-rule {
+    display: block;
+    width: clamp(28px, 4vw, 56px);
+    height: 1px;
+    background: currentColor;
+  }
+
+  /* Headline — sized + styled exactly like fleets-v2's
+     .fv2-bridge-icp. Italic em clause carries the
+     rhetorical lift in green-deep. */
+  .hwv2-bridge-icp {
+    margin: 0 auto;
+    max-width: 940px;
+    text-align: center;
+    font-size: clamp(24px, 2.7vw, 38px);
+    line-height: 1.22;
+    font-weight: 500;
+    color: var(--hwv2-ink);
+    letter-spacing: -0.018em;
+  }
+  .hwv2-bridge-icp em {
+    color: #24a347;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .hwv2-bridge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 1.8vw, 24px);
+  }
+
+  /* Card visuals — verbatim from replica .ohr-card. The
+     aspect-ratio: 1 / 1 + position:relative + overflow:hidden
+     additions support the background watermark + body-wrap
+     pattern below. */
+  .hwv2-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--hwv2-sage);
+    border: 1px solid var(--hwv2-sage-border);
+    border-radius: 18px;
+    padding: clamp(20px, 2.2vw, 28px);
+    color: var(--hwv2-ink);
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Background watermark — large, low-opacity ink-color
+     glyph that anchors each card as a visual motif. Partially
+     clipped by the card edge (negative offsets) so it reads
+     as background decoration rather than a UI icon. Per-card
+     placement varies via [data-hwv2-card] selectors below to
+     prevent the four cards from looking like a literal
+     repeating template. */
+  .hwv2-card-mark {
+    position: absolute;
+    pointer-events: none;
+    color: var(--hwv2-ink);
+    opacity: 0.10;
+    z-index: 0;
+  }
+
+  /* Card 1: bolt — lower-right, mostly clipped by the
+     bottom edge so it reads as a faint motif under the
+     reading column. */
+  .hwv2-card[data-hwv2-card="output"] .hwv2-card-mark {
+    width: clamp(140px, 14vw, 200px);
+    height: clamp(140px, 14vw, 200px);
+    bottom: -32px;
+    right:  -28px;
+  }
+  /* Card 2: pin — upper-right, anchored against the
+     headline so it reads as a subtle place-marker. */
+  .hwv2-card[data-hwv2-card="placement"] .hwv2-card-mark {
+    width: clamp(130px, 13vw, 180px);
+    height: clamp(130px, 13vw, 180px);
+    top:    -36px;
+    right:  -32px;
+  }
+  /* Card 3: shield — lower-right, slightly larger so the
+     enclosing form reads cleanly even at the corner clip. */
+  .hwv2-card[data-hwv2-card="availability"] .hwv2-card-mark {
+    width: clamp(150px, 15vw, 210px);
+    height: clamp(150px, 15vw, 210px);
+    bottom: -40px;
+    right:  -36px;
+  }
+  /* Card 4: clock — upper-right. Different corner from the
+     other three so the four watermarks feel composed rather
+     than identical. */
+  .hwv2-card[data-hwv2-card="turnover"] .hwv2-card-mark {
+    width: clamp(140px, 14vw, 200px);
+    height: clamp(140px, 14vw, 200px);
+    top:    -28px;
+    right:  -32px;
+  }
+
+  /* Foreground text wrapper — sits above the watermark via
+     z-index, with a constrained measure so the body copy
+     doesn't run into the icon corner. */
+  .hwv2-card-body-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 24ch;
+  }
+  .hwv2-card-title {
+    margin: 0 0 clamp(8px, 1vw, 14px);
+    font-size: clamp(17px, 1.5vw, 20px);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+  .hwv2-card-body {
+    margin: 0;
+    font-size: clamp(13.5px, 1vw, 14.5px);
+    line-height: 1.55;
+    color: var(--hwv2-ink-soft);
+  }
+
+  /* Responsive — squares hold at desktop and tablet, then
+     drop to a single-column flow on phones (where forcing
+     a 1:1 ratio at full-width gives absurdly tall cards). */
+  @media (max-width: 1080px) {
+    .hwv2-bridge-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .hwv2-bridge-grid { grid-template-columns: 1fr; }
+    .hwv2-card { aspect-ratio: auto; }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hardware cards — showroom treatment
+     ───────────────────────────────────────────────────────
+     Pattern adapted from multifamily-v3's "Recommended
+     Hardware" section. Each charger reads as a hero product
+     on a lit stage, not a UI tile. Image well gets an
+     overhead spotlight (radial light from above) and a
+     contact shadow under the unit (radial darken on the
+     stage floor). Image gets a real product-shoot drop
+     shadow so it feels grounded. Cards float on multi-
+     layer depth shadows. A green hairline accent at the
+     top edge animates in on hover. Featured card carries
+     a strong baseline glow + a more editorial outlined
+     ribbon (replaces the previous solid-fill pill).
+  ═══════════════════════════════════════════════════════ */
+
+  /* Grid — three equal columns. align-items: center is the
+     "podium" pattern: the middle card's extra height extends
+     symmetrically above and below the side cards instead of
+     hanging awkwardly off only the bottom edge. Rises and
+     sinks equally, reads as a featured display. */
+  .hwv2-hardware-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    gap: clamp(16px, 1.6vw, 24px);
+  }
+
+  /* Spotlight pattern — when any card in the grid is hovered,
+     all NON-hovered siblings dim and subtly shrink. This keeps
+     the hovered card the unambiguous focus regardless of which
+     card is hovered (without it, the at-rest tallness of the
+     middle card could compete with a hovered side card for
+     visual dominance). */
+  .hwv2-hardware-grid:has(.hwv2-hardware-card:hover) .hwv2-hardware-card:not(:hover) {
+    transform: scale(0.965);
+    opacity: 0.55;
+    filter: saturate(0.85);
+    transition:
+      transform 0.45s cubic-bezier(.2, .9, .25, 1),
+      opacity 0.4s ease,
+      filter 0.4s ease,
+      border-color 0.4s ease,
+      box-shadow 0.45s cubic-bezier(.2, .9, .25, 1);
+  }
+
+  .hwv2-hardware-card {
+    --hwv2-hardware-bg: #0f2330;
+    position: relative;
+    background: var(--hwv2-hardware-bg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    overflow: hidden;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 14px 28px -10px rgba(0, 0, 0, 0.40),
+      0 28px 56px -16px rgba(0, 0, 0, 0.32);
+    transition:
+      transform 0.5s cubic-bezier(.2, .9, .25, 1),
+      border-color 0.4s ease,
+      box-shadow 0.5s cubic-bezier(.2, .9, .25, 1);
+    transform-origin: center bottom;
+    will-change: transform;
+  }
+
+  /* Hover — strong lift + full-card scale + 4-layer green
+     glow that radiates from the card (matches the featured
+     card's hover treatment so all three cards bloom equally
+     on interaction). The previous green hairline at the top
+     edge has been retired in favor of the glow alone. */
+  .hwv2-hardware-card:hover {
+    transform: translateY(-12px) scale(1.025);
+    border-color: rgba(45, 200, 86, 0.55);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 8px 16px rgba(0, 0, 0, 0.30),
+      0 30px 56px -14px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(45, 200, 86, 0.22),
+      0 0 40px rgba(45, 200, 86, 0.26),
+      0 0 96px rgba(45, 200, 86, 0.16),
+      0 40px 76px -14px rgba(45, 200, 86, 0.40);
+  }
+
+  /* Middle card — taller via stage height + body min-height.
+     No baseline transform: the grid's align-items: center
+     vertically centers the row, so the extra height already
+     extends symmetrically above and below the side cards.
+     A baseline lift here would just break that symmetry. */
+  .hwv2-hardware-card--middle {
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 2px 4px rgba(0, 0, 0, 0.20),
+      0 18px 36px -10px rgba(0, 0, 0, 0.46),
+      0 36px 72px -18px rgba(0, 0, 0, 0.36);
+  }
+  .hwv2-hardware-card--middle:hover {
+    transform: translateY(-16px) scale(1.030);
+    border-color: rgba(45, 200, 86, 0.62);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 10px 20px rgba(0, 0, 0, 0.32),
+      0 36px 64px -14px rgba(0, 0, 0, 0.60),
+      0 0 0 1px rgba(45, 200, 86, 0.26),
+      0 0 48px rgba(45, 200, 86, 0.30),
+      0 0 120px rgba(45, 200, 86, 0.18),
+      0 48px 88px -16px rgba(45, 200, 86, 0.44);
+  }
+
+  /* Featured (Top Spec) card — stronger baseline border +
+     ambient green halo always-on; both intensify on hover. */
+  .hwv2-hardware-card--featured {
+    border-color: rgba(45, 200, 86, 0.32);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 14px 28px -10px rgba(0, 0, 0, 0.40),
+      0 28px 56px -16px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(45, 200, 86, 0.10),
+      0 24px 60px -20px rgba(45, 200, 86, 0.20);
+  }
+  .hwv2-hardware-card--featured:hover {
+    transform: translateY(-14px) scale(1.025);
+    border-color: rgba(45, 200, 86, 0.70);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 8px 16px rgba(0, 0, 0, 0.30),
+      0 32px 60px -14px rgba(0, 0, 0, 0.58),
+      0 0 0 1px rgba(45, 200, 86, 0.32),
+      0 0 44px rgba(45, 200, 86, 0.30),
+      0 0 104px rgba(45, 200, 86, 0.20),
+      0 44px 84px -14px rgba(45, 200, 86, 0.48);
+  }
+
+  /* Image stage — well with a soft overhead spotlight
+     (radial light from top) and a contact shadow on the
+     "floor" so the charger feels grounded. Sized to keep
+     the whole hardware section in a single viewport. */
+  .hwv2-hardware-stage {
+    position: relative;
+    height: 212px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255, 255, 255, 0.085) 0%, transparent 70%),
+      linear-gradient(180deg, #142a38 0%, #0d1f2b 100%);
+  }
+  /* Middle card gets a markedly taller stage so it reads
+     as the focal "podium" card. Since the grid uses
+     align-items: start, this extra stage height extends
+     the card downward past its siblings. */
+  .hwv2-hardware-card--middle .hwv2-hardware-stage {
+    height: 268px;
+  }
+  /* Middle body min-height keeps the middle card from
+     visually shrinking when its shorter pills wrap onto
+     fewer rows than the side cards'. Tuned so the whole
+     section still fits in a single viewport. */
+  .hwv2-hardware-card--middle .hwv2-hardware-body {
+    min-height: 250px;
+  }
+  /* Contact shadow under the charger. */
+  .hwv2-hardware-stage::after {
+    content: '';
+    position: absolute;
+    bottom: 7%;
+    left: 18%;
+    right: 18%;
+    height: 14%;
+    background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(0, 0, 0, 0.55) 0%, transparent 75%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Bottom fade so the image dissolves into the body section
+     rather than meeting it on a hard line. */
+  .hwv2-hardware-stage::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 56px;
+    background: linear-gradient(to top, var(--hwv2-hardware-bg) 0%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .hwv2-hardware-img {
+    position: relative;
+    z-index: 3;
+    display: block;
+    margin: 0 auto;
+    max-width: 76%;
+    max-height: 86%;
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    padding: 24px 0 18px;
+    filter:
+      drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+    transition: transform 0.55s cubic-bezier(.2, .9, .25, 1), filter 0.4s ease;
+    will-change: transform;
+  }
+  .hwv2-hardware-card:hover .hwv2-hardware-img {
+    transform: translateY(-3px) scale(1.04);
+    filter:
+      drop-shadow(0 20px 28px rgba(0, 0, 0, 0.65))
+      drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+  }
+
+  /* Body wrapper — flex column so the pill row can pin to
+     the bottom via mt-auto on the inline pill container. */
+  .hwv2-hardware-body {
+    padding: 18px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  /* Series tag — outlined editorial pill (replaces the
+     prior plain green eyebrow). Same shape as mf-v3's
+     .svc-hw-tag, brand-green palette. */
+  .hwv2-hardware-tag {
+    align-self: flex-start;
+    margin-bottom: 12px;
+    padding: 4px 11px;
+    border: 1px solid rgba(45, 200, 86, 0.40);
+    border-radius: 999px;
+    background: rgba(45, 200, 86, 0.08);
+    color: #2DC856;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* Featured ribbon — outlined editorial badge that replaces
+     the previous solid-fill pill ("Top Spec"). Reads as a
+     credentialed mark rather than a sticker. Sits top-left
+     so it doesn't overlap the product silhouette on the
+     right edge of the stage. */
+  .hwv2-hardware-flag {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px 5px 9px;
+    border: 1px solid rgba(45, 200, 86, 0.55);
+    border-radius: 4px;
+    background: rgba(15, 35, 48, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+  }
+  .hwv2-hardware-flag-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.65);
+  }
+  .hwv2-hardware-flag-text {
+    color: #7DFA9F;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Revenue projection flip cards
+     ───────────────────────────────────────────────────────
+     3D flip on hover (desktop) and on click (touch). Front
+     shows the headline projection, back shows the math
+     breakdown + source. Both faces are absolutely
+     positioned within an inner wrapper that rotates 180°
+     in Y. backface-visibility:hidden hides the away-facing
+     face during the rotation.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-rev-flip {
+    perspective: 1400px;
+    min-height: 405px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+  }
+  .hwv2-rev-flip:focus-visible .hwv2-rev-flip-inner {
+    outline: 2px solid rgba(45, 200, 86, 0.6);
+    outline-offset: 4px;
+    border-radius: 18px;
+  }
+  .hwv2-rev-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(.4, .0, .2, 1);
+    will-change: transform;
+  }
+  /* Flip on hover, on focus, or when JS adds is-flipped */
+  .hwv2-rev-flip:hover .hwv2-rev-flip-inner,
+  .hwv2-rev-flip.is-flipped .hwv2-rev-flip-inner {
+    transform: rotateY(180deg);
+  }
+  .hwv2-rev-face {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hwv2-rev-back {
+    transform: rotateY(180deg);
+  }
+
+  /* Subtle "tap to flip" hint at the bottom of the front face. */
+  .hwv2-rev-flip-hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.30);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    transition: opacity 0.3s ease;
+  }
+  .hwv2-rev-flip:hover .hwv2-rev-flip-hint {
+    opacity: 0;
+  }
+
+  /* Back-face breakdown list — each row is dt (label, left)
+     + dd (value, right) with a faint divider above. */
+  .hwv2-rev-back-list {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+  .hwv2-rev-back-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 9px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hwv2-rev-back-list > div:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hwv2-rev-back-list dt {
+    color: rgba(255, 255, 255, 0.50);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .hwv2-rev-back-list dd {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .hwv2-rev-back-list dd.is-accent {
+    color: #2DC856;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hero pavement-band CTA — adapted from fleets-v2's
+     .fv2-cta-primary. Skewed green parallelogram face sits
+     behind a counter-skewed inner span so the type reads
+     upright while the shape stays slanted. Pinned to the
+     lower-left corner of the hero, on the photo's pavement.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-hero {
+    --hwv2-cta-skew: -14deg;
+  }
+  /* Pushed right so the button no longer sits over the red
+     car on the left of the photo. Same right-of-center
+     placement as fleets-v2's hero action. Fills the open
+     pavement zone to the right of the chargers. */
+  .hwv2-hero-actions {
+    position: absolute;
+    left: clamp(440px, 54vw, 760px);
+    bottom: clamp(40px, 6vw, 80px);
+    z-index: 5;
+  }
+  .hwv2-cta-primary {
+    position: relative;
+    display: inline-flex;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    isolation: isolate;
+    transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-face {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, #3bd866 0%, #2DC856 50%, #25b04d 100%);
+    transform: skewX(var(--hwv2-cta-skew));
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 1px 0 0 rgba(255, 255, 255, 0.10),
+      inset -1px 0 0 rgba(0, 0, 0, 0.10),
+      0 22px 50px rgba(45, 200, 86, 0.45),
+      0 8px 22px rgba(0, 0, 0, 0.5);
+    transition:
+      background 0.32s ease,
+      box-shadow 0.4s cubic-bezier(.22, 1, .36, 1),
+      transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: clamp(16px, 1.7vw, 22px) clamp(30px, 3.4vw, 46px);
+    color: #0a1822;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.78rem, 0.92vw, 0.92rem);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: gap 0.32s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-inner svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary:hover,
+  .hwv2-cta-primary:focus-visible {
+    transform: translateY(-3px);
+    outline: none;
+  }
+  .hwv2-cta-primary:hover .hwv2-cta-primary-face,
+  .hwv2-cta-primary:focus-visible .hwv2-cta-primary-face {
+    background: linear-gradient(180deg, #4ae07a 0%, #38d562 50%, #2DC856 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset -1px 0 0 rgba(0, 0, 0, 0.10),
+      0 30px 64px rgba(45, 200, 86, 0.6),
+      0 12px 30px rgba(0, 0, 0, 0.55);
+  }
+  .hwv2-cta-primary:hover .hwv2-cta-primary-inner,
+  .hwv2-cta-primary:focus-visible .hwv2-cta-primary-inner {
+    gap: 16px;
+  }
+  .hwv2-cta-primary:hover svg,
+  .hwv2-cta-primary:focus-visible svg {
+    transform: translateY(3px);
+  }
+  .hwv2-cta-primary:active {
+    transform: translateY(-1px);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Final CTA — bottom-of-page button reactivity
+     ───────────────────────────────────────────────────────
+     Both buttons get cubic-bezier easing, lift on hover,
+     and meaningful feedback. Primary gets a pumped halo
+     and brightness boost; secondary fades in its arrow,
+     fills with a green tint, and brightens border + text.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-final-cta-primary {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.30) inset,
+      0 14px 32px -10px rgba(45, 200, 86, 0.45),
+      0 6px 16px -4px rgba(0, 0, 0, 0.35);
+    transition:
+      transform 0.35s cubic-bezier(.22, 1, .36, 1),
+      box-shadow 0.45s cubic-bezier(.22, 1, .36, 1),
+      filter 0.3s ease;
+    will-change: transform;
+  }
+  .hwv2-final-cta-primary:hover,
+  .hwv2-final-cta-primary:focus-visible {
+    transform: translateY(-3px);
+    filter: brightness(1.08);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.40) inset,
+      0 22px 48px -12px rgba(45, 200, 86, 0.65),
+      0 12px 28px -6px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(45, 200, 86, 0.30);
+    outline: none;
+  }
+  .hwv2-final-cta-primary:active {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+  }
+
+  .hwv2-final-cta-secondary {
+    background-color: rgba(10, 24, 34, 0.30);
+    transition:
+      transform 0.35s cubic-bezier(.22, 1, .36, 1),
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.45s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
+  }
+  .hwv2-final-cta-secondary:hover,
+  .hwv2-final-cta-secondary:focus-visible {
+    transform: translateY(-3px);
+    background-color: rgba(45, 200, 86, 0.12);
+    border-color: rgba(45, 200, 86, 0.65);
+    color: #ffffff;
+    box-shadow:
+      0 14px 32px -10px rgba(45, 200, 86, 0.30),
+      0 6px 16px -4px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(45, 200, 86, 0.20);
+    outline: none;
+  }
+  .hwv2-final-cta-secondary:active {
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  /* Revenue card flip — tap-to-toggle for touch / non-hover
+     environments. Hover handles desktop via CSS. Clicking
+     anywhere inside the card toggles is-flipped, which the
+     CSS picks up to rotate the inner wrapper 180°.
+     Keyboard: Enter / Space also toggles when the card is
+     focused. */
+  function initHwv2RevFlip() {
+    const cards = document.querySelectorAll('.hwv2-rev-flip');
+    cards.forEach((card) => {
+      const toggle = (e) => {
+        // Don't intercept clicks on actual links/buttons inside.
+        if (e.target.closest('a, button')) return;
+        card.classList.toggle('is-flipped');
+      };
+      card.addEventListener('click', toggle);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.classList.toggle('is-flipped');
+        }
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHwv2RevFlip);
+  } else {
+    initHwv2RevFlip();
+  }
+
+  /* ─── Hero pavement-CTA → Revenue section animated scroll ─
+     Mirrors the fleets-v2 smooth-scroll handler. Intercepts
+     clicks on a[data-hwv2-scroll], runs an rAF-eased cubic
+     ease-in-out animation (~900ms) to the target's top.
+     Falls back to native anchor jump if prefers-reduced-motion
+     is on. ────────────────────────────────────────────────── */
+  (function () {
+    var triggers = document.querySelectorAll('a[data-hwv2-scroll]');
+    if (!triggers.length) return;
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function animateScrollTo(targetY, duration) {
+      duration = duration || 900;
+      var startY = window.scrollY;
+      var distance = targetY - startY;
+      if (Math.abs(distance) < 2) return;
+      var startT = performance.now();
+      function step(now) {
+        var elapsed = now - startT;
+        var t = Math.min(elapsed / duration, 1);
+        var eased = easeInOutCubic(t);
+        window.scrollTo(0, startY + distance * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    triggers.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var hash = a.getAttribute('href');
+        if (!hash || hash.charAt(0) !== '#') return;
+        var target = document.querySelector(hash);
+        if (!target) return;
+        e.preventDefault();
+        if (reduceMotion) {
+          window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY);
+          return;
+        }
+        var targetY = target.getBoundingClientRect().top + window.scrollY;
+        animateScrollTo(targetY, 900);
+      });
+    });
+  })();
+</script>
