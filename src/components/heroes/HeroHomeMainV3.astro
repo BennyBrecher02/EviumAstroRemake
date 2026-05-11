@@ -2379,6 +2379,144 @@ import ConsultationForm from '../ConsultationForm.astro';
     }
     .hh-stat-l { display: none !important; }
   }
+
+  /* ════════════════════════════════════════════════════════
+     TRUE MOBILE (≤ 540 px) — phones / portrait handsets.
+     ────────────────────────────────────────────────────────
+     Mirrors the @media (max-width: 860px) "tablet" layout
+     above (skinny form on left + vertical card stack on
+     right, above the photo charger), but with all sizes /
+     positions / paddings retuned for the narrower handset
+     viewport. The 860px block's calibration was built for
+     ~600-860 px wide — at 375 px the form became crushed
+     and the cards crowded the masthead. This block keeps
+     the same composition but at handset-appropriate scales.
+     ════════════════════════════════════════════════════════ */
+  @media (max-width: 540px) {
+    .hh-inner {
+      grid-template-areas:
+        "title"
+        "sub"
+        "info"
+        "stats" !important;
+      padding: 14px 14px 14px 22px !important;
+    }
+
+    /* Title — handset-scale GRAND headline. */
+    .hh-title {
+      font-size: clamp(2.4rem, 10vw, 3rem) !important;
+      line-height: 1.0 !important;
+    }
+
+    /* Sub — fills the row below the title. Right padding
+       reserves clearance for the absolute card stack on
+       the right so the sub's text doesn't run under the
+       cards. */
+    .hh-sub {
+      padding-right: 86px !important;
+      font-size: 0.78rem !important;
+      line-height: 1.45 !important;
+    }
+
+    /* Form — skinnier than the natural 400 px cap so it
+       sits to the LEFT of the absolute card stack on the
+       right without overlapping. Combined with the 22 px
+       inner-left padding above, the form spans x=22→x=270. */
+    .hh-content-stack {
+      max-width: 248px !important;
+      margin-left: 0 !important;
+      margin-top: 10px !important;
+    }
+
+    /* Cards — vertical stack ABSOLUTE-positioned in the
+       upper-right of the hero, above the photo charger
+       (its visible top sits roughly mid-hero). */
+    .hh-side-actions {
+      position: absolute !important;
+      top: 140px !important;
+      right: 14px !important;
+      grid-area: unset !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+      width: 72px !important;
+      max-width: 72px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      z-index: 4;
+    }
+    .hh-side-card {
+      flex: none !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      padding: 6px 4px !important;
+      min-width: 0 !important;
+      text-align: center !important;
+      border-radius: 10px !important;
+    }
+    .hh-side-icon {
+      width: 20px !important;
+      height: 20px !important;
+      border-radius: 6px !important;
+    }
+    .hh-side-icon svg {
+      width: 13px !important;
+      height: 13px !important;
+    }
+    .hh-side-title {
+      font-size: 0.54rem !important;
+      line-height: 1.05 !important;
+      letter-spacing: 0.01em !important;
+    }
+    .hh-side-sub,
+    .hh-side-arrow {
+      display: none !important;
+    }
+
+    /* cf-head-row — very tight horizontal padding so the
+       logo + "Free Site / Consultation" title both fit
+       inside the narrow handset form without the title
+       wrapping to 3 lines. */
+    :global(.home-hero .cf-head-row) {
+      padding: 0 4px !important;
+    }
+    /* Slightly smaller cf-head-logo on the narrow handset
+       form — frees up width for the title to lay out on
+       its intended 2 lines ("Free Site" / "Consultation")
+       rather than wrapping further. */
+    :global(.home-hero .cf-head-logo) {
+      width: 72px !important;
+    }
+    /* Form field placeholders — smaller so the longer ones
+       ("Select your property type…", "Approx. # of parking
+       spaces") fit inside the narrow handset form's input
+       boxes without truncating mid-word. The cf-select has
+       a 36 px right-padding reserved for its caret, so its
+       usable text width is the tightest of all the fields
+       — sizing the placeholder font here ensures even
+       that field's text shows in full. */
+    :global(.home-hero .cf-input) {
+      font-size: 0.78rem !important;
+    }
+
+    /* Trust line — force one-line at the narrow form
+       width (same approach as the tablet block). Tighter
+       gap + smaller font than the tablet block so all
+       three chips fit cleanly inside the handset form. */
+    :global(.home-hero .cf-trust) {
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      font-size: 0.5rem !important;
+    }
+    :global(.home-hero .cf-trust > span) {
+      white-space: nowrap !important;
+    }
+  }
 </style>
 
 <script>
