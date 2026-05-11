@@ -1,0 +1,829 @@
+---
+/**
+ * SiteFooterTunnel — v2 footer
+ * ────────────────────────────
+ * The footer is a CLIFF FACE. Two full-height road columns at the
+ * page edges continue the U-road's legs straight down through the
+ * footer and end in arched TUNNEL OPENINGS at the bottom.
+ *
+ * Tunnel bore logic:
+ *   The bore is a HOLE in the cliff. The visible "void" sits AT
+ *   THE FRONT of the bore — a black band right under the arch
+ *   lip — into which the road's asphalt + dashes fade as they
+ *   pass the threshold. Going deeper into the bore, the colour
+ *   blends back to the cliff face's bg, so the back of the
+ *   tunnel is just the footer (no separate black void in the
+ *   depth).
+ *
+ * Footer layout:
+ *   Conventional 1+3 grid that's familiar (brand col on the
+ *   left, three link cols on the right, legal bar below) — no
+ *   gimmicky centred-logo header. The styling diverges from the
+ *   stock SiteFooter via brand-green dot-bullet column titles,
+ *   brand-green gradient rules, larger Evium logo, slightly
+ *   tighter typography, an ambient green wash behind the
+ *   content, and a faint stone-striation cliff texture.
+ */
+
+const solutionLinks = [
+  { label: 'Multifamily',          href: '/solutions/multifamily' },
+  { label: 'Fleet depot',          href: '/solutions/fleets' },
+  { label: 'Highway / fast lane',  href: '/solutions/highway-fast-charging' },
+  { label: 'Retail & hospitality', href: '/solutions/retail' },
+  { label: 'Parking garages',      href: '/solutions/parking' },
+  { label: 'Medical',              href: '/solutions/medical' },
+];
+
+const productLinks = [
+  { label: 'Level 2 chargers',    href: '/products' },
+  { label: 'DC fast chargers',    href: '/products' },
+  { label: 'Evium app',           href: '/#home-app-download' },
+  { label: 'Owner Portal',        href: 'https://portal.eviumcharging.com' },
+  { label: 'See all products →',  href: '/products' },
+];
+
+const companyLinks = [
+  { label: 'How it works',         href: '/how-it-works' },
+  { label: 'Services',             href: '/services' },
+  { label: 'Electrician partners', href: '/solutions/electrician-partners' },
+  { label: 'Blog',                 href: '/blog' },
+  { label: 'Contact',              href: '/contact' },
+];
+
+const socials = [
+  { label: 'Instagram', href: 'https://www.instagram.com/eviumcharging/',        kind: 'instagram' as const },
+  { label: 'Facebook',  href: 'https://www.facebook.com/eviumcharging/',         kind: 'facebook'  as const },
+  { label: 'X',         href: 'https://x.com/eviumcharging',                     kind: 'x'         as const },
+  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/evium-charging', kind: 'linkedin'  as const },
+];
+
+const legalLinks = [
+  { label: 'Privacy policy',   href: '/legal/privacy' },
+  { label: 'Terms of service', href: '/legal/terms' },
+  { label: 'Accessibility',    href: '/legal/accessibility' },
+  { label: 'Cookie preferences', href: '/legal/cookies' },
+];
+---
+
+<footer class="ftrt-cliff" aria-label="Site footer">
+  <!-- LEFT side — perspective layout (top→bottom):
+         · Asphalt road column visible at the top, picking up the
+           page's road column above seamlessly.
+         · Road FADES INTO the black void as it descends — this
+           is the "in front of the tunnel" zone the road enters.
+         · Tunnel ARCH curve marks the boundary between the void
+           (visible road interior of the tunnel) and the cliff
+           structure (back of the tunnel from the outside).
+         · Below the arch is just cliff colour — matches the
+           surrounding footer, so the back of the tunnel is
+           indistinguishable from the footer (no separate void). -->
+  <!-- Each side is a single SVG with FOUR clean layers:
+         1. asphalt road floor (continues the page's road)
+         2. one yellow dash line (single steady stream)
+         3. tunnel interior shadow path (depth gradient)
+         4. cream lip on the arch + inner shadow
+
+       The arch is a Q-curve from corner to corner at the SVG
+       top: M 0 0 A 50 21 0 1 0 100 1.5. The endpoints sit at the road
+       column's TOP-LEFT and TOP-RIGHT (= the boundary with the
+       page), and the curve dips DOWN to peak at (50, 40). No
+       separate cliff-face cutout — the curve IS the boundary
+       between the open road approach (above) and the tunnel
+       interior (below). -->
+
+  <svg
+    class="ftrt-side ftrt-side--left"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Concrete ceiling base — IDENTICAL to the headline
+           tunnel's #bv4-ht-roof-base. Five-stop vertical
+           gradient with the same crown profile: darker at the
+           top/bottom, lighter through the middle so the
+           ceiling reads as a 3-D arched concrete surface
+           catching light at its apex. All three tunnels
+           (headline + 2 footer) now share one palette. -->
+      <linearGradient id="ftrt-depth-l" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#222a36" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <!-- Concrete-panel seams — same shading + spacing as the
+           headline tunnel's #bv4-ht-panels (7-unit cadence,
+           0.4-thick dark joint at 0.40 alpha + 0.18-thick
+           highlight at 0.06 alpha), just rotated to horizontal
+           so the seams run perpendicular to the descent axis
+           in the footer tunnels. Rect x extends -2 to 102 so
+           the seam carries past the bore edges. -->
+      <pattern id="ftrt-panels-l" patternUnits="userSpaceOnUse" width="100" height="7">
+        <rect x="-2" y="6.6" width="104" height="0.4"  fill="rgba(0, 0, 0, 0.40)" />
+        <rect x="-2" y="6.6" width="104" height="0.18" fill="rgba(255, 255, 255, 0.06)" />
+      </pattern>
+      <linearGradient id="ftrt-dash-mask-l"
+                      gradientUnits="userSpaceOnUse"
+                      x1="0" y1="0" x2="0" y2="100">
+        <stop offset="0%"  stop-color="#fff" />
+        <stop offset="21%" stop-color="#fff" />
+        <stop offset="23%" stop-color="#000" />
+        <stop offset="100%" stop-color="#000" />
+      </linearGradient>
+      <mask id="ftrt-dash-svg-mask-l" maskUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="100" height="100" fill="url(#ftrt-dash-mask-l)" />
+      </mask>
+    </defs>
+
+    <!-- (1) Asphalt road floor — matches .bv4-u-asphalt so the
+         road column reads as one continuous slab. -->
+    <rect x="0" y="0" width="100" height="100" fill="#16213e" />
+
+    <!-- (2) Tunnel interior — same TWO-layer stack as the
+         headline tunnel: concrete crown gradient + panel seams.
+         No side-wall vignette (headline tunnel doesn't have one
+         either; consistency wins over extra atmospheric depth). -->
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-depth-l)" />
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-panels-l)" />
+
+    <!-- Cream arch lip REMOVED — the unified road outline path
+         in /blog-v4's centerline overlay now draws BOTH footer
+         arches as part of one continuous cream stroke that
+         spans the entire road perimeter. Eliminates the prior
+         CSS-border vs SVG-stroke rendering discrepancy at the
+         seam where these used to meet. -->
+
+    <!-- Yellow centerline dashes — DRAWN LAST so they sit on
+         top. Mask lets them flow from the seam at y=0 through
+         the arch dip and into the tunnel before fading. -->
+    <line
+      class="ftrt-dash ftrt-dash--left"
+      x1="50" y1="100" x2="50" y2="0"
+      stroke="rgba(220, 175, 20, 0.85)"
+      stroke-width="3"
+      stroke-dasharray="22 28"
+      stroke-linecap="butt"
+      vector-effect="non-scaling-stroke"
+      mask="url(#ftrt-dash-svg-mask-l)"
+    />
+  </svg>
+
+  <svg
+    class="ftrt-side ftrt-side--right"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="ftrt-depth-r" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#222a36" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <pattern id="ftrt-panels-r" patternUnits="userSpaceOnUse" width="100" height="7">
+        <rect x="-2" y="6.6" width="104" height="0.4"  fill="rgba(0, 0, 0, 0.40)" />
+        <rect x="-2" y="6.6" width="104" height="0.18" fill="rgba(255, 255, 255, 0.06)" />
+      </pattern>
+      <linearGradient id="ftrt-dash-mask-r"
+                      gradientUnits="userSpaceOnUse"
+                      x1="0" y1="0" x2="0" y2="100">
+        <stop offset="0%"  stop-color="#fff" />
+        <stop offset="21%" stop-color="#fff" />
+        <stop offset="23%" stop-color="#000" />
+        <stop offset="100%" stop-color="#000" />
+      </linearGradient>
+      <mask id="ftrt-dash-svg-mask-r" maskUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="100" height="100" fill="url(#ftrt-dash-mask-r)" />
+      </mask>
+    </defs>
+    <rect x="0" y="0" width="100" height="100" fill="#16213e" />
+    <!-- Tunnel interior (matches LEFT side AND headline tunnel):
+         concrete crown gradient + vertical panel seams. -->
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-depth-r)" />
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-panels-r)" />
+    <!-- Cream arch lip REMOVED — drawn by the unified
+         #road-outline-path in /blog-v4's centerline overlay. -->
+    <line
+      class="ftrt-dash ftrt-dash--right"
+      x1="50" y1="0" x2="50" y2="100"
+      stroke="rgba(220, 175, 20, 0.85)"
+      stroke-width="3"
+      stroke-dasharray="22 28"
+      stroke-linecap="butt"
+      vector-effect="non-scaling-stroke"
+      mask="url(#ftrt-dash-svg-mask-r)"
+    />
+  </svg>
+
+  <!-- Cliff-face content — brand col + 3 nav cols + legal bar. -->
+  <div class="ftrt-content">
+    <div class="ftrt-ambient" aria-hidden="true"></div>
+
+    <!-- ─── Top grid: brand column + 3 nav columns ─────────── -->
+    <div class="ftrt-top">
+      <div class="ftrt-brand">
+        <a href="/" class="ftrt-logo-link" aria-label="Evium Charging home">
+          <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="ftrt-logo" />
+        </a>
+        <p class="ftrt-tagline">
+          Electrifying the future.
+          <span class="ftrt-tagline-soft">One property at a time.</span>
+        </p>
+
+        <div class="ftrt-contact">
+          <p class="ftrt-contact-line">
+            <span class="ftrt-contact-label">Station support</span>
+            <a href="tel:+19499452000" class="ftrt-contact-link">(949) 945-2000</a>
+          </p>
+          <p class="ftrt-contact-line">
+            <span class="ftrt-contact-label">Partner inquiries</span>
+            <a href="mailto:contact@eviumcharging.com" class="ftrt-contact-link">contact@eviumcharging.com</a>
+          </p>
+        </div>
+
+        <div class="ftrt-socials" aria-label="Evium on social">
+          {socials.map((s) => (
+            <a
+              href={s.href} class="ftrt-social"
+              target="_blank" rel="noopener noreferrer"
+              aria-label={`Evium on ${s.label}`}
+            >
+              {s.kind === 'instagram' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {s.kind === 'facebook' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 8h2.5V5H14c-2 0-3.5 1.5-3.5 3.5V11H8v3h2.5v7h3v-7H16l.5-3h-3V8.8C13.5 8.4 13.7 8 14 8z"/>
+                </svg>
+              )}
+              {s.kind === 'x' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              )}
+              {s.kind === 'linkedin' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M7 10v7M7 7.5v.01"/>
+                  <path d="M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <nav class="ftrt-links" aria-label="Footer navigation">
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Solutions</h3>
+          <ul class="ftrt-col-list" role="list">
+            {solutionLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Products</h3>
+          <ul class="ftrt-col-list" role="list">
+            {productLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Company</h3>
+          <ul class="ftrt-col-list" role="list">
+            {companyLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <span class="ftrt-rule" aria-hidden="true"></span>
+
+    <!-- ─── Legal bar ──────────────────────────────────────── -->
+    <div class="ftrt-legal">
+      <p class="ftrt-copy">
+        <span class="ftrt-copy-mark" aria-hidden="true"></span>
+        © 2026 Evium Charging.
+        <span class="ftrt-copy-soft">All rights reserved.</span>
+      </p>
+      <nav class="ftrt-legal-nav" aria-label="Legal">
+        {legalLinks.map((l) => (
+          <a href={l.href} class="ftrt-legal-link">{l.label}</a>
+        ))}
+      </nav>
+      <button type="button" class="ftrt-totop" aria-label="Back to top" data-ftrt-totop>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftrt-cliff {
+    --road-w: clamp(160px, 14vw, 210px);
+    --ev-green: #2DC856;
+
+    position: relative;
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    /* Cliff face background — solid deep dark from edge to edge.
+       The previous white→grey→dark gradient at the top was the
+       "ugly band" appearing at the body/footer seam. The
+       page-side billboard-bottom frame (.bv4-billboard-bottom)
+       now provides the visual transition between the cavity's
+       white plaza and the footer's dark face, so the cliff face
+       can stay uniformly dark from top to bottom. A subtle
+       dark-on-dark gradient adds a touch of depth without
+       reintroducing a visible band. */
+    background:
+      linear-gradient(180deg,
+        #06101a  0%,
+        #050d16 100%
+      );
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Side road columns — full footer height, matching road-w.
+     SVGs are replaced elements: with width set explicitly, the
+     intrinsic aspect ratio of the viewBox would override
+     top/bottom positioning. height: 100% forces the SVG to
+     fill the offset parent (.ftrt-cliff) instead of squaring
+     itself to road-w.
+
+     z-index 3 places the road columns ABOVE the footer content
+     so the arch + tunnel are the visual focal point of the
+     footer. pointer-events: none keeps the columns purely
+     decorative — they never block clicks on links/legal even
+     where they overlap content. */
+  .ftrt-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--road-w);
+    height: 100%;
+    /* z-index 60 lifts the road column ABOVE the HeaderV4
+       lefter rail (z:50). The arch lip's outer leg cream
+       stroke sits at viewport x=78.5-81.5 — half overlapping
+       the lefter — so without this it would be clipped by the
+       lefter's solid background in dev-mode-off, producing a
+       "thin / half-covered" cream stripe that didn't connect
+       cleanly to the page's outer cream above the seam. */
+    z-index: 60;
+    pointer-events: none;
+    display: block;
+    /* CRITICAL: SVG defaults to overflow:hidden which clips
+       the cream arch lip's outer leg stroke. With
+       vector-effect:non-scaling-stroke, the 3 px stroke
+       extends 1.5 px LEFT of viewBox x=0 (and 1.5 px RIGHT of
+       viewBox x=100). Without overflow:visible those 1.5 px
+       slivers get clipped — so the leg renders as a 1.5 px
+       half-stripe instead of a full 3 px, producing the
+       "weirdly skinny" appearance at the top of each leg
+       where it meets the page's full-width cream stripe. */
+    overflow: visible;
+    /* Only a vertical bottom-fade — the SVG itself reaches
+       full width edge-to-edge at the TOP so the arch legs are
+       always visible touching down on the body/footer seam.
+       Inside the SVG, the asphalt rect uses a horizontal
+       gradient that softens the inside edge — that fade is
+       behind the arch + dashes so they stay crisp. */
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
+  }
+  .ftrt-side--left  { left:  0; }
+  .ftrt-side--right { right: 0; }
+
+  /* Footer dash animation is now JS-driven via Web Animations
+     API in the script below — using a SHARED startTime with
+     the page's centerline path so both run in perfect lockstep
+     (no CSS-keyframe scheduling drift between two separately
+     declared animations). The CSS animation here is disabled. */
+
+  /* ─── Footer content shell ───────────────────────────────────
+     Top padding only needs to clear the arch's deepest point
+     plus a tiny breathing buffer. Arch zenith depth scales
+     with footerH (≈22.5%), so this is tuned to LAND just past
+     the dip with only a couple of px of headroom — enough to
+     not touch the arch lip but small enough to crush the dead
+     vertical space the user flagged. Bottom padding is
+     similarly minimal — just enough breathing room below the
+     legal bar. Net effect: footer drops by ~40 px, slicing a
+     couple of panel-seam "rings" off the visible bore. */
+  .ftrt-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding:
+      clamp(64px, 5.5vw, 84px)
+      calc(var(--road-w) + clamp(20px, 2.5vw, 40px))
+      clamp(4px, 0.4vw, 8px);
+  }
+  .ftrt-ambient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 70% 55% at 35% 35%,
+      rgba(45, 200, 86, 0.06) 0%,
+      rgba(45, 200, 86, 0.018) 45%,
+      transparent 80%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Top grid: brand + link columns ─────────────────────── */
+  .ftrt-top {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(280px, 340px) 1fr;
+    gap: clamp(20px, 2.6vw, 40px);
+    align-items: start;
+    padding-bottom: clamp(6px, 0.6vw, 10px);
+  }
+
+  /* ─── Brand column ───────────────────────────────────────── */
+  .ftrt-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ftrt-logo-link { display: inline-block; line-height: 0; }
+  .ftrt-logo {
+    height: clamp(34px, 2.8vw, 42px);
+    width: auto;
+    display: block;
+    transition: opacity 0.18s ease;
+  }
+  .ftrt-logo-link:hover .ftrt-logo { opacity: 0.88; }
+  .ftrt-tagline {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 32ch;
+  }
+  .ftrt-tagline-soft { color: rgba(255, 255, 255, 0.5); }
+
+  /* Contact info: each row a single horizontal line — small
+     uppercase label on the left, value on the right. */
+  .ftrt-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 2px;
+  }
+  .ftrt-contact-line {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    min-width: 0;
+  }
+  .ftrt-contact-label {
+    font-size: 0.54rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ev-green);
+    flex-shrink: 0;
+  }
+  .ftrt-contact-link {
+    color: rgba(255, 255, 255, 0.86);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.18s ease;
+    word-break: break-word;
+    line-height: 1.25;
+  }
+  .ftrt-contact-link:hover { color: var(--ev-green); }
+
+  .ftrt-socials {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .ftrt-social {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.74);
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .ftrt-social:hover,
+  .ftrt-social:focus-visible {
+    background: rgba(45, 200, 86, 0.13);
+    border-color: rgba(45, 200, 86, 0.55);
+    color: var(--ev-green);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .ftrt-social svg { width: 14px; height: 14px; display: block; }
+
+  /* ─── Link columns ───────────────────────────────────────── */
+  .ftrt-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(14px, 1.8vw, 32px);
+  }
+  .ftrt-col-title {
+    margin: 0 0 6px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ev-green);
+    position: relative;
+    padding-left: 13px;
+  }
+  .ftrt-col-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ev-green);
+    box-shadow: 0 0 8px rgba(45, 200, 86, 0.55);
+  }
+  .ftrt-col-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ftrt-col-link {
+    display: inline-block;
+    font-size: 0.79rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.66);
+    text-decoration: none;
+    transition: color 0.16s ease, transform 0.16s ease;
+    padding: 0;
+    line-height: 1.45;
+  }
+  .ftrt-col-link:hover,
+  .ftrt-col-link:focus-visible {
+    color: var(--ev-green);
+    transform: translateX(3px);
+    outline: none;
+  }
+
+  /* ─── Rule + legal bar ───────────────────────────────────── */
+  .ftrt-rule {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0.50) 22%,
+      rgba(45, 200, 86, 0.55) 50%,
+      rgba(45, 200, 86, 0.50) 78%,
+      rgba(45, 200, 86, 0) 100%
+    );
+  }
+  .ftrt-legal {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: clamp(4px, 0.4vw, 7px);
+  }
+  .ftrt-copy {
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .ftrt-copy-mark { display: none; }
+  .ftrt-copy-soft { color: rgba(255, 255, 255, 0.32); }
+
+  .ftrt-legal-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(12px, 1.6vw, 22px);
+    flex-wrap: wrap;
+  }
+  .ftrt-legal-link {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.16s ease;
+  }
+  .ftrt-legal-link:hover,
+  .ftrt-legal-link:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  /* Back-to-top — small pill icon button on the right edge of
+     the legal bar. */
+  .ftrt-totop {
+    width: 28px; height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .ftrt-totop:hover,
+  .ftrt-totop:focus-visible {
+    background: rgba(45, 200, 86, 0.14);
+    border-color: rgba(45, 200, 86, 0.6);
+    color: var(--ev-green);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .ftrt-totop svg { width: 12px; height: 12px; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .ftrt-top { grid-template-columns: 1fr; gap: 32px; }
+    .ftrt-links { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .ftrt-side { display: none; }
+    .ftrt-content { padding: 40px 24px 18px; }
+    .ftrt-links { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<script>
+  /* Dash phase alignment — both sides.
+     ──────────────────────────────────
+     The page's centerline (.bv4-u-flow path) is one continuous
+     U-shape. Its total length L is unlikely to be a multiple of
+     50 (= our dasharray period 22 + 28). The page's path STARTS
+     at the bottom of the LEFT leg (= top of the footer's left
+     column at the seam) and ENDS at the bottom of the RIGHT
+     leg (= top of the footer's right column at the seam).
+
+     For dashes to flow seamlessly across the page→footer seam,
+     each footer line needs its dash phase to match the page's
+     dash phase at the seam.
+
+     Footer LEFT line is drawn from y=100 (bottom of column) to
+     y=0 (top = seam) so its strokes flow UPWARD. At the seam,
+     it has covered H pixels (footer column height). The page's
+     path at the seam (its start) has phase 0. We want the
+     footer's phase at the seam to ALSO be 0:
+         (H - leftBase) mod 50 = 0  ⇒  leftBase = H mod 50
+
+     Footer RIGHT line is drawn from y=0 (top = seam) down to
+     y=100 (bottom). At the seam (distance 0), the page's path
+     ends with phase L mod 50. We want the footer's phase at
+     the seam to match:
+         (0 - rightBase) mod 50 = L mod 50  ⇒  rightBase = -(L mod 50) */
+  (() => {
+    const path      = document.getElementById('bv4-u-flow-path') as SVGPathElement | null;
+    const leftDash  = document.querySelector<SVGElement>('.ftrt-side--left  .ftrt-dash');
+    const rightDash = document.querySelector<SVGElement>('.ftrt-side--right .ftrt-dash');
+    const leftSvg   = document.querySelector<SVGElement>('.ftrt-side--left');
+    if (!path || !leftDash || !rightDash || !leftSvg) return;
+
+    const PERIOD_MS = 2000;
+    const SHIFT_PX  = 50;
+
+    let pageAnim: Animation | null   = null;
+    let leftAnim: Animation | null   = null;
+    let rightAnim: Animation | null  = null;
+
+    /* Drive ALL three dash flows (page centerline + both footer
+       columns) from a SINGLE Web-Animations timeline anchored at
+       startTime=0. Because every animation shares the same
+       startTime + duration + iterations, their currentTime is
+       always identical — eliminating any CSS-keyframe scheduling
+       drift between the page and footer that would manifest as a
+       perceived "size shift" at the seam. */
+    function build() {
+      if (!path || !leftDash || !rightDash || !leftSvg) return;
+      const L = path.getTotalLength();
+      if (!isFinite(L) || L <= 0) return;
+      const H = leftSvg.getBoundingClientRect().height;
+      if (!isFinite(H) || H <= 0) return;
+
+      // Cancel any previous animations before rebuilding (resize).
+      pageAnim?.cancel();
+      leftAnim?.cancel();
+      rightAnim?.cancel();
+
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        // Set static offsets at phase 0 and stop.
+        path.style.strokeDashoffset = '0px';
+        leftDash.style.strokeDashoffset = `${H % SHIFT_PX}px`;
+        rightDash.style.strokeDashoffset = `${-(L % SHIFT_PX)}px`;
+        return;
+      }
+
+      const leftBase  = H % SHIFT_PX;
+      const rightBase = -(L % SHIFT_PX);
+      const opts: KeyframeAnimationOptions = {
+        duration: PERIOD_MS,
+        iterations: Infinity,
+        easing: 'linear',
+      };
+
+      pageAnim = path.animate(
+        [{ strokeDashoffset: '0px' }, { strokeDashoffset: `${-SHIFT_PX}px` }],
+        opts
+      );
+      leftAnim = leftDash.animate(
+        [{ strokeDashoffset: `${leftBase}px` }, { strokeDashoffset: `${leftBase - SHIFT_PX}px` }],
+        opts
+      );
+      rightAnim = rightDash.animate(
+        [{ strokeDashoffset: `${rightBase}px` }, { strokeDashoffset: `${rightBase - SHIFT_PX}px` }],
+        opts
+      );
+
+      // Anchor every animation's startTime to the SAME instant on
+      // the document timeline — currentTime is then identical
+      // across all three on every frame.
+      const anchor = document.timeline.currentTime as number;
+      if (pageAnim)  pageAnim.startTime  = anchor;
+      if (leftAnim)  leftAnim.startTime  = anchor;
+      if (rightAnim) rightAnim.startTime = anchor;
+    }
+
+    /* The page's CSS-keyframe animation on the centerline path
+       would fight with our JS-driven Web Animation. Inject a CSS
+       rule that disables it so our Web Animation is the sole
+       source of truth for the page path's dashoffset. */
+    const killCss = document.createElement('style');
+    killCss.textContent = '.bv4-u-flow path { animation: none !important; }';
+    document.head.appendChild(killCss);
+
+    // Defer until the path tracer in blog-v4 has set d + length.
+    requestAnimationFrame(() => requestAnimationFrame(build));
+
+    let resizeRAF = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(resizeRAF);
+      resizeRAF = requestAnimationFrame(build);
+    });
+  })();
+
+  /* Back-to-top button — smooth-scrolls the document to y=0.
+     Respects the OS's reduced-motion preference (jumps
+     instantly when motion is reduced rather than animating). */
+  (() => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-ftrt-totop]');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  })();
+</script>

@@ -1,0 +1,1155 @@
+---
+/**
+ * BlogV4Footer — page-specific footer for /blog-v4 ONLY.
+ * ──────────────────────────────────────────────────────
+ * This is NOT the sitewide footer (`SiteFooter.astro`). It's a
+ * per-page variant scoped to /blog-v4 because the blog-v4 surface
+ * has a unique CLIFF + TUNNEL framing (two side tunnels under a
+ * U-shaped road) that the rest of the site doesn't share.
+ *
+ * What changed vs the previous SiteFooterTunnel:
+ *   · Tunnel "rings" (concrete panel seams) are FATTER + sparser
+ *     so each ring reads as a deliberate band rather than a hair-
+ *     thin line — same footer height, fewer/heavier rings.
+ *   · No horizontal stripe bridge across the cliff face. The
+ *     rings stop cleanly at each tunnel mouth; the cliff face
+ *     between the two bores stays a flat dark wall framing the
+ *     content.
+ *
+ * The original SiteFooterTunnel.astro still exists but is no
+ * longer imported — kept for reference / archive.
+ */
+
+const solutionLinks = [
+  { label: 'Multifamily',          href: '/solutions/multifamily' },
+  { label: 'Fleet depot',          href: '/solutions/fleets' },
+  { label: 'Highway / fast lane',  href: '/solutions/highway-fast-charging' },
+  { label: 'Retail & hospitality', href: '/solutions/retail' },
+  { label: 'Parking garages',      href: '/solutions/parking' },
+  { label: 'Medical',              href: '/solutions/medical' },
+];
+
+const productLinks = [
+  { label: 'Level 2 chargers',    href: '/products' },
+  { label: 'DC fast chargers',    href: '/products' },
+  { label: 'Evium app',           href: '/#home-app-download' },
+  { label: 'Owner Portal',        href: 'https://portal.eviumcharging.com' },
+  { label: 'See all products →',  href: '/products' },
+];
+
+const companyLinks = [
+  { label: 'How it works',         href: '/how-it-works' },
+  { label: 'Services',             href: '/services' },
+  { label: 'Electrician partners', href: '/solutions/electrician-partners' },
+  { label: 'Blog',                 href: '/blog' },
+  { label: 'Contact',              href: '/contact' },
+];
+
+const socials = [
+  { label: 'Instagram', href: 'https://www.instagram.com/eviumcharging/',        kind: 'instagram' as const },
+  { label: 'Facebook',  href: 'https://www.facebook.com/eviumcharging/',         kind: 'facebook'  as const },
+  { label: 'X',         href: 'https://x.com/eviumcharging',                     kind: 'x'         as const },
+  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/evium-charging', kind: 'linkedin'  as const },
+];
+
+const legalLinks = [
+  { label: 'Privacy policy',     href: '/legal/privacy' },
+  { label: 'Terms of service',   href: '/legal/terms' },
+  { label: 'Accessibility',      href: '/legal/accessibility' },
+  { label: 'Cookie preferences', href: '/legal/cookies' },
+];
+---
+
+<footer class="ftrt-cliff" aria-label="Site footer">
+  <!-- LEFT side — perspective layout (top→bottom):
+         · Asphalt road column visible at the top, picking up the
+           page's road column above seamlessly.
+         · Road FADES INTO the black void as it descends — this
+           is the "in front of the tunnel" zone the road enters.
+         · Tunnel ARCH curve marks the boundary between the void
+           (visible road interior of the tunnel) and the cliff
+           structure (back of the tunnel from the outside).
+         · Below the arch is just cliff colour — matches the
+           surrounding footer, so the back of the tunnel is
+           indistinguishable from the footer (no separate void). -->
+  <svg
+    class="ftrt-side ftrt-side--left"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Concrete ceiling base — IDENTICAL to the headline
+           tunnel's #bv4-ht-roof-base. Five-stop vertical
+           gradient, darker at top/bottom, lighter through the
+           middle so the ceiling reads as a 3-D arched concrete
+           surface catching light at its apex. -->
+      <linearGradient id="ftrt-depth-l" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#222a36" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <!-- Concrete-panel seams — period 14.286 viewBox units
+           (= 100/7), so 7 rings down the full cliff height
+           (vs the previous 8 → 10 → 12). Each ring "segment"
+           (one period band) is now bigger so the ring rhythm
+           reads cleaner. Dark band 0.9 viewBox + highlight
+           0.28 viewBox kept absolute, so screen-pixel
+           thickness of each ring stays the same — only the
+           SPACING between rings grew. Phase y=0.5 shared with
+           the cliff-face extensions and the body-side roof-
+           ring strips so every ring on the page lines up
+           row-for-row at every seam. -->
+      <pattern id="ftrt-panels-l" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring: drop-shadow below + dark
+             stripe + soft top highlight. Drawn in this order so
+             the highlight sits on TOP of the dark stripe (where
+             they overlap at y=0.5..0.78), and the drop shadow
+             sits BEHIND in the gap below the ring (y=1.45..1.80,
+             between this ring and the next period below). -->
+        <rect x="-2" y="1.45" width="104" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="-2" y="0.5"  width="104" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="-2" y="0.5"  width="104" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <linearGradient id="ftrt-dash-mask-l"
+                      gradientUnits="userSpaceOnUse"
+                      x1="0" y1="0" x2="0" y2="100">
+        <stop offset="0%"  stop-color="#fff" />
+        <stop offset="21%" stop-color="#fff" />
+        <stop offset="23%" stop-color="#000" />
+        <stop offset="100%" stop-color="#000" />
+      </linearGradient>
+      <mask id="ftrt-dash-svg-mask-l" maskUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="100" height="100" fill="url(#ftrt-dash-mask-l)" />
+      </mask>
+    </defs>
+
+    <!-- (1) Asphalt road floor — matches .bv4-u-asphalt so the
+         road column reads as one continuous slab. STAYS asphalt
+         above the arch — no ring lines through the road. -->
+    <rect x="0" y="0" width="100" height="100" fill="#16213e" />
+
+    <!-- (2) Tunnel concrete crown — clipped to BELOW the arch
+         curve only. Above the arch the asphalt road shows
+         through; below the arch we see this warm-grey gradient. -->
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-depth-l)" />
+
+    <!-- (3) Horizontal panel rings — clipped to BELOW the arch
+         only (no rings on the road). Period 10 starting at
+         y=0.5 — same phase as the cliff-face extensions next
+         door so every ring on the page lines up row-for-row at
+         every seam. -->
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-panels-l)" />
+
+    <!-- Cream arch lip is drawn by the unified road-outline path
+         in /blog-v4's centerline overlay — see that file's
+         #road-outline-path subpaths for the footer arch geometry. -->
+
+    <!-- Yellow centerline dashes — DRAWN LAST so they sit on top.
+         Mask lets them flow from the seam at y=0 through the
+         arch dip and into the tunnel before fading. -->
+    <line
+      class="ftrt-dash ftrt-dash--left"
+      x1="50" y1="100" x2="50" y2="0"
+      stroke="rgba(220, 175, 20, 0.85)"
+      stroke-width="3"
+      stroke-dasharray="22 28"
+      stroke-linecap="butt"
+      vector-effect="non-scaling-stroke"
+      mask="url(#ftrt-dash-svg-mask-l)"
+    />
+  </svg>
+
+  <svg
+    class="ftrt-side ftrt-side--right"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="ftrt-depth-r" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#222a36" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <pattern id="ftrt-panels-r" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring: drop-shadow below + dark
+             stripe + soft top highlight. Drawn in this order so
+             the highlight sits on TOP of the dark stripe (where
+             they overlap at y=0.5..0.78), and the drop shadow
+             sits BEHIND in the gap below the ring (y=1.45..1.80,
+             between this ring and the next period below). -->
+        <rect x="-2" y="1.45" width="104" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="-2" y="0.5"  width="104" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="-2" y="0.5"  width="104" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <linearGradient id="ftrt-dash-mask-r"
+                      gradientUnits="userSpaceOnUse"
+                      x1="0" y1="0" x2="0" y2="100">
+        <stop offset="0%"  stop-color="#fff" />
+        <stop offset="21%" stop-color="#fff" />
+        <stop offset="23%" stop-color="#000" />
+        <stop offset="100%" stop-color="#000" />
+      </linearGradient>
+      <mask id="ftrt-dash-svg-mask-r" maskUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="100" height="100" fill="url(#ftrt-dash-mask-r)" />
+      </mask>
+    </defs>
+    <rect x="0" y="0" width="100" height="100" fill="#16213e" />
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-depth-r)" />
+    <!-- Horizontal panel rings — clipped BELOW the arch only,
+         period 10 starting at y=0.5 (same phase as the cliff
+         extensions so every ring lines up at the seam). -->
+    <path d="M 0 1.5 A 50 21 0 1 0 100 1.5 L 100 100 L 0 100 Z" fill="url(#ftrt-panels-r)" />
+    <line
+      class="ftrt-dash ftrt-dash--right"
+      x1="50" y1="0" x2="50" y2="100"
+      stroke="rgba(220, 175, 20, 0.85)"
+      stroke-width="3"
+      stroke-dasharray="22 28"
+      stroke-linecap="butt"
+      vector-effect="non-scaling-stroke"
+      mask="url(#ftrt-dash-svg-mask-r)"
+    />
+  </svg>
+
+  <!-- ─── Ring extensions ──────────────────────────────────────
+       Short stripe-only panels that sit RIGHT AT each tunnel's
+       inner edge and extend the ring rhythm a short distance out
+       past the arch toward the middle, then fade. They use the
+       same concrete-gradient base + panel pattern + viewBox y=100
+       as the tunnels, so dark-band rows land on the same screen y
+       — making each ring read as continuing horizontally out of
+       the bore for a moment before dissolving into the dark cliff.
+
+       Width is intentionally short (≤110px) so the rings don't
+       reach anywhere near the centre — this is a localised
+       "stone weathering past the bore mouth" feel, NOT a band
+       across the footer. Mask gradient fades them out away from
+       the bore so the cliff face stays uniform near the middle. -->
+  <svg
+    class="ftrt-ext ftrt-ext--left"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Top stop changed to #06101a so the inner extension
+           starts at the SAME color the billboard ends at — no
+           color step at the body→footer seam in the cavity area
+           (the inner extension sits directly below the billboard
+           at the seam). Lower stops keep the cliff-face crown
+           gradient's lighter middle so the surface still reads
+           as a curved concrete tunnel ceiling. -->
+      <linearGradient id="ftrt-ext-grad-l" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#06101a" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <!-- Period 14.286 viewBox units = 100/7 = one period per
+           ⅐ of the cliff face (7 rings down the extension),
+           matching the bore pattern + the body-side roof-ring
+           strips. Phase y=0.5 lands the topmost ring right at
+           the seam — no deadspace above the first ring. -->
+      <pattern id="ftrt-ext-pat-l" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring — see bore-pattern comment
+             above for the rationale. -->
+        <rect x="0" y="1.45" width="100" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="0" y="0.5"  width="100" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="0" y="0.5"  width="100" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <!-- Concrete-pipe curve drop — simulates the cliff-face
+           tunnel surface curving DOWN at the inner edge (away
+           from the bore) when viewed from a bird's-eye angle.
+           Brightest at the bore-side (the "top" of the curve,
+           closest to viewer), darkening toward the inner edge
+           (where the surface rolls down out of view). The
+           gradient lands at the cliff bg color (#06101a) by
+           the inner edge so when the horizontal CSS mask fades
+           the extension's content to transparent, the cliff bg
+           shows through at the SAME color the extension was
+           ending at — no hard color seam at the fade endpoint.
+           Stops use a quarter-circle-ish ease-in profile so the
+           drop-off accelerates toward the inner edge, mimicking
+           the visual rate at which a cylindrical surface goes
+           out of view as it curves around. -->
+      <linearGradient id="ftrt-ext-curve-l" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#06101a" stop-opacity="0"    />
+        <stop offset="40%"  stop-color="#06101a" stop-opacity="0.08" />
+        <stop offset="65%"  stop-color="#06101a" stop-opacity="0.28" />
+        <stop offset="85%"  stop-color="#06101a" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#06101a" stop-opacity="0.85" />
+      </linearGradient>
+    </defs>
+    <rect width="100" height="100" fill="url(#ftrt-ext-grad-l)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-pat-l)" />
+    <!-- Side curve drop OVER concrete + rings (drawn last so it
+         tints both). Combined with the curved horizontal mask
+         in CSS, the extension's content darkens INTO the cliff
+         bg color before fading to transparent — the inner edge
+         reads as a continuous concrete surface rolling out of
+         view rather than a vertical seam where rings end. -->
+    <rect width="100" height="100" fill="url(#ftrt-ext-curve-l)" />
+  </svg>
+  <svg
+    class="ftrt-ext ftrt-ext--right"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Top stop #06101a — see comment on ftrt-ext-grad-l. -->
+      <linearGradient id="ftrt-ext-grad-r" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#06101a" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <!-- Phase y=0.5 + period 14.286 mirrors the left extension
+           — see comment on the left for the rationale. -->
+      <pattern id="ftrt-ext-pat-r" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring — see bore-pattern comment
+             above for the rationale. -->
+        <rect x="0" y="1.45" width="100" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="0" y="0.5"  width="100" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="0" y="0.5"  width="100" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <!-- Side curve drop — mirror of left extension's curve.
+           Bore-side (right edge here) is bright; inner edge
+           (left edge, toward the cavity centre) darkens to
+           cliff bg. See full comment on the left side. -->
+      <linearGradient id="ftrt-ext-curve-r" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0%"   stop-color="#06101a" stop-opacity="0"    />
+        <stop offset="40%"  stop-color="#06101a" stop-opacity="0.08" />
+        <stop offset="65%"  stop-color="#06101a" stop-opacity="0.28" />
+        <stop offset="85%"  stop-color="#06101a" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#06101a" stop-opacity="0.85" />
+      </linearGradient>
+    </defs>
+    <rect width="100" height="100" fill="url(#ftrt-ext-grad-r)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-pat-r)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-curve-r)" />
+  </svg>
+
+  <!-- ─── Outer ring extensions ────────────────────────────────
+       Mirror of the inner extensions, sitting in the small
+       --road-margin gap on the OUTER side of each tunnel
+       (between the page wall and the tunnel's outer cream lip).
+       Bore-side is on the INSIDE of each (toward the road
+       column); inner-edge is on the OUTSIDE (toward the page
+       wall). Curve drop + horizontal mask are flipped so the
+       fade rolls OUT toward the wall, giving each tunnel a
+       symmetric ring stack on both sides like a real concrete
+       tunnel ceiling. -->
+  <svg
+    class="ftrt-ext ftrt-ext--outer-left"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Top stop #0d1825 so the outer extension starts at the
+           SAME color the body's outer gap (bv4-u-road bg) ends
+           at — no color step at the body→footer seam in the
+           outer-margin area. Lower stops keep the cliff-face
+           crown gradient's lighter middle for the curved tunnel
+           ceiling effect. -->
+      <linearGradient id="ftrt-ext-grad-ol" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#0d1825" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <pattern id="ftrt-ext-pat-ol" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring — see bore-pattern comment
+             above for the rationale. -->
+        <rect x="0" y="1.45" width="100" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="0" y="0.5"  width="100" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="0" y="0.5"  width="100" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <!-- Curve drop FLIPPED — bore-side (right edge of this
+           strip) bright, inner edge (left edge = page wall)
+           dark, so the surface curves DOWN toward the wall. -->
+      <linearGradient id="ftrt-ext-curve-ol" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0%"   stop-color="#06101a" stop-opacity="0"    />
+        <stop offset="40%"  stop-color="#06101a" stop-opacity="0.08" />
+        <stop offset="65%"  stop-color="#06101a" stop-opacity="0.28" />
+        <stop offset="85%"  stop-color="#06101a" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#06101a" stop-opacity="0.85" />
+      </linearGradient>
+    </defs>
+    <rect width="100" height="100" fill="url(#ftrt-ext-grad-ol)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-pat-ol)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-curve-ol)" />
+  </svg>
+  <svg
+    class="ftrt-ext ftrt-ext--outer-right"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <!-- Top stop #0d1825 — see comment on ftrt-ext-grad-ol. -->
+      <linearGradient id="ftrt-ext-grad-or" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#0d1825" />
+        <stop offset="22%"  stop-color="#37414f" />
+        <stop offset="50%"  stop-color="#4b5666" />
+        <stop offset="78%"  stop-color="#37414f" />
+        <stop offset="100%" stop-color="#222a36" />
+      </linearGradient>
+      <pattern id="ftrt-ext-pat-or" patternUnits="userSpaceOnUse" width="100" height="14.286">
+        <!-- 3-layer "expensive" ring — see bore-pattern comment
+             above for the rationale. -->
+        <rect x="0" y="1.45" width="100" height="0.35" fill="rgba(0, 0, 0, 0.16)" />
+        <rect x="0" y="0.5"  width="100" height="0.9"  fill="rgba(0, 0, 0, 0.52)" />
+        <rect x="0" y="0.5"  width="100" height="0.28" fill="rgba(255, 255, 255, 0.13)" />
+      </pattern>
+      <!-- Curve drop — bore-side (left edge of this strip)
+           bright, inner edge (right edge = page wall) dark. -->
+      <linearGradient id="ftrt-ext-curve-or" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#06101a" stop-opacity="0"    />
+        <stop offset="40%"  stop-color="#06101a" stop-opacity="0.08" />
+        <stop offset="65%"  stop-color="#06101a" stop-opacity="0.28" />
+        <stop offset="85%"  stop-color="#06101a" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#06101a" stop-opacity="0.85" />
+      </linearGradient>
+    </defs>
+    <rect width="100" height="100" fill="url(#ftrt-ext-grad-or)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-pat-or)" />
+    <rect width="100" height="100" fill="url(#ftrt-ext-curve-or)" />
+  </svg>
+
+  <!-- Cliff-face content — brand col + 3 nav cols + legal bar. -->
+  <div class="ftrt-content">
+    <div class="ftrt-ambient" aria-hidden="true"></div>
+
+    <!-- ─── Top grid: brand column + 3 nav columns ─────────── -->
+    <div class="ftrt-top">
+      <div class="ftrt-brand">
+        <a href="/" class="ftrt-logo-link" aria-label="Evium Charging home">
+          <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="ftrt-logo" />
+        </a>
+        <p class="ftrt-tagline">
+          <span class="ftrt-tagline-main">Electrifying the future.</span>
+          <span class="ftrt-tagline-soft">One property at a time.</span>
+        </p>
+
+        <div class="ftrt-contact">
+          <p class="ftrt-contact-line">
+            <span class="ftrt-contact-label">Station support</span>
+            <a href="tel:+19499452000" class="ftrt-contact-link">(949) 945-2000</a>
+          </p>
+          <p class="ftrt-contact-line">
+            <span class="ftrt-contact-label">Partner inquiries</span>
+            <a href="mailto:contact@eviumcharging.com" class="ftrt-contact-link">contact@eviumcharging.com</a>
+          </p>
+        </div>
+
+        <div class="ftrt-socials" aria-label="Evium on social">
+          {socials.map((s) => (
+            <a
+              href={s.href} class="ftrt-social"
+              target="_blank" rel="noopener noreferrer"
+              aria-label={`Evium on ${s.label}`}
+            >
+              {s.kind === 'instagram' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {s.kind === 'facebook' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 8h2.5V5H14c-2 0-3.5 1.5-3.5 3.5V11H8v3h2.5v7h3v-7H16l.5-3h-3V8.8C13.5 8.4 13.7 8 14 8z"/>
+                </svg>
+              )}
+              {s.kind === 'x' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              )}
+              {s.kind === 'linkedin' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M7 10v7M7 7.5v.01"/>
+                  <path d="M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <nav class="ftrt-links" aria-label="Footer navigation">
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Solutions</h3>
+          <ul class="ftrt-col-list" role="list">
+            {solutionLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Products</h3>
+          <ul class="ftrt-col-list" role="list">
+            {productLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+        <div class="ftrt-col">
+          <h3 class="ftrt-col-title">Company</h3>
+          <ul class="ftrt-col-list" role="list">
+            {companyLinks.map((l) => (
+              <li><a href={l.href} class="ftrt-col-link">{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <span class="ftrt-rule" aria-hidden="true"></span>
+
+    <!-- ─── Legal bar ──────────────────────────────────────── -->
+    <div class="ftrt-legal">
+      <p class="ftrt-copy">
+        <span class="ftrt-copy-mark" aria-hidden="true"></span>
+        © 2026 Evium Charging.
+        <span class="ftrt-copy-soft">All rights reserved.</span>
+      </p>
+      <nav class="ftrt-legal-nav" aria-label="Legal">
+        {legalLinks.map((l) => (
+          <a href={l.href} class="ftrt-legal-link">{l.label}</a>
+        ))}
+      </nav>
+      <button type="button" class="ftrt-totop" aria-label="Back to top" data-ftrt-totop>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftrt-cliff {
+    --road-w: clamp(160px, 14vw, 210px);
+    /* Small breathing room between the cliff face's outer edge
+       (the page wall + HeaderV4 lefter rail) and the tunnel's
+       outer cream lip — gives the OUTER side of each tunnel
+       roof room for ring extensions, so the rings flare out on
+       both sides like a natural concrete tunnel ceiling. Match
+       this value with .bv4-root's --road-margin in the body. */
+    --road-margin: clamp(15px, 1.5vw, 25px);
+    --ev-green: #2DC856;
+
+    position: relative;
+    color: #fff;
+    font-family: 'Maven Pro', sans-serif;
+    background:
+      linear-gradient(180deg,
+        #06101a  0%,
+        #050d16 100%
+      );
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Side road columns — full footer height, matching road-w. */
+  .ftrt-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--road-w);
+    height: 100%;
+    /* z-index 60 lifts the road column ABOVE the HeaderV4
+       lefter rail (z:50). The arch lip's outer leg cream stroke
+       sits at viewport x=78.5-81.5 — half overlapping the lefter
+       — so without this it would be clipped by the lefter's
+       solid bg in dev-mode-off. */
+    z-index: 60;
+    pointer-events: none;
+    display: block;
+    /* CRITICAL: SVG defaults to overflow:hidden which clips
+       the cream arch lip's outer leg stroke. */
+    overflow: visible;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
+  }
+  .ftrt-side--left  { left:  var(--road-margin); }
+  .ftrt-side--right { right: var(--road-margin); }
+
+  /* ─── Ring extensions ────────────────────────────────────────
+     Short panel of horizontal stripes that picks up at the inner
+     edge of each tunnel and extends rings a small distance toward
+     the middle before fading out. Width is capped well short of
+     the page centre. Same viewBox y proportion + same pattern
+     y-spec as the tunnels → dark-band rows land row-for-row.
+
+     z-index 1 keeps it above the cliff bg but below the side
+     tunnel SVG (60) so the tunnel's own arch + cream lip stay
+     in front. Pointer-events disabled so it doesn't intercept
+     clicks on overlapping content. */
+  .ftrt-ext {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    /* Width matches the footer content's horizontal padding
+       offset (`clamp(20px, 2.5vw, 40px)` on each side of the
+       road column), so the extension fits EXACTLY in the gap
+       between the road column's inner edge and the content
+       text's outer edge. With the linear horizontal fade
+       below, rings are fully transparent right at the
+       content's left edge — they extend slightly past the
+       bore but never appear behind the column text. */
+    width: clamp(20px, 2.5vw, 40px);
+    z-index: 1;
+    pointer-events: none;
+    display: block;
+    overflow: visible;
+  }
+  .ftrt-ext--left {
+    left: calc(var(--road-margin) + var(--road-w));
+    /* Vertical: fully opaque from the seam down to 92%, then
+         dissolves into the bottom-of-footer fade that the
+         tunnels use too — so rings start RIGHT at the seam
+         (no top deadspace) and stack the full footer height.
+       Horizontal: CURVED multi-stop fade approximating a
+         quarter-circle profile (cos curve) — opacity falls off
+         slowly at first, then accelerates toward the inner
+         edge. Combined with the in-SVG `ftrt-ext-curve-l`
+         gradient that darkens the content INTO cliff bg color
+         along the same axis, the inner edge reads as a
+         concrete surface rolling around the curve out of view
+         instead of a hard linear-fade vertical seam. */
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to right,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+            mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to right,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+    -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+  }
+  .ftrt-ext--right {
+    right: calc(var(--road-margin) + var(--road-w));
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to left,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+            mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to left,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+    -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+  }
+  /* OUTER ring extensions — flipped masks so the bore-side
+     (toward the road column) is solid and the inner-edge
+     (toward the page wall) fades out. Width = --road-margin
+     since they fill the small outer gap exactly. */
+  .ftrt-ext--outer-left {
+    width: var(--road-margin);
+    left: 0;
+    /* Bore-side is the RIGHT edge of this strip (next to the
+       tunnel's outer cream lip). Mask is solid on the right,
+       fading left toward the page wall. */
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to left,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+            mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to left,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+    -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+  }
+  .ftrt-ext--outer-right {
+    width: var(--road-margin);
+    right: 0;
+    /* Bore-side is the LEFT edge of this strip. Mask solid on
+       left, fading right toward the page wall. */
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to right,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+            mask-image:
+      linear-gradient(180deg, #000 0%, #000 92%, transparent 100%),
+      linear-gradient(to right,
+        rgba(0, 0, 0, 1)    0%,
+        rgba(0, 0, 0, 0.97) 25%,
+        rgba(0, 0, 0, 0.85) 50%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.20) 87%,
+        rgba(0, 0, 0, 0)    100%);
+    -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+  }
+
+  /* ─── Footer content shell ─────────────────────────────────── */
+  .ftrt-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    /* Horizontal padding clears the road-margin (outer ring band)
+       + the tunnel (--road-w) + inner ring band gap. */
+    padding:
+      clamp(64px, 5.5vw, 84px)
+      calc(var(--road-margin) + var(--road-w) + clamp(20px, 2.5vw, 40px))
+      clamp(4px, 0.4vw, 8px);
+  }
+  .ftrt-ambient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 70% 55% at 35% 35%,
+      rgba(45, 200, 86, 0.06) 0%,
+      rgba(45, 200, 86, 0.018) 45%,
+      transparent 80%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Top grid: brand + link columns ─────────────────────── */
+  .ftrt-top {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(280px, 340px) 1fr;
+    gap: clamp(20px, 2.6vw, 40px);
+    align-items: start;
+    padding-bottom: clamp(6px, 0.6vw, 10px);
+  }
+
+  /* ─── Brand column ───────────────────────────────────────── */
+  .ftrt-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ftrt-logo-link { display: inline-block; line-height: 0; }
+  .ftrt-logo {
+    height: clamp(34px, 2.8vw, 42px);
+    width: auto;
+    display: block;
+    transition: opacity 0.18s ease;
+  }
+  .ftrt-logo-link:hover .ftrt-logo { opacity: 0.88; }
+  /* Tagline — TWO LINES with clear hierarchy. The main phrase
+     ("Electrifying the future.") sits on its own line at full
+     opacity + slight font-weight bump, and the supportive
+     sub-phrase ("One property at a time.") sits on the next
+     line at a softer alpha. Splitting prevents the previous
+     awkward mid-phrase wrap (the old 32ch max-width clipped
+     "a / time" mid-string and read as a typo). */
+  .ftrt-tagline {
+    margin: 0;
+    line-height: 1.4;
+  }
+  .ftrt-tagline-main {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: -0.005em;
+  }
+  .ftrt-tagline-soft {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .ftrt-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 2px;
+  }
+  .ftrt-contact-line {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    min-width: 0;
+  }
+  .ftrt-contact-label {
+    font-size: 0.54rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ev-green);
+    flex-shrink: 0;
+  }
+  .ftrt-contact-link {
+    color: rgba(255, 255, 255, 0.86);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.18s ease;
+    word-break: break-word;
+    line-height: 1.25;
+  }
+  .ftrt-contact-link:hover { color: var(--ev-green); }
+
+  .ftrt-socials {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .ftrt-social {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.74);
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .ftrt-social:hover,
+  .ftrt-social:focus-visible {
+    background: rgba(45, 200, 86, 0.13);
+    border-color: rgba(45, 200, 86, 0.55);
+    color: var(--ev-green);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .ftrt-social svg { width: 14px; height: 14px; display: block; }
+
+  /* ─── Link columns ───────────────────────────────────────── */
+  .ftrt-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(14px, 1.8vw, 32px);
+  }
+  .ftrt-col-title {
+    margin: 0 0 6px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ev-green);
+    position: relative;
+    padding-left: 13px;
+  }
+  .ftrt-col-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ev-green);
+    box-shadow: 0 0 8px rgba(45, 200, 86, 0.55);
+  }
+  .ftrt-col-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ftrt-col-link {
+    display: inline-block;
+    font-size: 0.79rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.66);
+    text-decoration: none;
+    transition: color 0.16s ease, transform 0.16s ease;
+    padding: 0;
+    line-height: 1.45;
+  }
+  .ftrt-col-link:hover,
+  .ftrt-col-link:focus-visible {
+    color: var(--ev-green);
+    transform: translateX(3px);
+    outline: none;
+  }
+
+  /* ─── Rule + legal bar ───────────────────────────────────── */
+  .ftrt-rule {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0.50) 22%,
+      rgba(45, 200, 86, 0.55) 50%,
+      rgba(45, 200, 86, 0.50) 78%,
+      rgba(45, 200, 86, 0) 100%
+    );
+  }
+  .ftrt-legal {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: clamp(4px, 0.4vw, 7px);
+  }
+  .ftrt-copy {
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .ftrt-copy-mark { display: none; }
+  .ftrt-copy-soft { color: rgba(255, 255, 255, 0.32); }
+
+  .ftrt-legal-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(12px, 1.6vw, 22px);
+    flex-wrap: wrap;
+  }
+  .ftrt-legal-link {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.16s ease;
+  }
+  .ftrt-legal-link:hover,
+  .ftrt-legal-link:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  .ftrt-totop {
+    width: 28px; height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .ftrt-totop:hover,
+  .ftrt-totop:focus-visible {
+    background: rgba(45, 200, 86, 0.14);
+    border-color: rgba(45, 200, 86, 0.6);
+    color: var(--ev-green);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .ftrt-totop svg { width: 12px; height: 12px; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .ftrt-top { grid-template-columns: 1fr; gap: 32px; }
+    .ftrt-links { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .ftrt-side { display: none; }
+    .ftrt-ext  { display: none; }
+    .ftrt-content { padding: 40px 24px 18px; }
+    .ftrt-links { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<script>
+  /* Dash phase alignment — both sides.
+     ──────────────────────────────────
+     Drives the page centerline + both footer dash strokes from a
+     SINGLE Web-Animations timeline anchored at startTime=0 so all
+     three share an identical currentTime every frame — no
+     CSS-keyframe scheduling drift between page and footer that
+     could manifest as a perceived "size shift" at the seam. */
+  (() => {
+    const path      = document.getElementById('bv4-u-flow-path') as SVGPathElement | null;
+    const leftDash  = document.querySelector<SVGElement>('.ftrt-side--left  .ftrt-dash');
+    const rightDash = document.querySelector<SVGElement>('.ftrt-side--right .ftrt-dash');
+    const leftSvg   = document.querySelector<SVGElement>('.ftrt-side--left');
+    if (!path || !leftDash || !rightDash || !leftSvg) return;
+
+    const PERIOD_MS = 2000;
+    const SHIFT_PX  = 50;
+
+    let pageAnim: Animation | null   = null;
+    let leftAnim: Animation | null   = null;
+    let rightAnim: Animation | null  = null;
+
+    function build() {
+      if (!path || !leftDash || !rightDash || !leftSvg) return;
+      const L = path.getTotalLength();
+      if (!isFinite(L) || L <= 0) return;
+      const H = leftSvg.getBoundingClientRect().height;
+      if (!isFinite(H) || H <= 0) return;
+
+      pageAnim?.cancel();
+      leftAnim?.cancel();
+      rightAnim?.cancel();
+
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        path.style.strokeDashoffset = '0px';
+        leftDash.style.strokeDashoffset = `${H % SHIFT_PX}px`;
+        rightDash.style.strokeDashoffset = `${-(L % SHIFT_PX)}px`;
+        return;
+      }
+
+      const leftBase  = H % SHIFT_PX;
+      const rightBase = -(L % SHIFT_PX);
+      const opts: KeyframeAnimationOptions = {
+        duration: PERIOD_MS,
+        iterations: Infinity,
+        easing: 'linear',
+      };
+
+      pageAnim = path.animate(
+        [{ strokeDashoffset: '0px' }, { strokeDashoffset: `${-SHIFT_PX}px` }],
+        opts
+      );
+      leftAnim = leftDash.animate(
+        [{ strokeDashoffset: `${leftBase}px` }, { strokeDashoffset: `${leftBase - SHIFT_PX}px` }],
+        opts
+      );
+      rightAnim = rightDash.animate(
+        [{ strokeDashoffset: `${rightBase}px` }, { strokeDashoffset: `${rightBase - SHIFT_PX}px` }],
+        opts
+      );
+
+      const anchor = document.timeline.currentTime as number;
+      if (pageAnim)  pageAnim.startTime  = anchor;
+      if (leftAnim)  leftAnim.startTime  = anchor;
+      if (rightAnim) rightAnim.startTime = anchor;
+    }
+
+    /* Disable the page CSS-keyframe centerline animation so our
+       Web Animation is the single source of truth for dashoffset. */
+    const killCss = document.createElement('style');
+    killCss.textContent = '.bv4-u-flow path { animation: none !important; }';
+    document.head.appendChild(killCss);
+
+    requestAnimationFrame(() => requestAnimationFrame(build));
+
+    let resizeRAF = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(resizeRAF);
+      resizeRAF = requestAnimationFrame(build);
+    });
+  })();
+
+  /* Back-to-top — smooth-scrolls to y=0, respects reduced motion. */
+  (() => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-ftrt-totop]');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  })();
+
+  /* Roof-ring period sync.
+     ──────────────────────
+     The cliff-face SVG patterns repeat every 14.286 viewBox y
+     units (100/7) across a viewBox stretched to the cliff's
+     actual rendered height — so each ring period in screen
+     pixels is `cliffHeight / 7` (7 rings down the cliff face).
+     The body-side `.bv4-roof-ring-extra` strips above the seam
+     are CSS-px sized, so we publish that exact same
+     `cliffHeight / 7` value as the `--roof-ring-period` custom
+     property on :root. The body strips read the variable for
+     their own height + ring offset/thickness, so every roof
+     ring on the page (bore + cliff extension + body strip)
+     ends up at the SAME screen-pixel period regardless of where
+     it's rendered — no visible "this section vs that section"
+     seam in the ring rhythm. ResizeObserver keeps it in sync on
+     viewport changes. */
+  (() => {
+    const cliff = document.querySelector<HTMLElement>('.ftrt-cliff');
+    if (!cliff) return;
+    function update() {
+      if (!cliff) return;
+      const h = cliff.offsetHeight;
+      if (!Number.isFinite(h) || h <= 0) return;
+      document.documentElement.style.setProperty('--roof-ring-period', `${h / 7}px`);
+    }
+    update();
+    let raf = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    });
+    if ('ResizeObserver' in window) new ResizeObserver(update).observe(cliff);
+  })();
+</script>

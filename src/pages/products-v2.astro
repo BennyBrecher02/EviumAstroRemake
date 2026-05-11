@@ -43,6 +43,7 @@ import Layout from '../layouts/Layout.astro';
 import HeroCarouselPedestal from '../components/heroes/HeroCarouselPedestal.astro';
 import HeroCarouselPedestalMobile from '../components/heroes/HeroCarouselPedestalMobile.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTab.astro';
 
 /*
  * Services catalog — maps each property-type slug used in product
@@ -930,6 +931,13 @@ function powerSummary(p: AnyProduct): string {
   </aside>
 
   <SiteFooter />
+
+  <!-- Right-edge sticky CTA tab + drawer. `alwaysVisible`
+       so the tab is present from page load — products-v2
+       has no hero form, so the consultation CTA is the
+       only conversion path and should be persistently
+       reachable from any scroll position. -->
+  <ConsultationStickyTab alwaysVisible />
 </Layout>
 
 <style>
@@ -959,6 +967,44 @@ function powerSummary(p: AnyProduct): string {
   @media (max-width: 860px) {
     .hero-desktop-only { display: none;  }
     .hero-mobile-only  { display: block; }
+
+    /* Cap the mobile hero to fit within the visible viewport
+       AFTER the sticky mobile navbar (~80px). Without this, on
+       phones with a relatively short visible viewport (e.g.
+       iPhone SE in Safari with the URL bar showing — ~547px
+       effective height), the hero's natural aspect-ratio
+       (1024/1536 → height = 1.5 × width) overflows: at 375vw,
+       hero = 562px, plus navbar = 642px, exceeding the viewport
+       so the bottom of the hero (with the carousel arrows)
+       gets cut off below the fold.
+
+       Setting `max-height: calc(100svh - 80px)` constrains the
+       hero to the visible viewport minus navbar. The hero's
+       background image is `object-fit: cover`, so it crops
+       gracefully to whatever box height results — content stays
+       visually centered, no awkward letterbox. We use `svh`
+       (small viewport height — UA-defined, assumes URL bar
+       visible) so the hero size stays STABLE as the user
+       scrolls and the URL bar shows/hides; using `dvh` would
+       cause the hero to grow/shrink during scroll which reads
+       as layout drift.
+
+       On taller viewports where 100svh - 80 > the hero's
+       natural height, max-height is non-binding and the hero
+       uses its full natural aspect ratio — desktop-equivalent
+       feel. Only short viewports get the constraint.
+
+       Wrap the WHOLE selector in :global so both `body.page-
+       products-v2` AND `.mcp-root` are matched outside this
+       page's CSS scope. The .mcp-root is in the mobile hero
+       component, which has its own Astro CSS scope id;
+       partially-global selectors (only :global on body) don't
+       reach into the component, since the descendant `.mcp-
+       root` gets THIS page's scope id appended and matches
+       nothing. */
+    :global(body.page-products-v2 .mcp-root) {
+      max-height: calc(100svh - 80px);
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -1081,7 +1127,14 @@ function powerSummary(p: AnyProduct): string {
       minmax(0, 1fr)
       clamp(2rem, 5.5vw, 5rem);
     align-items: start;
-    padding-block: clamp(1.4rem, 2.5vw, 2.25rem);
+    /* Asymmetric padding-block: tighter top, generous bottom.
+       The bottom inset is settle-space below the brand-by-brand
+       strip so it doesn't sit at the viewport's bottom edge on
+       a typical laptop viewport (~900-921px tall). Section
+       background extends past the strip, giving it a "settled
+       inside the section" feel instead of "pinned to screen". */
+    padding-top: clamp(1.4rem, 2.5vw, 2.25rem);
+    padding-bottom: clamp(3rem, 5vw, 5rem);
     padding-inline: 0;
     /* APPLE-STYLE WHITE MODE — Apple's signature off-white #f5f5f7
        as the section base. Two-stop top-down gradient: brightest
@@ -1116,6 +1169,13 @@ function powerSummary(p: AnyProduct): string {
     max-height: 420px;
     opacity: 1;
     overflow: hidden;
+    /* Breathing room below the chart button — the head clips
+       with overflow: hidden so the L2/L3 max-height collapse
+       reads cleanly, but that same clip was slicing the chart
+       button's :focus-visible outline (which sits 5px below
+       the button after the modal closes and focus is restored
+       programmatically). 8px keeps the full ring visible. */
+    padding-bottom: 8px;
     transition:
       max-height 1.1s cubic-bezier(0.22, 1, 0.36, 1),
       opacity 0.7s ease,
@@ -1283,12 +1343,17 @@ function powerSummary(p: AnyProduct): string {
        right edges respectively. */
     padding-inline: clamp(16px, 2vw, 50px);
     /* Asymmetric padding-block: tight 14px at the top (cards
-       hug the head above) and a generous bottom inset so the
-       picker cards' lifted hover shadow has room to FADE fully
-       within the row before its overflow:hidden boundary clips
-       it. Without this, the deepest shadow layer was getting
-       hard-cut and reading as a jarring line. */
-    padding-block: 14px clamp(36px, 3.5vw, 50px);
+       hug the head above) and a moderate bottom inset. The
+       bottom was 36-50px to let the picker card's deepest hover
+       shadow fade fully before the row's overflow:hidden clips
+       it. Reduced to 14-22px after hybrid testing showed the
+       extra bottom space pushed the brand-by-brand strip to
+       the viewport's bottom edge on common laptop viewports
+       (~900-921px tall). Mid-tier shadow layers still fade
+       cleanly within this band; only the deepest atmospheric
+       wisp gets a tiny hard-cut, imperceptible against the
+       section's already-rich shadow stack. */
+    padding-block: 14px clamp(14px, 1.5vw, 22px);
     box-sizing: border-box;
     /* Tightened margin-bottom — the row already has generous
        padding-bottom for shadow fade, so a smaller gap to the
@@ -1407,6 +1472,170 @@ function powerSummary(p: AnyProduct): string {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+  }
+
+  /* ── Premium close choreography — STAGED LAYOUT ─────────
+     The close is split so the brand button can NEVER appear
+     to slide down from above. The brand button's Y position
+     = 850 + tier-row-height + tier-expand-height + offset.
+
+     Why staging is needed:
+       In browsers, `grid-template-rows: 1fr → 0fr` interpolates
+       FASTER than `max-height: 0 → 760` even with identical
+       curves — fr-unit interpolation is implementation-quirky
+       and tends to snap. So if both transitions fire together,
+       tier-expand collapses to ~0 before tier-row has grown
+       much, briefly placing the brand button at an unnaturally
+       HIGH Y position (close to where the picker SHOULD be).
+       The user then watches it slide DOWN as tier-row catches
+       up — the exact "browse-button-sliding-down-to-reveal-
+       cards" bug.
+
+     Staging the transitions:
+       Phase A (0 → 2.0s):
+         · tier-row grows 0 → 760 (slow, ease-in-out)
+         · tier-catalog fades 1 → 0 (uses default 0.7s — quick)
+         · tier-expand STAYS at 1fr (transition delayed by 2s)
+         · Brand button's layout Y = 850 + tier-row + 1500
+           → starts at 2350, ends at 3110 (DEEPER below
+           viewport throughout — guaranteed off-screen).
+         · The user sees the picker cards growing back in
+           from above; below them, the (already-fading)
+           catalog content gracefully disappearing in place.
+
+       Phase B (2.0s → 2.4s):
+         · tier-row stays at 760 (full picker)
+         · tier-expand finally collapses 1fr → 0fr (0.4s,
+           still using a smooth curve)
+         · Brand button rapidly moves 3110 → 1610 (UP, into
+           viewport on tall screens) — but the JS-controlled
+           opacity veil (.is-closing on .v2-brand-morph sets
+           opacity:0) keeps it INVISIBLE during this fast
+           motion.
+
+       After is-closing is removed (~2.7s, lock end):
+         · Brand button fades in (0 → 1) at its final settled
+           position via the existing `opacity 0.8s ease`
+           transition on .v2-brand-morph. The user sees it
+           materialize quietly at rest, never sliding.
+
+     The OPEN direction keeps its default fast 1.4s expo-out
+     for snappy clicks — opens deserve to snap, closes deserve
+     to breathe. */
+  .v2-selector.is-closing .v2-tier-row {
+    transition:
+      max-height 1.4s cubic-bezier(0.4, 0, 0.6, 1),
+      margin 1.4s cubic-bezier(0.4, 0, 0.6, 1),
+      opacity 1.4s cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  .v2-selector.is-closing .v2-tier-expand {
+    /* Hold tier-expand at full height while the picker grows
+       back in (Phase A: 0–1.8s), then snap-collapse it
+       cleanly in Phase B (1.8–2.0s) — runs in parallel with
+       the last 10% of the picker grow so by the moment cards
+       finish at 2.0s, the catalog space is also gone and the
+       layout is fully settled. The brand button is opacity:0
+       throughout, so the rapid Phase B motion is invisible.
+
+       Phase B was tightened to 0.2s (was 0.4s) so that the
+       brand button can begin its reveal animation at 2.0s
+       (right when cards finish) at a STABLE final layout
+       position — no layout drift during the brand reveal. */
+    transition:
+      grid-template-rows 0.2s cubic-bezier(0.22, 1, 0.36, 1) 1.8s,
+      opacity 0.2s ease 1.8s;
+  }
+  /* tier-catalog opacity/transform: NO is-closing override.
+     The default `opacity 0.7s + transform 0.7s` (cubic-bezier
+     0.4, 0, 0.2, 1) is fine — the catalog content fades out
+     quickly while still inside the held-open tier-expand
+     space, so the user sees a graceful in-place dissolve
+     rather than the catalog "shrinking" with its container. */
+
+  /* Brand-morph veil during close.
+
+     The brand button lives at the bottom of the section, BELOW
+     the catalog. As the catalog collapses during close, layout
+     flow pulls the brand button up (its absolute Y position
+     evolves from "deep below viewport" in state-l2 to "just
+     below picker" in state-idle). On taller viewports that
+     final position lands inside the viewport — without
+     intervention, the user would see the brand button slide
+     up into view out of nowhere, since it wasn't visible at
+     the moment they triggered the close.
+
+     We keep the brand button COMPLETELY INVISIBLE for the
+     entire close window. JS adds `is-closing` at the start of
+     the L2/L3 close handler and removes it at lock end (~2.7s
+     later). During that window, opacity is locked at 0 — so
+     no matter where layout flow moves the brand button, the
+     user never sees it. After the lock ends, the existing
+     `opacity 0.5s ease` transition on .v2-brand-morph (defined
+     in the base rule) fades the brand button back to opacity
+     1 at its FINAL, settled position — a gentle reveal at
+     rest, not a pop-up during motion.
+
+     Both directions use the existing base transition, so:
+       · Add `is-closing` → opacity 1 → 0 over 0.5s (fade-out
+         is invisible since brand is below the viewport on
+         typical screens at this moment).
+       · Remove `is-closing` → opacity 0 → 1 over 0.5s
+         (fade-in at the brand's final settled position; the
+         user sees a quiet reveal, not a slide). */
+  /* Brand-morph reveal animation — overlaps the latter half
+     of the picker reveal so there's no dead air between the
+     cards settling and the brand rising into place.
+
+     Timing (animation-delay 1.4s + duration 1.2s = 2.6s end):
+       0 → 1.4s   — Brand fully hidden (0% keyframe holds via
+                    fill-mode `both` during the delay).
+       1.4 → 2.6s — Reveal animation runs. Visibility snaps to
+                    visible at 1%, then opacity 0 → 1 and
+                    transform translateY(28px) → translateY(0)
+                    over the rest of the 1.2s duration with an
+                    ease-in-out curve.
+
+     Why ease-in-out (not the page's expo-out):
+       expo-out front-loads — brand would "shoot up" at the
+       start of the reveal. ease-in-out distributes motion
+       evenly: brand starts moving slowly, accelerates through
+       the middle, decelerates into its final spot. The result
+       reads as a deliberate rise rather than a snap.
+
+     Because the reveal animation begins at 1.4s — while the
+     picker cards are still at ~70% grown and tier-expand
+     hasn't started its Phase B collapse yet — the brand
+     button's layout position is still deep below the
+     viewport during the first ~500ms of the animation. The
+     opacity ramp is barely perceptible until ~1.9s when
+     brand layout actually crosses into the viewport. From
+     there, the user sees the button rise smoothly into rest
+     over the remaining 700ms. */
+  @keyframes v2-brand-reveal-after-cards {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(28px);
+    }
+    1% {
+      opacity: 0;
+      visibility: visible;
+      transform: translateY(28px);
+    }
+    100% {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+  .v2-selector.is-closing .v2-brand-morph {
+    /* `pointer-events: none` is the only static rule — opacity,
+       visibility, and transform are all driven by the animation
+       (fill-mode `both` so the 0% keyframe holds during the
+       delay window). */
+    pointer-events: none;
+    animation: v2-brand-reveal-after-cards 1.2s
+               cubic-bezier(0.4, 0, 0.6, 1) 1.4s both;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2123,6 +2352,16 @@ function powerSummary(p: AnyProduct): string {
     box-shadow: var(--elev-2);
     overflow: hidden;
     cursor: pointer;
+    /* Opacity transition is 0.8s — bumped from 0.5s so the
+       reveal at the END of an L2/L3 close (when JS removes
+       the is-closing class) feels like a gentle resolve at
+       the brand button's final settled position rather than
+       a quick pop-in. The fade-out at the START of the close
+       (when is-closing is added, opacity 1 → 0) also runs at
+       0.8s but is invisible since the brand button is below
+       the viewport at that moment. The is-hidden state (used
+       when a tier is active) also benefits from the slightly
+       slower fade. */
     transition:
       background 1s cubic-bezier(0.22, 1, 0.36, 1),
       border-color var(--duration-hover) var(--ease),
@@ -2130,7 +2369,7 @@ function powerSummary(p: AnyProduct): string {
       box-shadow var(--duration-hover) var(--ease),
       transform var(--duration-hover) var(--ease),
       max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.5s ease;
+      opacity 0.8s ease;
     max-height: 5000px;
     opacity: 1;
   }
@@ -4015,7 +4254,38 @@ function powerSummary(p: AnyProduct): string {
     .v2-brand-section-inner-wrap { padding-left: 1rem; padding-right: 1rem; }
   }
   @media (max-width: 640px) {
-    .v2-selector { min-height: auto; padding: 4rem 1rem 3rem; }
+    /* Section ALWAYS exceeds the visible viewport on mobile.
+       Two reasons:
+
+       1. Idle baseline coverage. The section's content (head +
+          picker cards + brand button) doesn't reach 100dvh on
+          its own; without a floor, the global <html> dark teal
+          (#1A2F3A) peeks below the brand button on tall
+          viewports.
+
+       2. Brand-close animation feel. When the user closes the
+          browse-by-brand catalog, the brand-morph-content
+          collapses 1fr → 0fr over 1.8s. The brand button sits
+          at the END of content flow, so as content above it
+          collapses the button rises naturally. For that rise
+          to read as "the section coming up" (matching desktop),
+          the section's bottom edge must NOT be visible in the
+          viewport — otherwise the user sees the bottom edge
+          rapidly snapping up to its min-height floor and
+          interprets that as "the footer just shoots up."
+
+       Setting min-height to a full `100dvh` (vs the previous
+       `calc(100dvh - 80px)`) gives the section ~80px of
+       overshoot below the visible-below-navbar area on a
+       phone with the URL bar showing. The section's bottom
+       edge sits offscreen throughout the close, so the user
+       only sees the brand button rising smoothly into rest —
+       no exposed dark teal, no rapid-snap footer rise. The
+       extra 80px is invisible inside the section anyway (it's
+       just more of the section's own gradient). Desktop's
+       base `min-height: 100vh` rule already gives this same
+       behavior at desktop sizes. */
+    .v2-selector { min-height: 100dvh; padding: 4rem 1rem 3rem; }
     .v2-selector-title { font-size: clamp(1.8rem, 8vw, 2.4rem); }
     .v2-level-panel { padding-left: 1rem; padding-right: 1rem; }
     .v2-level-panel.is-open {
@@ -4028,7 +4298,60 @@ function powerSummary(p: AnyProduct): string {
     .v2-card-body { padding: 1.25rem 1.25rem 1.5rem; }
     .v2-card-specs { padding: 0.95rem 0 1.05rem; gap: 0.75rem 1rem; }
     .v2-chart-overlay { left: var(--lefter-width, 64px); }
-    .v2-brand-grid { grid-template-columns: 1fr; }
+    /* Brand grid → horizontal scroll-snap carousel on mobile.
+       Each brand's chargers scroll left/right instead of
+       stacking vertically, saving massive vertical real
+       estate (a 5-card brand was previously ~5 × 480px =
+       2400px tall) and giving the catalog a tactile gallery
+       feel. Cards snap into place on swipe end so the user
+       always lands on a clean card edge.
+
+       Sizing math at 375vw:
+         · brand-morph-content-inner has horizontal padding
+           ~16px on each side, so the carousel container is
+           ~343px wide.
+         · Card width 75% = ~257px. The next card's edge
+           peeks ~25% (~85px) from the right, signaling
+           there's more to scroll to.
+         · min/max-width clamps protect smaller (320px) and
+           larger (480px tablet-portrait) viewports.
+
+       Edge-bleed via negative margin + matching padding
+       lets the carousel run flush to the brand-morph
+       content's edges; the first card's left margin (and
+       last card's right margin) come from the padding so
+       both endpoints sit at the visual edge of the content
+       area, which feels more like a real swipe gallery than
+       a clipped grid. */
+    .v2-brand-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      grid-template-columns: none;
+      gap: 0.75rem;
+      overflow-x: auto;
+      overflow-y: visible;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      /* Bleed to the brand-morph-content-inner's content
+         edges so cards align flush with the visible edges. */
+      margin-inline: calc(-1 * clamp(1rem, 3vw, 2rem));
+      padding-inline: clamp(1rem, 3vw, 2rem);
+      /* Hide scrollbar — the peek of the next card is the
+         only affordance we need. */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      /* Webkit fallback */
+      -webkit-overflow-scrolling: touch;
+    }
+    .v2-brand-grid::-webkit-scrollbar {
+      display: none;
+    }
+    .v2-brand-grid > .v2-mini-card {
+      flex: 0 0 75%;
+      min-width: 240px;
+      max-width: 320px;
+      scroll-snap-align: start;
+    }
     .v2-brand-head { grid-template-columns: 1fr; }
     .v2-brand-count {
       grid-column: 1;
@@ -4038,6 +4361,264 @@ function powerSummary(p: AnyProduct): string {
       margin-top: 10px;
     }
     .v2-brand-name { font-size: clamp(2rem, 8vw, 2.6rem); }
+
+    /* ──────────────────────────────────────────────────────────
+       SELECTOR TIER ROW — phone layout (DESKTOP-PATTERN PORT)
+       ──────────────────────────────────────────────────────────
+       The picker mirrors desktop's two-card structure on mobile:
+       L2 + L3 cards side-by-side in a 1fr/1fr grid, each card
+       in vertical orientation (image alcove on top, body below
+       with badge/title/stat/CTA). The Browse-by-brand strip
+       sits below the row as a third stacked element.
+
+       This replaces an earlier mobile-only horizontal-card
+       layout (single column, image-left/body-right) which had
+       drifted away from the desktop pattern visually. The
+       horizontal layout was originally added because the
+       desktop `min-height: clamp(240px, 30vh, 340px)` made
+       cards too tall when stacked single-column on phone —
+       but at TWO cards per row each takes only ~50% width, the
+       natural portrait aspect fits well, and tightened
+       spacing keeps the pair under 270px tall.
+
+       Desktop / tablet (>640px) is COMPLETELY untouched —
+       every rule below is locked behind this same media query.
+       ────────────────────────────────────────────────────────── */
+    /* The .v2-selector's outer 4-col grid reserves a column for
+       the lefter rail (`var(--lefter-width)`) — desirable on
+       desktop where the rail is visible, but on phone the rail
+       is `display:none` (HeaderV4 mobile bar takes over) and
+       that reserved column was eating ~64px off the content
+       width. Collapse the entire grid to a single column at this
+       breakpoint so the inner takes the full available row. */
+    .v2-selector {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .v2-selector-inner {
+      grid-column: 1;
+    }
+
+    /* Tier row — TWO columns side by side, matching desktop. */
+    .v2-tier-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-inline: 0;
+      padding-block: 8px 14px;
+      /* Desktop applies a negative margin-right that bleeds the
+         row past the section's right gutter. On mobile we want
+         the row flush inside the .v2-selector's own 1rem
+         padding — kill that bleed. */
+      margin-right: 0;
+      max-height: none;
+    }
+    /* Reset desktop's grid placements + L3's translateX nudge.
+       Desktop puts L2 in column 1 and L3 in column 3 of a
+       3-col grid (col2 is a center spacer); on our 2-col
+       mobile grid that leaves L3 in implicit column 3 (way
+       off-grid) and column 2 empty. `grid-column: auto` lets
+       both cards auto-place into the two natural columns. */
+    .v2-tier-morph[data-morph="l2"],
+    .v2-tier-morph[data-morph="l3"] {
+      grid-column: auto;
+      transform: none;
+    }
+
+    /* Card — vertical orientation matching desktop. The desktop
+       `min-height: clamp(240px, 30vh, 340px)` rule from line
+       1806 is overridden by the @media 960px rule that sets
+       `min-height: 340px`. Bring it down to a tighter mobile
+       budget so the picker pair + brand button fit together
+       inside one mobile viewport. */
+    .v2-selector-card {
+      width: 100%;
+      flex-direction: column;
+      min-height: 0;
+      height: auto;
+      border-radius: 18px;
+    }
+
+    /* Stage (image alcove) takes the top portion. Fixed height
+       so it scales predictably across the two cards. */
+    .v2-sel-stage {
+      flex: 0 0 auto;
+      width: 100%;
+      height: 130px;
+      padding-block: 10px;
+    }
+    .v2-sel-img-wrap {
+      max-width: 65%;
+    }
+    .v2-sel-img {
+      max-height: 100px;
+    }
+    /* The desktop reflection works fine at this scale — keep it. */
+
+    /* Body — bottom portion. Stacks badge/title/stat/CTA in a
+       column. Tight padding + smaller type so the body fits
+       under the stage at narrow card widths (~165px). */
+    .v2-sel-body {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 12px 12px 14px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      border-left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 2px;
+    }
+    .v2-sel-badge {
+      align-self: flex-start;
+      padding: 3px 8px;
+      font-size: 0.46rem;
+    }
+    .v2-sel-title {
+      margin: 6px 0 4px;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    /* Stat row — wraps when content exceeds card width. The
+       smaller font + flex-wrap keeps the kW + duration line
+       readable without cramping. */
+    .v2-sel-stat {
+      margin: 0 0 8px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .v2-sel-stat-num { font-size: 0.85rem; }
+    .v2-sel-stat-unit,
+    .v2-sel-stat-time,
+    .v2-sel-stat-sep { font-size: 0.6rem; }
+    /* Hide the descriptor sentence — title + stat already
+       communicate the tier; the long descriptor would force
+       the card to grow beyond a comfortable mobile budget. */
+    .v2-sel-desc { display: none; }
+    /* CTA — compact pill in the bottom of the body. */
+    .v2-sel-cta {
+      align-self: flex-start;
+      padding: 7px 12px;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+    }
+    .v2-sel-cta svg { width: 11px; height: 11px; }
+
+    /* Browse-by-brand strip on mobile — moderately substantial
+       (more padding + slightly larger icon than the tightest
+       version, but NOT a giant card that fills the bottom of
+       the viewport). The section's `min-height: 100dvh` ensures
+       the global <html> dark backdrop never peeks; the empty
+       space below the brand button is just the selector's own
+       light gradient, which reads as breathing room rather
+       than missing content. */
+    .v2-brand-morph-header {
+      padding: 20px 18px;
+      gap: 16px;
+      min-height: 110px;
+    }
+    .v2-brand-mark {
+      width: 48px;
+      height: 48px;
+    }
+    .v2-brand-btn-title {
+      font-size: 1.18rem;
+    }
+    /* Hide the tier-mini-slot on mobile — its 280px+ minimum
+       width wouldn't fit alongside brand-morph at narrow
+       viewports anyway, and on desktop it carried a baked-in
+       150-200px height that was padding the bottom-row even
+       when the slot itself was width:0 in idle state. With
+       the slot hidden, the bottom-row collapses to brand-
+       morph's natural (now substantial) height. The picker
+       cards already cover the "switch tier" affordance the
+       slot provided. */
+    .v2-tier-mini-slot {
+      display: none;
+    }
+    /* Section padding-bottom keeps the desktop's 3rem
+       (default) so the section ends at a comfortable
+       distance from the next section — no need to tighten
+       it now that the brand button itself fills the space
+       inside the section. */
+    /* Closed-state polish — animated padding instead of
+       display:none.
+
+       Background: the morph's content area uses an 0fr→1fr
+       grid-row reveal, but its inner carries clamp(1.5rem)
+       top+bottom padding (~48px total at mobile). With the row
+       at 0fr the grid track is 0 height, but on some mobile
+       layout passes the inner's padding was leaking visibly
+       below the header — a stripe of empty light area that
+       read as a layout bug. The previous fix used
+       `display: none` on the closed state, which solved the
+       cosmetic issue but DESTROYED the close animation: when
+       the user closed the panel, the content went straight to
+       display:none and the section snapped — no smooth
+       grid-rows transition, the brand button "footer" appeared
+       to shoot up.
+
+       New fix: collapse the inner's padding alongside grid-
+       template-rows on close, so the row + padding both
+       animate together. Element stays in the grid the entire
+       time, transitions play, brand button rises smoothly.
+
+       The transition on padding shares the grid-template-rows
+       duration so the inner's content area shrinks in lockstep
+       with the row track collapsing. */
+    /* CLOSE direction (no .is-open) — smooth but tight.
+       Tuned to 1.4s after iterating 2.6s (felt over-long) and
+       2.0s (still felt too slow). 1.4s reads as smooth +
+       deliberate without making the user wait for the brand
+       button to reach its rest position. CSS transitions read
+       the spec from the rules that apply at the moment of
+       change: removing .is-open switches the element back to
+       the :not(.is-open) match, so the close direction gets
+       this 1.4s curve.
+
+       Curve is ease-in-out (cubic-bezier 0.4, 0, 0.6, 1) —
+       distributes motion EVENLY across the duration. The
+       open direction's expo-out (cubic-bezier 0.22, 1, 0.36,
+       1) front-loads 95% of motion into the first 30% of the
+       duration ("snap then settle"), which is right for an
+       open (immediate visual feedback) but WRONG for a close
+       (reads as "rushed" — most of the catalog disappears
+       before the user perceives the close as having started).
+       Ease-in-out gives a measured glide: slow start (gesture
+       acknowledgement), measured middle, soft landing. */
+    .v2-brand-morph-content {
+      transition:
+        grid-template-rows 1.4s cubic-bezier(0.4, 0, 0.6, 1),
+        opacity 0.8s ease 0.2s;
+    }
+    .v2-brand-morph:not(.is-open) .v2-brand-morph-content-inner {
+      padding-top: 0;
+      padding-bottom: 0;
+      transition: padding 1.4s cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    /* OPEN direction (with .is-open) — keep snappy at 1.8s.
+       Adding .is-open immediately matches these rules so the
+       transition uses 1.8s rather than the 1.4s close above.
+       Note: the open is actually slightly LONGER than the
+       close now (1.8s vs 1.4s) — open uses the front-loaded
+       expo-out curve which feels instant for the first ~30%
+       then settles, so the perceived "feel" still reads as
+       snappy-open / smooth-close. */
+    .v2-brand-morph.is-open .v2-brand-morph-content {
+      transition:
+        grid-template-rows 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 1.1s ease 0.35s;
+    }
+    .v2-brand-morph.is-open .v2-brand-morph-content-inner {
+      transition: padding 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* (Mobile brand-reveal speedup REMOVED.)
+       A previous tuning shortened the L2/L3 brand-button
+       reveal to 0.8s delay + 0.7s duration on the theory that
+       smaller mobile cards "finish their reveal faster
+       perceptually." In practice it made the L2/L3 close feel
+       rushed. Mobile now inherits desktop's 1.4s delay + 1.2s
+       duration (2.6s end), giving the same deliberate, slow-
+       resolve feel as desktop. */
   }
 </style>
 
@@ -4090,6 +4671,29 @@ function powerSummary(p: AnyProduct): string {
     function setState(s: State) {
       state = s;
       lastStateChange = performance.now();
+      /* Reset the L2/L3 close accumulator on every state
+         transition. Whatever upward-scroll distance was
+         accumulated under the previous state shouldn't carry
+         over — a fresh tab open starts from 0. See the
+         L23_CLOSE_THRESHOLD_PX declaration above for context. */
+      l23UpwardAccum = 0;
+      /* CAROUSEL PAUSE HOOK (#5).
+         When the brand catalog opens the user is ~1340px down,
+         the pedestal hero is fully off-screen (the user can't
+         see it without two transitions back), and the carousel's
+         CSS animations + JS auto-rotate are wasting compositor
+         cycles that the brand morph's own heavy reveal (1.8s
+         grid-rows + 1.1s opacity + 1.2s padding + 16 first-paint
+         mini-cards) is already competing for. Toggling the
+         `carousel-paused` body class on/off based on brand state
+         lets HeroCarouselPedestal (which owns the receiving
+         hook) freeze every `.cp-slide / .cp-dot / .featured-
+         spotlight` animation via `animation-play-state: paused`
+         AND halt the auto-rotate timer. State leaving brand
+         (back to idle) removes the class; the carousel resumes
+         from where it left off BEFORE the user has scrolled
+         back up to where it's visible again. */
+      document.body.classList.toggle('carousel-paused', s === 'brand');
       /* STRONG ANCHOR — every state change activates the
          hold-pullback for a window after the click. The pull-
          back only fires when the user has drifted UPWARD past
@@ -4168,8 +4772,41 @@ function powerSummary(p: AnyProduct): string {
        can fire. Long enough to cover the scrollToSelector smooth
        scroll that runs right after a state change (~300-500ms in
        practice) plus a comfort buffer for the CSS transitions to
-       settle visually. */
-    const STATE_CHANGE_COOLDOWN_MS = 900;
+       settle visually. Bumped from 900 → 1100 after the L2/L3
+       close started feeling too easy to trigger from trackpad
+       residue immediately after the cooldown expired. */
+    const STATE_CHANGE_COOLDOWN_MS = 1100;
+
+    /* L2/L3 CLOSE — cumulative-upward-distance threshold.
+       The close handler used to fire on any 1px upward scroll
+       once the cooldown expired, which made the catalog feel
+       "too easy to accidentally close" — a trackpad twitch
+       2px upward at scrollY=800 (where the click lands the
+       user) was enough to dismiss the whole catalog. The
+       accumulator below tracks upward scroll distance while
+       the user is INSIDE the close zone (scrollY < 900,
+       i.e. megaRect.top > -100). It does NOT count upward
+       motion from deep inside the catalog content while
+       returning to the top — that was the second issue: a
+       fluid scroll-back-to-top from say scrollY=1500 would
+       arrive at the close zone with the accumulator already
+       at hundreds of pixels, instantly firing close before
+       the user had a moment to anchor at the catalog top.
+       Now the accumulator resets:
+         · on any downward scroll (intent flipped)
+         · on every state change (fresh tab opens at 0)
+         · whenever the user is OUT of the close zone (they
+           need to enter the zone before the counter starts)
+
+       Threshold of 150px handles natural "I'm scrolling
+       back to the top" momentum. The user has ~150px of
+       in-zone upward range before close commits — enough to
+       let them stop anywhere from scrollY=900 down through
+       the section header (~scrollY=750) and decide whether
+       to close. A faster flick still closes; a settling
+       momentum pause keeps them anchored. */
+    let l23UpwardAccum = 0;
+    const L23_CLOSE_THRESHOLD_PX = 150;
 
     /* Hold-at-selector pin. After a scroll-up-close fires we
        SHOULD land at the selector anchor and stay there until the
@@ -4210,47 +4847,46 @@ function powerSummary(p: AnyProduct): string {
        scroll events the smooth-scroll itself emits. */
     let snapping = false;
 
-    /* FIRST-ARRIVAL ANCHOR GRAB
-       ───────────────────────────────────────────────────────
-       When the user scrolls down from the pedestal hero into
-       the products section for the first time, the section
-       should "grab" them at the closed/idle state for a moment
-       before they can scroll past it. Without this grab, a
-       long-momentum scroll from the hero blasts straight
-       through the picker and trips the brand auto-open before
-       the user has had a chance to register the closed state.
-       The grab works two ways during its hold window:
-         (1) Brand auto-open is gated off — even if megaRect.top
-             goes well past -40, the brand catalog won't open.
-         (2) A downward pull-back catches drift past the anchor
-             (megaRect.top < -28) and snaps it back to ~0, so
-             the picker stays in the user's perfect viewport
-             until the hold expires.
-       After the hold expires, normal behavior resumes — they
-       can scroll down to trigger brand auto-open or click any
-       picker card directly. */
-    let firstArrivalUntil = 0;
-    let lastFirstArrivalPullAt = 0;
-    /* Hold duration after first arrival. ~700ms is long enough
-       for the user to perceive the picker as the rest position
-       even on a fast trackpad fling, short enough that a
-       deliberate downward scroll doesn't feel sticky. */
-    const FIRST_ARRIVAL_HOLD_MS = 700;
-    /* Drift threshold during first-arrival pull-back. Looser
-       than the upward HOLD_PULLBACK_THRESHOLD (24) because the
-       user is actively scrolling down — we don't want to fight
-       small downward motion, only catch them when they've
-       clearly overshot. */
-    const FIRST_ARRIVAL_PULL_THRESHOLD = -28;
-    const FIRST_ARRIVAL_PULL_DEBOUNCE_MS = 180;
-    /* Section top must be within this band on first arrival
-       for the grab to engage — the user has to ACTUALLY land
-       at the section, not just be passing somewhere above. */
-    const FIRST_ARRIVAL_DETECT_TOP = 24;
-    /* Once the user scrolls clearly back UP past this, the
-       grab resets so a return-trip from pedestal triggers
-       a fresh anchor. */
-    const FIRST_ARRIVAL_RESET_TOP = 240;
+    /* Deep-link gate. While a deep-link scroll is in progress
+       (after a featured-charger click jumps the user to a
+       specific card via /products-v2#<id>), this timestamp is
+       set to `performance.now() + windowMs` to suppress the
+       L2/L3 close handler. Without this, the deep-link's
+       smooth-scroll fires natural scroll events that the
+       close handler can interpret as "user scrolled up from
+       the catalog" — which then collapses the catalog right
+       after the user just clicked into it. */
+    let deepLinkSuppressUntil = 0;
+
+    /* FIRST-ARRIVAL ANCHOR GRAB — REMOVED.
+       The 700ms first-arrival grab + the >-28px pull-back used to
+       fire the moment the selector reached the viewport top. It
+       made the hero↔selector flow feel like "gravity fighting me"
+       on first scroll-in: a fast trackpad flick would land the
+       user at the selector and immediately get yanked back if
+       their momentum carried them 28+px past it, repeatedly for
+       700ms. We've kept `holdAtSelectorUntil` (above) for its
+       real value — it only engages after EXPLICIT state changes
+       (closing a catalog), so it doesn't fight first-impression
+       scroll but still catches trackpad momentum on the bounce-
+       back-to-selector that follows a catalog close. The rail's
+       safety-net snap (HeaderV4) is the only first-arrival
+       controller now — same architecture home-v2 uses. */
+
+
+    /* Mobile navbar offset for scroll-to-anchor calculations.
+       Below 860px the lefter rail is hidden and the page uses
+       a sticky `.mobile-header` (~80px) at the top of the
+       viewport. Any anchor we scroll TO needs to land at
+       viewport y=80 (right below the navbar) instead of y=0
+       (under it) — otherwise the section's first ~80px of
+       content (tier-tabs, hero text, section headers) gets
+       hidden behind the bar. Returns 80 on mobile, 0 on
+       desktop. Re-evaluated per call because the breakpoint
+       can flip live on viewport resize. */
+    function getMobileNavOffset(): number {
+      return window.matchMedia('(max-width: 860px)').matches ? 80 : 0;
+    }
 
     /* rAF-driven smooth scroll with cubic ease-in-out. Used by
        scrollToAnchor for click-driven anchor travel; gives more
@@ -4271,10 +4907,316 @@ function powerSummary(p: AnyProduct): string {
       requestAnimationFrame(step);
     }
 
+    /* HARD SCROLL-LOCK at the selector anchor — close-time
+       guarantee that the user cannot escape past selector toward
+       the hero anchor, choreographed as a single continuous
+       glide that syncs PERFECTLY with the extended CSS reveal
+       of the picker cards (see .v2-selector.is-closing rules).
+
+       The visual contract — every element ends together at 2.4s:
+         · CSS .v2-tier-row max-height 0 → 760px over 2.4s
+           (picker cards grow back; ease-in-out curve)
+         · CSS .v2-tier-expand grid-rows 1fr → 0fr over 2.4s
+           (catalog space collapses; same curve)
+         · CSS .v2-tier-catalog opacity 1 → 0 over 1.6s
+           (active catalog fades + drifts down; same curve)
+         · JS page scroll enterY → targetY over scrollMs (=2.4s)
+           with cubic ease-in-out — 50% of motion at 50% time
+
+       Why ease-in-out (not ease-out): the default expo-out
+       curve front-loads motion — picker cards reach 96% grown
+       at the midpoint, then sit nearly still for the second
+       half. That's the "rushed boom you're back" feel. Ease-
+       in-out distributes motion EVENLY: the picker grows at a
+       measured pace across the full 2.4s, mirrored exactly by
+       the page scroll. Slow start (~200ms of barely
+       perceptible motion), measured middle, smooth landing.
+       This is how Apple, Linear, Vercel handle premium close
+       transitions.
+
+       The slow start IS visible — but it doesn't read as
+       "the page is stuck." It reads as the system briefly
+       acknowledging the gesture before settling the user in.
+       The catalog beginning to fade out at the same instant
+       reinforces that something is happening; the eye tracks
+       the catalog while the page hasn't moved much yet.
+
+       Side effects established at lock-start, torn down at end:
+         · body.page-suppress-rail-snap blocks HeaderV4's
+           safety-net snap from racing our scroll.
+         · `snapping = true` blocks every other scroll-watcher
+           branch in onScrollAll (pull-back, accumulator, etc.)
+         · `is-closing` class on the .v2-selector triggers the
+           extended CSS transition durations + ease-in-out
+           curve. Removed at lock end so the OPEN direction
+           continues to use the default fast transitions.
+         · holdAtSelectorUntil tracks lock-end so any cross-
+           handler code keying off it stays consistent.
+
+       The lock ABORTS early if `state` changes externally
+       (e.g. user clicks a tier card mid-lock to re-open one) —
+       the new click's own scroll choreography takes over
+       cleanly without our pin fighting it. is-closing is
+       cleaned up immediately on abort so the new state's
+       transition uses the default fast curves. */
+    function lockToSelector(scrollMs: number, holdMs: number = 700) {
+      const selectorEl = document.querySelector<HTMLElement>(
+        '[data-lv4-anchor="products-selector"]',
+      );
+      if (!selectorEl) return;
+
+      document.body.classList.add('page-suppress-rail-snap');
+      /* NOTE: `is-closing` is NOT added here. It's only added by
+         the L2/L3 close handler (where the slow picker grow-in
+         is the focus and the brand-morph veil keyframes need to
+         hide the layout-flow motion). Brand close uses default
+         CSS — its brand-morph-content collapse, fade, and
+         scroll-back animations were perfected long before this
+         lock existed and shouldn't be touched. */
+      snapping = true;
+
+      /* Total lock duration = scrollMs (Phase 1: glide to
+         selector) + holdMs (Phase 2: hold while CSS picker
+         grows back in). Caller supplies both so L2/L3 close
+         and brand close can have their own Phase 2 lengths
+         that match each path's CSS animation. */
+      const TOTAL_MS = scrollMs + holdMs;
+      const lockStart = performance.now();
+      holdAtSelectorUntil = lockStart + TOTAL_MS;
+
+      /* User-input abort. The lock pins scrollY each frame to
+         override trackpad momentum that could otherwise carry
+         the user past selector toward hero. Pinning is GREAT
+         for residual momentum but BAD when the user actively
+         scrolls during the close — it fights their input,
+         producing visible jitter ("page freaks out"). After
+         a 200ms grace period (long enough that the close-
+         trigger gesture's own residual momentum doesn't
+         immediately abort), any wheel or touchmove event
+         signals fresh user intent and aborts the lock cleanly.
+
+         The CSS animations (catalog fade, picker grow,
+         brand-morph veil) keep playing — only the JS scroll-
+         pin is released. The user can scroll wherever they
+         want; the catalog → picker reveal still completes
+         visually in parallel. */
+      let userAborted = false;
+      let canAbort = false;
+      window.setTimeout(() => { canAbort = true; }, 200);
+      function abortHandler() {
+        if (canAbort) userAborted = true;
+      }
+      window.addEventListener('wheel', abortHandler, { passive: true });
+      window.addEventListener('touchmove', abortHandler, { passive: true });
+
+      /* cleanup(reason)
+         - 'natural-end'  → lock duration exhausted; the CSS close
+           animation has finished, so removing is-closing is the
+           natural endpoint that lets the brand button fade in.
+         - 'state-change' → user clicked a tier/brand card mid-
+           lock; the new state's CSS takes over so is-closing must
+           come off immediately to avoid stale transitions.
+         - 'user-abort'   → user scrolled. The scroll pin must
+           release NOW so input feels free, but is-closing must
+           STAY until the natural lock end — otherwise the in-
+           flight close animation snaps back to its idle CSS
+           values mid-curve, undoing visible progress. We schedule
+           the is-closing removal for the remaining lock window. */
+      function cleanup(reason: 'natural-end' | 'state-change' | 'user-abort') {
+        snapping = false;
+        document.body.classList.remove('page-suppress-rail-snap');
+        window.removeEventListener('wheel', abortHandler);
+        window.removeEventListener('touchmove', abortHandler);
+        if (reason === 'user-abort') {
+          const remaining = Math.max(
+            0,
+            TOTAL_MS - (performance.now() - lockStart),
+          );
+          window.setTimeout(() => {
+            mega?.classList.remove('is-closing');
+          }, remaining);
+        } else {
+          mega?.classList.remove('is-closing');
+        }
+      }
+
+      /* Snap-on-overshoot: if the user's momentum at lock-start
+         already pushed them ABOVE target (closer to hero,
+         scrollY < targetY), an eased glide from above-target
+         DOWN to target would visually REVERSE their scroll
+         direction — they were scrolling up, page would scroll
+         down. Visually jarring. A small instant snap is the
+         lesser evil. The 4px dead band tolerates measurement
+         jitter so we don't snap on rounding noise.
+
+         targetY subtracts the mobile navbar offset so on mobile
+         the snap lands the selector top at viewport y=80 (just
+         below the sticky bar) instead of y=0 (under it). */
+      {
+        const rect = selectorEl.getBoundingClientRect();
+        const targetY = Math.max(
+          0,
+          Math.round(window.pageYOffset + rect.top - getMobileNavOffset()),
+        );
+        if (window.scrollY < targetY - 4) {
+          window.scrollTo({ top: targetY, behavior: 'auto' });
+          prevScrollY = targetY;
+        }
+      }
+
+      /* Captured AFTER any snap-on-overshoot — the eased curve
+         starts from the corrected position. */
+      const enterY = window.scrollY;
+
+      function step(ts: number) {
+        /* Abort if state has changed externally. A mid-lock
+           click on a tier card or brand morph fires its own
+           setState + scroll choreography; our pin would fight
+           that. Cleanly bow out so the new state's transitions
+           use default fast curves. */
+        if (state !== 'idle') {
+          cleanup('state-change');
+          return;
+        }
+        /* Abort if the user actively scrolled — the CSS
+           animations continue but we stop pinning scrollY so
+           the user's intent wins. */
+        if (userAborted) {
+          cleanup('user-abort');
+          return;
+        }
+
+        const elapsed = ts - lockStart;
+        if (elapsed >= TOTAL_MS) {
+          cleanup('natural-end');
+          return;
+        }
+
+        /* Re-read target each frame. Defensive against any
+           layout reflow during the close. The selector anchor
+           sits ABOVE the closing catalog so its absolute Y is
+           stable in practice; recompute is cheap insurance.
+
+           targetY subtracts the mobile navbar offset so on
+           mobile the lock pins the selector's top at viewport
+           y=80 (below the sticky bar). On desktop offset is 0
+           so behavior is unchanged. */
+        const rect = selectorEl!.getBoundingClientRect();
+        const targetY = Math.max(
+          0,
+          Math.round(window.pageYOffset + rect.top - getMobileNavOffset()),
+        );
+
+        if (elapsed < scrollMs) {
+          /* SCROLL — Glide to selector with cubic ease-out.
+
+             Curve `1 - (1-t)^3`:
+               t=0    → 0     (high initial velocity = 3)
+               t=0.25 → 0.578
+               t=0.5  → 0.875
+               t=0.75 → 0.984
+               t=1    → 1     (smooth landing, zero velocity)
+
+             Starts FAST (continuous with the user's upward
+             trackpad gesture — page reads as continuing the
+             motion they initiated, not interrupting it),
+             decelerates smoothly into the anchor. The CSS
+             close animations (lockstep at 2.4s ease-in-out
+             — see .v2-selector.is-closing) run alongside
+             this scroll and continue past it; the page
+             settles at the selector while the catalog
+             fades + picker grows around the user. */
+          const t = Math.min(1, elapsed / scrollMs);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const eY = Math.round(enterY + (targetY - enterY) * eased);
+          /* Defensive clamp: never above target (closer to
+             hero). For typical close (enterY > targetY) eY
+             stays in [targetY, enterY] so this is a no-op;
+             kept for safety in any edge case. */
+          const clampedY = Math.max(eY, targetY);
+          window.scrollTo({ top: clampedY, behavior: 'auto' });
+          prevScrollY = clampedY;
+        } else {
+          /* HOLD — Anchor the page at the selector while the
+             CSS picker grow + catalog collapse + catalog fade
+             finish their 2.4s lockstep choreography. The brand
+             button below them moves smoothly along a monotonic
+             path from its catalog-state position (deep below
+             viewport) to its idle-state position (just below
+             viewport) — never entering the viewport, exactly
+             like the OPEN direction the user already approved.
+
+             3px threshold filters sub-pixel browser drift
+             from causing visible re-snaps. */
+          if (Math.abs(window.scrollY - targetY) > 3) {
+            window.scrollTo({ top: targetY, behavior: 'auto' });
+            prevScrollY = targetY;
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      requestAnimationFrame(step);
+    }
+
     function onScrollAll() {
       const now = window.scrollY;
       const scrollingUp = now < prevScrollY;
       const scrollingDown = now > prevScrollY;
+
+      /* L2/L3 CLOSE accumulator. Track upward scroll distance
+         while the user is INSIDE the close zone (megaRect.top >
+         -100, i.e. scrollY < 900). The close handler below
+         uses this against L23_CLOSE_THRESHOLD_PX to distinguish
+         intent-driven gestures from incidental motion. Resets:
+           · on any downward scroll (intent flipped — they're
+             re-engaging with the catalog)
+           · whenever the user is OUT of the close zone (they
+             must traverse INTO the zone before counting starts)
+           · on every state change (handled in setState)
+
+         GATED BY THE STATE-CHANGE COOLDOWN: the post-click
+         `scrollToSelector()` smooth-scroll fires upward scroll
+         events whenever the click came from a position past
+         scrollY=800 (e.g. user clicked L2 from scrollY=850).
+         Without this gate those programmatic upward events
+         poison the accumulator — by the time the cooldown
+         expires the counter is already near threshold, and
+         the user's natural settling-twitch closes the catalog.
+         Matching the close handler's own cooldown gate keeps
+         the accumulator strictly user-driven.
+
+         ZONE-GATED: anchored to the close zone specifically —
+         not the whole catalog scroll range. A user scrolling
+         back to the top of the catalog from deep inside (say
+         scrollY=1500) crosses ~600px upward before reaching
+         the close zone at scrollY=900. Without zone-gating,
+         the accumulator would already be at 600 by the time
+         they enter the close zone, and the close would fire
+         immediately on entry — denying them any moment to
+         anchor at the catalog top. With zone-gating, the
+         counter doesn't start until they're actually in the
+         zone, giving them ~150px of in-zone motion (≈ from
+         the trigger band's top at scrollY=900 down through
+         the section header at scrollY=750) before close
+         commits. Plenty of room to stop and stay; still
+         comfortably traversable on a fast deliberate flick. */
+      if (
+        (state === 'l2' || state === 'l3') &&
+        mega &&
+        performance.now() - lastStateChange >= STATE_CHANGE_COOLDOWN_MS
+      ) {
+        const closeZoneRect = mega.getBoundingClientRect();
+        if (closeZoneRect.top > -100) {
+          if (scrollingUp)        l23UpwardAccum += (prevScrollY - now);
+          else if (scrollingDown) l23UpwardAccum = 0;
+        } else {
+          /* Out of close zone — keep counter at 0 until the
+             user crosses back in. */
+          l23UpwardAccum = 0;
+        }
+      }
+
       prevScrollY = now;
 
       /* Active hold: if we recently fired a state-change-close,
@@ -4299,60 +5241,36 @@ function powerSummary(p: AnyProduct): string {
       ) {
         const megaRect = mega.getBoundingClientRect();
         const sinceLastPullback = performance.now() - lastHoldPullbackAt;
+        const navOffset = getMobileNavOffset();
+        /* Pullback fires when the section has drifted MORE than
+           HOLD_PULLBACK_THRESHOLD past its rest position. On
+           desktop rest = viewport y=0, so the trigger is when
+           megaRect.top > 24. On mobile rest = viewport y=80
+           (just below the sticky navbar), so the trigger is
+           when megaRect.top > 80+24 = 104 — using the same
+           24px tolerance from the rest position regardless of
+           navbar presence. */
         if (
-          megaRect.top > HOLD_PULLBACK_THRESHOLD &&
+          megaRect.top > HOLD_PULLBACK_THRESHOLD + navOffset &&
           sinceLastPullback > HOLD_PULLBACK_DEBOUNCE_MS
         ) {
           const absoluteTop = window.pageYOffset + megaRect.top;
-          window.scrollTo({ top: Math.max(0, absoluteTop - 8), behavior: 'auto' });
+          /* Land flush at the anchor's rest position. On desktop
+             that's viewport y=0 (target = absoluteTop). On mobile
+             it's viewport y=80 (target = absoluteTop - 80) so the
+             section top sits right below the sticky navbar instead
+             of underneath it. */
+          window.scrollTo({ top: Math.max(0, absoluteTop - navOffset), behavior: 'auto' });
           prevScrollY = window.scrollY;
           lastHoldPullbackAt = performance.now();
         }
       }
 
-      /* FIRST-ARRIVAL DETECTION + RESET. Engages when the user
-         scrolls DOWN into the section from above and the section
-         top first reaches the detect band. Resets when the user
-         scrolls clearly back UP past the reset band so a return-
-         trip can trigger a fresh grab. */
-      if (mega && state === 'idle') {
-        const megaRectFA = mega.getBoundingClientRect();
-        if (
-          firstArrivalUntil === 0 &&
-          scrollingDown &&
-          megaRectFA.top <= FIRST_ARRIVAL_DETECT_TOP &&
-          megaRectFA.top > -40
-        ) {
-          firstArrivalUntil = performance.now() + FIRST_ARRIVAL_HOLD_MS;
-        }
-        if (megaRectFA.top > FIRST_ARRIVAL_RESET_TOP) {
-          firstArrivalUntil = 0;
-        }
-      }
-
-      /* FIRST-ARRIVAL PULL-BACK. During the grab window, pull the
-         user back to the section anchor if their downward
-         momentum has carried them past it. Same `snapping` /
-         debounce gating as the upward pull-back so it doesn't
-         fight any programmatic scrolls or stutter on rapid
-         momentum frames. */
-      if (
-        mega &&
-        !snapping &&
-        performance.now() < firstArrivalUntil
-      ) {
-        const megaRectFA = mega.getBoundingClientRect();
-        const sinceLastPull = performance.now() - lastFirstArrivalPullAt;
-        if (
-          megaRectFA.top < FIRST_ARRIVAL_PULL_THRESHOLD &&
-          sinceLastPull > FIRST_ARRIVAL_PULL_DEBOUNCE_MS
-        ) {
-          const absoluteTop = window.pageYOffset + megaRectFA.top;
-          window.scrollTo({ top: Math.max(0, absoluteTop - 8), behavior: 'auto' });
-          prevScrollY = window.scrollY;
-          lastFirstArrivalPullAt = performance.now();
-        }
-      }
+      /* (FIRST-ARRIVAL DETECTION + RESET and FIRST-ARRIVAL
+         PULL-BACK blocks REMOVED — see the comment block where
+         their constants used to live, further up in this script.
+         The rail's safety-net snap is now the only first-arrival
+         controller for the hero↔selector zone.) */
 
       /* SCROLL-DOWN AUTO-OPEN BRAND. When the user is in idle
          (the closed/picker state) and starts scrolling DOWN past
@@ -4363,25 +5281,41 @@ function powerSummary(p: AnyProduct): string {
          past the picker. Cooldown gate prevents the post-click
          smooth-scroll from re-triggering it.
 
-         GATED BY FIRST-ARRIVAL HOLD: when the user has just
-         arrived at the section from above, we hold them at the
-         picker for FIRST_ARRIVAL_HOLD_MS before allowing the
-         auto-open. Without this gate, a long-momentum scroll
-         from the pedestal hero would blast past the picker and
-         open brand instantly, bypassing the closed state. */
+         (Previously gated by `firstArrivalUntil` to suppress
+         brand auto-open during the 700ms first-arrival hold.
+         The first-arrival hold is gone — see its REMOVED comment
+         block above — so the gate is gone too. If a high-
+         momentum scroll blasts past the picker without the user
+         seeing it, that's now the rail's safety-net problem,
+         the same architecture home-v2 uses.) */
       if (
         scrollingDown &&
         state === 'idle' &&
         mega &&
-        performance.now() - lastStateChange >= STATE_CHANGE_COOLDOWN_MS &&
-        performance.now() >= firstArrivalUntil
+        performance.now() - lastStateChange >= STATE_CHANGE_COOLDOWN_MS
       ) {
         const megaRect = mega.getBoundingClientRect();
         if (megaRect.top < -40) {
           setState('brand');
-          setTimeout(() => {
+          /* Mobile: scroll IMMEDIATELY (no 280ms stage delay).
+             The desktop's 280ms delay lets the brand-morph
+             begin its visual unfurl before the page glides to
+             the brand anchor — readable on a tall viewport.
+             On mobile that 280ms window is exactly when user
+             trackpad/touch momentum can carry them past the
+             section's min-height boundary into the footer
+             below. Killing the delay means the smooth-scroll
+             starts overriding scrollY on the very next frame,
+             before any momentum can leak through, so the
+             footer never shows. */
+          const scrollDelay = window.matchMedia('(max-width: 860px)').matches ? 0 : 280;
+          if (scrollDelay === 0) {
             scrollToAnchor('[data-lv4-anchor="products-brands"]');
-          }, 280);
+          } else {
+            setTimeout(() => {
+              scrollToAnchor('[data-lv4-anchor="products-brands"]');
+            }, scrollDelay);
+          }
           return;
         }
       }
@@ -4405,13 +5339,31 @@ function powerSummary(p: AnyProduct): string {
       if (state === 'brand' && brandMorph) {
         const brandRect = brandMorph.getBoundingClientRect();
         if (brandRect.top > 40 && brandRect.top < window.innerHeight * 0.6) {
+          /* NOTE: NO `is-closing` class for brand close. The brand
+             close animation (brand-morph-content folding back,
+             page scrolling to selector) was perfected long before
+             the L2/L3 close lock existed and uses its own default
+             CSS timings. Adding `is-closing` here would trigger
+             the brand-morph veil keyframes — meant to hide layout
+             motion during the L2/L3 close — and visibly fade the
+             brand button itself, which is wrong for this path
+             (the brand button IS the thing the user is closing,
+             so making it disappear before the close animation
+             plays out would gut the visual). The click-driven
+             brand close (toggleBrandFromClick) ALSO doesn't add
+             is-closing, so both close paths now share the exact
+             same animation: default CSS collapse + default JS
+             scroll. */
           setState('idle');
-          /* SMOOTHNESS: stagger the scroll-back to AFTER the
-             collapse has begun, so the user sees the catalog
-             animate before the page moves. */
-          const scrollDelay = 320;
-          holdAtSelectorUntil = performance.now() + HOLD_AT_SELECTOR_MS + scrollDelay;
-          setTimeout(scrollToSelector, scrollDelay);
+          /* HARD SCROLL-LOCK to selector — same anti-hero-anchor
+             guarantee as L2/L3, but with a shorter hold (1100ms)
+             because brand close has no slow picker grow-in to
+             cover (picker is already visible in state-brand).
+             Hold just needs to cover the brand-morph-content's
+             default 1.8s grid-rows collapse + brief momentum
+             buffer, all of which happens off-screen since the
+             user is already at the selector top. */
+          lockToSelector(CLOSE_SCROLL_DURATION_MS, 1100);
         }
         return;
       }
@@ -4422,41 +5374,61 @@ function powerSummary(p: AnyProduct): string {
          cooldown above gates against the post-click anchor scroll;
          from there a deliberate upward scroll closes the catalog.
 
-         STAGED ANIMATION (matches the brand-close pattern):
-           1. setState('idle') — kicks off the .v2-tier-row's
-              max-height: 0 → 760px transition (1.4s in CSS) so
-              the picker cards visibly grow back into view.
-           2. holdAtSelectorUntil set FIRST, before the scroll
-              starts, with a generous window covering both the
-              scroll and lingering trackpad momentum afterward.
-           3. scrollToSelector delayed by `scrollDelay` so the
-              picker cards have started growing IN before the
-              page begins moving. Without the delay, the page
-              scrolls to anchor while the row is still mostly
-              collapsed — visually empty and choppy.
-           4. Scroll uses the slower CLOSE duration so its
-              landing roughly syncs with the row's expansion
-              completing.
+         The actual close choreography is delegated entirely to
+         lockToSelector — a per-frame rAF clamp loop that pins
+         the user at the selector anchor for the full duration
+         (stage + scroll + hold). This is a HARD GUARANTEE:
+         every frame the page is forced onto the lock's clamp
+         position, so trackpad momentum, the rail's safety-net
+         snap, and any other scroll handler all become physically
+         incapable of sending the user past selector toward hero.
 
-         Anti-peek: the hold window is intentionally long
-         (CLOSE_SCROLL_DURATION_MS + scrollDelay + buffer) so
-         that momentum overshooting the anchor gets caught by
-         the pull-back rather than letting the user briefly
-         "peek" into the pedestal hero above the section. */
+         The previous implementation used a setTimeout-based
+         scrollToSelector chain plus a body-class suppress flag
+         and a cooperative pull-back — three independent moving
+         parts that could (and did) race. The lock collapses
+         them into one authoritative loop. */
       const megaRect = mega.getBoundingClientRect();
-      if (megaRect.top > -100) {
+      /* Gate the close on TWO conditions: the section is at the
+         top of the viewport (megaRect.top > -100, the existing
+         trigger band) AND the user has actually scrolled up by
+         a meaningful amount (l23UpwardAccum >= threshold). The
+         threshold filters trackpad twitches and momentum-jitter
+         that would otherwise dismiss the catalog while the user
+         was just settling in to read it. A real "scroll up to
+         close" gesture clears 80px in one finger-flick. See the
+         declaration block near the top of the IIFE for context. */
+      if (megaRect.top > -100 && l23UpwardAccum >= L23_CLOSE_THRESHOLD_PX) {
+        /* Deep-link gate: a featured-charger click that jumps
+           the user into the catalog suppresses the close
+           handler for ~3s so the post-click scroll's natural
+           scroll events can't be misread as "user scrolled
+           up to close". Without this, the catalog would
+           randomly collapse right after the user just opened
+           it. */
+        if (performance.now() < deepLinkSuppressUntil) return;
+
+        /* `is-closing` MUST be set BEFORE setState so the
+           CSS transitions on tier-row, tier-expand, and
+           tier-catalog all fire with the 2.4s ease-in-out
+           timing spec already in the cascade. CSS reads the
+           transition spec at the moment the property changes,
+           which happens inside setState's classList swap —
+           adding the class after would be too late. */
+        mega?.classList.add('is-closing');
         setState('idle');
-        /* scrollDelay 500ms — picker cards have ~half their
-           1.4s grow-in animation visible before the page begins
-           to move. Combined with the 1500ms close-scroll, the
-           total close sequence runs ~2s and feels deliberate. */
-        const scrollDelay = 500;
-        holdAtSelectorUntil =
-          performance.now() +
-          scrollDelay +
-          CLOSE_SCROLL_DURATION_MS +
-          HOLD_AT_SELECTOR_MS;
-        setTimeout(() => scrollToSelector(CLOSE_SCROLL_DURATION_MS), scrollDelay);
+        /* HARD SCROLL-LOCK to selector — page glides up to the
+           anchor with cubic ease-out (700ms, gestural) while
+           the CSS lockstep choreography (2.4s ease-in-out for
+           tier-row grow + tier-expand collapse + tier-catalog
+           fade) plays out around the user. Hold for 2000ms
+           after the scroll lands to cover the remaining CSS
+           animation + a brief momentum-decay buffer. Total:
+           2.7s. The brand button below the catalog evolves
+           smoothly along a monotonic layout path that never
+           enters the viewport — every motion the user sees
+           is serving the close, nothing illogical. */
+        lockToSelector(CLOSE_SCROLL_DURATION_MS, 2000);
       }
     }
     window.addEventListener('scroll', onScrollAll, { passive: true });
@@ -4621,14 +5593,22 @@ function powerSummary(p: AnyProduct): string {
        the exact same pixel the rail would. */
     /* Default anchor-scroll duration for click-driven travel.
        Slower than native ~300ms for a deliberate glide, but fast
-       enough to feel responsive after a click. The L2/L3 close
-       overrides this with a longer duration to sync visually
-       with the .v2-tier-row's 1.4s max-height expansion (so the
-       page doesn't finish moving long before the picker cards
-       finish growing back into view) — and the close gets even
-       more time on top via the staged scrollDelay. */
+       enough to feel responsive after a click. */
     const ANCHOR_SCROLL_DURATION_MS = 700;
-    const CLOSE_SCROLL_DURATION_MS = 1500;
+    /* Close-scroll Phase 1 duration — JS scrolls the page from
+       enterY to the selector anchor over this window with cubic
+       ease-out. Default-speed CSS handles catalog fade (0.7s)
+       and tier-expand collapse (1.4s) in parallel so the brand
+       button below them finishes its upward layout shift
+       quickly, out of the user's attention.
+
+       Phase 2 (the slow picker grow-in) runs AFTER this Phase 1
+       via a 700ms transition-delay on .v2-selector.is-closing
+       .v2-tier-row — the picker cards stay at max-height: 0
+       for the entire Phase 1 then begin their 2s ease-in-out
+       grow at the moment Phase 1 ends. See CSS comment on
+       .is-closing for the full two-phase rationale. */
+    const CLOSE_SCROLL_DURATION_MS = 700;
 
     function scrollToAnchor(selector: string, durationMs?: number) {
       const el = document.querySelector<HTMLElement>(selector);
@@ -4638,7 +5618,17 @@ function powerSummary(p: AnyProduct): string {
         requestAnimationFrame(() => {
           const rect = el.getBoundingClientRect();
           const absoluteTop = window.pageYOffset + rect.top;
-          const targetY = Math.max(0, Math.round(absoluteTop - 8));
+          /* Land flush with the anchor's top edge MINUS the
+             mobile navbar offset. On desktop offset is 0 so
+             the anchor's top ends up at viewport y=0 (matches
+             the rail's safety-net snap target — both paths
+             agree). On mobile offset is 80 so the anchor's
+             top lands at viewport y=80, just below the sticky
+             mobile header — the section's first content
+             (e.g. the tier-tabs the user just clicked
+             into) is fully visible instead of hidden under
+             the navbar. */
+          const targetY = Math.max(0, Math.round(absoluteTop - getMobileNavOffset()));
           /* `snapping` blocks any future scroll-watcher branches
              from re-entering during the smooth scroll. Hold it for
              the full duration plus a small buffer so the very
@@ -4745,16 +5735,140 @@ function powerSummary(p: AnyProduct): string {
       const card = document.getElementById(id);
       if (!card) return;
       const owningTier = card.getAttribute('data-product-tab') as Panel | null;
-      if (owningTier === 'l2' || owningTier === 'l3') openPanel(owningTier);
-      /* Give the max-height transition a beat to start before
-         we measure and scroll — otherwise the card's Y is
-         still inside the collapsed box. */
-      setTimeout(() => {
+      /* Deep-link guard: only L2/L3 cards trigger panel-open.
+         Cards without a valid tier (none currently exist, but
+         this prevents future bug routes) fall through to a
+         simple scrollIntoView with no state change. */
+      if (owningTier !== 'l2' && owningTier !== 'l3') {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      /* DEEP-LINK FOUR-PHASE FLOW
+         ─────────────────────────────────────────────────────
+         The previous version triggered setState immediately on
+         click — the catalog began expanding while the page was
+         still scrolling toward the section, producing a dizzy
+         tangle of parallel motion (page travel + CSS unfurl +
+         post-scroll re-target). The user's eye couldn't lock
+         onto any single moving element.
+
+         Each phase is now a single, isolated motion. The flow
+         reads as four discrete beats — never two simultaneous
+         — which feels intentional and premium:
+
+           Phase 1 (0–700ms)   Smooth-scroll DOWN to the
+                               selector section's anchor.
+                               State stays 'idle'; the picker
+                               cards are the only thing the
+                               user sees move (the page).
+           Phase 2 (700–900ms) Brief settle pause. The page
+                               has landed at the selector
+                               anchor. Nothing moves.
+           Phase 3 (900–2300ms) setState fires; the chosen
+                                tier's catalog unfurls via the
+                                normal 1.4s open animation.
+                                Page does NOT scroll — the
+                                catalog grows BELOW the
+                                picker, in place. Same flow as
+                                clicking the L2/L3 picker card
+                                directly.
+           Phase 4 (2300–3000ms) Smooth-scroll DOWN to the
+                                 chosen card so it lands
+                                 centered in the viewport.
+
+         Scroll-watchers stay quiet across the whole window:
+           · `snapping = true` blocks onScrollAll's pull-back,
+             accumulator, and close branches for the duration.
+           · `deepLinkSuppressUntil` is belt-and-suspenders
+             insurance: even if `snapping` lapsed for a frame,
+             the L2/L3 close handler refuses to fire inside
+             this window, so any momentum bounce can't
+             collapse the catalog right after Phase 3 opens
+             it. */
+      const sel = document.querySelector<HTMLElement>(
+        '[data-lv4-anchor="products-selector"]',
+      );
+      if (!sel) {
+        /* Fallback: anchor element missing — skip phased flow
+           and just open + native scroll. Should never fire in
+           practice. */
+        openPanel(owningTier);
+        scrollToPanel(owningTier);
+        return;
+      }
+
+      const PHASE1_SCROLL_MS = 700;
+      const PHASE2_SETTLE_MS = 200;
+      const PHASE3_OPEN_MS = 1400; // matches CSS .v2-tier-expand grid-rows transition
+      const PHASE4_SCROLL_MS = 700;
+      const TOTAL_MS =
+        PHASE1_SCROLL_MS + PHASE2_SETTLE_MS + PHASE3_OPEN_MS + PHASE4_SCROLL_MS;
+
+      /* Neutralize the browser's native hash-scroll BEFORE we
+         start Phase 1.
+
+         When the hero carousel sets `window.location.href = '...
+         #cardId'`, the browser synchronously scrolls the page so
+         the element with that id sits at viewport top — firing
+         scroll events on the way. Those scroll events run BEFORE
+         our hashchange listener (handleHash) gets a chance to
+         set snapping=true, so onScrollAll's brand-auto-open
+         branch sees `state==='idle' && scrollingDown` and flips
+         the page into state-brand mid-jump. By the time we get
+         here, scrollY is past the selector and state is wrong.
+
+         Fix: at the top of handleHash, force the page back to
+         the hero (scrollY=0, where the user clicked from) and
+         reset state to idle. From that clean baseline our four-
+         phase flow controls every subsequent motion. The reset
+         is invisible in practice — it happens within a single
+         frame of the browser's hash-jump, so the user just sees
+         our Phase 1 scroll start from the top. */
+      if (state !== 'idle') setState('idle');
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      prevScrollY = 0;
+      lastStateChange = performance.now();
+
+      snapping = true;
+      deepLinkSuppressUntil = performance.now() + TOTAL_MS + 400;
+
+      /* Phase 1: scroll page to the selector anchor. */
+      const selRect = sel.getBoundingClientRect();
+      const phase1TargetY = Math.max(
+        0,
+        Math.round(window.pageYOffset + selRect.top - getMobileNavOffset()),
+      );
+      smoothScrollTo(phase1TargetY, PHASE1_SCROLL_MS);
+
+      /* Phase 3: open the panel after Phase 1 + settle pause. */
+      window.setTimeout(() => {
+        openPanel(owningTier);
+      }, PHASE1_SCROLL_MS + PHASE2_SETTLE_MS);
+
+      /* Phase 4: scroll to the card once the catalog has
+         finished unfurling. Recompute target Y at fire time —
+         the open animation may have shifted layout slightly. */
+      window.setTimeout(() => {
         const rect = card.getBoundingClientRect();
         const absoluteTop = window.pageYOffset + rect.top;
-        const targetScroll = absoluteTop - (window.innerHeight - rect.height) / 2;
-        window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
-      }, 140);
+        const navOffset = getMobileNavOffset();
+        /* Vertical centering for short cards, navbar-aware
+           top-aligned for tall cards. The center calc gives
+           the desired CARD-TOP position in the viewport;
+           clamp it to never go above (navOffset + 16) so the
+           card never tucks under the navbar. */
+        const centerY = (window.innerHeight - rect.height) / 2;
+        const desiredTopInViewport = Math.max(navOffset + 16, centerY);
+        const targetScroll = Math.max(
+          0,
+          Math.round(absoluteTop - desiredTopInViewport),
+        );
+        smoothScrollTo(targetScroll, PHASE4_SCROLL_MS);
+        window.setTimeout(() => {
+          snapping = false;
+        }, PHASE4_SCROLL_MS + 120);
+      }, PHASE1_SCROLL_MS + PHASE2_SETTLE_MS + PHASE3_OPEN_MS);
     }
 
     handleHash();

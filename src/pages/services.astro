@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTab.astro';
 
 // Service-card images live in /public/images/old-service-images/. They
 // were originally hot-linked from Google's AIDA CDN (aida-public/...);
@@ -11,21 +13,21 @@ const topCards = [
     code: 'SITE-REF-01',
     title: 'Multifamily Real Estate',
     subtitle: 'Urban residential ecosystems.',
-    href: '/solutions/multifamily',
+    href: '/service-testing/multifamily-v4',
     image: '/images/old-service-images/multifamily.jpg',
   },
   {
     code: 'FLEET-OP-A9',
     title: 'Fleets',
     subtitle: 'Zero-emission logistics scaling.',
-    href: '/solutions/fleets',
+    href: '/service-testing/fleets-v2',
     image: '/images/old-service-images/fleets.jpg',
   },
   {
     code: 'TRANSIT-HUB-X',
     title: 'Highway Fast Charging',
     subtitle: 'High-throughput corridor power.',
-    href: '/solutions/highway-fast-charging',
+    href: '/service-testing/highway-v3',
     image: '/images/old-service-images/highway-fast-charging.jpg',
   },
 ];
@@ -42,6 +44,7 @@ const sideTopCards = [
     title: 'Commercial',
     href: '/solutions/commercial',
     image: '/images/old-service-images/commercial.jpg',
+    wip: true,
   },
 ];
 
@@ -51,18 +54,21 @@ const sideBottomCards = [
     title: 'Retail',
     href: '/solutions/retail',
     image: '/images/old-service-images/retail.jpg',
+    wip: true,
   },
   {
     code: 'PK-INFRA-G',
     title: 'Parking',
     href: '/solutions/parking',
     image: '/images/old-service-images/parking.jpg',
+    wip: true,
   },
   {
     code: 'HOSPITAL-UNIT',
     title: 'Medical',
     href: '/solutions/medical',
     image: '/images/old-service-images/medical.jpg',
+    wip: true,
   },
 ];
 
@@ -97,6 +103,8 @@ const standards = [
 <Layout
   title="Services — Evium Charging"
   description="Explore Evium Charging's service verticals across multifamily, fleets, highway fast charging, commercial, retail, parking, medical, and more."
+  headerVariant="v4"
+  bodyClass="page-services"
 >
   <main class="services-page text-[#182126]">
     <section class="services-hero relative overflow-hidden pt-28 md:pt-36">
@@ -330,7 +338,7 @@ const standards = [
         ))}
 
         <a
-          href="/solutions/generate-profits"
+          href="/solutions/profit-calculator"
           class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white px-6 py-7 shadow-[0_28px_60px_rgba(10,20,28,0.08)] md:col-span-6 md:row-span-2 md:px-10 md:py-9"
         >
           <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#ededec] text-[#a7aaaa] transition-colors duration-300 group-hover:bg-[#dfe8e1] group-hover:text-[#17883c] md:right-8 md:top-8 md:h-16 md:w-16">
@@ -387,7 +395,12 @@ const standards = [
         {sideTopCards.map((card) => (
           <a
             href={card.href}
-            class="group relative overflow-hidden rounded-2xl md:col-span-3"
+            class:list={[
+              'group relative overflow-hidden rounded-2xl md:col-span-3',
+              card.wip && 'pointer-events-none',
+            ]}
+            aria-disabled={card.wip ? 'true' : undefined}
+            tabindex={card.wip ? -1 : undefined}
           >
             <img
               src={card.image}
@@ -397,6 +410,11 @@ const standards = [
             />
             <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.16))]"></div>
             <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+            {card.wip && (
+              <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#404952]/55 backdrop-blur-[1.5px]" aria-hidden="true">
+                <span class="rounded bg-black/45 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/95">Under Construction</span>
+              </div>
+            )}
             <div class="relative flex h-full flex-col justify-between p-5">
               <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
               <h2 class="max-w-[12ch] text-[1.65rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
@@ -407,7 +425,12 @@ const standards = [
         {sideBottomCards.map((card) => (
           <a
             href={card.href}
-            class="group relative overflow-hidden rounded-2xl md:col-span-2"
+            class:list={[
+              'group relative overflow-hidden rounded-2xl md:col-span-2',
+              card.wip && 'pointer-events-none',
+            ]}
+            aria-disabled={card.wip ? 'true' : undefined}
+            tabindex={card.wip ? -1 : undefined}
           >
             <img
               src={card.image}
@@ -417,6 +440,11 @@ const standards = [
             />
             <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.12))]"></div>
             <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+            {card.wip && (
+              <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#404952]/55 backdrop-blur-[1.5px]" aria-hidden="true">
+                <span class="rounded bg-black/45 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white/95">Under Construction</span>
+              </div>
+            )}
             <div class="relative flex h-full flex-col justify-between p-4">
               <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
               <h2 class="text-[1.35rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
@@ -473,28 +501,71 @@ const standards = [
       </div>
     </section>
 
-    <section class="mx-auto max-w-[1440px] px-4 py-24 text-center md:px-8 md:py-32">
-      <h2 class="text-5xl font-black leading-[0.95] tracking-[-0.05em] text-[#11181d] md:text-[4.4rem]">
-        Ready to architect your
-        <span class="block italic text-[#17883c]">charging future?</span>
-      </h2>
+    {/* ═══════════════════════════════════════════════════════════════
+        FINAL CTA — full-bleed photo background of a driver charging a
+        DC fast-charger, with a brand-dark gradient overlay for text
+        legibility. Text content is unchanged from the previous CTA;
+        only the surface treatment has been upgraded to match the
+        scale + finish of the up-to-date ServicePageV2 final-CTA
+        (centered headline, button row, generous padding).
+        Image lives at /public/images/aura-farming/.
+        ═══════════════════════════════════════════════════════════ */}
+    <section class="services-final-cta">
+      {/* Background photo — covers the whole section, set as a
+          decorative img so we can fine-tune position/scale with CSS
+          (object-position centers on the subject's torso so the
+          headline copy lands on the open right-side gradient). */}
+      <img
+        src="/images/aura-farming/Blond_Female_Charging_DCFC.png"
+        alt=""
+        class="services-final-cta-photo"
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+      {/* Two-layer overlay: a dark gradient that fades from solid-near-
+          black on the right (under the headline) to soft on the left
+          (so the photo subject reads through), plus a subtle bottom-
+          dark gradient for the button-row contrast. */}
+      <div class="services-final-cta-overlay" aria-hidden="true"></div>
 
-      <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <a
-          href="/contact/quote"
-          class="inline-flex items-center justify-center bg-[#17883c] px-10 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors duration-200 hover:bg-[#0f6e30]"
-        >
-          Begin Site Analysis
-        </a>
-        <a
-          href="/how-it-works"
-          class="inline-flex items-center justify-center border border-[#11181d]/20 px-10 py-4 text-xs font-bold uppercase tracking-[0.16em] text-[#11181d] transition-colors duration-200 hover:bg-[#11181d] hover:text-white"
-        >
-          Explore How It Works
-        </a>
+      <div class="services-final-cta-inner">
+        {/* Three-line headline. Top line + green italic accent middle
+            line carry the original two-line stack; the bottom line
+            absorbs the old eyebrow pill's "Ready when you are" idea
+            as a confidence statement so the brow can come off without
+            losing that beat. All three lines share the original title
+            styling — no per-line treatment. */}
+        <h2 class="services-final-cta-title">
+          Ready to architect your
+          <span class="services-final-cta-title-accent">charging future?</span>
+          <span class="services-final-cta-title-coda">We&rsquo;re ready when you are</span>
+        </h2>
+        <div class="services-final-cta-actions">
+          <a
+            href="/contact/quote"
+            class="services-final-cta-btn services-final-cta-btn--primary"
+          >
+            Begin Site Analysis
+          </a>
+          <a
+            href="/how-it-works"
+            class="services-final-cta-btn services-final-cta-btn--ghost"
+          >
+            Explore How It Works
+          </a>
+        </div>
       </div>
     </section>
   </main>
+  <SiteFooter />
+
+  <!-- Right-edge sticky consultation CTA. `alwaysVisible`
+       so the tab is present from page load on /services —
+       the services hub has no in-content conversion form,
+       so the consultation CTA stays one click away from
+       any scroll position. -->
+  <ConsultationStickyTab alwaysVisible />
 </Layout>
 
 <style>
@@ -658,5 +729,161 @@ const standards = [
     font-weight: 800;
     letter-spacing: -0.05em;
     font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     FINAL CTA — full-bleed photo bg + brand gradient overlay
+     ───────────────────────────────────────────────────────────────
+     Replaces the previous light-bg text-only CTA. Photo lives at
+     /public/images/aura-farming/. Inspired by ServicePageV2's
+     .svc-final closing card — same scale, eyebrow pill, big
+     two-line headline with a green-accent line — but with a
+     photographic background instead of a white card.
+     ═══════════════════════════════════════════════════════════════ */
+  .services-final-cta {
+    position: relative;
+    min-height: clamp(420px, 56vh, 640px);
+    overflow: hidden;
+    isolation: isolate;
+    color: #ffffff;
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+  }
+  /* Photo — absolutely positioned to cover. object-position pulls
+     the subject toward the left so the open right-half can carry
+     the headline + buttons against the gradient. */
+  .services-final-cta-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Slightly off-centre so the subject reads as ambient framing
+       behind the centred text, not as direct competition with it. */
+    object-position: 38% 28%;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  /* Overlay — uniform dark wash + soft vignette. Symmetric stack
+     for the centred text: a flat dark layer for baseline legibility
+     everywhere, a centre-dim radial vignette so the centred text
+     gets a hair more contrast where the eye lands, and a bottom
+     fade for the button row. */
+  .services-final-cta-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(
+        ellipse 60% 70% at 50% 50%,
+        rgba(13, 26, 34, 0.55) 0%,
+        rgba(13, 26, 34, 0.45) 60%,
+        rgba(13, 26, 34, 0.50) 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(13, 26, 34, 0.22) 0%,
+        rgba(13, 26, 34, 0.10) 40%,
+        rgba(13, 26, 34, 0.55) 100%
+      );
+    pointer-events: none;
+  }
+  /* Inner — centred column at every breakpoint. Mirrors the
+     upscale ServicePageV2 closing-card pattern. */
+  .services-final-cta-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(64px, 9vw, 120px) clamp(24px, 6vw, 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(22px, 2.4vw, 28px);
+  }
+
+  /* Headline — original ServicePageV2-flavor display set. One
+     font-size + weight + letter-spacing across all three lines;
+     the .accent middle line layers in the brand-green italic, and
+     the .coda bottom line is just a plain block break so the
+     "We're ready when you are" coda inherits the same display
+     weight. Text content is the only thing that changed vs. the
+     previous pill+two-line CTA. */
+  .services-final-cta-title {
+    margin: 0;
+    font-size: clamp(2.2rem, 5.2vw, 4rem);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: #ffffff;
+    text-wrap: pretty;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+  }
+  .services-final-cta-title-accent {
+    display: block;
+    color: #2DC856;
+    font-style: italic;
+  }
+  .services-final-cta-title-coda {
+    display: block;
+  }
+
+  /* Button row — primary brand-green pill + ghost outline.
+     Matches the size / tracking / weight of ServicePageV2's
+     final-CTA buttons so the two pages feel kin. */
+  .services-final-cta-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: clamp(10px, 1.6vw, 18px);
+  }
+  @media (min-width: 480px) {
+    .services-final-cta-actions {
+      flex-direction: row;
+      gap: 14px;
+    }
+  }
+  .services-final-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.22s ease, color 0.22s ease, transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  }
+  .services-final-cta-btn--primary {
+    background: #2DC856;
+    color: #0d1a22;
+    box-shadow: 0 12px 28px rgba(45, 200, 86, 0.30);
+  }
+  .services-final-cta-btn--primary:hover {
+    background: #36e464;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 36px rgba(45, 200, 86, 0.42);
+  }
+  .services-final-cta-btn--ghost {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(2px);
+  }
+  .services-final-cta-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.96);
+    color: #0d1a22;
+    border-color: rgba(255, 255, 255, 0.96);
+    transform: translateY(-1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .services-final-cta-btn { transition: none; }
+    .services-final-cta-btn:hover { transform: none; }
   }
 </style>

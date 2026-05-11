@@ -2,9 +2,10 @@
 title: "Battery Technology Trends Every Infrastructure Investor Should Watch"
 category: "vehicle-efficiency"
 categoryLabel: "Vehicle Efficiency"
-date: "2026-03-19"
+date: "2025-11-17"
 excerpt: "Solid-state batteries, bidirectional charging, and faster charge acceptance are coming — here's what these trends mean for infrastructure decisions you're making today."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging1.png"
 ---
 
 # Battery Technology Trends Every Infrastructure Investor Should Watch

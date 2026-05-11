@@ -21,36 +21,41 @@
  * with copyright + privacy/terms/accessibility/cookie links.
  */
 
+/* Footer link map — kept in sync with HeaderV4's canonical
+   navigation. Service pages route to the in-production v4/v2/v3
+   surfaces; Products → /products-v2; Blog → /blog-v5; Home (the
+   brand logo) → /home-v3. Retail / parking / medical sub-pages
+   stay listed under Solutions as auxiliary solution surfaces. */
 const footerCols = [
   {
     title: 'Solutions',
     links: [
-      { label: 'Multifamily',          href: '/solutions/multifamily' },
-      { label: 'Fleet depot',          href: '/solutions/fleets' },
-      { label: 'Highway / fast lane',  href: '/solutions/highway-fast-charging' },
-      { label: 'Retail & hospitality', href: '/solutions/retail' },
-      { label: 'Parking garages',      href: '/solutions/parking' },
-      { label: 'Medical',              href: '/solutions/medical' },
+      { label: 'Multifamily',          href: '/service-testing/multifamily-v4' },
+      { label: 'Fleets',               href: '/service-testing/fleets-v2'      },
+      { label: 'Highway / fast lane',  href: '/service-testing/highway-v3'     },
+      { label: 'Retail & hospitality', href: '/solutions/retail'               },
+      { label: 'Parking garages',      href: '/solutions/parking'              },
+      { label: 'Medical',              href: '/solutions/medical'              },
     ],
   },
   {
     title: 'Products',
     links: [
-      { label: 'Level 2 chargers',    href: '/products' },
-      { label: 'DC fast chargers',    href: '/products' },
-      { label: 'Evium app',           href: '/#home-app-download' },
-      { label: 'Owner Portal',        href: 'https://portal.eviumcharging.com' },
-      { label: 'See all products →',  href: '/products' },
+      { label: 'Level 2 chargers',    href: '/products-v2#panel-l2'              },
+      { label: 'DC fast chargers',    href: '/products-v2#panel-l3'              },
+      { label: 'Evium app',           href: '/home-v3#home-app-download'         },
+      { label: 'Owner Portal',        href: 'https://portal.eviumcharging.com'   },
+      { label: 'See all products →',  href: '/products-v2'                       },
     ],
   },
   {
     title: 'Company',
     links: [
-      { label: 'How it works',      href: '/how-it-works' },
-      { label: 'Services',          href: '/services' },
-      { label: 'Electrician partners', href: '/solutions/electrician-partners' },
-      { label: 'Blog',              href: '/blog' },
-      { label: 'Contact',           href: '/contact' },
+      { label: 'How it works',         href: '/how-it-works'                    },
+      { label: 'Services',             href: '/services'                        },
+      { label: 'Electrician partners', href: '/solutions/electrician-partners'  },
+      { label: 'Blog',                 href: '/blog-v5'                         },
+      { label: 'Contact',              href: '/contact'                         },
     ],
   },
 ];
@@ -68,7 +73,7 @@ const socials = [
 
     <div class="ev-footer-top">
       <div class="ev-brand-col">
-        <a href="/" class="ev-brand-link" aria-label="Evium Charging home">
+        <a href="/home-v3" class="ev-brand-link" aria-label="Evium Charging home">
           <img src="/images/logos/evium/logo.webp" alt="Evium Charging" class="ev-logo" />
         </a>
         <p class="ev-tagline">Electrifying the future.<br/>One property at a time.</p>

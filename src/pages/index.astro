@@ -1,17 +1,36 @@
 ---
+/**
+ * / — Default landing page.
+ * ─────────────────────────
+ * Renders the v3 stack so visitors hitting the bare root
+ * URL land on the current production-intent home page. The
+ * legacy v1 home is preserved at /home-v1; v2 is at
+ * /home-v2; v3 also lives at /home-v3. This file just
+ * mirrors v3's stack so the canonical URL is /.
+ *
+ * (When you're ready to fully retire v1/v2, this file can
+ * stay as-is and only the version-specific routes need to
+ * change.)
+ */
 import Layout from '../layouts/Layout.astro';
-import HeroHomeMain from '../components/heroes/HeroHomeMain.astro';
-import HeroPortalSolutionsScene from '../components/heroes/HeroPortalSolutionsScene.astro';
-import LocationsMapSection from '../components/LocationsMapSection.astro';
-import HomeFaqSection from '../components/HomeFaqSection.astro';
-import HomeAppDownloadSection from '../components/HomeAppDownloadSection.astro';
+import HeroHomeMainV3 from '../components/heroes/HeroHomeMainV3.astro';
+import HeroPortalSolutionsSceneV3 from '../components/heroes/HeroPortalSolutionsSceneV3.astro';
+import LocationsMapSectionV3 from '../components/LocationsMapSectionV3.astro';
+import HomeFaqSectionV3 from '../components/HomeFaqSectionV3.astro';
+import HomeAppDownloadSectionV3 from '../components/HomeAppDownloadSectionV3.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTab.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 ---
-<Layout title="Evium Charging">
-  <HeroHomeMain />
-  <HeroPortalSolutionsScene />
-  <LocationsMapSection />
-  <HomeFaqSection />
-  <HomeAppDownloadSection />
+<Layout title="Evium Charging" headerVariant="v4" bodyClass="page-home-v3">
+  <HeroHomeMainV3 />
+  <HeroPortalSolutionsSceneV3 />
+  <LocationsMapSectionV3 />
+  <HomeFaqSectionV3 />
+  <HomeAppDownloadSectionV3 />
   <SiteFooter />
+
+  <!-- Sticky right-edge tab + drawer. Shows AFTER the
+       visitor scrolls past the hero (the hero already has
+       its own form, so the tab would be redundant there). -->
+  <ConsultationStickyTab />
 </Layout>

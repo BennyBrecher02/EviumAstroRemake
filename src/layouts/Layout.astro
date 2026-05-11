@@ -77,4 +77,15 @@ const bodyClass = [isLefter ? 'has-lefter-nav' : '', extraBodyClass].filter(Bool
   body.has-lefter-nav {
     padding-left: var(--lefter-width, 72px);
   }
+  /* At ≤860px the lefter rail hides itself and HeaderV4 swaps in
+     a top mobile bar instead (same breakpoint Header.astro uses
+     for its own mobile/desktop swap). The body's reserved
+     padding for the rail must drop to zero so page content
+     occupies the full viewport width on mobile. Applies to
+     every HeaderV4 page automatically. */
+  @media (max-width: 860px) {
+    body.has-lefter-nav {
+      padding-left: 0;
+    }
+  }
 </style>

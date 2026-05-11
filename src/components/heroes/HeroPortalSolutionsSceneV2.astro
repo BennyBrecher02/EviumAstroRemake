@@ -639,15 +639,80 @@ const cards: Card[] = [
     transform: translateX(-50%) scaleX(1);
   }
 
-  /* Narrow viewports — single column, wider aspect */
+  /* Phone widths — 3-col chip row + thin secondary CTA banner.
+     ─────────────────────────────────────────────────────────────
+     Visual hierarchy goal: Hardware / Software / Services are the
+     three primary product pillars; Calculate Generated Profits is
+     a secondary CTA. Desktop nails this naturally — each chip is
+     285×380 (3/4 portrait) while the banner is 896×190 (16/3.4),
+     so the banner has ≈52% the area of all three chips combined.
+     The user reads the chips first, then the banner as a pull-
+     down CTA.
+     ─────────────────────────────────────────────────────────────
+     The earlier mobile pass (4/5 chips + 16/5.6 banner) put the
+     banner at ≈92% of total chip area — visually competing with
+     the three primaries it's supposed to live beneath. So the
+     fix here is two-fold:
+
+       · Bump each chip from 4/5 → 3/4 portrait (matches desktop's
+         own chip aspect, just scaled down). Chips grow slightly
+         taller and feel like proper product images, not thumbnail
+         chips.
+       · Shrink the banner from 16/5.6 → 16/3.4 (matches desktop's
+         own banner aspect). Banner becomes a clean horizontal CTA
+         strip under the chip row, ≈73px tall on a 375 viewport,
+         ≈half the chip's height — the same proportional rhythm
+         desktop reads as.
+
+     Result on a 375px viewport:
+       chip:   109w × 145h         (3 of them, gap 0.625rem)
+       banner: 343w × 73h
+       chip-area-total / banner-area = ~1.9× — primaries clearly
+                                              dominate, banner is
+                                              clearly secondary.
+
+     Desktop layout (>640px) is untouched. */
   @media (max-width: 640px) {
     .pps-cards {
-      grid-template-columns: 1fr;
-      max-width: 20rem;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 100%;
+      gap: 0.625rem;
     }
-    .pps-card { aspect-ratio: 16 / 9; }
-    .pps-card-wide { aspect-ratio: 16 / 6; }
+    .pps-card { aspect-ratio: 3 / 4; }
+    /* `.pps-card.pps-card-wide` (compound) is the desktop rule's
+       specificity — match it here so the mobile override wins. */
+    .pps-card.pps-card-wide { aspect-ratio: 16 / 3.4; }
+    .pps-card-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+    }
+    /* The Profits banner is now thinner, so its label must shrink
+       in lock-step or it'll dominate the strip. 0.7rem keeps
+       CALCULATE GENERATED PROFITS readable on a single line at
+       375px width without crowding the banner's vertical center. */
+    .pps-card.pps-card-wide .pps-card-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+    }
+    /* Tighter horizontal padding on the content layer so chips can
+       use the full width without feeling cramped on either side.
+       Vertical padding stays generous so the EVIUM logo's portal
+       state doesn't slide up underneath the mobile bar. */
+    .pps-content {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
     .pps-tagline { white-space: normal; max-width: 80vw; }
+  }
+
+  /* Hash-link offset for #portal-to-solutions when the mobile bar
+     is active. scrollIntoView'd from a peer page or rail menu lands
+     the section top below the bar instead of behind it. No effect
+     on visual layout — only affects scroll-target positioning. */
+  @media (max-width: 860px) {
+    :global(body.has-lefter-nav) #portal-to-solutions {
+      scroll-margin-top: 80px;
+    }
   }
 </style>
 

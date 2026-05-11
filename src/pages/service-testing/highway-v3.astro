@@ -1,0 +1,4576 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+---
+
+<Layout
+  title="Highway Fast Charging v3 — Evium Charging"
+  description="Turn your highway corridor location into a high-utilization EV charging destination. NEVI-compliant, no-cost deployments managed end-to-end by Evium."
+  headerVariant="v4"
+  bodyClass="page-highway-v3"
+>
+
+  <!-- ═══════════════════════════════════════════════════
+       1. HERO — full-viewport image with bottom gradient.
+       Copy lives at the bottom on the calm pavement zone.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-hero relative w-full h-screen min-h-[640px] overflow-hidden bg-evium-dark">
+    {/* Responsive hero — <picture> swaps to a portrait mobile
+        crop below 760px, and falls back to the landscape
+        desktop image otherwise. Same pattern fleets-v2's hero
+        uses. No JS, no flicker — the browser picks the right
+        source via `<source media>`. The fallback <img> still
+        carries the desktop src so existing image handlers /
+        SEO see the same value. */}
+    <picture class="absolute inset-0 w-full h-full block">
+      <source
+        media="(max-width: 759px)"
+        srcset="/images/heroes/highway-hero-mobile.png"
+      />
+      <img
+        src="/images/heroes/highway-hero-fuzzy.png"
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+        loading="eager"
+        fetchpriority="high"
+        draggable="false"
+      />
+    </picture>
+
+    <!-- Top scrim — keeps the upper-left copy column legible
+         against the bright sky / canopy without washing the
+         chargers in the center-right of the frame. -->
+    <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_75%_60%_at_15%_22%,rgba(10,24,34,0.78),transparent_60%)]"></div>
+
+    <!-- Bottom gradient — fades the lower portion to dark
+         so the photo transitions smoothly into the page. -->
+    <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0a1822] via-[#0a1822]/55 to-transparent pointer-events-none"></div>
+
+    <!-- Copy — top-left -->
+    <div class="absolute inset-x-0 top-0 px-6 md:px-10 lg:px-16 pt-12 md:pt-16 lg:pt-20">
+      <div class="max-w-3xl">
+        <!-- Editorial brow — short hairline rule + tracked caps.
+             Magazine convention that reads as confident and
+             editorial without resorting to a backdrop pill. -->
+        <div class="flex items-center gap-4 mb-7">
+          <div class="w-10 h-px bg-evium-green flex-shrink-0"></div>
+          <span class="text-evium-green text-xs font-extrabold tracking-[0.34em] uppercase [text-shadow:0_1px_2px_rgba(10,24,34,1),0_2px_14px_rgba(10,24,34,0.95),0_4px_24px_rgba(10,24,34,0.7)]">The new fuel stop</span>
+        </div>
+        <h1 class="font-black leading-[0.95] tracking-tight mb-9 [text-shadow:0_2px_24px_rgba(10,24,34,0.85),0_1px_4px_rgba(10,24,34,0.7)]" style="font-size: clamp(2.2rem, 5.4vw, 4.75rem);">
+          <span class="text-white">Your highway exit.</span><br /><span class="text-evium-green">Our gear and grid.</span>
+        </h1>
+        <a
+          href="/contact/quote"
+          class="group inline-flex items-center gap-3 text-white font-semibold text-sm tracking-[0.12em] uppercase border-b border-evium-green pb-2 hover:text-evium-green transition-colors duration-200 [text-shadow:0_1px_8px_rgba(10,24,34,0.7)]"
+        >
+          See if your site qualifies
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pavement-band action — primary CTA on the lower
+         portion of the photo (the parking-lot pavement band).
+         Mirrors the fleets-v2 hero pattern: skewed green
+         parallelogram face + counter-skewed inner text + arrow
+         that translates on hover. data-hwv2-scroll triggers
+         the rAF-eased smooth scroll to the hybrid Models +
+         Outcomes economics section (#economics). -->
+    <div class="hwv2-hero-actions">
+      <a
+        class="hwv2-cta-primary"
+        href="#economics"
+        data-hwv2-scroll
+        aria-label="See the four hosting models and what each one earns"
+      >
+        <span class="hwv2-cta-primary-face" aria-hidden="true"></span>
+        <span class="hwv2-cta-primary-inner">
+          <span>See what you'd earn</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       2. AUDIENCE BRIDGE — sage benefit cards on white.
+       Lift of /testing/highway-old-replica §3 (Highway
+       charging benefits). Card visual style is verbatim
+       from the replica per request — the layout enforces
+       a square aspect ratio per card and adds a centered
+       eyebrow above the grid that ties back to the hero's
+       "The new fuel stop" framing.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-bridge" aria-labelledby="hwv2-bridge-icp">
+    <div class="hwv2-bridge-inner">
+
+      <header class="hwv2-bridge-head">
+        <p class="hwv2-bridge-eyebrow">
+          <span class="hwv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+          <span>For Highway Hosts</span>
+          <span class="hwv2-bridge-eyebrow-rule" aria-hidden="true"></span>
+        </p>
+        <!-- Headline — same role + sizing as fleets-v2's
+             .fv2-bridge-icp. Synthesized from the replica's
+             page title + Partner pitch + 3 pillars (premium
+             destination, next-gen highway service, state DOTs,
+             dwell-time tuning). Italic clause carries the
+             rhetorical lift. -->
+        <p id="hwv2-bridge-icp" class="hwv2-bridge-icp">
+          Premium fast-charging destinations along major travel
+          corridors —
+          <em>built alongside state DOTs, tuned to dwell time.</em>
+        </p>
+      </header>
+
+      <div class="hwv2-bridge-grid">
+
+        <!-- Card 1 — Commercial Output. Lightning bolt watermark
+             in the lower-right corner; speed / energy motif. -->
+        <article class="hwv2-card" data-hwv2-card="output">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M37 4 L18 36 L30 36 L25 60 L48 26 L34 26 L37 4 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">Commercial Output</h3>
+            <p class="hwv2-card-body">
+              Our Level 3 stations allow drivers to quickly recharge
+              their batteries, adding hundreds of miles of range in
+              just 20 to 30 minutes.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 2 — Strategic Placement. Map pin watermark
+             upper-right; location / placement motif. -->
+        <article class="hwv2-card" data-hwv2-card="placement">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 4 C19 4, 9 14, 9 27 C9 44, 32 60, 32 60 C32 60, 55 44, 55 27 C55 14, 45 4, 32 4 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+            <circle cx="32" cy="25" r="7" fill="none" stroke="currentColor" stroke-width="2.6" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">Strategic Placement</h3>
+            <p class="hwv2-card-body">
+              Stations are installed at high-traffic points such as
+              rest stops, gas stations, and food courts, providing
+              easy and practical access for drivers.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 3 — High Availability. Shield + check watermark
+             lower-right; reliability motif. -->
+        <article class="hwv2-card" data-hwv2-card="availability">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 4 L8 12 L8 32 C8 47 32 60 32 60 C32 60 56 47 56 32 L56 12 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+            <path d="M20 32 L29 41 L44 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">High Availability</h3>
+            <p class="hwv2-card-body">
+              Robust infrastructure and continuous maintenance ensure
+              our stations are always ready to meet demand.
+            </p>
+          </div>
+        </article>
+
+        <!-- Card 4 — High Turnover. Clock watermark, lower-right;
+             24/7 demand / time-on-clock motif. -->
+        <article class="hwv2-card" data-hwv2-card="turnover">
+          <svg class="hwv2-card-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="2.6" />
+            <path d="M32 13 L32 32 L46 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="32" cy="32" r="2" fill="currentColor" />
+          </svg>
+          <div class="hwv2-card-body-wrap">
+            <h3 class="hwv2-card-title">High Turnover</h3>
+            <p class="hwv2-card-body">
+              Designed to serve large volumes of vehicles with 24/7
+              demand, especially during holidays and peak travel
+              seasons.
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       3. HOW NEVI WORKS — and Why Evium Is Your CPO
+       Layout lifted from fleets-v2's "Engineered for Your
+       Operation" section: full-viewport split with a left
+       editorial column (kicker → dual-color headline →
+       pull-quote lede → numbered list → bottom GSA anchor)
+       and a flush-right full-bleed photo on lg+. All v1
+       content preserved verbatim — only the layout vehicle
+       has changed.
+       ═══════════════════════════════════════════════════ -->
+  <section id="opportunity" class="bg-[#0d1f2b] min-h-screen flex items-stretch">
+
+    <!-- Left: content column. Header → lede → credentials →
+         numbered list → GSA bottom anchor. Mirrors the
+         fleets section's vertical regions. -->
+    <div class="flex-1 flex min-w-0">
+      <div class="w-full max-w-3xl mx-auto px-6 md:px-10 lg:px-10 py-8 flex flex-col">
+
+        <!-- ── HEADER ─────────────────────────────────── -->
+        <header>
+          <!-- Kicker label with fading hairline that bleeds
+               toward the column edge. Same magazine-style
+               header marker as fleets. -->
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-evium-green text-xs font-extrabold tracking-[0.22em] uppercase whitespace-nowrap">Federal Grant Program</span>
+            <span class="flex-1 h-px bg-gradient-to-r from-evium-green/35 to-transparent"></span>
+          </div>
+
+          <!-- Headline (h2) — two lines, dual color. Sized so
+               the longer green line "and Why Evium Is Your CPO."
+               holds on a single line within the wider max-w-3xl
+               column. whitespace-nowrap on each line guarantees
+               no wrap regardless of viewport breakpoint. -->
+          <h2 class="text-white font-black text-[1.85rem] md:text-[2.05rem] leading-[1.05] tracking-[-0.022em] mb-3">
+            <span class="block whitespace-nowrap">How NEVI Works —</span>
+            <span class="block whitespace-nowrap text-evium-green">and Why Evium Is Your CPO.</span>
+          </h2>
+
+          <!-- Deck — third headline line at smaller scale so the
+               full triplet ("One federal program. One operator.
+               Zero cost to you.") holds on a single line. Three
+               phrases, alternating white / green / white so the
+               middle clause (Evium's identity) reads as the
+               visual hinge. -->
+          <p class="font-black text-base md:text-lg leading-tight tracking-[-0.014em] whitespace-nowrap mb-6">
+            <span class="text-white">One federal program.</span>
+            <span class="text-evium-green">One operator.</span>
+            <span class="text-white">Zero cost to you.</span>
+          </p>
+
+          <!-- Lede framed as a pull-quote (thin brand-green
+               left rule). Carries the NEVI program definition
+               from v1 verbatim. -->
+          <div class="border-l-2 border-evium-green/55 pl-5 mb-3">
+            <p class="text-white/75 text-[15px] leading-snug">
+              The National Electric Vehicle Infrastructure (NEVI) Formula Program distributes $7.5 billion in federal funding to build a national charging network. States issue grants to qualified Charging Point Operators (CPOs) to deploy hardware on designated Alternative Fuel Corridors (AFCs) — with a station required at least every 50 miles along major U.S. travel routes.
+            </p>
+          </div>
+
+          <!-- Credentials paragraph — Evium's CPO awards
+               (NM, CEC, NJ BPU). v1 verbatim. -->
+          <p class="text-white/65 text-[13px] leading-snug">
+            Evium is a federally recognized CPO and has already secured NEVI site awards in New Mexico, grants from the California Energy Commission ($6MM+), and funding through the New Jersey BPU program. We've navigated every level of this bureaucracy — so you don't have to.
+          </p>
+        </header>
+
+        <!-- ── EDITORIAL LIST ─────────────────────────── -->
+        <!-- 5 numbered entries, each as a row with a ringed
+             number badge (fleets uses checkmarks; sequential
+             steps want numerals). Same hairline divider
+             treatment as fleets. -->
+        <ul class="my-4 space-y-0">
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">1</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Evium assesses your corridor location</h4>
+              <p class="text-white/65 text-sm leading-tight">We evaluate your site's AFC corridor status, utility access, traffic patterns, and grant eligibility in a single consult.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">2</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">We submit the NEVI application on your behalf</h4>
+              <p class="text-white/65 text-sm leading-tight">All federal, state, and utility paperwork is handled entirely by Evium. You sign where needed — nothing more.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">3</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">Hardware is installed at no cost to you</h4>
+              <p class="text-white/65 text-sm leading-tight">Grant funding covers the full cost of DC fast hardware, installation, and utility work. Zero capital expenditure for the site host.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">4</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">5-year contract + 5-year renewal option</h4>
+              <p class="text-white/65 text-sm leading-tight">You secure long-term infrastructure at your site with renewal rights, ensuring competitive advantage well into the decade.</p>
+            </div>
+          </li>
+
+          <li class="grid grid-cols-[1.75rem_1fr] gap-x-4 py-3.5 border-t border-white/[0.07]">
+            <span class="w-7 h-7 rounded-full border border-evium-green/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-evium-green text-xs font-black">5</span>
+            <div>
+              <h4 class="text-white font-bold text-base mb-0.5 leading-tight">You earn a percentage of every charging session</h4>
+              <p class="text-white/65 text-sm leading-tight">Site hosts receive a share of charging revenue. Evium handles billing, settlements, and compliance reporting — you receive a monthly payment.</p>
+            </div>
+          </li>
+        </ul>
+
+        <!-- ── BOTTOM ANCHOR ──────────────────────────── -->
+        <!-- GSA / NEVI-compliant credential, pinned to the
+             bottom of the column via mt-auto. Replaces the
+             fleets section's plain "Design. Install. Operate."
+             tagline with the v1 GSA shield-badge content,
+             rebuilt in the same fleets bottom-anchor pattern
+             so we don't lose the GSA / qualified-hands line. -->
+        <div class="mt-auto flex items-center gap-4 pt-4 border-t border-white/[0.10]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-evium-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span class="text-white/70 text-[11px] tracking-[0.18em] uppercase font-bold leading-[1.55]">
+            GSA-Approved · NEVI-Compliant CPO<br />
+            Your Site Is in Qualified Hands
+          </span>
+          <span class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: flush-right full-bleed photo. object-cover so the
+         image touches the top and bottom of the section and fills
+         the entire column vertically. Wider than the fleets truck
+         column (62% / 60%) so a much larger portion of the photo's
+         horizontal extent shows while still preserving the
+         cover-fill behavior at top and bottom.
+         NOTE: Tailwind `hidden lg:block` hides this below 1024px.
+         The mobile <style> block below restores the image at
+         ≤759px so phones show the photo on the right ~42% of
+         the section — same magazine spine pattern fleets uses.
+         The .hwv2-opp-photo class gives the CSS a deterministic
+         hook into this div. */ -->
+    <div class="hwv2-opp-photo hidden lg:block flex-shrink-0 w-[63%] xl:w-[61%]">
+      <img
+        src="/images/heroes/highway-charging-station.png"
+        alt="Evium-equipped highway charging station alongside a corridor location"
+        class="block w-full h-full object-cover object-center"
+        loading="lazy"
+      />
+    </div>
+
+  </section>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       #opportunity — Federal Grant Program mobile overrides
+       ──────────────────────────────────────────────────────
+       Desktop (≥1024px) keeps the full-bleed magazine layout:
+       left content column + flush-right highway station photo.
+       On mobile the original layout dropped the image entirely
+       (Tailwind `hidden lg:block`), leaving a wall of dense
+       editorial text on a black background — same readability
+       problem the fleets-v2 "Engineered for Your Operation"
+       section had before its mobile fix.
+
+       This block applies the same treatment fleets got:
+         · Restore the right-edge photo at ~42% width on mobile
+           so it runs as a tall vertical magazine spine
+           alongside the scrolling list.
+         · Compress the content column (smaller padding,
+           tighter eyebrow, shrunken headline + decks +
+           lede + list items + bottom anchor) so 5 list
+           items + the full headline group fit comfortably
+           in the remaining 58% width.
+       Desktop CSS is untouched — every override is gated
+       inside @media (max-width: 759px).
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 759px) {
+      /* Force-show the right-edge photo on mobile. !important
+         is required because Tailwind's `hidden` and `lg:block`
+         share the same CSS specificity, and `lg:block` only
+         fires at ≥1024px so it can't help here. */
+      #opportunity .hwv2-opp-photo {
+        display: block !important;
+        width: 42% !important;
+        flex-shrink: 0;
+      }
+      #opportunity .hwv2-opp-photo img {
+        /* The source photo (1416×1111) has the EVIUM charger
+           pedestal on the left side, the charging cable
+           running diagonally across the middle, and the car
+           parked on the right side. At a 42% strip width
+           only ~13% of the source's horizontal range is
+           visible at any single object-position — so we
+           must choose which subject anchors the frame.
+           90% lands the crop primarily on the CAR (the
+           previous 35% framed only the charger; user wants
+           more car); the charging cable still tails in from
+           the left edge of the visible strip, so the
+           charger-to-car relationship still reads. */
+        object-position: 90% center;
+      }
+      /* Content column — tighter padding so the text has more
+         room within the remaining ~58% of width. */
+      #opportunity > div.flex-1 > div {
+        padding-left: 16px;
+        padding-right: 14px;
+        padding-top: 28px;
+        padding-bottom: 28px;
+      }
+      /* Eyebrow + hairline — fit "Federal Grant Program" in
+         the narrow content column. */
+      #opportunity header > div.flex.items-center.gap-4 {
+        column-gap: 8px;
+        margin-bottom: 10px;
+      }
+      #opportunity header .text-evium-green.text-xs {
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+      }
+      /* Headline — drop hard so dual-line dual-color title
+         ("How NEVI Works —" / "and Why Evium Is Your CPO.")
+         wraps cleanly. whitespace-nowrap on each span is
+         overridden so the longer green line can wrap. */
+      #opportunity h2 {
+        font-size: 24px !important;
+        line-height: 1.05 !important;
+        margin-bottom: 10px !important;
+      }
+      #opportunity h2 > span {
+        white-space: normal !important;
+      }
+      /* Three-clause deck — compress so it fits within col. */
+      #opportunity header > p.font-black {
+        font-size: 12px !important;
+        line-height: 1.18 !important;
+        white-space: normal !important;
+        margin-bottom: 14px;
+      }
+      /* Lede pull-quote — green rule + tighter padding-left
+         + smaller body so the brand signature reads at scale. */
+      #opportunity header > div.border-l-2 {
+        padding-left: 12px;
+        margin-bottom: 10px;
+      }
+      #opportunity header > div.border-l-2 > p {
+        font-size: 11.5px;
+        line-height: 1.4;
+      }
+      /* Credentials paragraph — small body, tight leading. */
+      #opportunity header > p.text-white\/65 {
+        font-size: 10.5px !important;
+        line-height: 1.4 !important;
+      }
+      /* Editorial list — tighter grid, smaller badge col,
+         smaller body + title text so 5 items stay scannable
+         in the narrow column. */
+      #opportunity ul.my-4 {
+        margin-top: 14px;
+        margin-bottom: 14px;
+      }
+      #opportunity ul.my-4 li {
+        grid-template-columns: 1.15rem 1fr;
+        column-gap: 8px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+      }
+      #opportunity ul.my-4 li > span:first-child {
+        width: 18px;
+        height: 18px;
+        font-size: 9px !important;
+      }
+      #opportunity ul.my-4 li h4 {
+        font-size: 12px !important;
+        line-height: 1.22;
+        margin-bottom: 2px;
+      }
+      #opportunity ul.my-4 li p {
+        font-size: 10.5px !important;
+        line-height: 1.4;
+      }
+      /* Bottom anchor — compact GSA credential. */
+      #opportunity > div.flex-1 > div > div.mt-auto {
+        gap: 8px;
+        padding-top: 10px;
+      }
+      #opportunity > div.flex-1 > div > div.mt-auto svg {
+        width: 13px;
+        height: 13px;
+      }
+      #opportunity > div.flex-1 > div > div.mt-auto > span:not(.h-px) {
+        font-size: 8.5px !important;
+        letter-spacing: 0.14em;
+        line-height: 1.42;
+      }
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════════
+       4. SCOPE — process-framed, 6 items in the canonical
+       Evium spine (canon Stage 01 + 02 split + 03 split + 04
+       + 05). Bespoke styling that mirrors multifamily-v3's
+       scope visual pattern (light blue-gray gradient, white
+       cards with hairline + green top accent, numbered tags,
+       icon blocks, lift on hover). Sized to a full viewport.
+       ═══════════════════════════════════════════════════ -->
+  <section id="highway-scope" class="hwv2-scope" aria-labelledby="hwv2-scope-title">
+    <div class="hwv2-scope-inner">
+
+      <header class="hwv2-scope-head">
+        <p class="hwv2-scope-eyebrow">
+          <span>The Full Scope</span>
+        </p>
+        <h2 id="hwv2-scope-title" class="hwv2-scope-title">
+          Truly Turnkey. One Partner. Everything Covered.
+        </h2>
+        <p class="hwv2-scope-sub">
+          From the initial site walk to day-1,000 of operations, Evium owns the entire process so you never have to.
+        </p>
+      </header>
+
+      <div class="hwv2-scope-grid">
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">01</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.5-4.5" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">Corridor site assessment</h3>
+          <p class="hwv2-scope-card-body">
+            Per-site due diligence on Alternative Fuel Corridor proximity, utility capacity, traffic patterns, and your state's NEVI program stage. Output: which sites qualify, which programs apply, and which rank highest for the next funding cycle.
+          </p>
+        </article>
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">02</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v4 M12 19v4 M4.22 4.22l2.83 2.83 M16.95 16.95l2.83 2.83 M1 12h4 M19 12h4 M4.22 19.78l2.83-2.83 M16.95 7.05l2.83-2.83" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">Hardware spec &amp; site design</h3>
+          <p class="hwv2-scope-card-body">
+            A custom proposal designs the deployment — charger mix (180kW Tellus, 300kW Tellus, 60–240kW Maxi), stall count, layout, and signage plan to NEVI program standard.
+          </p>
+        </article>
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">03</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 2L4 14h6l-2 8 10-12h-6l2-8z" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">Full installation &amp; commissioning</h3>
+          <p class="hwv2-scope-card-body">
+            Licensed crew handles install — paid through the grant. Each unit is provisioned, signage and station identification go up to spec, and the site is commissioned and brought live.
+          </p>
+        </article>
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">04</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">Permits &amp; utility coordination</h3>
+          <p class="hwv2-scope-card-body">
+            Federal and state regulatory permits, building and electrical permits, utility interconnection, inspections — every form filed and every inspection scheduled by Evium.
+          </p>
+        </article>
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">05</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v10" />
+              <path d="M9 9.5c0-1 1-2 3-2s3 .5 3 1.5-1 1.5-3 2-3 1-3 2 1.5 1.5 3 1.5 3-1 3-2" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">NEVI grant application &amp; incentive capture</h3>
+          <p class="hwv2-scope-card-body">
+            The NEVI application itself is filed and managed by Evium end-to-end on your behalf — federal, state DOT, and utility paperwork included. Any state-level rebates or co-funding programs that stack on top get pursued in the same pass.
+          </p>
+        </article>
+
+        <article class="hwv2-scope-card">
+          <span class="hwv2-scope-card-num" aria-hidden="true">06</span>
+          <span class="hwv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 3" />
+            </svg>
+          </span>
+          <h3 class="hwv2-scope-card-title">Ongoing operations &amp; revenue</h3>
+          <p class="hwv2-scope-card-body">
+            24/7 monitoring meets the federal uptime obligation. Field-tech dispatch when hardware needs hands. Federal compliance reporting runs automatically. Site host's revenue share is settled monthly, with live visibility into per-stall revenue in the Owner Portal.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ─── SCOPE — light "showroom" band that mirrors
+         multifamily-v3's scope visual treatment. Local tokens
+         + bespoke class names so this stays self-contained
+         until the page migrates onto ServicePageV2. */
+    .hwv2-scope {
+      --hwv2-scope-shadow-rgb: 13, 28, 36;
+      --hwv2-scope-elev-1:
+        0 1px 1px rgba(var(--hwv2-scope-shadow-rgb), 0.04),
+        0 2px 5px rgba(var(--hwv2-scope-shadow-rgb), 0.05),
+        0 5px 11px rgba(var(--hwv2-scope-shadow-rgb), 0.05);
+      --hwv2-scope-elev-2:
+        0 1px 2px rgba(var(--hwv2-scope-shadow-rgb), 0.05),
+        0 3px 6px rgba(var(--hwv2-scope-shadow-rgb), 0.05),
+        0 7px 14px rgba(var(--hwv2-scope-shadow-rgb), 0.06),
+        0 14px 26px rgba(var(--hwv2-scope-shadow-rgb), 0.04);
+      --hwv2-scope-hairline: 1px solid rgba(0, 0, 0, 0.05);
+      --hwv2-scope-hairline-hover: 1px solid rgba(0, 0, 0, 0.08);
+      --hwv2-scope-ease: cubic-bezier(0.25, 0, 0, 1);
+
+      /* Outer wrapper carries the gradient full-width; padding +
+         max-width live on the inner so the section sizes itself
+         to its content (matches mf-v3's .svc-section behavior).
+         No min-height: 100vh — content-tall instead of viewport-
+         forced. */
+      background:
+        linear-gradient(180deg, #f4f7fb 0%, #eef2f7 45%, #e7edf4 100%);
+      font-family: 'Maven Pro', system-ui, sans-serif;
+    }
+    .hwv2-scope-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: clamp(64px, 9vw, 130px) clamp(20px, 4vw, 60px);
+    }
+
+    .hwv2-scope-head {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto clamp(40px, 5vw, 68px);
+    }
+    .hwv2-scope-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      color: #2DC856;
+      font-size: clamp(0.56rem, 0.7vw, 0.72rem);
+      font-weight: 900;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .hwv2-scope-title {
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      color: #1d1d1f;
+      font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: -0.024em;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+    .hwv2-scope-sub {
+      margin: 0 auto;
+      max-width: 60ch;
+      color: #4d5963;
+      font-size: clamp(0.96rem, 1.1vw, 1.08rem);
+      line-height: 1.6;
+      text-wrap: pretty;
+    }
+
+    /* Force 3 columns at desktop so 6 cards always sit as a
+       clean 3+3 instead of letting auto-fit drift to 4+2 on
+       wider monitors. Steps down to 2 columns on tablet and
+       1 on mobile. */
+    .hwv2-scope-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 2vw, 24px);
+    }
+    @media (max-width: 880px) {
+      .hwv2-scope-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .hwv2-scope-grid { grid-template-columns: 1fr; }
+    }
+
+    .hwv2-scope-card {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      border: var(--hwv2-scope-hairline);
+      border-radius: 20px;
+      padding: clamp(22px, 2.4vw, 30px);
+      box-shadow: var(--hwv2-scope-elev-1);
+      transition:
+        transform 0.4s var(--hwv2-scope-ease),
+        box-shadow 0.4s var(--hwv2-scope-ease),
+        border-color 0.4s var(--hwv2-scope-ease);
+    }
+    .hwv2-scope-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: #2DC856;
+      transform: scaleX(0);
+      transform-origin: 50% 50%;
+      transition: transform 0.45s var(--hwv2-scope-ease);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hwv2-scope-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--hwv2-scope-elev-2);
+      border: var(--hwv2-scope-hairline-hover);
+    }
+    .hwv2-scope-card:hover::before {
+      transform: scaleX(0.6);
+    }
+    .hwv2-scope-card-num {
+      position: absolute;
+      top: clamp(16px, 2vw, 22px);
+      right: clamp(18px, 2.2vw, 24px);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #aeaeb2;
+      font-variant-numeric: tabular-nums;
+    }
+    .hwv2-scope-card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(45, 200, 86, 0.1);
+      color: #2DC856;
+      margin-bottom: 14px;
+    }
+    .hwv2-scope-card-icon svg {
+      width: 56%;
+      height: 56%;
+    }
+    .hwv2-scope-card-title {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.012em;
+      line-height: 1.25;
+      color: #1d1d1f;
+    }
+    .hwv2-scope-card-body {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #4d5963;
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════════
+       5. HARDWARE — DC Fast Hardware for Every Corridor.
+       Lifted from /solutions/highway-fast-charging (v1).
+       Section sized to a full viewport (min-h-screen) with
+       content vertically centered via flex. Card body keeps
+       v2's tighter typography. Cards seat v1 product images
+       on a multifamily-v3-style "showroom" stage.
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv2-hardware-section bg-evium-dark-light min-h-screen flex flex-col justify-center py-8 lg:py-12">
+    <div class="max-w-7xl mx-auto w-full px-6 lg:px-12">
+
+      <!-- Header — v1 content, centered. Compressed to fit
+           the section in a single viewport. -->
+      <div class="text-center max-w-3xl mx-auto mb-7 lg:mb-9">
+        <div class="text-evium-green text-xs font-bold uppercase tracking-[0.22em] mb-3">DC Fast Hardware</div>
+        <h2 class="text-3xl lg:text-[2.4rem] font-black text-white leading-[1.05] mb-4">
+          Infrastructure-Grade Hardware
+          <span class="text-evium-green">for Every Corridor.</span>
+        </h2>
+        <p class="text-[15px] text-white/60 leading-snug max-w-2xl mx-auto">
+          Highway charging demands more than a standard EV install. Every unit Evium deploys is a high-power DC fast charger built for continuous-duty, multi-vehicle throughput with NEVI compliance baked in.
+        </p>
+      </div>
+
+      <!-- Grid uses explicit column ratios so the middle card
+           is ~15% wider than its siblings — gives the central
+           card visual weight without resorting to a transform
+           scale that would break grid alignment. -->
+      <div class="hwv2-hardware-grid">
+
+        <!-- Tellus 180kW -->
+        <article class="hwv2-hardware-card group">
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/tellus/tellus-dc-fast-180kw.png"
+              alt="Tellus DC Fast 180kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">Tellus Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">180<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">The corridor workhorse. Dual CCS + CHAdeMO connectors, weatherproof outdoor enclosure, OCPP 1.6+ connectivity, and NEVI uptime compliance built in. Adds 100+ miles in under 20 minutes.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">180kW Output</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">CCS + CHAdeMO</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">NEVI Compliant</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- MaxiCharger 60–240kW (now MIDDLE — promoted to the
+             center slot per request, sized slightly larger via
+             the wider middle column. Showroom floor card. -->
+        <article class="hwv2-hardware-card hwv2-hardware-card--middle group">
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/maxicharger/maxicharger-dc-fast-60-240kw.png"
+              alt="MaxiCharger DC Fast 60–240kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">MaxiCharger Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">60–240<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">Scalable modular architecture for sites with growing demand. Deploy at 60kW and upgrade to 240kW without replacing hardware. Ideal for sites entering the corridor market with room to scale.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">60–240kW</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Modular</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Upgradeable</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tellus 300kW (featured "Top Spec" — now on the right) -->
+        <article class="hwv2-hardware-card hwv2-hardware-card--featured group">
+          <span class="hwv2-hardware-flag" aria-label="Top spec">
+            <span class="hwv2-hardware-flag-dot" aria-hidden="true"></span>
+            <span class="hwv2-hardware-flag-text">Top Spec</span>
+          </span>
+          <div class="hwv2-hardware-stage">
+            <img
+              src="/images/chargers/tellus/tellus-dc-fast-300kw.png"
+              alt="Tellus DC Fast 300kW"
+              class="hwv2-hardware-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="hwv2-hardware-body">
+            <span class="hwv2-hardware-tag">Tellus Series</span>
+            <div class="text-4xl font-black text-white mb-2 leading-none">300<span class="text-2xl text-white/55 ml-1">kW</span></div>
+            <p class="text-white/55 text-[13px] leading-snug mb-4">Maximum throughput for high-traffic corridors. Supports dynamic power sharing across multiple vehicles simultaneously, ultra-fast 10-minute sessions for capable vehicles, and future-proof power delivery.</p>
+            <div class="flex flex-wrap gap-2 mt-auto">
+              <span class="text-xs font-semibold text-evium-green bg-evium-green/10 border border-evium-green/25 rounded-full px-3 py-1">300kW Output</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Dynamic Sharing</span>
+              <span class="text-xs font-semibold text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Future-Proof</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <p class="text-center text-white/40 text-sm mt-8">Multi-stall configurations available. All hardware is GSA-approved and meets NEVI technical specifications. Evium handles equipment procurement, installation, and certification.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       5. THE ECONOMICS — single-viewport dashboard.
+       One full viewport. Two segmented controls (Hosting
+       Model · Demand Tier) drive a single outcome panel that
+       morphs to show what each combination earns.
+
+       Every number is sourced verbatim from Evium's own docs.
+       No invented figures, no guessed splits.
+
+       ┌── TRUTH SOURCES ──────────────────────────────────┐
+       │ Evium NEVI Proposal, p.5                          │
+       │   • 180 kW CCS1 dual-port chargers                │
+       │   • 4–6 chargers per typical NEVI site            │
+       │   • $0.50/kWh consumer price                      │
+       │   • 18,000 / 30,000 / 42,000 kWh per month        │
+       │     (Low / Medium / High utilization)             │
+       │   • 10% host revenue at the No-Cost tier          │
+       │     → $900 / $1,500 / $2,100 per month, host      │
+       │     → $54k / $90k / $126k over 5 years            │
+       │   • Evium pays the kWh cost                       │
+       │   • Term: 5 years + 5-year Evium option           │
+       │                                                    │
+       │ Evium Charging Overview deck, p.5                 │
+       │   • Four canonical models, verbatim definitions:  │
+       │     - Low to No-Cost: Evium invests, runs, shares │
+       │       revenue; Evium captures incentives          │
+       │     - Client Investment: client finances, owns,   │
+       │       and operates; client receives ALL revenue;  │
+       │       Evium assists in rebate processing only     │
+       │     - Hybrid: blend of no-cost + investment,      │
+       │       tailored per site                           │
+       │     - Leasing: customizable leasing terms         │
+       │                                                    │
+       │ Evium Charging Overview deck, p.11                │
+       │   • "Why Choose Evium" pillars (zero-cost*,       │
+       │     flexible structure*, hassle-free, customized) │
+       └────────────────────────────────────────────────────┘
+
+       Visual register: light "showroom" gradient (consistent
+       break between the dark Hardware section above and the
+       dark Software & Compliance section below). Section is
+       100svh tall by design so the eventual scroll-snap
+       page-flow lands cleanly on it.
+
+       Animation: pill thumbs slide via translate; numbers
+       tween via rAF + easeOutCubic when model OR tier
+       changes; narrative panel cross-fades. All animation
+       honors prefers-reduced-motion.
+       ═══════════════════════════════════════════════════ -->
+  <section
+    id="economics"
+    class="hwv3-econ"
+    aria-labelledby="hwv3-econ-title"
+    data-hwv3-econ
+  >
+    <div class="hwv3-econ-bg" aria-hidden="true"></div>
+
+    <div class="hwv3-econ-frame">
+
+      <!-- HEADER ─────────────────────────────────── -->
+      <header class="hwv3-econ-head">
+        <p class="hwv3-econ-eyebrow">
+          <span class="hwv3-econ-eyebrow-rule" aria-hidden="true"></span>
+          <span>The Economics</span>
+          <span class="hwv3-econ-eyebrow-rule" aria-hidden="true"></span>
+        </p>
+        <h2 id="hwv3-econ-title" class="hwv3-econ-title">
+          How you host.
+          <span class="hwv3-econ-title-em">What each site earns.</span>
+        </h2>
+        <p class="hwv3-econ-sub">
+          Two pickers. Each owns its own description card; the outcome
+          panel below shows what the chosen combination earns.
+        </p>
+      </header>
+
+      <!-- ZONES — two columns. Each zone bundles a picker
+           with its description card, so switching a picker
+           visibly changes that picker's card. The combined
+           outcome lives in the panel below. ──────────────── -->
+      <div class="hwv3-econ-zones">
+
+        <!-- ZONE A — Hosting model. -->
+        <div class="hwv3-econ-zone hwv3-econ-zone--model">
+
+          <div class="hwv3-econ-zone-bar">
+            <span class="hwv3-econ-zone-label">Hosting model</span>
+            <div
+              class="hwv3-econ-segmented hwv3-econ-segmented--four"
+              role="tablist"
+              aria-label="Hosting model"
+              data-hwv3-models
+              data-active="nocost"
+            >
+              <span class="hwv3-econ-thumb" aria-hidden="true" data-hwv3-thumb="model"></span>
+              <button type="button" role="tab" class="hwv3-econ-tab is-active" data-hwv3-model="nocost"     aria-selected="true"  tabindex="0">Low to No-Cost</button>
+              <button type="button" role="tab" class="hwv3-econ-tab"           data-hwv3-model="hybrid"     aria-selected="false" tabindex="-1">Hybrid</button>
+              <button type="button" role="tab" class="hwv3-econ-tab"           data-hwv3-model="investment" aria-selected="false" tabindex="-1">Client Investment</button>
+              <button type="button" role="tab" class="hwv3-econ-tab"           data-hwv3-model="leasing"    aria-selected="false" tabindex="-1">Leasing</button>
+            </div>
+          </div>
+
+          <article class="hwv3-econ-card hwv3-econ-card--model" data-hwv3-card="model">
+            <div class="hwv3-econ-card-head">
+              <span class="hwv3-econ-card-flag" data-hwv3-narr-flag>Most common · NEVI-funded</span>
+              <h3 class="hwv3-econ-card-title" data-hwv3-narr-title>Low to No-Cost</h3>
+            </div>
+            <p class="hwv3-econ-card-tagline" data-hwv3-narr-tagline>
+              You contribute the land. Evium contributes everything else.
+            </p>
+            <p class="hwv3-econ-card-body" data-hwv3-narr-body>
+              Evium invests the capital and runs the site end to end. You
+              contribute the land and access; we cover hardware, install,
+              software, support, incentives, and the cost of every kilowatt
+              sold. Revenue is shared with the host.
+            </p>
+            <dl class="hwv3-econ-spec" data-hwv3-narr-facts>
+              <div><dt>Capital</dt><dd>Evium</dd></div>
+              <div><dt>Operations</dt><dd>Evium</dd></div>
+              <div><dt>Revenue</dt><dd>Shared,
+host‑favored</dd></div>
+              <div><dt>Term</dt><dd>5 yr&nbsp;+&nbsp;5</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <!-- ZONE B — Demand tier. -->
+        <div class="hwv3-econ-zone hwv3-econ-zone--tier">
+
+          <div class="hwv3-econ-zone-bar">
+            <span class="hwv3-econ-zone-label">Demand tier</span>
+            <div
+              class="hwv3-econ-segmented hwv3-econ-segmented--three"
+              role="tablist"
+              aria-label="Demand tier"
+              data-hwv3-tiers
+              data-active="medium"
+            >
+              <span class="hwv3-econ-thumb" aria-hidden="true" data-hwv3-thumb="tier"></span>
+              <button type="button" role="tab" class="hwv3-econ-tab" data-hwv3-tier="low" aria-selected="false" tabindex="-1">Low</button>
+              <button type="button" role="tab" class="hwv3-econ-tab is-active" data-hwv3-tier="medium" aria-selected="true" tabindex="0">Medium</button>
+              <button type="button" role="tab" class="hwv3-econ-tab" data-hwv3-tier="high" aria-selected="false" tabindex="-1">High</button>
+            </div>
+          </div>
+
+          <article class="hwv3-econ-card hwv3-econ-card--tier" data-hwv3-card="tier">
+            <div class="hwv3-econ-card-head">
+              <span class="hwv3-econ-card-flag" data-hwv3-tier-eyebrow>Tier 02 / 03</span>
+              <h3 class="hwv3-econ-card-title" data-hwv3-tier-title>Medium utilization</h3>
+            </div>
+
+            <!-- Two physical signals from the NEVI Proposal
+                 utilization table — the only tier-specific
+                 figures the source doc gives. Labels lead
+                 with the time period so the unit sits as the
+                 qualifier ("daily sessions" reads cleanly;
+                 "sessions / stall · day" reads like math). -->
+            <dl class="hwv3-econ-tier-stats">
+              <div>
+                <dt>Daily sessions</dt>
+                <dd><span data-hwv3-tier-sessions>~3</span></dd>
+                <p class="hwv3-econ-tier-stat-foot">per stall</p>
+              </div>
+              <div>
+                <dt>Monthly throughput</dt>
+                <dd>
+                  <span data-hwv3-tier-kwh>30,000</span>
+                  <span class="hwv3-econ-tier-stat-unit">kWh</span>
+                </dd>
+                <p class="hwv3-econ-tier-stat-foot">per stall</p>
+              </div>
+            </dl>
+
+            <!-- Foundation calc. The four hosting models all
+                 derive from this single gross-per-stall figure;
+                 surfacing it makes the model card's "Revenue"
+                 row directly comparable. -->
+            <p class="hwv3-econ-tier-math">
+              <span class="hwv3-econ-tier-math-key">Gross at $0.50&nbsp;/&nbsp;kWh</span>
+              <span class="hwv3-econ-tier-math-val">
+                <span class="hwv3-econ-num-prefix">$</span><span
+                  data-hwv3-num="grossPerStall"
+                >15,000</span>
+                <span class="hwv3-econ-tier-math-unit">monthly, per stall</span>
+              </span>
+            </p>
+          </article>
+        </div>
+      </div>
+
+      <!-- OUTCOME PANEL — full width, derived numbers only.
+           Eyebrow names the active combo so the reader knows
+           which (model × tier) this is the result of. ──── -->
+      <div class="hwv3-econ-outcome" data-hwv3-outcome>
+        <p class="hwv3-econ-outcome-eyebrow">
+          <span class="hwv3-econ-outcome-eyebrow-tag">Outcome</span>
+          <span class="hwv3-econ-outcome-eyebrow-combo">
+            <strong data-hwv3-active-model>Low to No-Cost</strong>
+            <span aria-hidden="true">·</span>
+            <strong data-hwv3-active-tier>Medium utilization</strong>
+          </span>
+        </p>
+
+        <!-- Mode A — Numeric. No-Cost + Client Investment. -->
+        <div class="hwv3-econ-numeric" data-hwv3-mode="numeric">
+          <p class="hwv3-econ-num-label" data-hwv3-num-label>
+            Estimated host revenue
+          </p>
+          <div class="hwv3-econ-num-row">
+            <p class="hwv3-econ-num-primary">
+              <span class="hwv3-econ-num-prefix">$</span><span
+                class="hwv3-econ-num-figure"
+                data-hwv3-num="monthly"
+              >1,500</span>
+              <span class="hwv3-econ-num-unit">/&nbsp;month</span>
+            </p>
+            <span class="hwv3-econ-num-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 12" fill="none">
+                <path d="M1 6 L22 6 M16 1 L22 6 L16 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <p class="hwv3-econ-num-secondary">
+              <span class="hwv3-econ-num-prefix">$</span><span
+                class="hwv3-econ-num-figure"
+                data-hwv3-num="fiveyear"
+              >90,000</span>
+              <span class="hwv3-econ-num-unit">over&nbsp;5&nbsp;years</span>
+            </p>
+          </div>
+          <p class="hwv3-econ-num-multi">
+            <span class="hwv3-econ-num-multi-label" data-hwv3-multi-label>Typical 4‑charger NEVI site, 5&nbsp;yr</span>
+            <span class="hwv3-econ-num-multi-val">
+              <span class="hwv3-econ-num-prefix">$</span><span
+                data-hwv3-num="multistall"
+              >360,000</span>
+            </span>
+          </p>
+        </div>
+
+        <!-- Mode B — Band. Hybrid. -->
+        <div class="hwv3-econ-band" data-hwv3-mode="band" hidden>
+          <p class="hwv3-econ-num-label">Hybrid lands somewhere along this band</p>
+          <div class="hwv3-econ-band-row">
+            <div class="hwv3-econ-band-anchor hwv3-econ-band-anchor--low">
+              <p class="hwv3-econ-band-val">
+                <span class="hwv3-econ-num-prefix">$</span><span
+                  class="hwv3-econ-band-val-num"
+                  data-hwv3-num="bandLow"
+                >1,500</span>
+                <span class="hwv3-econ-band-val-unit">/&nbsp;mo</span>
+              </p>
+              <p class="hwv3-econ-band-anchor-label">Pure No‑Cost</p>
+              <p class="hwv3-econ-band-anchor-sub">Evium funds 100%</p>
+            </div>
+            <div class="hwv3-econ-band-track" aria-hidden="true">
+              <span class="hwv3-econ-band-dot hwv3-econ-band-dot--left"></span>
+              <span class="hwv3-econ-band-rail"></span>
+              <span class="hwv3-econ-band-dot hwv3-econ-band-dot--right"></span>
+            </div>
+            <div class="hwv3-econ-band-anchor hwv3-econ-band-anchor--high">
+              <p class="hwv3-econ-band-val">
+                <span class="hwv3-econ-num-prefix">$</span><span
+                  class="hwv3-econ-band-val-num"
+                  data-hwv3-num="bandHigh"
+                >15,000</span>
+                <span class="hwv3-econ-band-val-unit">/&nbsp;mo</span>
+              </p>
+              <p class="hwv3-econ-band-anchor-label">Pure Investment</p>
+              <p class="hwv3-econ-band-anchor-sub">Host funds 100%</p>
+            </div>
+          </div>
+          <p class="hwv3-econ-band-caption">
+            Where you land is set by your share of the capital — more
+            host capital, larger host share of revenue.
+          </p>
+        </div>
+
+        <!-- Mode C — Subtraction. Leasing. -->
+        <div class="hwv3-econ-sub" data-hwv3-mode="subtraction" hidden>
+          <p class="hwv3-econ-num-label">How Leasing settles per stall</p>
+          <dl class="hwv3-econ-sub-eq">
+            <div class="hwv3-econ-sub-row">
+              <dt class="hwv3-econ-sub-key">Gross sales (yours)</dt>
+              <dd class="hwv3-econ-sub-val">
+                <span class="hwv3-econ-num-prefix">$</span><span
+                  class="hwv3-econ-sub-num"
+                  data-hwv3-num="grossSales"
+                >15,000</span>
+                <span class="hwv3-econ-sub-unit">/&nbsp;mo</span>
+              </dd>
+            </div>
+            <div class="hwv3-econ-sub-row hwv3-econ-sub-row--minus">
+              <dt class="hwv3-econ-sub-key"><span class="hwv3-econ-sub-op" aria-hidden="true">−</span> Monthly lease payment</dt>
+              <dd class="hwv3-econ-sub-val hwv3-econ-sub-val--soft">sized to site</dd>
+            </div>
+            <div class="hwv3-econ-sub-row hwv3-econ-sub-row--total">
+              <dt class="hwv3-econ-sub-key"><span class="hwv3-econ-sub-op" aria-hidden="true">=</span> Host take‑home</dt>
+              <dd class="hwv3-econ-sub-val hwv3-econ-sub-val--soft">set by throughput</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- SOURCE FOOTNOTE ─ explicit citations ──────────── -->
+      <p class="hwv3-econ-source">
+        Numbers and terms drawn directly from the
+        <em>Evium NEVI Proposal</em> (180 kW CCS1 dual-port; $0.50/kWh
+        consumer price; 10% host revenue at the No-Cost tier; 5-year
+        contract + 5-year Evium option) and the
+        <em>Evium Charging Overview</em> deck (canonical model
+        definitions). Hybrid and Leasing figures are bespoke per site.
+      </p>
+    </div>
+  </section>
+
+  <style>
+    /* ─── Section surface — light "showroom" gradient.
+           Single-viewport: 100svh fixed, no scroll inside. ─── */
+    .hwv3-econ {
+      position: relative;
+      isolation: isolate;
+      height: 100svh;
+      min-height: 640px;
+      display: flex;
+      align-items: center;
+      padding: clamp(24px, 3vw, 56px) 0;
+      overflow: hidden;
+      color: #0d1b22;
+      box-sizing: border-box;
+    }
+    .hwv3-econ-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, #f4f7fb 0%, #eef2f7 50%, #e7edf4 100%);
+    }
+    .hwv3-econ-bg::before,
+    .hwv3-econ-bg::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+    .hwv3-econ-bg::before {
+      top: -10%;
+      right: -8%;
+      width: 55%;
+      height: 60%;
+      background: radial-gradient(ellipse at top right, rgba(45, 200, 86, 0.10) 0%, transparent 65%);
+    }
+    .hwv3-econ-bg::after {
+      bottom: -15%;
+      left: -8%;
+      width: 50%;
+      height: 55%;
+      background: radial-gradient(ellipse at bottom left, rgba(26, 47, 58, 0.06) 0%, transparent 70%);
+    }
+
+    .hwv3-econ-frame {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(24px, 4vw, 60px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: clamp(14px, 1.8vw, 24px);
+      max-height: 100%;
+      box-sizing: border-box;
+      min-height: 0;
+    }
+
+    /* ─── Header. Compact — eyebrow + 2-line title + sub. ─── */
+    .hwv3-econ-head {
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .hwv3-econ-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: clamp(0.56rem, 0.7vw, 0.72rem);
+      font-weight: 900;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: #1A2F3A;
+      margin: 0 0 14px;
+      opacity: 0.78;
+    }
+    .hwv3-econ-eyebrow-rule {
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: #1A2F3A;
+      opacity: 0.35;
+    }
+    .hwv3-econ-title {
+      font-size: clamp(1.55rem, 2.8vw, 2.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.04;
+      color: #0d1b22;
+      margin: 0 0 10px;
+    }
+    .hwv3-econ-title-em {
+      display: inline-block;
+      font-style: italic;
+      font-weight: 800;
+      color: #1A2F3A;
+      opacity: 0.78;
+    }
+    .hwv3-econ-sub {
+      font-size: clamp(0.92rem, 1vw, 1.025rem);
+      line-height: 1.55;
+      color: rgba(13, 27, 34, 0.62);
+      margin: 0;
+      max-width: 640px;
+      margin-inline: auto;
+    }
+
+    /* ─── Zones row — two columns. Each zone bundles a
+           picker bar + its description card. The card
+           reacts visibly when its picker changes, so each
+           control owns its own surface. ─── */
+    .hwv3-econ-zones {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: clamp(14px, 1.6vw, 22px);
+      align-items: stretch;
+      min-height: 0;
+    }
+    @media (max-width: 880px) {
+      .hwv3-econ-zones { grid-template-columns: 1fr; }
+    }
+    .hwv3-econ-zone {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.2vw, 16px);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    /* Zone bar — picker label inline with the segmented pill. */
+    .hwv3-econ-zone-bar {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: clamp(10px, 1.2vw, 18px);
+    }
+    .hwv3-econ-zone-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.5);
+      white-space: nowrap;
+    }
+
+    /* ─── Segmented (shared by both zone pickers + the
+           outcome panel's mode-switching). ─── */
+    .hwv3-econ-segmented {
+      position: relative;
+      display: grid;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(13, 27, 34, 0.08);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 1px 2px rgba(13, 27, 34, 0.04),
+        0 12px 28px -16px rgba(13, 27, 34, 0.18);
+    }
+    .hwv3-econ-segmented--four { grid-template-columns: repeat(4, 1fr); }
+    .hwv3-econ-segmented--three { grid-template-columns: repeat(3, 1fr); }
+
+    .hwv3-econ-thumb {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 5px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 6px 16px -6px rgba(45, 200, 86, 0.55),
+        0 2px 4px rgba(13, 27, 34, 0.12);
+      transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+      pointer-events: none;
+    }
+    .hwv3-econ-segmented--four .hwv3-econ-thumb  { width: calc((100% - 10px) / 4); }
+    .hwv3-econ-segmented--three .hwv3-econ-thumb { width: calc((100% - 10px) / 3); }
+    .hwv3-econ-segmented--four[data-active="nocost"]      .hwv3-econ-thumb { transform: translateX(0);    }
+    .hwv3-econ-segmented--four[data-active="hybrid"]      .hwv3-econ-thumb { transform: translateX(100%); }
+    .hwv3-econ-segmented--four[data-active="investment"]  .hwv3-econ-thumb { transform: translateX(200%); }
+    .hwv3-econ-segmented--four[data-active="leasing"]     .hwv3-econ-thumb { transform: translateX(300%); }
+    .hwv3-econ-segmented--three[data-active="low"]        .hwv3-econ-thumb { transform: translateX(0);    }
+    .hwv3-econ-segmented--three[data-active="medium"]     .hwv3-econ-thumb { transform: translateX(100%); }
+    .hwv3-econ-segmented--three[data-active="high"]       .hwv3-econ-thumb { transform: translateX(200%); }
+
+    .hwv3-econ-tab {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 9px 10px;
+      border-radius: 999px;
+      color: rgba(13, 27, 34, 0.62);
+      transition: color 220ms ease;
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      line-height: 1.1;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .hwv3-econ-tab:hover:not(.is-active) { color: #1A2F3A; }
+    .hwv3-econ-tab.is-active             { color: #ffffff; }
+    .hwv3-econ-tab:focus-visible {
+      outline: 2px solid #2DC856;
+      outline-offset: 3px;
+    }
+
+    /* ─── Card (shared by model + tier zones). ─── */
+    .hwv3-econ-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.2vw, 16px);
+      padding: clamp(16px, 1.8vw, 24px);
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid rgba(13, 27, 34, 0.07);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 1px 2px rgba(13, 27, 34, 0.03),
+        0 24px 48px -32px rgba(13, 27, 34, 0.18),
+        0 4px 12px -8px rgba(13, 27, 34, 0.08);
+      transition: opacity 280ms ease;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .hwv3-econ-card.is-swapping { opacity: 0; }
+
+    .hwv3-econ-card-head {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .hwv3-econ-card-flag {
+      align-self: flex-start;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: rgba(45, 200, 86, 0.10);
+      color: #1A2F3A;
+      border: 1px solid rgba(45, 200, 86, 0.30);
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .hwv3-econ-card-title {
+      font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+      font-weight: 900;
+      letter-spacing: -0.018em;
+      line-height: 1.05;
+      color: #0d1b22;
+      margin: 0;
+    }
+    .hwv3-econ-card-tagline {
+      font-size: clamp(0.92rem, 1.05vw, 1rem);
+      font-weight: 700;
+      line-height: 1.4;
+      color: #1A2F3A;
+      margin: 0;
+      letter-spacing: -0.005em;
+    }
+    .hwv3-econ-card-body {
+      font-size: clamp(0.84rem, 0.95vw, 0.92rem);
+      line-height: 1.55;
+      color: rgba(13, 27, 34, 0.66);
+      margin: 0;
+    }
+
+    /* ─── Spec strip — Capital · Operations · Revenue · Term.
+           Same four axes for every model so the row reads as
+           a comparable spec sheet. Soft contained gray-grid
+           look — distinct from the surrounding card body, but
+           refined: subtle bg gradient on the cells, hairline
+           outer border, inner 1px hairline cell separators.
+
+           dd uses white-space: pre-line so the JS can pass an
+           explicit \n where a line break should fall. That
+           gives us controlled, balanced wrap on the longer
+           Revenue values instead of the browser's default
+           greedy line-break. ─── */
+    .hwv3-econ-spec {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      margin: auto 0 0;
+      padding: 0;
+      background: rgba(13, 27, 34, 0.085);
+      border: 1px solid rgba(13, 27, 34, 0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .hwv3-econ-spec > div {
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+      padding: 11px 13px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+    .hwv3-econ-spec dt {
+      font-size: 0.54rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.48);
+      line-height: 1.2;
+    }
+    .hwv3-econ-spec dd {
+      font-size: clamp(0.8rem, 0.92vw, 0.88rem);
+      font-weight: 700;
+      color: #0d1b22;
+      margin: 0;
+      letter-spacing: -0.005em;
+      line-height: 1.32;
+      white-space: pre-line;
+      text-wrap: balance;
+    }
+
+    /* ─── Tier card stats — two physical signals from the
+           NEVI Proposal utilization table. Mirrors the
+           spec-strip treatment so both cards feel like
+           sibling product spec sheets. ─── */
+    .hwv3-econ-tier-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      margin: 0;
+      padding: 0;
+      background: rgba(13, 27, 34, 0.085);
+      border: 1px solid rgba(13, 27, 34, 0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .hwv3-econ-tier-stats > div {
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+      padding: 14px 14px 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      gap: 8px;
+      min-height: 0;
+    }
+    .hwv3-econ-tier-stats dt {
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.5);
+      line-height: 1.2;
+    }
+    .hwv3-econ-tier-stats dd {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 5px;
+      margin: 0;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      line-height: 1;
+    }
+    .hwv3-econ-tier-stats dd > span:first-child {
+      font-size: clamp(1.55rem, 2.1vw, 1.95rem);
+      font-weight: 900;
+      letter-spacing: -0.022em;
+      color: #0d1b22;
+      line-height: 1;
+    }
+    .hwv3-econ-tier-stat-unit {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.005em;
+    }
+    .hwv3-econ-tier-stat-foot {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: rgba(13, 27, 34, 0.45);
+      margin: 0;
+      line-height: 1;
+    }
+
+    /* ─── Tier card foundation calc — the gross-per-stall
+           figure the four hosting models all derive from. ─── */
+    .hwv3-econ-tier-math {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      margin: auto 0 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(45, 200, 86, 0.08) 0%, rgba(45, 200, 86, 0.02) 100%);
+      border: 1px solid rgba(45, 200, 86, 0.22);
+    }
+    .hwv3-econ-tier-math-key {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #1A2F3A;
+      line-height: 1.2;
+    }
+    .hwv3-econ-tier-math-val {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      color: #2DC856;
+      font-weight: 900;
+      font-size: clamp(1.05rem, 1.45vw, 1.35rem);
+      letter-spacing: -0.018em;
+      line-height: 1;
+    }
+    .hwv3-econ-tier-math-val .hwv3-econ-num-prefix {
+      font-size: 0.78rem;
+      color: #2DC856;
+      opacity: 0.78;
+    }
+    .hwv3-econ-tier-math-unit {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.005em;
+    }
+
+    /* ─── Outcome panel — full-width, derived numbers only.
+           Eyebrow names the active (model × tier) combo
+           so the reader can verify what they're looking at. ─── */
+    .hwv3-econ-outcome {
+      position: relative;
+      padding: clamp(16px, 1.8vw, 24px) clamp(20px, 2.2vw, 30px);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(45, 200, 86, 0.06) 0%, rgba(45, 200, 86, 0.02) 50%, transparent 100%),
+        #ffffff;
+      border: 1px solid rgba(45, 200, 86, 0.28);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 24px 48px -28px rgba(45, 200, 86, 0.22),
+        0 4px 12px -6px rgba(13, 27, 34, 0.10);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.4vw, 18px);
+      min-height: 0;
+    }
+    .hwv3-econ-outcome-eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+    .hwv3-econ-outcome-eyebrow-tag {
+      font-size: 0.56rem;
+      font-weight: 800;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: #1A2F3A;
+      color: #ffffff;
+    }
+    .hwv3-econ-outcome-eyebrow-combo {
+      font-size: clamp(0.78rem, 0.95vw, 0.9rem);
+      font-weight: 700;
+      color: rgba(13, 27, 34, 0.7);
+      letter-spacing: -0.005em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hwv3-econ-outcome-eyebrow-combo strong {
+      color: #0d1b22;
+      font-weight: 800;
+    }
+    .hwv3-econ-outcome-eyebrow-combo span {
+      color: rgba(13, 27, 34, 0.4);
+    }
+
+    /* Mode containers inside the outcome panel — three modes,
+       mutually exclusive, cross-fade on swap. */
+    [data-hwv3-mode] {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.2vw, 16px);
+      transition: opacity 280ms ease;
+    }
+    [data-hwv3-mode][hidden] { display: none; }
+
+    /* Numeric mode (No-Cost + Investment). */
+    .hwv3-econ-num-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.5);
+      margin: 0;
+    }
+    .hwv3-econ-num-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(10px, 1.4vw, 18px);
+    }
+    @media (max-width: 600px) {
+      .hwv3-econ-num-row {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hwv3-econ-num-arrow { transform: rotate(90deg); }
+    }
+    .hwv3-econ-num-primary,
+    .hwv3-econ-num-secondary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px;
+      margin: 0;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+    .hwv3-econ-num-prefix {
+      font-size: clamp(1rem, 1.4vw, 1.35rem);
+      font-weight: 800;
+      color: rgba(13, 27, 34, 0.55);
+      line-height: 1;
+    }
+    .hwv3-econ-num-figure {
+      font-size: clamp(1.85rem, 3.2vw, 2.85rem);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      color: #0d1b22;
+      line-height: 1;
+    }
+    .hwv3-econ-num-secondary .hwv3-econ-num-figure {
+      color: #2DC856;
+      font-size: clamp(1.45rem, 2.2vw, 2rem);
+    }
+    .hwv3-econ-num-secondary .hwv3-econ-num-prefix {
+      color: #2DC856;
+      font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+    }
+    .hwv3-econ-num-unit {
+      font-size: clamp(0.72rem, 0.9vw, 0.86rem);
+      font-weight: 600;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.01em;
+      flex-basis: 100%;
+    }
+    .hwv3-econ-num-arrow {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(45, 200, 86, 0.10);
+      color: #2DC856;
+      flex-shrink: 0;
+    }
+    .hwv3-econ-num-arrow svg {
+      width: 18px;
+      height: 9px;
+    }
+
+    /* Compact multi-stall line — sits inside the numeric mode. */
+    .hwv3-econ-num-multi {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 0;
+      padding: 9px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #f5f8fc 0%, #eef2f7 100%);
+      border: 1px solid rgba(13, 27, 34, 0.06);
+    }
+    .hwv3-econ-num-multi-label {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.55);
+      line-height: 1.2;
+    }
+    .hwv3-econ-num-multi-val {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 2px;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      color: #1A2F3A;
+      font-weight: 900;
+      font-size: clamp(1rem, 1.35vw, 1.25rem);
+      letter-spacing: -0.018em;
+      line-height: 1;
+    }
+    .hwv3-econ-num-multi-val .hwv3-econ-num-prefix {
+      font-size: 0.78rem;
+      color: rgba(13, 27, 34, 0.55);
+    }
+
+    /* Band mode (Hybrid). */
+    .hwv3-econ-band-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(56px, 1.6fr) minmax(0, 1fr);
+      gap: clamp(10px, 1.2vw, 18px);
+      align-items: center;
+    }
+    @media (max-width: 600px) {
+      .hwv3-econ-band-row { grid-template-columns: 1fr; }
+    }
+    .hwv3-econ-band-anchor {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hwv3-econ-band-anchor--low { text-align: left; }
+    .hwv3-econ-band-anchor--high { text-align: right; align-items: flex-end; }
+    .hwv3-econ-band-val {
+      margin: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+    .hwv3-econ-band-val-num {
+      font-size: clamp(1.55rem, 2.4vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: -0.022em;
+      color: #0d1b22;
+      line-height: 1;
+    }
+    .hwv3-econ-band-anchor--high .hwv3-econ-band-val-num {
+      color: #1A2F3A;
+    }
+    .hwv3-econ-band-val-unit {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.005em;
+    }
+    .hwv3-econ-band-anchor-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(13, 27, 34, 0.62);
+      margin: 0;
+      line-height: 1.2;
+    }
+    .hwv3-econ-band-anchor-sub {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: rgba(13, 27, 34, 0.45);
+      margin: 0;
+      letter-spacing: -0.005em;
+      line-height: 1.2;
+    }
+    .hwv3-econ-band-track {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 8px;
+      width: 100%;
+    }
+    .hwv3-econ-band-rail {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        rgba(45, 200, 86, 0.55) 0%,
+        rgba(45, 200, 86, 0.30) 50%,
+        rgba(26, 47, 58, 0.55) 100%
+      );
+    }
+    .hwv3-econ-band-dot {
+      position: relative;
+      z-index: 1;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow:
+        0 0 0 3px #ffffff,
+        0 2px 6px rgba(13, 27, 34, 0.18);
+    }
+    .hwv3-econ-band-dot--left  { background: #2DC856; }
+    .hwv3-econ-band-dot--right { background: #1A2F3A; }
+    .hwv3-econ-band-caption {
+      font-size: clamp(0.78rem, 0.92vw, 0.88rem);
+      line-height: 1.5;
+      color: rgba(13, 27, 34, 0.6);
+      margin: 0;
+    }
+
+    /* ─── Subtraction mode (Leasing) — vertical equation card. ─── */
+    .hwv3-econ-sub-eq {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 0;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #f5f8fc 0%, #eef2f7 100%);
+      border: 1px solid rgba(13, 27, 34, 0.06);
+    }
+    .hwv3-econ-sub-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .hwv3-econ-sub-key {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #1A2F3A;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .hwv3-econ-sub-op {
+      display: inline-grid;
+      place-items: center;
+      width: 14px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: rgba(13, 27, 34, 0.5);
+      line-height: 1;
+    }
+    .hwv3-econ-sub-val {
+      margin: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      color: #0d1b22;
+    }
+    .hwv3-econ-sub-num {
+      font-size: clamp(1.35rem, 1.85vw, 1.65rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .hwv3-econ-sub-unit {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.005em;
+    }
+    .hwv3-econ-sub-val--soft {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: rgba(13, 27, 34, 0.55);
+      letter-spacing: -0.005em;
+      font-style: italic;
+    }
+    .hwv3-econ-sub-row--total {
+      padding-top: 7px;
+      border-top: 1px dashed rgba(13, 27, 34, 0.18);
+    }
+    .hwv3-econ-sub-row--total .hwv3-econ-sub-key {
+      color: #0d1b22;
+      font-weight: 800;
+    }
+
+
+    /* ─── Source line. ─── */
+    .hwv3-econ-source {
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: rgba(13, 27, 34, 0.45);
+      max-width: 880px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .hwv3-econ-source em {
+      font-style: normal;
+      font-weight: 700;
+      color: rgba(13, 27, 34, 0.62);
+    }
+
+    /* ─── Reduced motion. ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .hwv3-econ-thumb,
+      [data-hwv3-mode],
+      .hwv3-econ-card {
+        transition: none;
+      }
+    }
+
+    /* ─── Compact heights — squeeze for shorter viewports.
+           Below ~760px tall we tighten paddings to keep
+           everything inside one viewport. ─── */
+    @media (max-height: 760px) {
+      .hwv3-econ {
+        padding-block: clamp(18px, 2vw, 32px);
+      }
+      .hwv3-econ-frame {
+        gap: clamp(10px, 1.2vw, 18px);
+      }
+      .hwv3-econ-card {
+        padding: clamp(12px, 1.4vw, 20px);
+        gap: clamp(8px, 1vw, 14px);
+      }
+      .hwv3-econ-num-figure {
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+      }
+      .hwv3-econ-band-val-num {
+        font-size: clamp(1.35rem, 2vw, 1.8rem);
+      }
+      .hwv3-econ-card-body {
+        font-size: clamp(0.78rem, 0.88vw, 0.86rem);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Economics — mobile (≤759px) overrides
+       ──────────────────────────────────────────────────────
+       Desktop renders the section as a fixed-height interactive
+       dashboard (100svh + max-height:100% on the frame so the
+       2-zone + outcome layout fits cleanly inside one viewport).
+       At 390px wide that fixed-height crush squeezes 4 tabs +
+       2 description cards + an outcome panel into ~720px of
+       vertical space — content overflows, tabs clip, and the
+       outcome row vanishes.
+
+       Mobile fix:
+         · Section becomes `min-height: calc(100dvh - 80px)`
+           — still one viewport tall, but content drives the
+           actual height so the cards/outcome don't squeeze.
+         · Frame drops max-height:100% — content flows
+           naturally (still no scroll within section because
+           shrunk fonts/paddings keep total height inside one
+           viewport).
+         · Every interior text size + padding shrunk for the
+           narrower column so the editorial register reads
+           clearly at phone scale.
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 759px) {
+      /* ─── Section + frame ─────────────────────────────────
+         Section LOCKED to one mobile viewport (calc(100dvh -
+         80px) accounts for the 80px sticky navbar). Frame
+         is flex-column so children can use `flex: 1` to
+         claim remaining vertical space (zones grow → outcome
+         is pushed to the bottom). */
+      .hwv3-econ {
+        height: calc(100dvh - 80px) !important;
+        min-height: calc(100dvh - 80px) !important;
+        max-height: calc(100dvh - 80px) !important;
+        scroll-margin-top: 80px !important;
+        /* Section padding zeroed top/bottom — the frame's
+           justify-content:center centers the content cluster
+           so the distance from the section's top divider to
+           the eyebrow's top equals the distance from the
+           outcome's bottom to the section's bottom divider. */
+        padding: 0 !important;
+        display: block !important;
+        align-items: initial !important;
+        overflow: hidden !important;
+      }
+      .hwv3-econ-frame {
+        height: 100% !important;
+        padding: 0 12px !important;
+        gap: 0 !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        /* Centered cluster — content sits as a single unified
+           block centered in the section, with EQUAL deadspace
+           above the eyebrow and below the outcome panel. */
+        justify-content: center !important;
+      }
+
+      /* ─── Header ──────────────────────────────────────────
+         Sub→tabs gap = 36 (bumped). Slight negative top
+         margin (-6) compensates for the ~8px line-box space
+         above the eyebrow text, so the section's top→eyebrow
+         visible gap equals the outcome→section-bottom gap. */
+      .hwv3-econ-head {
+        margin-top: -8px !important;
+        margin-bottom: 36px !important;
+      }
+      .hwv3-econ-eyebrow {
+        font-size: 12px !important;
+        letter-spacing: 0.28em !important;
+        margin: 0 0 6px !important;
+        gap: 11px !important;
+      }
+      .hwv3-econ-eyebrow-rule {
+        width: 22px !important;
+      }
+      .hwv3-econ-title {
+        font-size: 25px !important;
+        line-height: 1.03 !important;
+        margin: 0 0 6px !important;
+      }
+      .hwv3-econ-sub {
+        font-size: 12.5px !important;
+        line-height: 1.32 !important;
+      }
+
+      /* ─── Mirror desktop's "2 cards above 1 wide card"
+         layout on mobile.
+
+         Desktop: zones grid is 1.4fr | 1fr — two zones side-
+         by-side, each zone is (picker bar) + (description
+         card) stacked vertically. Outcome panel sits BELOW
+         the zones row.
+
+         Mobile rebuild: keep the two description cards side-
+         by-side (top row), with both picker bars stacked at
+         FULL WIDTH above them (rows 1 + 2) so 4 model tabs
+         + 3 tier tabs fit comfortably. Cards stay side-by-
+         side as user requested. Outcome panel still flows
+         below from the frame's normal layout.
+
+         Implementation: zones becomes a grid; each zone
+         element gets `display: contents` so its children
+         (the picker bar + the card) flow as direct grid
+         items, then we explicitly place each one into a
+         row/column. ─── */
+      /* Two-column zones grid — each picker sits above its
+         own card.
+         · row-gap (tabs → cards) = 18 (small bump).
+         · margin-bottom (cards → outcome) = 30 (big bump). */
+      .hwv3-econ-zones {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: auto auto !important;
+        row-gap: 18px !important;
+        column-gap: 8px !important;
+        align-items: stretch !important;
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        margin-bottom: 30px !important;
+      }
+      .hwv3-econ-zone {
+        display: contents !important;
+      }
+      /* Model picker — col 1, row 1 (above the model card) */
+      .hwv3-econ-zone--model .hwv3-econ-zone-bar {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+      }
+      /* Tier picker — col 2, row 1 (above the tier card) */
+      .hwv3-econ-zone--tier .hwv3-econ-zone-bar {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+      }
+      /* Model card — col 1, row 2 */
+      .hwv3-econ-zone--model .hwv3-econ-card {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        min-height: 0 !important;
+      }
+      /* Tier card — col 2, row 2 */
+      .hwv3-econ-zone--tier .hwv3-econ-card {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        min-height: 0 !important;
+      }
+      /* Per-column zone-bar — stack label above the segmented
+         tab control so the picker fits the narrow column. */
+      .hwv3-econ-zone-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+      }
+      .hwv3-econ-zone-label {
+        font-size: 10.5px !important;
+        letter-spacing: 0.22em !important;
+        text-align: center !important;
+      }
+
+      /* Segmented control — bigger font + more padding so the
+         pickers read with proper editorial weight. Long labels
+         ("Client Investment") wrap to 2 lines inside narrow
+         columns rather than clipping. */
+      .hwv3-econ-segmented {
+        padding: 3px !important;
+        border-radius: 11px !important;
+      }
+      .hwv3-econ-tab {
+        font-size: 10px !important;
+        padding: 8px 3px !important;
+        letter-spacing: 0 !important;
+        line-height: 1.18 !important;
+        font-weight: 700 !important;
+        white-space: normal !important;
+        text-align: center !important;
+      }
+
+      /* Cards — INNER content bumped bigger, but cards are
+         shorter overall by hiding the body description.
+         Result: flag + title + (specs|stats) is the punchy
+         editorial register; the descriptive paragraph lives
+         on the desktop pattern only. */
+      .hwv3-econ-card {
+        padding: 11px !important;
+        gap: 4px !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+      }
+      .hwv3-econ-card-head {
+        gap: 5px !important;
+      }
+      .hwv3-econ-card-flag {
+        font-size: 8.5px !important;
+        padding: 3px 8px !important;
+        letter-spacing: 0.12em !important;
+        align-self: flex-start;
+        max-width: 100%;
+      }
+      .hwv3-econ-card-title {
+        font-size: 18px !important;
+        line-height: 1.05 !important;
+        letter-spacing: -0.02em;
+      }
+      .hwv3-econ-card-tagline {
+        display: none !important;
+      }
+      /* Body description hidden on mobile — cards stay short
+         so the section can breathe. */
+      .hwv3-econ-card-body {
+        display: none !important;
+      }
+      /* Model spec grid — single column, label|value rows.
+         Bumped for editorial weight. */
+      .hwv3-econ-spec {
+        grid-template-columns: 1fr !important;
+        gap: 2px !important;
+        margin-top: 4px !important;
+      }
+      .hwv3-econ-spec > div {
+        padding: 3px 8px !important;
+        /* Stacked layout: label-above-value. Each row takes
+           full card width for the value, so long values like
+           "Shared, host-favored" stay on a single line. The
+           dt label sits as a small caption above each value. */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0 !important;
+      }
+      .hwv3-econ-spec dt {
+        font-size: 9.5px !important;
+        letter-spacing: 0.14em !important;
+        margin: 0 !important;
+        opacity: 0.7;
+      }
+      .hwv3-econ-spec dd {
+        font-size: 13.5px !important;
+        line-height: 1.18 !important;
+        font-weight: 700 !important;
+      }
+
+      /* Tier card stats — label above value, both stacked.
+         Compressed to keep the cards short enough to fit the
+         section's 720 viewport budget while the gap tiers
+         (sub→tabs 28, cards→outcome 22) consume the rest. */
+      .hwv3-econ-tier-stats {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+        margin: 3px 0 !important;
+        padding: 5px 0 !important;
+      }
+      .hwv3-econ-tier-stats > div {
+        padding: 2px 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1px !important;
+      }
+      .hwv3-econ-tier-stats dt {
+        font-size: 9.5px !important;
+        letter-spacing: 0.13em !important;
+        margin: 0 !important;
+      }
+      .hwv3-econ-tier-stats dd {
+        font-size: 19px !important;
+        line-height: 1 !important;
+      }
+      .hwv3-econ-tier-stats dd > span:first-child {
+        font-size: 19px !important;
+      }
+      .hwv3-econ-tier-stat-unit {
+        font-size: 11.5px !important;
+        margin-left: 3px;
+      }
+      .hwv3-econ-tier-stat-foot {
+        display: none !important;
+      }
+      .hwv3-econ-tier-math {
+        padding: 4px 10px !important;
+        margin-top: 3px !important;
+        gap: 1px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+      .hwv3-econ-tier-math-key {
+        font-size: 9.5px !important;
+        letter-spacing: 0.12em !important;
+      }
+      .hwv3-econ-tier-math-val {
+        font-size: 17px !important;
+      }
+      .hwv3-econ-tier-math-val .hwv3-econ-num-prefix {
+        font-size: 13px !important;
+      }
+      .hwv3-econ-tier-math-unit {
+        font-size: 9.5px !important;
+        line-height: 1.2 !important;
+      }
+
+      /* Outcome panel — tightened so the section fits the
+         larger inter-section gaps (sub→tabs 32, cards→outcome
+         28) within the locked 720 viewport. */
+      .hwv3-econ-outcome {
+        padding: 10px 14px 11px !important;
+        gap: 6px !important;
+        border-radius: 12px !important;
+        flex-shrink: 0 !important;
+      }
+      .hwv3-econ-outcome-eyebrow {
+        font-size: 9.5px !important;
+        flex-wrap: wrap !important;
+        gap: 4px 7px !important;
+        margin: 0 !important;
+      }
+      .hwv3-econ-outcome-eyebrow-tag {
+        font-size: 9px !important;
+        padding: 3px 8px !important;
+        letter-spacing: 0.18em !important;
+      }
+      .hwv3-econ-num-label {
+        font-size: 10.5px !important;
+        letter-spacing: 0.16em !important;
+        margin-bottom: 3px !important;
+      }
+      /* Horizontal outcome row — 3-column grid: monthly |
+         arrow | 5-year. */
+      .hwv3-econ-num-row {
+        display: grid !important;
+        grid-template-columns: 1fr auto 1fr !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      /* Number rows — each side ($ prefix + figure + unit) on
+         a SINGLE inline row (was stacked column). Layout:
+         "$ 1,500 / month"  →  "$ 90,000 over 5 years"
+         All three sub-elements baseline-aligned in one row. */
+      .hwv3-econ-num-primary,
+      .hwv3-econ-num-secondary {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: baseline !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+      }
+      .hwv3-econ-num-secondary {
+        justify-content: flex-end !important;
+      }
+      .hwv3-econ-num-figure {
+        font-size: 21px !important;
+        line-height: 1 !important;
+        letter-spacing: -0.02em;
+      }
+      .hwv3-econ-num-prefix {
+        font-size: 14px !important;
+      }
+      .hwv3-econ-num-unit {
+        font-size: 10px !important;
+      }
+      .hwv3-econ-num-arrow {
+        width: 20px !important;
+        height: 12px !important;
+        transform: rotate(0deg) !important;
+      }
+      .hwv3-econ-num-multi {
+        display: none !important;
+      }
+      /* Source citation — hidden on mobile to give the two
+         top cards proper vertical room for all of their
+         editorial content (4-row spec / dual-stat dashboard).
+         The desktop source paragraph reads as a small
+         footnote under the outcome panel; on mobile it
+         was eating ~80px of the fixed 720-viewport budget. */
+      .hwv3-econ-source {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <script>
+    // ───────────────────────────────────────────────────────
+    // The Economics — single-viewport interactive dashboard.
+    //
+    // State: { model: 'nocost'|'hybrid'|'investment'|'leasing',
+    //          tier:  'low'|'medium'|'high' }
+    //
+    // On change → update:
+    //   1. data-active on each segmented control (drives thumb)
+    //   2. is-active class + aria-selected on tabs
+    //   3. Numeric vs bespoke mode (display flip on left card)
+    //   4. Numbers tween via rAF + easeOutCubic (520ms)
+    //   5. Narrative panel (title, flag, body, dl) — cross-fade
+    //
+    // Numbers source — Evium NEVI Proposal p.5:
+    //   Per single 180kW DC fast charger,
+    //   $0.50/kWh consumer price.
+    //   No-Cost = 10% host revenue.
+    //   ─ Low (2 cars/day):    18,000 kWh × $0.50 × 10% = $900
+    //   ─ Medium (3 cars/day): 30,000 kWh × $0.50 × 10% = $1,500
+    //   ─ High (5 cars/day):   42,000 kWh × $0.50 × 10% = $2,100
+    //   Client Investment = 100% of gross revenue (host pays
+    //   ops + electricity, not netted here — gross is shown
+    //   honestly with a clarifying foot label).
+    //   Hybrid + Leasing = bespoke, no fabricated figures.
+    // ───────────────────────────────────────────────────────
+    (() => {
+      const root = document.querySelector('[data-hwv3-econ]');
+      if (!root) return;
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // ── Init guard — Astro view-transitions or HMR can re-run
+      //    a script tag; we want at most one binding per page. ──
+      if (root.__hwv3EconBound) return;
+      root.__hwv3EconBound = true;
+
+      // ── Tier-keyed copy. Reacts to the demand pill, not
+      //    the model. Pulled directly from the NEVI Proposal
+      //    p.5 utilization table (kWh per stall per month +
+      //    cars per charger per day). Low/Medium/High labels
+      //    are the proposal's own. ──
+      const TIER_DATA = {
+        low: {
+          title:    'Low utilization',
+          eyebrow:  'Tier 01 / 03',
+          sessions: '~2',
+          kwh:      '18,000',
+        },
+        medium: {
+          title:    'Medium utilization',
+          eyebrow:  'Tier 02 / 03',
+          sessions: '~3',
+          kwh:      '30,000',
+        },
+        high: {
+          title:    'High utilization',
+          eyebrow:  'Tier 03 / 03',
+          sessions: '~5',
+          kwh:      '42,000',
+        },
+      };
+
+      // ── The four canonical hosting models. Every fact grid
+      //    uses the same four axes — Capital · Operations ·
+      //    Revenue · Term — so models can be read straight
+      //    down the same column.
+      //
+      //    Numeric values come from the Evium NEVI Proposal
+      //    p.5. Bespoke modes (band, subtraction) derive their
+      //    visible figures from the same numeric anchors at
+      //    the active tier — no invented midpoints. ──
+      const MODELS = {
+        nocost: {
+          title: 'Low to No-Cost',
+          flag: 'Most common · NEVI-funded',
+          tagline: 'You contribute the land. Evium contributes everything else.',
+          body: 'Evium invests the capital and runs the site end to end. You contribute the land and access; we cover hardware, install, software, support, incentives, and the cost of every kilowatt sold. Revenue is shared with the host.',
+          mode: 'numeric',
+          numLabel: 'Estimated host revenue',
+          monthly:    { low: 900,    medium: 1500,   high: 2100   },
+          fiveyear:   { low: 54000,  medium: 90000,  high: 126000 },
+          multistall: { low: 216000, medium: 360000, high: 504000 },
+          multiLabel: 'Typical 4‑charger NEVI site, 5 yr',
+          facts: [
+            ['Capital',    'Evium'],
+            ['Operations', 'Evium'],
+            ['Revenue',    'Shared,\nhost‑favored'],
+            ['Term',       '5 yr + 5'],
+          ],
+        },
+        hybrid: {
+          title: 'Hybrid',
+          flag: 'Tunable split',
+          tagline: 'You put in part of the capital. Your share scales with what you put in.',
+          body: 'A blend of No-Cost and Client Investment. You contribute part of the capital; in exchange, your share of revenue scales up with what you put in. Use it to dial in more upside than No-Cost without taking on the full Client Investment lift.',
+          mode: 'band',
+          // Anchors read from these two numeric models at the
+          // active tier — that's why no midpoint is fabricated.
+          bandFrom: 'nocost',
+          bandTo:   'investment',
+          facts: [
+            ['Capital',    'Shared'],
+            ['Operations', 'Evium'],
+            ['Revenue',    'Scales with\ncapital'],
+            ['Term',       'Negotiated'],
+          ],
+        },
+        investment: {
+          title: 'Client Investment',
+          flag: 'Host keeps 100% of revenue',
+          tagline: 'You buy it. You run it. You keep all of it.',
+          body: 'You finance and own the entire installation. You run it, you maintain it, and you keep every dollar of revenue it produces. Evium’s role is limited to rebate processing and incentive capture. Best fit for hosts with capex appetite and an existing operations team.',
+          mode: 'numeric',
+          numLabel: 'Estimated gross sales (host)',
+          monthly:    { low: 9000,    medium: 15000,   high: 21000   },
+          fiveyear:   { low: 540000,  medium: 900000,  high: 1260000 },
+          multistall: { low: 2160000, medium: 3600000, high: 5040000 },
+          multiLabel: 'Typical 4‑charger site, 5 yr gross',
+          facts: [
+            ['Capital',    'Host'],
+            ['Operations', 'Host'],
+            ['Revenue',    '100% to host'],
+            ['Term',       'Host‑owned'],
+          ],
+        },
+        leasing: {
+          title: 'Leasing',
+          flag: 'Lease + buy‑out',
+          tagline: 'Fixed monthly payment. You keep the revenue. Buy‑out at term end.',
+          body: 'Evium finances the hardware as a lease. You make a fixed monthly payment, keep all gross revenue, and have a buy‑out option at term end. Payment size, term length, and buy‑out price are sized to your site’s projected throughput.',
+          mode: 'subtraction',
+          // Gross figure equals the Investment gross at the
+          // active tier (same kWh-times-price math). The lease
+          // payment isn't sourced (no doc fixes it) so the
+          // equation displays "sized to site" rather than a
+          // fabricated number.
+          subFrom: 'investment',
+          facts: [
+            ['Capital',    'Evium‑financed'],
+            ['Operations', 'Negotiated'],
+            ['Revenue',    'Gross − lease'],
+            ['Term',       'Buy‑out at end'],
+          ],
+        },
+      };
+
+      // ── DOM refs. ──
+      const modelsCtl = root.querySelector('[data-hwv3-models]');
+      const tiersCtl  = root.querySelector('[data-hwv3-tiers]');
+      const modelBtns = modelsCtl ? Array.from(modelsCtl.querySelectorAll('[data-hwv3-model]')) : [];
+      const tierBtns  = tiersCtl  ? Array.from(tiersCtl.querySelectorAll('[data-hwv3-tier]'))   : [];
+
+      // Outcome panel — three mutually-exclusive modes that
+      // change with the active model.
+      const modes = {
+        numeric:     root.querySelector('[data-hwv3-mode="numeric"]'),
+        band:        root.querySelector('[data-hwv3-mode="band"]'),
+        subtraction: root.querySelector('[data-hwv3-mode="subtraction"]'),
+      };
+
+      const numLabel    = root.querySelector('[data-hwv3-num-label]');
+      const multiLabel  = root.querySelector('[data-hwv3-multi-label]');
+      const numEls = {
+        monthly:       root.querySelector('[data-hwv3-num="monthly"]'),
+        fiveyear:      root.querySelector('[data-hwv3-num="fiveyear"]'),
+        multistall:    root.querySelector('[data-hwv3-num="multistall"]'),
+        bandLow:       root.querySelector('[data-hwv3-num="bandLow"]'),
+        bandHigh:      root.querySelector('[data-hwv3-num="bandHigh"]'),
+        grossSales:    root.querySelector('[data-hwv3-num="grossSales"]'),
+        grossPerStall: root.querySelector('[data-hwv3-num="grossPerStall"]'),
+      };
+
+      // Active-combo eyebrow inside the outcome panel.
+      const activeModelEl = root.querySelector('[data-hwv3-active-model]');
+      const activeTierEl  = root.querySelector('[data-hwv3-active-tier]');
+
+      // Model card refs (left zone, reacts to model picker).
+      const modelCardEl   = root.querySelector('[data-hwv3-card="model"]');
+      const narrTitle     = root.querySelector('[data-hwv3-narr-title]');
+      const narrFlag      = root.querySelector('[data-hwv3-narr-flag]');
+      const narrTagline   = root.querySelector('[data-hwv3-narr-tagline]');
+      const narrBody      = root.querySelector('[data-hwv3-narr-body]');
+      const narrFacts     = root.querySelector('[data-hwv3-narr-facts]');
+
+      // Tier card refs (right zone, reacts to tier picker).
+      const tierCardEl    = root.querySelector('[data-hwv3-card="tier"]');
+      const tierEyebrow   = root.querySelector('[data-hwv3-tier-eyebrow]');
+      const tierTitle     = root.querySelector('[data-hwv3-tier-title]');
+      const tierSessions  = root.querySelector('[data-hwv3-tier-sessions]');
+      const tierKwh       = root.querySelector('[data-hwv3-tier-kwh]');
+
+      // ── State. ──
+      let activeModel = 'nocost';
+      let activeTier  = 'medium';
+
+      // ── Tween util — reads current displayed integer from
+      //    each element's textContent, so external state can
+      //    never desync. ──
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const fmt = (n) => Math.round(n).toLocaleString('en-US');
+      const readInt = (el) => {
+        if (!el) return 0;
+        const n = parseInt(String(el.textContent || '').replace(/[^0-9-]/g, ''), 10);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const inflight = new WeakMap();
+      function tween(el, to, durationMs) {
+        if (!el) return;
+        if (typeof to !== 'number' || !Number.isFinite(to)) return;
+        const prev = inflight.get(el);
+        if (prev) cancelAnimationFrame(prev);
+        const from = readInt(el);
+        // Snap if there's no motion to do (same value, reduce-motion
+        // preference, or hidden tab where rAF is throttled and the
+        // user wouldn't see the animation anyway).
+        if (from === to || reduceMotion || (typeof document !== 'undefined' && document.hidden)) {
+          el.textContent = fmt(to);
+          return;
+        }
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min(1, (now - start) / durationMs);
+          const v = from + (to - from) * easeOutCubic(t);
+          el.textContent = fmt(v);
+          if (t < 1) inflight.set(el, requestAnimationFrame(step));
+          else inflight.delete(el);
+        }
+        inflight.set(el, requestAnimationFrame(step));
+      }
+
+      // ── Mode-aware paint. Each mode reads numbers from the
+      //    same MODELS dictionary so we never duplicate truth. ──
+      function paintNumeric(m, tier, animate) {
+        if (numLabel) numLabel.textContent = m.numLabel;
+        if (multiLabel && m.multiLabel) multiLabel.textContent = m.multiLabel;
+        const monthly    = m.monthly[tier];
+        const fiveyear   = m.fiveyear[tier];
+        const multistall = m.multistall[tier];
+        if (animate) {
+          tween(numEls.monthly,    monthly,    520);
+          tween(numEls.fiveyear,   fiveyear,   560);
+          tween(numEls.multistall, multistall, 600);
+        } else {
+          if (numEls.monthly)    numEls.monthly.textContent    = fmt(monthly);
+          if (numEls.fiveyear)   numEls.fiveyear.textContent   = fmt(fiveyear);
+          if (numEls.multistall) numEls.multistall.textContent = fmt(multistall);
+        }
+      }
+      function paintBand(m, tier, animate) {
+        const lo = MODELS[m.bandFrom];
+        const hi = MODELS[m.bandTo];
+        if (!lo || !hi) return;
+        const lowVal  = lo.monthly[tier];
+        const highVal = hi.monthly[tier];
+        if (animate) {
+          tween(numEls.bandLow,  lowVal,  520);
+          tween(numEls.bandHigh, highVal, 560);
+        } else {
+          if (numEls.bandLow)  numEls.bandLow.textContent  = fmt(lowVal);
+          if (numEls.bandHigh) numEls.bandHigh.textContent = fmt(highVal);
+        }
+      }
+      function paintSubtraction(m, tier, animate) {
+        const src = MODELS[m.subFrom];
+        if (!src) return;
+        const gross = src.monthly[tier];
+        if (animate) tween(numEls.grossSales, gross, 520);
+        else if (numEls.grossSales) numEls.grossSales.textContent = fmt(gross);
+      }
+
+      // ── Tier card paint. The tier card reacts to the tier
+      //    picker, not the model. The "gross per stall" figure
+      //    is the foundation number every model is calculated
+      //    from — Investment.monthly[tier] is the gross at
+      //    $0.50/kWh × kWh table. ──
+      function paintTierCard(tier, animate) {
+        const t = TIER_DATA[tier];
+        if (!t) return;
+        if (tierEyebrow)  tierEyebrow.textContent  = t.eyebrow;
+        if (tierTitle)    tierTitle.textContent    = t.title;
+        if (tierSessions) tierSessions.textContent = t.sessions;
+        if (tierKwh)      tierKwh.textContent      = t.kwh;
+        const gross = MODELS.investment.monthly[tier];
+        if (animate) tween(numEls.grossPerStall, gross, 520);
+        else if (numEls.grossPerStall) numEls.grossPerStall.textContent = fmt(gross);
+      }
+
+      // ── Render: pull state into DOM. ──
+      function render({ animate = true, source = null } = {}) {
+        try {
+          const m = MODELS[activeModel];
+          if (!m) return;
+
+          // Segmented data-active drives thumb position via CSS.
+          if (modelsCtl) modelsCtl.setAttribute('data-active', activeModel);
+          if (tiersCtl)  tiersCtl.setAttribute('data-active', activeTier);
+
+          modelBtns.forEach((b) => {
+            const a = b.getAttribute('data-hwv3-model') === activeModel;
+            b.classList.toggle('is-active', a);
+            b.setAttribute('aria-selected', a ? 'true' : 'false');
+            b.setAttribute('tabindex', a ? '0' : '-1');
+          });
+          tierBtns.forEach((b) => {
+            const a = b.getAttribute('data-hwv3-tier') === activeTier;
+            b.classList.toggle('is-active', a);
+            b.setAttribute('aria-selected', a ? 'true' : 'false');
+            b.setAttribute('tabindex', a ? '0' : '-1');
+          });
+
+          // Active-combo eyebrow on the outcome panel.
+          if (activeModelEl) activeModelEl.textContent = m.title;
+          if (activeTierEl)  activeTierEl.textContent  = (TIER_DATA[activeTier] || {}).title || activeTier;
+
+          // Tier card always paints on every render (tier may
+          // have changed; if model changed only, this is a
+          // cheap no-op for the textContent assignments).
+          paintTierCard(activeTier, animate);
+
+          // Toggle which mode card is visible. Three modes,
+          // mutually exclusive: numeric / band / subtraction.
+          for (const k of Object.keys(modes)) {
+            const el = modes[k];
+            if (el) el.hidden = (k !== m.mode);
+          }
+
+          if (m.mode === 'numeric')          paintNumeric(m, activeTier, animate);
+          else if (m.mode === 'band')        paintBand(m, activeTier, animate);
+          else if (m.mode === 'subtraction') paintSubtraction(m, activeTier, animate);
+
+          // Model card cross-fade — only when the model
+          // actually changed (a tier-only change shouldn't
+          // flicker the model card).
+          const swapModelCard = source !== 'tier';
+          if (animate && !reduceMotion && modelCardEl && swapModelCard) {
+            modelCardEl.classList.add('is-swapping');
+            setTimeout(() => {
+              paintModelCard(m);
+              modelCardEl.classList.remove('is-swapping');
+            }, 140);
+          } else {
+            paintModelCard(m);
+          }
+
+          // Tier card cross-fade — only when the tier changed.
+          const swapTierCard = source !== 'model';
+          if (animate && !reduceMotion && tierCardEl && swapTierCard) {
+            tierCardEl.classList.add('is-swapping');
+            setTimeout(() => {
+              tierCardEl.classList.remove('is-swapping');
+            }, 280);
+          }
+        } catch (err) {
+          console.error('[hwv3-econ] render failed:', err);
+        }
+      }
+
+      function paintModelCard(m) {
+        if (narrTitle)   narrTitle.textContent   = m.title;
+        if (narrFlag)    narrFlag.textContent    = m.flag;
+        if (narrTagline && m.tagline) narrTagline.textContent = m.tagline;
+        if (narrBody)  narrBody.textContent  = m.body;
+        if (narrFacts) {
+          // Update the existing dt/dd pairs in place. Replacing
+          // innerHTML would strip Astro's scoped CSS attributes
+          // from the newly-injected nodes — so we'd lose all
+          // typography and dividers on the spec strip.
+          const rows = narrFacts.querySelectorAll(':scope > div');
+          m.facts.forEach(([k, v], i) => {
+            const row = rows[i];
+            if (!row) return;
+            const dt = row.querySelector('dt');
+            const dd = row.querySelector('dd');
+            if (dt) dt.textContent = k;
+            if (dd) dd.textContent = v;
+          });
+        }
+      }
+
+      // ── Wiring — click + keyboard nav for each tablist. ──
+      function bindTabs(btns, attr, setActive) {
+        btns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const v = btn.getAttribute(attr);
+            if (v) { setActive(v); btn.focus(); }
+          });
+          btn.addEventListener('keydown', (e) => {
+            const idx = btns.indexOf(btn);
+            let next = -1;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % btns.length;
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + btns.length) % btns.length;
+            else if (e.key === 'Home') next = 0;
+            else if (e.key === 'End')  next = btns.length - 1;
+            if (next >= 0) {
+              e.preventDefault();
+              const v = btns[next].getAttribute(attr);
+              if (v) { setActive(v); btns[next].focus(); }
+            }
+          });
+        });
+      }
+
+      bindTabs(modelBtns, 'data-hwv3-model', (v) => {
+        if (v === activeModel) return;
+        activeModel = v;
+        render({ source: 'model' });
+      });
+      bindTabs(tierBtns, 'data-hwv3-tier', (v) => {
+        if (v === activeTier) return;
+        activeTier = v;
+        render({ source: 'tier' });
+      });
+
+      // Initial paint, no animation (matches default markup).
+      render({ animate: false });
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════
+       5. SOFTWARE & COMPLIANCE
+       Replaces the prior What-Evium-Handles + Uptime
+       sections. Single section. Narrative left, certs right.
+       ═══════════════════════════════════════════════════ -->
+  <section id="hw-software" class="bg-evium-dark py-28">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Left: narrative -->
+        <div>
+          <div class="text-evium-green text-sm font-bold uppercase tracking-widest mb-4">Software & Compliance</div>
+          <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
+            Federal Uptime, Handled by Software.
+          </h2>
+          <p class="text-lg text-white/60 leading-relaxed mb-6">
+            The NEVI program mandates 97% network uptime as a condition of continued federal funding. Meeting it requires real-time monitoring, automatic fault detection, and dispatched on-site response — built into the platform from day one.
+          </p>
+          <p class="text-lg text-white/60 leading-relaxed mb-8">
+            Evium's software platform monitors every charger continuously, detects faults automatically, and triggers remote restarts before drivers report problems. When hardware needs hands on it, certified field technicians are dispatched. Federal compliance reporting runs on the same platform.
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">24/7 monitoring across every connected charger</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">Automatic fault detection with remote restart and diagnostics</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">Certified field technicians dispatched for hardware faults</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-2 h-2 rounded-full bg-evium-green flex-shrink-0"></div>
+              <span class="text-white/70 text-sm">NEVI compliance reporting handled end-to-end</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: certifications -->
+        <div>
+          <div class="grid grid-cols-2 gap-5 mb-5">
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">OCPP 1.6+</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Charge Point Protocol</div>
+              <p class="text-white/55 text-xs leading-relaxed">Industry-standard open protocol for charger management and telemetry.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">OpenADR 2.0b</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Demand Response</div>
+              <p class="text-white/55 text-xs leading-relaxed">Grid-smart load management for utility programs and peak shaving.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">PCI DSS</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Certified Payments</div>
+              <p class="text-white/55 text-xs leading-relaxed">Payment processing certified to the Payment Card Industry Data Security Standard.</p>
+            </div>
+            <div class="bg-evium-dark-light rounded-2xl p-7 border border-white/8">
+              <div class="text-2xl font-black text-evium-green mb-2">FIPS 140.2</div>
+              <div class="text-white/40 text-xs uppercase tracking-widest mb-3">Data at Rest</div>
+              <p class="text-white/55 text-xs leading-relaxed">Federal standard for cryptographic data protection at rest.</p>
+            </div>
+          </div>
+
+          <!-- Owner Portal — now an interactive button. Links
+               to the owner portal product page; group hover
+               brightens the border + green accents and shifts
+               the trailing arrow right. -->
+          <a
+            href="/products/owner-portal"
+            class="group block bg-evium-dark-light rounded-2xl p-7 border border-white/8 hover:border-evium-green/45 hover:bg-evium-green/[0.04] transition-colors duration-300"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 border border-evium-green/30 flex items-center justify-center flex-shrink-0 group-hover:bg-evium-green/25 group-hover:border-evium-green/55 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between gap-3 mb-1">
+                  <div class="text-white font-bold text-base group-hover:text-evium-green transition-colors duration-200">Owner Portal</div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-evium-green/70 group-hover:text-evium-green group-hover:translate-x-1 transition-all duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h11M11 5l5 5-5 5"/>
+                  </svg>
+                </div>
+                <p class="text-white/55 text-sm leading-relaxed">Live usage data, session history, revenue tracking, and uptime status — for the site host, with no management burden.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       #hw-software — mobile-only overrides
+       ──────────────────────────────────────────────────────
+       Desktop layout is a 2-column lg:grid-cols-2 split:
+       narrative left, certs + Owner Portal CTA right. On
+       mobile the grid collapses to 1 column (Tailwind base
+       grid-cols-1), which stacks the narrative on top of the
+       cert grid — the section overran two screens of vertical
+       space.
+
+       Mobile fix: lock the section to ONE viewport (calc(100dvh
+       - 80px) accounting for the 80px sticky navbar), then
+       compress every interior element so the same narrative +
+       4-bullet list + 2×2 cert grid + Owner Portal button fits
+       inside that single viewport. Desktop CSS is untouched —
+       every override below is gated inside the @media block. */
+    @media (max-width: 759px) {
+      /* Section locked to one mobile viewport. Content
+         centers vertically as ONE cohesive cluster — no
+         weird mid-section gap. Grid uses a single tight
+         row-gap (24px) between the narrative half and the
+         cert/CTA half so they read as a continuous editorial
+         block, with the cluster as a whole centered against
+         the section. */
+      #hw-software {
+        height: calc(100dvh - 80px) !important;
+        min-height: calc(100dvh - 80px) !important;
+        max-height: calc(100dvh - 80px) !important;
+        padding: 16px 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+      #hw-software > div {
+        width: 100% !important;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+      }
+      #hw-software > div > div.grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 22px !important;
+        align-items: stretch !important;
+      }
+
+      /* ─── Narrative column ─────────────────────────────── */
+      #hw-software .text-evium-green.text-sm.tracking-widest {
+        font-size: 10.5px !important;
+        letter-spacing: 0.22em !important;
+        margin-bottom: 10px !important;
+      }
+      #hw-software h2.text-4xl {
+        font-size: 26px !important;
+        line-height: 1.06 !important;
+        margin-bottom: 12px !important;
+      }
+      /* First narrative paragraph: hidden on mobile to keep
+         the focus on the punchier second paragraph + bullets. */
+      #hw-software p.text-lg:nth-of-type(1) {
+        display: none !important;
+      }
+      #hw-software p.text-lg:nth-of-type(2) {
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+        margin-bottom: 14px !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      /* Bullet list — bigger + more breathing room. */
+      #hw-software > div > div.grid > div:first-child > div.space-y-3 {
+        margin-top: 4px;
+      }
+      #hw-software > div > div.grid > div:first-child > div.space-y-3 > .flex {
+        gap: 12px !important;
+      }
+      #hw-software > div > div.grid > div:first-child > div.space-y-3 > .flex > span.text-white\/70 {
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+      }
+      #hw-software > div > div.grid > div:first-child > div.space-y-3 > .flex > .w-2 {
+        width: 6px !important;
+        height: 6px !important;
+      }
+      #hw-software > div > div.grid > div:first-child > div.space-y-3 > .flex + .flex {
+        margin-top: 10px !important;
+      }
+
+      /* ─── Cert grid + Owner Portal — bottom block ──────── */
+      /* The certs + CTA are wrapped in `<div>` (grid child).
+         Stretching that block to the section's bottom edge
+         via the flex space-between above. */
+      #hw-software > div > div.grid > div:nth-child(2) > div.grid {
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > div.grid > div {
+        padding: 12px 14px !important;
+        border-radius: 12px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > div.grid > div > div.text-2xl {
+        font-size: 17px !important;
+        margin-bottom: 4px !important;
+        line-height: 1 !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > div.grid > div > div.uppercase {
+        font-size: 8.5px !important;
+        letter-spacing: 0.14em !important;
+        margin-bottom: 6px !important;
+        line-height: 1.2 !important;
+      }
+      /* Cert card body — bring back at small size so each
+         badge has the descriptive context like desktop. */
+      #hw-software > div > div.grid > div:nth-child(2) > div.grid > div > p {
+        font-size: 9.5px !important;
+        line-height: 1.32 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* Owner Portal CTA — generous card at bottom of section. */
+      #hw-software > div > div.grid > div:nth-child(2) > a {
+        padding: 14px !important;
+        border-radius: 12px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > a > div.flex {
+        gap: 14px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > a .w-10 {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 8px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > a .w-10 > svg {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > a .text-base {
+        font-size: 15px !important;
+      }
+      #hw-software > div > div.grid > div:nth-child(2) > a .text-sm {
+        font-size: 11.5px !important;
+        line-height: 1.4 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════════
+       6. FAQ — single-viewport target (min-height 100svh).
+       8 questions, all source-grounded:
+         • NEVI program / site qualifying — discovery
+         • Hardware spec — physical setup
+         • Contract term — legal envelope
+         • Parking-stall handling — host concern
+         • Cost / reporting — financial
+         • Maintenance — ongoing support
+
+       Sources: Evium NEVI Proposal p.5 (4–6 chargers,
+       180 kW CCS1, $0.50/kWh), WaWa preliminary proposal
+       (7-yr highway minimum, 5-yr renewals, 2–3 yr
+       warranty, "All vehicle parking welcome" signage,
+       Evium-paid utility, near-real-time portal data),
+       Overview deck (financial models, 24/7 support).
+       ═══════════════════════════════════════════════════ -->
+  <section class="hwv3-faq bg-[#0d1f2b] py-14 md:py-20">
+    <div class="max-w-4xl mx-auto px-6 md:px-12 hwv3-faq-frame">
+
+      <div class="text-center mb-8 md:mb-10">
+        <p class="text-evium-green text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Highway Charging FAQ</p>
+        <h2 class="text-white font-black text-3xl md:text-4xl lg:text-5xl leading-tight">
+          Answers for Highway Hosts.
+        </h2>
+      </div>
+
+      <div class="space-y-0 border border-white/8">
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">What exactly is the NEVI program?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              NEVI — the National Electric Vehicle Infrastructure Formula Program — is a $7.5 billion federal initiative funded by the 2021 Infrastructure Investment and Jobs Act. It distributes grants through state DOTs to build a national network of EV charging stations along Alternative Fuel Corridors. States contract with Charging Point Operators like Evium to deploy and operate the hardware.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">Does my site qualify?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              Eligibility depends on proximity to a federally designated Alternative Fuel Corridor, the state's NEVI program status, utility capacity at the site, and other technical criteria. Gas stations, travel plazas, rest stops, truck stops, and retail near highway exits are common candidates. Evium's free site assessment evaluates your location and reports back on which programs apply.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">What hardware goes on my site?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              Typical NEVI sites deploy four to six Level&nbsp;3 dual‑port DC fast chargers built to the federal program's technical specifications. Our Tellus 180&nbsp;kW CCS1 platform is the workhorse — sized for the dwell time most highway sessions require. Hardware is GSA‑approved and carries a 2–3&nbsp;year manufacturer warranty, with continuous software updates throughout the contract.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">What's the contract term?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              Standard highway agreements run a 7‑year minimum, with 5‑year renewal options that are mutually agreed at the end of each term. The federal NEVI award itself runs across that window, so the operational period is structured to cover the full grant cycle.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">Are my parking stalls dedicated to EVs only?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              No. By default, charging stalls are signed "All vehicle parking welcome" so they stay available to your existing customers whenever a charger isn't actively in use. Total parking inventory stays the same — drivers just see chargers where they were already parking.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">What does this cost me as a site host?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              Under Evium's no-cost model, nothing. Federal and state grant funding combined with Evium's investment cover hardware, installation, permitting, software, and ongoing maintenance. You provide the site and the electrical access point. Hybrid and ownership models are available for site hosts who want to co-invest.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border-b border-white/8">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">How do I see what's happening, and how do I get paid?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              The host portal gives you near‑real‑time access to every site's data — sessions, revenue, and operating costs. Revenue share is calculated against gross sales (driver payments minus the electric utility invoice Evium covers under the no‑cost model) and disbursed on the schedule defined in your agreement.
+            </p>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex justify-between items-center px-6 py-4 md:px-7 md:py-5 cursor-pointer list-none select-none">
+            <span class="text-white font-semibold text-base md:text-lg pr-8">Who handles maintenance when something breaks?</span>
+            <span class="flex-shrink-0 w-6 h-6 rounded-full border border-evium-green/40 flex items-center justify-center text-evium-green group-open:rotate-45 transition-transform duration-200">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="px-6 md:px-7 pb-4 md:pb-5">
+            <p class="text-white/55 text-sm md:text-base leading-relaxed">
+              Evium does. The 24/7 monitoring platform detects faults automatically — most are resolved remotely. For hardware failures requiring hands‑on work, certified field technicians are dispatched. Maintenance, repair, and federal compliance reporting are Evium's responsibility under the service agreement.
+            </p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ─── FAQ section — single viewport target. Section
+           is at least 100svh tall (so the closed state fills
+           a viewport on standard desktop heights) but is free
+           to grow when accordions expand. The frame uses flex
+           so the heading + accordion column distribute the
+           available vertical space cleanly. ─── */
+    .hwv3-faq {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .hwv3-faq-frame {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Compress for short viewports (laptop ≤760px tall)
+       so 8 FAQs still fit inside one viewport without
+       requiring the user to scroll. */
+    @media (max-height: 760px) {
+      .hwv3-faq {
+        padding-top: clamp(24px, 3vw, 40px);
+        padding-bottom: clamp(24px, 3vw, 40px);
+      }
+      .hwv3-faq-frame > .text-center {
+        margin-bottom: clamp(16px, 2vw, 24px);
+      }
+      .hwv3-faq-frame > .text-center > h2 {
+        font-size: clamp(1.5rem, 2.4vw, 1.85rem);
+        line-height: 1.1;
+      }
+      .hwv3-faq-frame > .text-center > p {
+        margin-bottom: 8px;
+      }
+      .hwv3-faq summary {
+        padding-top: 11px;
+        padding-bottom: 11px;
+      }
+      .hwv3-faq details > div {
+        padding-bottom: 11px;
+      }
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════════
+       8. FINAL CTA
+       Forest-road corridor photo as the section background —
+       sets the "this is the road you're claiming" stage for
+       the closing call to action. Layered scrim stack for
+       legibility (mirrors the fleets-v2 bus-fleet pattern).
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative bg-[#0a1822] py-28 overflow-hidden">
+
+    <!-- Photo background -->
+    <img
+      src="/images/heroes/highway-hero.jpg"
+      alt=""
+      aria-hidden="true"
+      class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+      loading="lazy"
+    />
+
+    <!-- Scrim stack — tuned so the road in the photo's
+         vertical center stays present while copy stays
+         legible. Side scrims (left + right) carry the
+         legibility load instead of one big center darken;
+         the road column reads through unobstructed. -->
+    <div class="absolute inset-0 pointer-events-none">
+      <!-- Base vertical scrim — lighter overall than before
+           so the photo reads more present. Top/bottom still
+           anchor the section into the surrounding page. -->
+      <div class="absolute inset-0 bg-gradient-to-b from-[#0a1822]/65 via-[#0a1822]/45 to-[#0a1822]/85"></div>
+      <!-- Side scrims — darken the LEFT and RIGHT thirds
+           where the trees frame the road. The center column
+           (the actual road) stays clearer. Headline + lede
+           keep their text-shadow stack for legibility on
+           top of this. -->
+      <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,24,34,0.55)_0%,transparent_28%,transparent_72%,rgba(10,24,34,0.55)_100%)]"></div>
+      <!-- Subtle vertical light strip down the center to
+           lift the road as the focal element of the photo. -->
+      <div class="absolute inset-0 bg-[linear-gradient(90deg,transparent_38%,rgba(255,255,255,0.04)_50%,transparent_62%)]"></div>
+      <!-- Subtle green halo center — brand tie-in, lifted
+           to the headline area instead of full-section. -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_50%_38%_at_50%_45%,rgba(45,200,86,0.10),transparent_70%)]"></div>
+      <!-- Section seams — same hairline treatment as the rest
+           of the page. -->
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/30 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/20 to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center">
+      <div class="inline-flex items-center gap-2 bg-evium-green/15 border border-evium-green/40 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8">
+        <span class="w-2 h-2 rounded-full bg-evium-green animate-pulse"></span>
+        <span class="text-evium-green text-sm font-semibold tracking-widest uppercase [text-shadow:0_2px_12px_rgba(10,24,34,0.7)]">NEVI Applications Open Now</span>
+      </div>
+
+      <h2 class="text-5xl lg:text-6xl font-black text-white leading-tight mb-6 [text-shadow:0_4px_32px_rgba(10,24,34,0.9),0_2px_8px_rgba(10,24,34,0.7)]">
+        Claim Your Corridor Site Before Your Competitor Does
+      </h2>
+
+      <p class="text-xl text-white/75 leading-relaxed mb-12 max-w-2xl mx-auto [text-shadow:0_2px_18px_rgba(10,24,34,0.95),0_1px_4px_rgba(10,24,34,0.85)]">
+        NEVI site awards are issued state by state. Highway locations are competitive — sites that engage first secure the grants. Get Evium's free eligibility assessment and move first.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <!-- Primary CTA — group hover for arrow translate +
+             card lift + brightness pop + bigger green halo. -->
+        <a
+          href="/contact/quote"
+          class="hwv2-final-cta-primary group inline-flex items-center gap-3 bg-evium-green text-evium-dark font-black text-lg px-10 py-5 rounded-xl w-full sm:w-auto justify-center"
+        >
+          <span>Check NEVI Eligibility</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+        <!-- Secondary CTA — outlined; on hover, fills with a
+             tinted green wash, brightens border + text, and
+             lifts in unison with the primary. -->
+        <a
+          href="/contact/quote"
+          class="hwv2-final-cta-secondary group inline-flex items-center gap-3 border border-white/25 text-white/85 font-semibold text-lg px-10 py-5 rounded-xl backdrop-blur-sm w-full sm:w-auto justify-center"
+        >
+          <span>Request a Revenue Estimate</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 -translate-x-1 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+
+      <p class="text-white/45 text-sm mt-10 [text-shadow:0_1px_8px_rgba(10,24,34,0.8)]">
+        No commitment required. Free site assessment within 48 hours.
+      </p>
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════
+     Audience bridge section
+     ───────────────────────────────────────────────────────
+     Lift of /testing/highway-old-replica §3 styling. The
+     card visuals (sage fill, hairline border, ink title +
+     soft-ink body) are verbatim from the replica's `.ohr-card`
+     so this beat reads as a faithful transplant. The layout
+     above adds a white surface, centered tracked-caps
+     eyebrow with flanking hairline rules (mirrors the
+     fleets-v2 bridge pattern), and forces each card to a
+     1:1 square at desktop / tablet widths.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-bridge {
+    --hwv2-sage:        #DDE9D6;
+    --hwv2-sage-border: #C7D8BD;
+    --hwv2-ink:         #1A2F3A;
+    --hwv2-ink-soft:    #3A4A55;
+    --hwv2-green:       #2DC856;
+
+    background: #ffffff;
+    padding: clamp(48px, 7vw, 96px) clamp(20px, 6vw, 96px);
+    font-family: 'Maven Pro', system-ui, sans-serif;
+  }
+  .hwv2-bridge-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header wrapper — eyebrow + headline together. */
+  .hwv2-bridge-head {
+    margin: 0 auto clamp(36px, 4.4vw, 64px);
+    text-align: center;
+  }
+
+  /* Centered eyebrow with flanking hairline rules — same
+     editorial pattern as fleets-v2's bridge. */
+  .hwv2-bridge-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 1.4vw, 20px);
+    margin: 0 0 clamp(20px, 2.2vw, 30px);
+    color: var(--hwv2-green);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+  }
+  .hwv2-bridge-eyebrow-rule {
+    display: block;
+    width: clamp(28px, 4vw, 56px);
+    height: 1px;
+    background: currentColor;
+  }
+
+  /* Headline — sized + styled exactly like fleets-v2's
+     .fv2-bridge-icp. Italic em clause carries the
+     rhetorical lift in green-deep. */
+  .hwv2-bridge-icp {
+    margin: 0 auto;
+    max-width: 940px;
+    text-align: center;
+    font-size: clamp(24px, 2.7vw, 38px);
+    line-height: 1.22;
+    font-weight: 500;
+    color: var(--hwv2-ink);
+    letter-spacing: -0.018em;
+  }
+  .hwv2-bridge-icp em {
+    color: #24a347;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .hwv2-bridge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 1.8vw, 24px);
+  }
+
+  /* Card visuals — verbatim from replica .ohr-card. The
+     aspect-ratio: 1 / 1 + position:relative + overflow:hidden
+     additions support the background watermark + body-wrap
+     pattern below. */
+  .hwv2-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--hwv2-sage);
+    border: 1px solid var(--hwv2-sage-border);
+    border-radius: 18px;
+    padding: clamp(20px, 2.2vw, 28px);
+    color: var(--hwv2-ink);
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Background watermark — large, low-opacity ink-color
+     glyph that anchors each card as a visual motif. Partially
+     clipped by the card edge (negative offsets) so it reads
+     as background decoration rather than a UI icon. Per-card
+     placement varies via [data-hwv2-card] selectors below to
+     prevent the four cards from looking like a literal
+     repeating template. */
+  .hwv2-card-mark {
+    position: absolute;
+    pointer-events: none;
+    color: var(--hwv2-ink);
+    opacity: 0.10;
+    z-index: 0;
+  }
+
+  /* Card 1: bolt — lower-right, mostly clipped by the
+     bottom edge so it reads as a faint motif under the
+     reading column. */
+  .hwv2-card[data-hwv2-card="output"] .hwv2-card-mark {
+    width: clamp(140px, 14vw, 200px);
+    height: clamp(140px, 14vw, 200px);
+    bottom: -32px;
+    right:  -28px;
+  }
+  /* Card 2: pin — upper-right, anchored against the
+     headline so it reads as a subtle place-marker. */
+  .hwv2-card[data-hwv2-card="placement"] .hwv2-card-mark {
+    width: clamp(130px, 13vw, 180px);
+    height: clamp(130px, 13vw, 180px);
+    top:    -36px;
+    right:  -32px;
+  }
+  /* Card 3: shield — lower-right, slightly larger so the
+     enclosing form reads cleanly even at the corner clip. */
+  .hwv2-card[data-hwv2-card="availability"] .hwv2-card-mark {
+    width: clamp(150px, 15vw, 210px);
+    height: clamp(150px, 15vw, 210px);
+    bottom: -40px;
+    right:  -36px;
+  }
+  /* Card 4: clock — upper-right. Different corner from the
+     other three so the four watermarks feel composed rather
+     than identical. */
+  .hwv2-card[data-hwv2-card="turnover"] .hwv2-card-mark {
+    width: clamp(140px, 14vw, 200px);
+    height: clamp(140px, 14vw, 200px);
+    top:    -28px;
+    right:  -32px;
+  }
+
+  /* Foreground text wrapper — sits above the watermark via
+     z-index, with a constrained measure so the body copy
+     doesn't run into the icon corner. */
+  .hwv2-card-body-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 24ch;
+  }
+  .hwv2-card-title {
+    margin: 0 0 clamp(8px, 1vw, 14px);
+    font-size: clamp(17px, 1.5vw, 20px);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+  .hwv2-card-body {
+    margin: 0;
+    font-size: clamp(13.5px, 1vw, 14.5px);
+    line-height: 1.55;
+    color: var(--hwv2-ink-soft);
+  }
+
+  /* Responsive — squares hold at desktop and tablet, then
+     drop to a single-column flow on phones (where forcing
+     a 1:1 ratio at full-width gives absurdly tall cards). */
+  @media (max-width: 1080px) {
+    .hwv2-bridge-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .hwv2-bridge-grid { grid-template-columns: 1fr; }
+    .hwv2-card { aspect-ratio: auto; }
+  }
+
+  /* ─── Mobile (≤759px) — 4-up square row ─────────────────────
+     User wanted the highway bridge to mirror the fleet bridge
+     pattern: all 4 cards live in a single horizontal row, all
+     onscreen simultaneously, sized as compact square tiles.
+     Overrides the 640px single-column rule above (later in
+     source order wins at same specificity). */
+  @media (max-width: 759px) {
+    .hwv2-bridge {
+      /* Tighter section padding so the 4-up row has more
+         usable width to work with. */
+      padding: 32px 12px 32px;
+    }
+    .hwv2-bridge-head {
+      margin-bottom: 18px;
+    }
+    .hwv2-bridge-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .hwv2-bridge-eyebrow-rule {
+      width: 18px;
+    }
+    .hwv2-bridge-icp {
+      /* Compress headline so the section feels purpose-built
+         for mobile, not a tall scroll of giant type. */
+      font-size: 16px;
+      line-height: 1.28;
+      max-width: 34ch;
+    }
+    .hwv2-bridge-grid {
+      /* Override the 640px 1-col rule. 4 cards × ~84px each
+         + 3 × 6px gap + 24px section padding = 366 within
+         the 390 viewport. */
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .hwv2-card {
+      /* Slightly portrait aspect (4/5) at mobile — the previous
+         strict 1/1 square left no room for legible type once
+         the 4-up column gave each card only 87px of width.
+         87×~108 portrait holds the brand-readable title +
+         body sizes below without text clipping. Visually the
+         tiles still feel like a row of equal blocks. */
+      aspect-ratio: 4 / 5;
+      padding: 10px 9px 10px;
+      border-radius: 11px;
+    }
+    .hwv2-card-body-wrap {
+      max-width: 100%;
+    }
+    .hwv2-card-title {
+      /* Bumped from 10.5 → 12.5 — 19% larger. At 87px column
+         width "Strategic Placement" wraps to 2 lines; the
+         12.5px size keeps it confidently legible without
+         crowding the watermark icon. */
+      font-size: 12.5px;
+      line-height: 1.14;
+      margin: 0 0 4px;
+      letter-spacing: -0.01em;
+    }
+    .hwv2-card-body {
+      /* Bumped from 8.5 → 10.5 — 24% larger. The body now
+         reads as proper editorial copy instead of a strain-
+         to-read footnote. Line-clamp tightened from 5 → 4 to
+         keep total content height within the taller 4/5
+         tile, terminating cleanly with a magazine-style
+         "..." cut. */
+      font-size: 10.5px;
+      line-height: 1.34;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Watermark icons — shrunk + tightened corner offsets so
+       they read as a clear editorial mark inside the small
+       square tile. Higher opacity (0.18 from base 0.10) so
+       the strokes don't disappear at this scale. */
+    .hwv2-card .hwv2-card-mark {
+      opacity: 0.18;
+    }
+    .hwv2-card[data-hwv2-card="output"] .hwv2-card-mark {
+      width: 56px;
+      height: 56px;
+      bottom: -10px;
+      right: -10px;
+    }
+    .hwv2-card[data-hwv2-card="placement"] .hwv2-card-mark {
+      width: 54px;
+      height: 54px;
+      top: -12px;
+      right: -12px;
+    }
+    .hwv2-card[data-hwv2-card="availability"] .hwv2-card-mark {
+      width: 60px;
+      height: 60px;
+      bottom: -14px;
+      right: -14px;
+    }
+    .hwv2-card[data-hwv2-card="turnover"] .hwv2-card-mark {
+      width: 56px;
+      height: 56px;
+      top: -10px;
+      right: -12px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hardware cards — showroom treatment
+     ───────────────────────────────────────────────────────
+     Pattern adapted from multifamily-v3's "Recommended
+     Hardware" section. Each charger reads as a hero product
+     on a lit stage, not a UI tile. Image well gets an
+     overhead spotlight (radial light from above) and a
+     contact shadow under the unit (radial darken on the
+     stage floor). Image gets a real product-shoot drop
+     shadow so it feels grounded. Cards float on multi-
+     layer depth shadows. A green hairline accent at the
+     top edge animates in on hover. Featured card carries
+     a strong baseline glow + a more editorial outlined
+     ribbon (replaces the previous solid-fill pill).
+  ═══════════════════════════════════════════════════════ */
+
+  /* Grid — three equal columns. align-items: center is the
+     "podium" pattern: the middle card's extra height extends
+     symmetrically above and below the side cards instead of
+     hanging awkwardly off only the bottom edge. Rises and
+     sinks equally, reads as a featured display. */
+  .hwv2-hardware-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    gap: clamp(16px, 1.6vw, 24px);
+  }
+
+  /* Spotlight pattern — when any card in the grid is hovered,
+     all NON-hovered siblings dim and subtly shrink. This keeps
+     the hovered card the unambiguous focus regardless of which
+     card is hovered (without it, the at-rest tallness of the
+     middle card could compete with a hovered side card for
+     visual dominance). */
+  .hwv2-hardware-grid:has(.hwv2-hardware-card:hover) .hwv2-hardware-card:not(:hover) {
+    transform: scale(0.965);
+    opacity: 0.55;
+    filter: saturate(0.85);
+    transition:
+      transform 0.45s cubic-bezier(.2, .9, .25, 1),
+      opacity 0.4s ease,
+      filter 0.4s ease,
+      border-color 0.4s ease,
+      box-shadow 0.45s cubic-bezier(.2, .9, .25, 1);
+  }
+
+  .hwv2-hardware-card {
+    --hwv2-hardware-bg: #0f2330;
+    position: relative;
+    background: var(--hwv2-hardware-bg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    overflow: hidden;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 14px 28px -10px rgba(0, 0, 0, 0.40),
+      0 28px 56px -16px rgba(0, 0, 0, 0.32);
+    transition:
+      transform 0.5s cubic-bezier(.2, .9, .25, 1),
+      border-color 0.4s ease,
+      box-shadow 0.5s cubic-bezier(.2, .9, .25, 1);
+    transform-origin: center bottom;
+    will-change: transform;
+  }
+
+  /* Hover — strong lift + full-card scale + 4-layer green
+     glow that radiates from the card (matches the featured
+     card's hover treatment so all three cards bloom equally
+     on interaction). The previous green hairline at the top
+     edge has been retired in favor of the glow alone. */
+  .hwv2-hardware-card:hover {
+    transform: translateY(-12px) scale(1.025);
+    border-color: rgba(45, 200, 86, 0.55);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 8px 16px rgba(0, 0, 0, 0.30),
+      0 30px 56px -14px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(45, 200, 86, 0.22),
+      0 0 40px rgba(45, 200, 86, 0.26),
+      0 0 96px rgba(45, 200, 86, 0.16),
+      0 40px 76px -14px rgba(45, 200, 86, 0.40);
+  }
+
+  /* Middle card — taller via stage height + body min-height.
+     No baseline transform: the grid's align-items: center
+     vertically centers the row, so the extra height already
+     extends symmetrically above and below the side cards.
+     A baseline lift here would just break that symmetry. */
+  .hwv2-hardware-card--middle {
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 2px 4px rgba(0, 0, 0, 0.20),
+      0 18px 36px -10px rgba(0, 0, 0, 0.46),
+      0 36px 72px -18px rgba(0, 0, 0, 0.36);
+  }
+  .hwv2-hardware-card--middle:hover {
+    transform: translateY(-16px) scale(1.030);
+    border-color: rgba(45, 200, 86, 0.62);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 10px 20px rgba(0, 0, 0, 0.32),
+      0 36px 64px -14px rgba(0, 0, 0, 0.60),
+      0 0 0 1px rgba(45, 200, 86, 0.26),
+      0 0 48px rgba(45, 200, 86, 0.30),
+      0 0 120px rgba(45, 200, 86, 0.18),
+      0 48px 88px -16px rgba(45, 200, 86, 0.44);
+  }
+
+  /* Featured (Top Spec) card — stronger baseline border +
+     ambient green halo always-on; both intensify on hover. */
+  .hwv2-hardware-card--featured {
+    border-color: rgba(45, 200, 86, 0.32);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 14px 28px -10px rgba(0, 0, 0, 0.40),
+      0 28px 56px -16px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(45, 200, 86, 0.10),
+      0 24px 60px -20px rgba(45, 200, 86, 0.20);
+  }
+  .hwv2-hardware-card--featured:hover {
+    transform: translateY(-14px) scale(1.025);
+    border-color: rgba(45, 200, 86, 0.70);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 8px 16px rgba(0, 0, 0, 0.30),
+      0 32px 60px -14px rgba(0, 0, 0, 0.58),
+      0 0 0 1px rgba(45, 200, 86, 0.32),
+      0 0 44px rgba(45, 200, 86, 0.30),
+      0 0 104px rgba(45, 200, 86, 0.20),
+      0 44px 84px -14px rgba(45, 200, 86, 0.48);
+  }
+
+  /* Image stage — well with a soft overhead spotlight
+     (radial light from top) and a contact shadow on the
+     "floor" so the charger feels grounded. Sized to keep
+     the whole hardware section in a single viewport. */
+  .hwv2-hardware-stage {
+    position: relative;
+    height: 212px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255, 255, 255, 0.085) 0%, transparent 70%),
+      linear-gradient(180deg, #142a38 0%, #0d1f2b 100%);
+  }
+  /* Middle card gets a markedly taller stage so it reads
+     as the focal "podium" card. Since the grid uses
+     align-items: start, this extra stage height extends
+     the card downward past its siblings. */
+  .hwv2-hardware-card--middle .hwv2-hardware-stage {
+    height: 268px;
+  }
+  /* Middle body min-height keeps the middle card from
+     visually shrinking when its shorter pills wrap onto
+     fewer rows than the side cards'. Tuned so the whole
+     section still fits in a single viewport. */
+  .hwv2-hardware-card--middle .hwv2-hardware-body {
+    min-height: 250px;
+  }
+  /* Contact shadow under the charger. */
+  .hwv2-hardware-stage::after {
+    content: '';
+    position: absolute;
+    bottom: 7%;
+    left: 18%;
+    right: 18%;
+    height: 14%;
+    background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(0, 0, 0, 0.55) 0%, transparent 75%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Bottom fade so the image dissolves into the body section
+     rather than meeting it on a hard line. */
+  .hwv2-hardware-stage::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 56px;
+    background: linear-gradient(to top, var(--hwv2-hardware-bg) 0%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .hwv2-hardware-img {
+    position: relative;
+    z-index: 3;
+    display: block;
+    margin: 0 auto;
+    max-width: 76%;
+    max-height: 86%;
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    padding: 24px 0 18px;
+    filter:
+      drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+    transition: transform 0.55s cubic-bezier(.2, .9, .25, 1), filter 0.4s ease;
+    will-change: transform;
+  }
+  .hwv2-hardware-card:hover .hwv2-hardware-img {
+    transform: translateY(-3px) scale(1.04);
+    filter:
+      drop-shadow(0 20px 28px rgba(0, 0, 0, 0.65))
+      drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+  }
+
+  /* Body wrapper — flex column so the pill row can pin to
+     the bottom via mt-auto on the inline pill container. */
+  .hwv2-hardware-body {
+    padding: 18px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  /* Series tag — outlined editorial pill (replaces the
+     prior plain green eyebrow). Same shape as mf-v3's
+     .svc-hw-tag, brand-green palette. */
+  .hwv2-hardware-tag {
+    align-self: flex-start;
+    margin-bottom: 12px;
+    padding: 4px 11px;
+    border: 1px solid rgba(45, 200, 86, 0.40);
+    border-radius: 999px;
+    background: rgba(45, 200, 86, 0.08);
+    color: #2DC856;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* Featured ribbon — outlined editorial badge that replaces
+     the previous solid-fill pill ("Top Spec"). Reads as a
+     credentialed mark rather than a sticker. Sits top-left
+     so it doesn't overlap the product silhouette on the
+     right edge of the stage. */
+  .hwv2-hardware-flag {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px 5px 9px;
+    border: 1px solid rgba(45, 200, 86, 0.55);
+    border-radius: 4px;
+    background: rgba(15, 35, 48, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+  }
+  .hwv2-hardware-flag-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.65);
+  }
+  .hwv2-hardware-flag-text {
+    color: #7DFA9F;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hardware section — mobile-only overrides
+     ──────────────────────────────────────────────────────
+     Desktop keeps the showroom layout: 3 cards in a row,
+     middle card slightly taller as the "podium" focal card.
+     On mobile that podium-tall-middle pattern + the 3-up
+     row at 390px width forces every card into a narrow
+     skinny column, AND the middle card overflows the side
+     cards' bottoms because its stage is 268px tall vs the
+     siblings' 212px — visually awkward at phone widths.
+
+     Mobile fix:
+       · Section sized to ONE mobile viewport (calc(100dvh
+         - 80px) accounting for the 80px sticky navbar).
+       · All 3 cards share an identical stage height +
+         identical body min-height — no podium tier, no
+         uneven bottoms.
+       · Tightened section padding, header type sizes, card
+         padding, body text + pill sizes so all 3 cards
+         line up cleanly in the row and the whole section
+         fits without scroll.
+  ═══════════════════════════════════════════════════════ */
+  @media (max-width: 759px) {
+    /* ═══════════════════════════════════════════════════════
+       Mobile — desktop visual style scaled to fit
+       ──────────────────────────────────────────────────────
+       Per the latest design direction: keep the EXACT desktop
+       visual style on mobile (dark cards, image stages with
+       spotlights, contact shadows, the editorial info stack of
+       image+tag+kW+body+pill row) — just shrink the typography
+       so it fits inside a 3-up row at mobile widths. No
+       reinvention, no flattening, no content removal. The
+       section auto-sizes to its content so the row doesn't
+       float in 200+px of deadspace, but is still a single
+       viewport's worth of premium product showroom. */
+
+    /* Section — fills ONE mobile viewport so the row reads as
+       a deliberate full-screen product showroom. Content
+       inside is bumped up (taller stage, larger type, longer
+       descriptions, no aggressive line-clamp) so the cards
+       fill the viewport naturally rather than floating in a
+       big empty band. flex justify-center vertically anchors
+       what content shy of the full 720 there is. */
+    .hwv2-hardware-section {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: 28px !important;
+      padding-bottom: 28px !important;
+    }
+    .hwv2-hardware-section > div {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+    /* Header — slightly larger headline + sub so the top of
+       the section anchors strongly. */
+    .hwv2-hardware-section > div > div.text-center {
+      margin-bottom: 24px !important;
+    }
+    .hwv2-hardware-section .text-evium-green.text-xs {
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      margin-bottom: 10px;
+    }
+    .hwv2-hardware-section h2 {
+      font-size: 26px !important;
+      line-height: 1.08 !important;
+      margin-bottom: 10px !important;
+    }
+    .hwv2-hardware-section h2 + p {
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+    }
+
+    /* Grid — keep 3-up; stretch so cards land equal heights. */
+    .hwv2-hardware-grid {
+      grid-template-columns: 1fr 1fr 1fr !important;
+      gap: 6px !important;
+      align-items: stretch !important;
+    }
+
+    /* All 3 stages share a single height — no podium tier at
+       mobile. Tuned to ~95px — big enough that the charger
+       image still reads as the visual anchor, small enough
+       that the total card aspect stays closer to a card-y
+       0.45 (not the 0.3 "skinny tile" ratio that earlier
+       larger stages produced). */
+    .hwv2-hardware-card .hwv2-hardware-stage,
+    .hwv2-hardware-card--middle .hwv2-hardware-stage,
+    .hwv2-hardware-card--featured .hwv2-hardware-stage {
+      height: 95px !important;
+    }
+    .hwv2-hardware-card--middle .hwv2-hardware-body {
+      min-height: 0 !important;
+    }
+
+    /* Image — fills the stage cleanly. */
+    .hwv2-hardware-img {
+      padding: 10px 0 6px !important;
+      max-width: 72% !important;
+      max-height: 92% !important;
+    }
+    .hwv2-hardware-stage::before {
+      height: 24px !important;
+    }
+
+    /* Body — compact padding to keep the card height in check. */
+    .hwv2-hardware-body {
+      padding: 12px 10px 12px !important;
+    }
+    /* Series tag — outlined editorial pill, scaled down. */
+    .hwv2-hardware-tag {
+      font-size: 0.52rem !important;
+      letter-spacing: 0.18em !important;
+      padding: 3px 8px !important;
+      margin-bottom: 7px !important;
+    }
+    /* Big kW number — 22px reads with editorial weight without
+       overwhelming the small card; sized so the middle card's
+       "60-240 kW" string fits inside the ~95px content width
+       comfortably without the "kW" suffix touching the right
+       edge. white-space:nowrap prevents Safari from treating
+       the en-dash as a soft break point. */
+    .hwv2-hardware-body .text-4xl {
+      font-size: 22px !important;
+      margin-bottom: 7px !important;
+      letter-spacing: -0.02em;
+      white-space: nowrap !important;
+    }
+    .hwv2-hardware-body .text-4xl .text-2xl {
+      font-size: 12px !important;
+    }
+    /* Body description — 10px / line-clamp 3 so cards stay
+       compact without text-thin under-content. 3 lines pairs
+       with the kW + pill blocks for a balanced card layout. */
+    .hwv2-hardware-body p {
+      font-size: 10px !important;
+      line-height: 1.4 !important;
+      margin-bottom: 10px !important;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Spec pills — 8px reads as proper pill text; pills wrap
+       to 2-3 rows max per card. */
+    .hwv2-hardware-body .flex.flex-wrap {
+      gap: 3px !important;
+    }
+    .hwv2-hardware-body .flex.flex-wrap > span {
+      font-size: 8px !important;
+      padding: 2px 7px !important;
+      letter-spacing: 0.02em;
+    }
+
+    /* Top Spec flag — same corner-tucked badge as desktop, just
+       sized down. */
+    .hwv2-hardware-flag {
+      top: 7px;
+      left: 7px;
+      padding: 3px 6px 3px 5px;
+      gap: 4px;
+    }
+    .hwv2-hardware-flag-dot {
+      width: 4px;
+      height: 4px;
+    }
+    .hwv2-hardware-flag-text {
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+    }
+
+    /* Disable hover spotlight dim on non-hovered siblings —
+       Safari fires :hover on tap, the dim/scale looked wrong
+       at mobile scale. */
+    .hwv2-hardware-grid:has(.hwv2-hardware-card:hover) .hwv2-hardware-card:not(:hover) {
+      transform: none !important;
+      opacity: 1 !important;
+      filter: none !important;
+    }
+    /* Footnote — small, tight leading. */
+    .hwv2-hardware-section > div > p.text-center {
+      font-size: 10px !important;
+      line-height: 1.45 !important;
+      margin-top: 18px !important;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Revenue projection flip cards
+     ───────────────────────────────────────────────────────
+     3D flip on hover (desktop) and on click (touch). Front
+     shows the headline projection, back shows the math
+     breakdown + source. Both faces are absolutely
+     positioned within an inner wrapper that rotates 180°
+     in Y. backface-visibility:hidden hides the away-facing
+     face during the rotation.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-rev-flip {
+    perspective: 1400px;
+    min-height: 405px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+  }
+  .hwv2-rev-flip:focus-visible .hwv2-rev-flip-inner {
+    outline: 2px solid rgba(45, 200, 86, 0.6);
+    outline-offset: 4px;
+    border-radius: 18px;
+  }
+  .hwv2-rev-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(.4, .0, .2, 1);
+    will-change: transform;
+  }
+  /* Flip on hover, on focus, or when JS adds is-flipped */
+  .hwv2-rev-flip:hover .hwv2-rev-flip-inner,
+  .hwv2-rev-flip.is-flipped .hwv2-rev-flip-inner {
+    transform: rotateY(180deg);
+  }
+  .hwv2-rev-face {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hwv2-rev-back {
+    transform: rotateY(180deg);
+  }
+
+  /* Subtle "tap to flip" hint at the bottom of the front face. */
+  .hwv2-rev-flip-hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.30);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    transition: opacity 0.3s ease;
+  }
+  .hwv2-rev-flip:hover .hwv2-rev-flip-hint {
+    opacity: 0;
+  }
+
+  /* Back-face breakdown list — each row is dt (label, left)
+     + dd (value, right) with a faint divider above. */
+  .hwv2-rev-back-list {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+  .hwv2-rev-back-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 9px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hwv2-rev-back-list > div:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hwv2-rev-back-list dt {
+    color: rgba(255, 255, 255, 0.50);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .hwv2-rev-back-list dd {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .hwv2-rev-back-list dd.is-accent {
+    color: #2DC856;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hero pavement-band CTA — adapted from fleets-v2's
+     .fv2-cta-primary. Skewed green parallelogram face sits
+     behind a counter-skewed inner span so the type reads
+     upright while the shape stays slanted. Pinned to the
+     lower-left corner of the hero, on the photo's pavement.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-hero {
+    --hwv2-cta-skew: -14deg;
+  }
+  /* Pushed right so the button no longer sits over the red
+     car on the left of the photo. Same right-of-center
+     placement as fleets-v2's hero action. Fills the open
+     pavement zone to the right of the chargers. */
+  .hwv2-hero-actions {
+    position: absolute;
+    left: clamp(440px, 54vw, 760px);
+    bottom: clamp(40px, 6vw, 80px);
+    z-index: 5;
+  }
+  .hwv2-cta-primary {
+    position: relative;
+    display: inline-flex;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    isolation: isolate;
+    transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-face {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, #3bd866 0%, #2DC856 50%, #25b04d 100%);
+    transform: skewX(var(--hwv2-cta-skew));
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 1px 0 0 rgba(255, 255, 255, 0.10),
+      inset -1px 0 0 rgba(0, 0, 0, 0.10),
+      0 22px 50px rgba(45, 200, 86, 0.45),
+      0 8px 22px rgba(0, 0, 0, 0.5);
+    transition:
+      background 0.32s ease,
+      box-shadow 0.4s cubic-bezier(.22, 1, .36, 1),
+      transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: clamp(16px, 1.7vw, 22px) clamp(30px, 3.4vw, 46px);
+    color: #0a1822;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.78rem, 0.92vw, 0.92rem);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: gap 0.32s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary-inner svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .hwv2-cta-primary:hover,
+  .hwv2-cta-primary:focus-visible {
+    transform: translateY(-3px);
+    outline: none;
+  }
+  .hwv2-cta-primary:hover .hwv2-cta-primary-face,
+  .hwv2-cta-primary:focus-visible .hwv2-cta-primary-face {
+    background: linear-gradient(180deg, #4ae07a 0%, #38d562 50%, #2DC856 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset -1px 0 0 rgba(0, 0, 0, 0.10),
+      0 30px 64px rgba(45, 200, 86, 0.6),
+      0 12px 30px rgba(0, 0, 0, 0.55);
+  }
+  .hwv2-cta-primary:hover .hwv2-cta-primary-inner,
+  .hwv2-cta-primary:focus-visible .hwv2-cta-primary-inner {
+    gap: 16px;
+  }
+  .hwv2-cta-primary:hover svg,
+  .hwv2-cta-primary:focus-visible svg {
+    transform: translateY(3px);
+  }
+  .hwv2-cta-primary:active {
+    transform: translateY(-1px);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Hero CTA — mobile-only overrides
+     ───────────────────────────────────────────────────────
+     Desktop position uses `left: clamp(440px, 54vw, 760px)`
+     which, at a 390-ish mobile viewport, plants the CTA
+     entirely off-screen to the right (min 440 > viewport).
+     On top of that, the inner span had no `nowrap`, so the
+     19-char "See what you'd earn" was breaking to 3 lines
+     inside a narrow column.
+
+     Fix on mobile only:
+       · Pin the action block to the LEFT edge of the photo
+         (24px) so the CTA sits inside the viewport.
+       · Force the inner text to a single line (`nowrap`).
+       · Knock font + padding down a notch so the resulting
+         single-line button fits within 390px viewport with
+         visible breathing room.
+
+     Desktop CSS is untouched — the override only applies at
+     ≤759px. */
+  @media (max-width: 759px) {
+    /* ─── Hero fit ────────────────────────────────────────────
+       Desktop hero uses `h-screen min-h-[640px]` which on a
+       390×800 phone evaluates to 800px tall. The 80px sticky
+       mobile navbar pushes the hero to start at y=80, so the
+       hero ends at y=880 — 80px past the viewport bottom,
+       hiding the bottom CTA + a slice of the photo.
+
+       Fix: pull the hero UP behind the navbar via
+       `margin-top: -80px`, so the hero takes the FULL viewport
+       (y=0 → y=100dvh). The navbar's transparent top edge
+       overlays the hero, picking up the photo behind it via
+       backdrop-blur. The title-block padding-top is bumped
+       so the eyebrow + headline clear the navbar's 80px band.
+       The CTA at `bottom: clamp(28,4.5vh,44)` from hero
+       bottom now lands ~36px above the viewport bottom —
+       fully visible at first paint with no scroll required. */
+    .hwv2-hero {
+      margin-top: -80px;
+      height: 100dvh;
+      min-height: 0;
+    }
+    /* Title block — bump top padding so the eyebrow + headline
+       clear the navbar's 80px band. The desktop pt-12 (48px)
+       would tuck content behind the navbar after the hero is
+       shifted up; pt-[100px] gives ~20px of breathing room
+       below the navbar bottom edge. Horizontal padding stays
+       tight on mobile so the headline doesn't crowd the
+       column. */
+    .hwv2-hero > div.absolute.inset-x-0.top-0 {
+      padding-top: 100px;
+      padding-left: 22px;
+      padding-right: 22px;
+    }
+    /* Headline — shrink on mobile so the dual-line layout
+       ("Your highway exit." / "Our gear and grid.") fits
+       within the narrower mobile column without breaking
+       awkwardly. */
+    .hwv2-hero h1 {
+      font-size: 36px !important;
+      line-height: 1.0 !important;
+      margin-bottom: 22px !important;
+    }
+    /* "See if your site qualifies" link — slightly smaller +
+       tighter so it stays a graceful single line on mobile. */
+    .hwv2-hero a.group {
+      font-size: 11px;
+    }
+
+    /* ─── CTA position + sizing (existing) ─────────────────── */
+    .hwv2-hero-actions {
+      /* Anchored toward the right edge of the photo — the
+         mobile portrait hero has its "open pavement" reading
+         zone on the right side of the frame (the red car
+         sits on the left, the chargers + canopy run down
+         the right), so the CTA reads best over the right
+         pavement band. Right offset 44 puts the button
+         a touch in from the viewport edge for breathing room. */
+      left: auto;
+      right: 44px;
+      bottom: clamp(28px, 4.5vh, 44px);
+    }
+    .hwv2-cta-primary-inner {
+      white-space: nowrap;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      padding: 13px 20px;
+      gap: 10px;
+    }
+    .hwv2-cta-primary-inner svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     Final CTA — bottom-of-page button reactivity
+     ───────────────────────────────────────────────────────
+     Both buttons get cubic-bezier easing, lift on hover,
+     and meaningful feedback. Primary gets a pumped halo
+     and brightness boost; secondary fades in its arrow,
+     fills with a green tint, and brightens border + text.
+  ═══════════════════════════════════════════════════════ */
+  .hwv2-final-cta-primary {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.30) inset,
+      0 14px 32px -10px rgba(45, 200, 86, 0.45),
+      0 6px 16px -4px rgba(0, 0, 0, 0.35);
+    transition:
+      transform 0.35s cubic-bezier(.22, 1, .36, 1),
+      box-shadow 0.45s cubic-bezier(.22, 1, .36, 1),
+      filter 0.3s ease;
+    will-change: transform;
+  }
+  .hwv2-final-cta-primary:hover,
+  .hwv2-final-cta-primary:focus-visible {
+    transform: translateY(-3px);
+    filter: brightness(1.08);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.40) inset,
+      0 22px 48px -12px rgba(45, 200, 86, 0.65),
+      0 12px 28px -6px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(45, 200, 86, 0.30);
+    outline: none;
+  }
+  .hwv2-final-cta-primary:active {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+  }
+
+  .hwv2-final-cta-secondary {
+    background-color: rgba(10, 24, 34, 0.30);
+    transition:
+      transform 0.35s cubic-bezier(.22, 1, .36, 1),
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.45s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
+  }
+  .hwv2-final-cta-secondary:hover,
+  .hwv2-final-cta-secondary:focus-visible {
+    transform: translateY(-3px);
+    background-color: rgba(45, 200, 86, 0.12);
+    border-color: rgba(45, 200, 86, 0.65);
+    color: #ffffff;
+    box-shadow:
+      0 14px 32px -10px rgba(45, 200, 86, 0.30),
+      0 6px 16px -4px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(45, 200, 86, 0.20);
+    outline: none;
+  }
+  .hwv2-final-cta-secondary:active {
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  /* Revenue card flip — tap-to-toggle for touch / non-hover
+     environments. Hover handles desktop via CSS. Clicking
+     anywhere inside the card toggles is-flipped, which the
+     CSS picks up to rotate the inner wrapper 180°.
+     Keyboard: Enter / Space also toggles when the card is
+     focused. */
+  function initHwv2RevFlip() {
+    const cards = document.querySelectorAll('.hwv2-rev-flip');
+    cards.forEach((card) => {
+      const toggle = (e) => {
+        // Don't intercept clicks on actual links/buttons inside.
+        if (e.target.closest('a, button')) return;
+        card.classList.toggle('is-flipped');
+      };
+      card.addEventListener('click', toggle);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.classList.toggle('is-flipped');
+        }
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHwv2RevFlip);
+  } else {
+    initHwv2RevFlip();
+  }
+
+  /* ─── Hero pavement-CTA → Revenue section animated scroll ─
+     Mirrors the fleets-v2 smooth-scroll handler. Intercepts
+     clicks on a[data-hwv2-scroll], runs an rAF-eased cubic
+     ease-in-out animation (~900ms) to the target's top.
+     Falls back to native anchor jump if prefers-reduced-motion
+     is on. ────────────────────────────────────────────────── */
+  (function () {
+    var triggers = document.querySelectorAll('a[data-hwv2-scroll]');
+    if (!triggers.length) return;
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function animateScrollTo(targetY, duration) {
+      duration = duration || 900;
+      var startY = window.scrollY;
+      var distance = targetY - startY;
+      if (Math.abs(distance) < 2) return;
+      var startT = performance.now();
+      function step(now) {
+        var elapsed = now - startT;
+        var t = Math.min(elapsed / duration, 1);
+        var eased = easeInOutCubic(t);
+        window.scrollTo(0, startY + distance * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    triggers.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var hash = a.getAttribute('href');
+        if (!hash || hash.charAt(0) !== '#') return;
+        var target = document.querySelector(hash);
+        if (!target) return;
+        e.preventDefault();
+        if (reduceMotion) {
+          window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY);
+          return;
+        }
+        var targetY = target.getBoundingClientRect().top + window.scrollY;
+        animateScrollTo(targetY, 900);
+      });
+    });
+  })();
+</script>

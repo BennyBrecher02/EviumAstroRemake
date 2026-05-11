@@ -1,0 +1,2209 @@
+---
+/**
+ * /blog-v4 — fourth desktop blog iteration.
+ *
+ * Layout reference: NewEviumAssets/BLOG-FORMATTING-ADD ROADS IN BACKGROUND.png
+ *
+ * Three-column card grid centered in the page max-width. The
+ * page background carries TWO decorative roads — one along the
+ * left margin and one along the right — so the centered grid
+ * reads as content "in the middle of the road network" the rest
+ * of the site uses elsewhere. Cards are pulled from the blog
+ * content collection (src/content.config.ts) so adding a .md
+ * file to src/content/blog automatically appears here AND gets
+ * a route at /blog/[slug] via the [...slug] template.
+ *
+ * Header: HeaderV4 (lefter PRNDL nav). Body class: page-blog-v4.
+ */
+import Layout from '../layouts/Layout.astro';
+import BlogV4Footer from '../components/BlogV4Footer.astro';
+import { getCollection } from 'astro:content';
+
+/* All published posts, newest first by ISO date. */
+const allPosts = (await getCollection('blog')).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
+
+/* Rhythm bands — split the sorted list into recency groups so 17
+   undifferentiated cards become three labeled chunks. The slice
+   sizes prefer roughly 6/6/rest so each band feels like a full
+   row at every breakpoint (3-col grid → 2 rows per band). */
+const bands = [
+  { id: 'latest',  label: 'Latest',             posts: allPosts.slice(0, 6) },
+  { id: 'recent',  label: 'Earlier this year',  posts: allPosts.slice(6, 12) },
+  { id: 'archive', label: 'From the archive',   posts: allPosts.slice(12) },
+].filter((b) => b.posts.length > 0);
+
+/* Categories — same four used everywhere across the site so the
+   palette stays consistent with v1/v2/v3 dropdowns and chips. */
+const categories = [
+  { id: 'cost-demand',        label: 'Cost & Demand',      color: '#5BC8DC' },
+  { id: 'market-shifts',      label: 'Market Shifts',      color: '#E8C030' },
+  { id: 'charging-tech',      label: 'Charging Tech',      color: '#E07428' },
+  { id: 'vehicle-efficiency', label: 'Vehicle Efficiency', color: '#D82020' },
+];
+
+/* Full "Mon DD, YYYY" date label — keeps the day-of-month visible
+   on every card so two posts published in the same month don't
+   look like duplicates. Compact enough that it still fits the
+   single meta-line row beside `readTime`.                          */
+function shortDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+---
+
+<Layout
+  title="Blog v4 — Evium Charging"
+  description="Insights on EV charging economics, market shifts, technology, and vehicle efficiency."
+  headerVariant="v4"
+  bodyClass="page-blog-v4"
+>
+<!-- Single road-centerline overlay — ONE SVG, ONE path, ONE
+     animation tracing the entire road from inside the LEFT
+     footer arch tunnel UP through the seam, around the U on
+     the page, back DOWN through the right seam, into the RIGHT
+     arch tunnel. Lives at the layout level (sibling of .bv4-
+     root + the footer) so its single path can render
+     continuously across both. -->
+<svg id="road-centerline-overlay" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- Car gradients — top-down view, headlight side
+         (bright) at the LEADING edge, taillight side darker. -->
+    <linearGradient id="bv4-car-grad-1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#1a2632" />
+      <stop offset="100%" stop-color="#2DC856" />
+    </linearGradient>
+    <linearGradient id="bv4-car-grad-2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#992020" />
+      <stop offset="100%" stop-color="#e63950" />
+    </linearGradient>
+    <linearGradient id="bv4-car-grad-3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#155499" />
+      <stop offset="100%" stop-color="#39a0e6" />
+    </linearGradient>
+    <linearGradient id="bv4-car-grad-4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#995015" />
+      <stop offset="100%" stop-color="#e68c39" />
+    </linearGradient>
+    <linearGradient id="bv4-car-grad-5" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5a1599" />
+      <stop offset="100%" stop-color="#a439e6" />
+    </linearGradient>
+
+    <!-- Centerline stroke gradient — full bright on the open road
+         (top 95% of the path BB), dimming to a low-alpha amber
+         in the bottom 5% (which corresponds to the tunnel zone:
+         seam at ~95%, zenith at 100%). Result: dashes visibly
+         shade as they enter the tunnel mouth, completing the
+         "interior is darker" reading without needing a separate
+         overlay over the road. The path's BB top sits at the
+         top of the U-road, BB bottom sits at the arch zenith,
+         so 95%/100% maps directly onto the open-road / tunnel
+         boundary regardless of page height. -->
+    <linearGradient id="bv4-centerline-stroke" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#dcaf14" stop-opacity="0.85" />
+      <stop offset="95%"  stop-color="#dcaf14" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#dcaf14" stop-opacity="0.30" />
+    </linearGradient>
+
+    <!-- Reusable car body symbol — a rounded rectangle with
+         headlights at the leading edge (right) and taillights
+         at the trailing edge (left). Centered at (0,0) so
+         animateMotion places its midpoint on the path; the
+         body extends ±18 px along x (leading direction) and
+         ±10 px perpendicular. Auto-rotation on animateMotion
+         keeps the headlights pointed forward through curves. -->
+    <symbol id="bv4-car-body" overflow="visible">
+      <!-- Drop shadow -->
+      <rect x="-32" y="-16" width="64" height="32" rx="9" ry="9"
+            fill="rgba(0,0,0,0.55)" transform="translate(2.5, 4)" />
+      <!-- Body -->
+      <rect x="-32" y="-16" width="64" height="32" rx="9" ry="9"
+            fill="var(--bv4-car-fill, url(#bv4-car-grad-1))" />
+      <!-- Windshield (front) -->
+      <rect x="4" y="-11.5" width="16" height="23" rx="2.5"
+            fill="rgba(180, 220, 240, 0.4)" />
+      <!-- Rear window -->
+      <rect x="-20" y="-11.5" width="13" height="23" rx="2.5"
+            fill="rgba(180, 220, 240, 0.28)" />
+      <!-- Side trim line (a single bright stripe along the body
+           top to add some metallic definition at this scale). -->
+      <rect x="-30" y="-12" width="60" height="1.2" rx="0.6"
+            fill="rgba(255, 255, 255, 0.18)" />
+      <!-- Headlights (leading edge) -->
+      <circle cx="29.5" cy="-10" r="2.6" fill="#fffde0" opacity="0.98" />
+      <circle cx="29.5" cy="10"  r="2.6" fill="#fffde0" opacity="0.98" />
+      <!-- Taillights (trailing edge) -->
+      <circle cx="-29.5" cy="-10" r="2.2" fill="#ff3349" opacity="0.92" />
+      <circle cx="-29.5" cy="10"  r="2.2" fill="#ff3349" opacity="0.92" />
+    </symbol>
+  </defs>
+
+  <!-- Centerline dashes — single path for the entire road. -->
+  <path id="road-centerline-path"></path>
+
+  <!-- Lane paths — two parallel offset paths from the
+       centerline so cars drive American-style on the
+       right-hand side of the dashes:
+         · lane-cw  = clockwise   (UP-LEFT, EAST-top, DOWN-RIGHT)
+                      offset INWARD toward the cavity — this
+                      is the right-hand lane on each segment.
+         · lane-ccw = counter-CW (UP-RIGHT, WEST-top, DOWN-LEFT)
+                      offset OUTWARD toward the page edges — also
+                      right-hand-relative-to-direction-of-travel.
+       Cars on each lane go ONE direction at a SINGLE speed so
+       they keep their spacing and never overtake / collide. -->
+  <path id="road-lane-cw-path"  fill="none" stroke="none"></path>
+  <path id="road-lane-ccw-path" fill="none" stroke="none"></path>
+
+</svg>
+
+<!-- Unified road outline overlay — separate SVG at z:170 (above
+     the headline tunnel at z:150). Holds:
+       · #road-outline-cap-mortar-path  (drawn first, behind)
+       · #road-outline-path              (cream stroke on top)
+     The whole road perimeter — page top + corners + outer
+     verticals + footer arches + inner verticals + inner top
+     corners + inner top horizontal + LEFT/RIGHT headline-tunnel
+     cap arches — is ONE single SVG path. Same stroke, same
+     anti-aliasing throughout. Sits ABOVE the headline tunnel so
+     the cap arches render on top of the dark concrete ceiling. -->
+<svg id="road-outline-overlay" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- Mortar clip — prevents the wider cap-mortar stroke from
+         "peeking out" past the cap-arch endpoints (where its
+         linecap would otherwise extend a half-disk into the
+         page cavity below y=roadW or above the page top at y<0).
+         Width/height set dynamically in trace() to (W, roadW). -->
+    <clipPath id="bv4-cap-mortar-clip" clipPathUnits="userSpaceOnUse">
+      <rect id="bv4-cap-mortar-clip-rect" x="0" y="0" width="0" height="0"/>
+    </clipPath>
+  </defs>
+  <path id="road-outline-cap-mortar-path" clip-path="url(#bv4-cap-mortar-clip)"></path>
+  <path id="road-outline-path"></path>
+</svg>
+
+<!-- Cars — moved OUT of the SVG into HTML divs with CSS
+     `offset-path` so the browser drives the motion natively
+     (GPU-composited, no JS per frame). Safari composites HTML
+     transforms way faster than animated SVG <use> elements,
+     so this is what fixes the "smooth in Chrome / laggy in
+     Safari" gap. Each car has its OWN tiny SVG body for the
+     visual (just renders the shared <symbol>) — sub-pixel
+     rendering happens in a 64×32 box, not the full road. -->
+<div id="bv4-cars-container" aria-hidden="true">
+  <div class="bv4-car" data-lane="cw"  data-phase="0.00" style="--bv4-car-fill: url(#bv4-car-grad-1)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+  <div class="bv4-car" data-lane="cw"  data-phase="0.33" style="--bv4-car-fill: url(#bv4-car-grad-3)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+  <div class="bv4-car" data-lane="cw"  data-phase="0.66" style="--bv4-car-fill: url(#bv4-car-grad-5)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+  <div class="bv4-car" data-lane="ccw" data-phase="0.16" style="--bv4-car-fill: url(#bv4-car-grad-2)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+  <div class="bv4-car" data-lane="ccw" data-phase="0.50" style="--bv4-car-fill: url(#bv4-car-grad-4)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+  <div class="bv4-car" data-lane="ccw" data-phase="0.83" style="--bv4-car-fill: url(#bv4-car-grad-3)"><svg viewBox="-32 -16 64 32"><use href="#bv4-car-body" /></svg><div class="bv4-car-headlight"></div></div>
+</div>
+
+<main class="bv4-root">
+
+  <!-- ─── U-shaped road frame ─────────────────────────────────
+       One continuous road that runs across the top of the page,
+       curves down at each end, and continues vertically along
+       the left + right page edges all the way to the foot. The
+       top horizontal segment is tall enough to fit the headline
+       (eyebrow + title + sub) so the headline literally sits
+       INSIDE the ribbon. The U is open at the bottom (no
+       border-bottom) so the road tapers off into the rest of
+       the page instead of enclosing it.
+
+       Layers:
+         .bv4-u-asphalt          — dark fill (thick CSS borders)
+         .bv4-u-shoulder-outer   — cream stripe at the page-edge
+         .bv4-u-shoulder-inner   — cream stripe at the interior edge
+         <svg .bv4-u-flow>       — yellow centre dashes traced as a
+                                   single SVG path so the dashes
+                                   stay continuous through the
+                                   corner curves (CSS-only dashes
+                                   can't follow a quarter-arc).      -->
+  <div class="bv4-u-road" aria-hidden="true">
+    <div class="bv4-u-asphalt"></div>
+    <div class="bv4-u-cavity"></div>
+    <div class="bv4-u-shoulder-outer"></div>
+    <div class="bv4-u-shoulder-inner"></div>
+
+    <!-- Headline tunnel — the road's top horizontal section
+         disappears UNDER an opaque highway-tunnel roof. Two
+         cream-lipped arched mouths (LEFT and RIGHT) frame
+         the tunnel openings; everything inside the cavity
+         is the OPAQUE concrete-and-light tunnel ceiling.
+         The road, dashes, and cars all hide behind the roof
+         while inside, then reappear at the other mouth.
+
+         Arch direction matches the footer convention: each
+         cap arc DIPS INTO the tunnel's depth direction.
+           – LEFT cap arc bows RIGHTWARD (peak at x≈20)
+           – RIGHT cap arc bows LEFTWARD (peak at x≈80)
+
+         z-index 150 sits ABOVE the road centerline overlay
+         (100) AND the cars container (also 100) so the
+         opaque roof hides them inside the tunnel. The
+         headline (z:200) stays the readable foreground. -->
+    <div class="bv4-headline-tunnel">
+      <svg class="bv4-ht-svg" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <!-- Concrete ceiling base — vertical gradient gives
+               the roof a subtle 3-D crown: darker at the
+               top/bottom (where the ceiling meets the side
+               walls), lighter through the middle (the apex
+               of the arched ceiling, where overhead lights
+               land). -->
+          <linearGradient id="bv4-ht-roof-base" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#222a36" />
+            <stop offset="22%"  stop-color="#37414f" />
+            <stop offset="50%"  stop-color="#4b5666" />
+            <stop offset="78%"  stop-color="#37414f" />
+            <stop offset="100%" stop-color="#222a36" />
+          </linearGradient>
+          <!-- Concrete-panel seams running across the road
+               direction. Tile pattern of thin dark verticals
+               every 7 viewbox units suggests the segmented
+               panels of a cast-in-place tunnel ceiling. -->
+          <pattern id="bv4-ht-panels" patternUnits="userSpaceOnUse" width="7" height="100">
+            <rect x="6.6" y="0" width="0.4" height="100" fill="rgba(0, 0, 0, 0.40)" />
+            <rect x="6.6" y="0" width="0.18" height="100" fill="rgba(255, 255, 255, 0.06)" />
+          </pattern>
+        </defs>
+
+        <!-- ─── OPAQUE TUNNEL ROOF ─────────────────────────
+             Fills the cavity ONLY (between the two arch
+             mouths). The corner triangles outside the arches
+             stay transparent so the open road is visible
+             leading INTO and out of the tunnel — only the
+             portion under the roof is hidden. -->
+        <path
+          d="M 10 0 L 90 0 A 10 50 0 0 0 90 100 L 10 100 A 10 50 0 0 0 10 0 Z"
+          fill="url(#bv4-ht-roof-base)"
+        />
+        <!-- Concrete panel-seam overlay -->
+        <path
+          d="M 10 0 L 90 0 A 10 50 0 0 0 90 100 L 10 100 A 10 50 0 0 0 10 0 Z"
+          fill="url(#bv4-ht-panels)"
+        />
+
+        <!-- Cap arch cream lips + dark mortar shadows REMOVED.
+             Now drawn by #road-outline-path + #road-outline-cap-
+             mortar-path in the shared overlay (z:170, above this
+             tunnel SVG at z:150). Single SVG = single rendering
+             tech = no cross-SVG sub-pixel discrepancy where the
+             cap arches meet the rest of the road outline. -->
+
+        <!-- Inner cream sill REMOVED — the road's inner top
+             horizontal stripe is now drawn by the unified
+             outline path which crosses this same y position. -->
+      </svg>
+    </div>
+
+    <!-- Billboard-bottom frame piece — closes the U at the
+         body's bottom edge with a horizontal cream-lipped
+         dark frame, reading as the bottom rail of a billboard.
+         Spans the cavity (between the two road legs) so the
+         road continuity into the footer is preserved. -->
+    <div class="bv4-billboard-bottom"></div>
+
+    <!-- One extra roof ring stacked on each tunnel's roof.
+         Each strip mirrors the corresponding cliff-face roof
+         ring extension (.ftrt-ext) below it: same horizontal
+         offset (left:road-w / right:road-w), same width, same
+         concrete gradient, same ring style + alphas, same
+         horizontal mask fade toward the cavity centre. The two
+         strips are mirror duplicates of each other and only
+         render on each tunnel's side — the cavity middle is
+         left untouched (billboard-bottom shows through). -->
+    <div class="bv4-roof-ring-extra bv4-roof-ring-extra--left"  aria-hidden="true"></div>
+    <div class="bv4-roof-ring-extra bv4-roof-ring-extra--right" aria-hidden="true"></div>
+    <!-- Outer ring extras — sit in the small --road-margin gap
+         on the OUTER side of each road column (between the
+         page wall and the column's outer cream lip), giving
+         each tunnel a symmetric ring stack on BOTH sides. -->
+    <div class="bv4-roof-ring-extra bv4-roof-ring-extra--outer-left"  aria-hidden="true"></div>
+    <div class="bv4-roof-ring-extra bv4-roof-ring-extra--outer-right" aria-hidden="true"></div>
+  </div>
+
+  <!-- Header — eyebrow + title + sub inside the top horizontal
+       of the U. Absolute-positioned at top: 0 with height
+       matching --road-w so the text sits centred vertically
+       inside the ribbon. The horizontal padding (left + right =
+       --curve-r) keeps the text out of the curved corners. -->
+  <header class="bv4-head">
+    <p class="bv4-eyebrow">
+      <span class="bv4-eyebrow-mark" aria-hidden="true"></span>
+      Evium Insights
+      <span class="bv4-eyebrow-mark" aria-hidden="true"></span>
+    </p>
+    <h1 class="bv4-title">The knowledge behind<br>every charging decision.</h1>
+    <span class="bv4-title-rule" aria-hidden="true"></span>
+    <p class="bv4-sub">Infrastructure economics, technology trends, and market signals — from the team deploying charging networks across the country.</p>
+  </header>
+
+  <!-- Topic filter — editorial tab bar styling. Each tab uses
+       its category's own accent color for the underline + dot
+       ring + count when selected, so the active tab visually
+       belongs to the section it filters in. The whole strip
+       sits on a hairline rule echoing the band-header rules
+       below so the page reads as one consistent rhythm. -->
+  <div class="bv4-filter-panel">
+    <p class="bv4-filter-label" aria-hidden="true">
+      <span class="bv4-filter-label-mark" aria-hidden="true"></span>
+      Topics
+      <span class="bv4-filter-label-mark" aria-hidden="true"></span>
+    </p>
+    <nav class="bv4-filters" role="tablist" aria-label="Filter posts by category">
+      <button type="button" class="bv4-chip" role="tab" data-bv4-filter="all" aria-selected="true">
+        <span class="bv4-chip-dot bv4-chip-dot--all" aria-hidden="true"></span>
+        <span class="bv4-chip-label">All</span>
+        <span class="bv4-chip-count">{allPosts.length}</span>
+      </button>
+      {categories.map((cat) => {
+        const count = allPosts.filter((p) => p.data.category === cat.id).length;
+        return (
+          <button
+            type="button" class="bv4-chip" role="tab"
+            data-bv4-filter={cat.id} aria-selected="false"
+            style={`--chip-accent:${cat.color};`}
+          >
+            <span class="bv4-chip-dot" aria-hidden="true"></span>
+            <span class="bv4-chip-label">{cat.label}</span>
+            <span class="bv4-chip-count">{count}</span>
+          </button>
+        );
+      })}
+    </nav>
+  </div>
+
+  <!-- Banded card grids — each band gets a small uppercase
+       eyebrow label flanked by hairline rules, then a 3-col grid.
+       Bands collapse to display:none if all of their cards are
+       filtered out (handled in <script> below). -->
+  {bands.map((band, bIdx) => {
+    /* Cumulative card-index offset across bands so the entrance
+       fade stagger flows continuously top-to-bottom rather than
+       restarting per band. */
+    const offset = bands.slice(0, bIdx).reduce((n, b) => n + b.posts.length, 0);
+    return (
+      <section class="bv4-band" data-band={band.id}>
+        <header class="bv4-band-head">
+          <span class="bv4-band-rule" aria-hidden="true"></span>
+          <span class="bv4-band-label">{band.label}</span>
+          <span class="bv4-band-rule" aria-hidden="true"></span>
+        </header>
+        <div class="bv4-grid">
+          {band.posts.map((post, i) => {
+            const cat = categories.find((c) => c.id === post.data.category);
+            return (
+              <a
+                href={`/blog/${post.id}`}
+                class="bv4-card"
+                data-category={post.data.category}
+                style={`--accent:${cat?.color ?? '#2DC856'}; --card-delay:${(offset + i) * 0.04}s;`}
+              >
+                <div class="bv4-card-img">
+                  {post.data.image ? (
+                    <img src={post.data.image} alt="" draggable="false" />
+                  ) : (
+                    <span class="bv4-card-noimg" aria-hidden="true"></span>
+                  )}
+                </div>
+                <div class="bv4-card-body">
+                  <span class="bv4-card-cat">{post.data.categoryLabel}</span>
+                  <h2 class="bv4-card-title">{post.data.title}</h2>
+                  <p class="bv4-card-excerpt">{post.data.excerpt}</p>
+                  <div class="bv4-card-meta">
+                    <span>{shortDate(post.data.date)}</span>
+                    <span class="bv4-card-meta-dot" aria-hidden="true">·</span>
+                    <span>{post.data.readTime} read</span>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    );
+  })}
+
+  <p class="bv4-empty" id="bv4-empty" hidden>
+    No posts in this category yet. <a href="/contact">Tell us what to write next →</a>
+  </p>
+
+</main>
+
+<BlogV4Footer />
+</Layout>
+
+<style>
+  .bv4-root {
+    /* Single source of truth for the U-road's two key dimensions.
+         --road-w     thickness of every leg of the U. Sized to fit
+                      the headline (eyebrow + title + sub) inside
+                      the top horizontal segment.
+         --curve-r    OUTER corner radius. Inner radius is
+                      automatically (curve-r − road-w), keeping
+                      both edges of the road concentric through
+                      the bend.
+         --road-margin
+                      breathing room between the page wall + the
+                      road column's outer cream lip. Filled with
+                      the OUTER roof-ring extensions in the body
+                      (and matching extensions in the footer) so
+                      each tunnel roof has rings flaring out on
+                      BOTH sides like a real concrete tunnel
+                      ceiling. Match this with .ftrt-cliff's
+                      --road-margin in the footer component. */
+    --road-w:      clamp(160px, 14vw, 210px);
+    --curve-r:     clamp(210px, 17.5vw, 260px);
+    --road-margin: clamp(15px, 1.5vw, 25px);
+
+    position: relative;
+    /* Light, brand-aligned content surface — sits INSIDE the
+       U-road's frame so the dark asphalt reads as a road around
+       a clean white plaza where the cards and filters live. The
+       road, shoulders, and headline (which all sit on the
+       asphalt) keep their dark/cream styling unchanged. */
+    background: #f6f8fa;
+    color: #1A2F3A;
+    font-family: 'Maven Pro', sans-serif;
+    min-height: 100vh;
+    /* Padding clears the road on each side so cards/filters get
+       breathing room inside the U. Top padding starts AFTER the
+       road's top horizontal (which is now home to the headline). */
+    padding:
+      calc(var(--road-w) + clamp(28px, 4vw, 48px))
+      calc(var(--road-margin) + var(--road-w) + clamp(28px, 3.5vw, 44px))
+      clamp(60px, 8vw, 100px);
+    /* overflow: hidden was previously clipping the page dashes
+       against page edges; removed so the outer shoulder lines
+       can extend slightly past the element bounds to center on
+       the page edge — that's what makes them line up exactly
+       with the footer arch legs (both centered on the same x). */
+  }
+
+  /* ─── U-shaped road ──────────────────────────────────────────
+     Built from four layered absolute children so each visual
+     concern can be tuned independently:
+       1. .bv4-u-asphalt   — the dark fill (thick border on the
+          outer wrapper draws the U; bottom border absent so the
+          U is open).
+       2. .bv4-u-shoulder-outer — 3 px cream stripe at the page-
+          edge side of the road (matches every other shoulder on
+          the site).
+       3. .bv4-u-shoulder-inner — 2 px fainter stripe at the
+          interior side, indented by --road-w so it traces the
+          inner edge.
+       4. .bv4-u-dashes-* — three independent yellow dashed
+          centre lines (top horizontal, left vertical, right
+          vertical), each animating in their own straight axis.
+          The curved corners themselves don't carry dashes — same
+          convention real roads use through tight bends.          */
+  /* Single road-centerline overlay covering page+footer in ONE
+     SVG — guarantees one path / one animation so dashes can NOT
+     drift between page and footer. Positioned absolute at top:0
+     of the body, sized to span from page top to where the
+     footer arch zeniths sit. JS sets viewBox + path d + height. */
+  #road-centerline-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* JS overrides */
+    pointer-events: none;
+    z-index: 100;
+    overflow: visible;
+  }
+  /* Outline overlay — sibling SVG at z:170, above the headline
+     tunnel (z:150) so the unified cream outline + cap arches
+     render on top of the tunnel's dark ceiling. Position +
+     viewBox + height are mirrored from the centerline overlay
+     in JS so both share the same coord system. */
+  #road-outline-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* JS overrides */
+    pointer-events: none;
+    z-index: 170;
+    overflow: visible;
+  }
+
+  /* Only the centerline path renders dashes — the two lane
+     paths are invisible carriers used purely as motion guides
+     for the car animateMotion elements. */
+  #road-centerline-path {
+    fill: none;
+    /* Stroke uses a vertical alpha gradient so dashes dim as
+       they enter each tunnel mouth — see <linearGradient
+       id="bv4-centerline-stroke"> in the SVG defs above. */
+    stroke: url(#bv4-centerline-stroke);
+    stroke-width: 3;
+    stroke-linecap: butt;
+    stroke-dasharray: 22 28;
+    vector-effect: non-scaling-stroke;
+  }
+  /* Unified road outline — ONE cream stroke that traces the
+     entire road perimeter in one go: page top + corners +
+     outer verticals + LEFT + RIGHT footer arches + inner
+     verticals + inner top corners + inner top horizontal +
+     LEFT + RIGHT headline-tunnel cap arches (subpaths).
+     Closed loop. Single source = same color, same weight,
+     same anti-aliasing throughout. */
+  #road-outline-path {
+    fill: none;
+    stroke: rgba(244, 242, 232, 1);
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  /* Cap-arch mortar shadow — wider dark stroke on the same
+     cap-arch geometry as #road-outline-path's tunnel-cap
+     subpaths. Rendered before the cream outline so the cream
+     lip ends up CENTERED inside a 2 px dark halo on each side
+     (cream 3 px + mortar 7 px → 2 px visible mortar L/R of
+     cream). Fills the previously-empty gap between the cream
+     and the offset shadow stroke.
+
+     stroke-linecap: butt + clip-path together prevent the
+     mortar's perpendicular extent at the cap-arch endpoints
+     from "tonguing out" past the road area into the cavity
+     below or the page edge above. */
+  #road-outline-cap-mortar-path {
+    fill: none;
+    stroke: rgba(20, 14, 8, 0.65);
+    stroke-width: 7;
+    stroke-linecap: butt;
+    vector-effect: non-scaling-stroke;
+  }
+  #road-lane-cw-path,
+  #road-lane-ccw-path {
+    fill: none;
+    stroke: none;
+  }
+
+  /* Cars container — exact same coordinate frame as the
+     centerline overlay so each car's offset-path coordinates
+     map 1:1 onto the same coords used by the dashes path.
+     Width / height / left / top all set by JS to match.
+
+     z-index 100 keeps cars BELOW the opaque headline-tunnel
+     roof (z:150). Cars driving across the top of the U
+     hide behind the roof while inside the tunnel and
+     reappear at the other mouth — same way real cars
+     disappear when entering a tunnel viewed from above.
+     The @property `--bv4-state` filter still dims cars
+     briefly at the mouth thresholds so they fade smoothly
+     instead of popping out of view. */
+  #bv4-cars-container {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    /* CSS mask matches the SVG car-tunnel-mask: cars fully
+       visible above the seam, fading to invisible at the arch
+       zenith. Stops set by JS at runtime via CSS variables. */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0,
+      #000 var(--bv4-cars-fade-start, 95%),
+      transparent var(--bv4-cars-fade-end, 100%)
+    );
+            mask-image: linear-gradient(
+      to bottom,
+      #000 0,
+      #000 var(--bv4-cars-fade-start, 95%),
+      transparent var(--bv4-cars-fade-end, 100%)
+    );
+  }
+  /* @property gives --bv4-state interpolation between
+     keyframes (without it, CSS variables snap step-wise). The
+     variable goes 0 inside the tunnel → 1 on the open road.
+     Children read it for filter brightness + headlight
+     opacity, so dimming + headlights both come straight from
+     the same single source of truth and stay perfectly
+     synced with the offset-distance animation. */
+  @property --bv4-state {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  .bv4-car {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 32px;
+    /* Anchor the CENTER of the car onto the path point so the
+       64×32 box is symmetric around the lane line, not hanging
+       off the corner. */
+    offset-anchor: center;
+            offset-rotate: auto;
+    -webkit-offset-anchor: center;
+    -webkit-offset-rotate: auto;
+    /* TWO animations, same duration + delay → same timeline:
+         · bv4-car-drive — offset-distance 0→100% (motion)
+         · bv4-car-state — --bv4-state 0/1 toggling at the
+           tunnel ends (drives dim + headlight via CSS calc) */
+    /* Lap duration was 45s — felt lethargic, especially through
+       the headline-tunnel section (which is ~23% of the path
+       length, so ~10s of crawl). 30s gives the cars a more
+       road-speed feel without losing the calm flow. Both
+       animations share the duration so the state-keyframe
+       (which marks "in tunnel" vs "on road") stays in sync
+       with the offset-distance progress. */
+    animation: bv4-car-drive 30s linear infinite,
+               bv4-car-state 30s linear infinite;
+    will-change: offset-distance, transform;
+  }
+  .bv4-car > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    /* In tunnel (state=0) → 0.42 brightness; on road (state=1)
+       → full brightness. GPU-accelerated filter. */
+    filter: brightness(calc(0.42 + 0.58 * var(--bv4-state, 1)));
+  }
+  /* Headlight glow — extends FORWARD from the front of the
+     car (in the car's own local frame, so it rotates with the
+     body via offset-rotate). Visible only in/near the tunnel. */
+  .bv4-car-headlight {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 90px;
+    height: 64px;
+    margin: -32px 0 0 -12px;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70px 14px at 6% 18px, rgba(255, 250, 180, 0.55), transparent 75%),
+      radial-gradient(ellipse 70px 14px at 6% 46px, rgba(255, 250, 180, 0.55), transparent 75%);
+    mix-blend-mode: screen;
+    /* Headlights ON inside tunnel + just before/after the
+       tunnel mouth, OFF on the open road. */
+    opacity: calc(1 - var(--bv4-state, 1));
+  }
+  @keyframes bv4-car-drive {
+    from { offset-distance:   0%; }
+    to   { offset-distance: 100%; }
+  }
+  /* THREE tunnel zones along each car's loop:
+       0%   – 3%    : emerging from the START footer tunnel
+       46%  – 54%   : passing under the HEADLINE TUNNEL on
+                       the road's top horizontal — cars enter
+                       the cream-lipped LEFT cap, dim through
+                       the dark interior, and emerge from the
+                       RIGHT cap on the other side
+       97%  – 100%  : descending into the END footer tunnel
+     The mid-path % range (46–54) was picked from the rough
+     proportions of the U-path: ascent + leg + corner ≈ 45%
+     of the path length brings the car to the start of the
+     top horizontal; the top horizontal itself spans ≈ 10%
+     of the path, so the entry/exit cap arcs (each at the
+     10% inset of the horizontal) land near 46% / 54%. */
+  @keyframes bv4-car-state {
+    0%   { --bv4-state: 0; }   /* deep in start footer tunnel */
+    3%   { --bv4-state: 1; }   /* fully out → road */
+    44%  { --bv4-state: 1; }   /* approaching headline tunnel */
+    47%  { --bv4-state: 0; }   /* inside headline tunnel */
+    53%  { --bv4-state: 0; }   /* still inside headline tunnel */
+    56%  { --bv4-state: 1; }   /* emerging back onto the road */
+    97%  { --bv4-state: 1; }   /* still on road, approaching seam */
+    100% { --bv4-state: 0; }   /* descended to end footer zenith */
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bv4-car { animation: none; }
+  }
+
+  .bv4-u-road {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Background fills:
+         · the small triangular dead-space at the top-left +
+           top-right corners outside the asphalt's rounded
+           corners, AND
+         · the new outer gap (left:0..left:road-margin and
+           right:0..right:road-margin) that opens up when the
+           asphalt is inset by --road-margin (so the body's
+           outer roof-ring extensions can flare out toward the
+           page wall on each side of the road column).
+       Color #0d1825 — a refined dark navy with no teal/green
+       undertone. Sits cleanly in the dark-navy palette the
+       cliff face uses (#06101a … #050d16) and the asphalt
+       (#16213e), reading as part of the same material family
+       rather than a contrasting tinted block. */
+    background: #0d1825;
+    /* No mask — the road extends to the foot of the page at
+       full opacity. Where the page meets the footer, the
+       footer's tunnel mouths (in BlogV4Footer) take over,
+       framing the road's terminus and dissolving it into the
+       footer's bg colour. */
+  }
+
+  /* Asphalt: solid-filled rounded rectangle (top corners only).
+     Stays a single solid asphalt colour so the road column reads
+     as one continuous strip from the page top through to the
+     footer's road column below — the road remains visibly bright
+     all the way to the tunnel mouth (the void appears INSIDE
+     the footer, not on the page side). */
+  .bv4-u-asphalt {
+    position: absolute;
+    /* Inset by --road-margin on left + right so the road column's
+       outer cream lip leaves a small gap between itself and the
+       page wall — that gap is where the body-side outer roof-ring
+       extensions live. .bv4-u-road's bg fills the gap. */
+    top: 0;
+    left:   var(--road-margin);
+    right:  var(--road-margin);
+    bottom: 0;
+    background: #16213e;
+    border-top-left-radius:  var(--curve-r);
+    border-top-right-radius: var(--curve-r);
+    z-index: 0;
+  }
+  /* Cavity: solid-filled element matching the page bg, inset by
+     --road-w on three sides (open at bottom — same as the U's
+     openness). Its inverse top radii (curve-r − road-w) trace the
+     asphalt's inner edge so the visible road thickness stays
+     uniform around the curves. */
+  .bv4-u-cavity {
+    position: absolute;
+    top:   var(--road-w);
+    /* Cavity insets shift inward with the asphalt so the cavity
+       still sits inside the road column. */
+    left:  calc(var(--road-margin) + var(--road-w));
+    right: calc(var(--road-margin) + var(--road-w));
+    bottom: 0;
+    /* Bg fades from light plaza color at top to the cliff-face
+       color at the very bottom — meaning the cavity terminates
+       in the same colour the footer begins with. The page-to-
+       footer boundary in the cavity is dark-on-dark = invisible.
+       Combined with the road columns being asphalt #16213e (which
+       matches the cliff's top stop), the entire bottom edge of
+       the page transitions cleanly into the cliff-face footer. */
+    /* Cavity stays a SOLID light plaza colour from top to
+       bottom — no fade. The previous black-on-white gradient
+       was a leftover from an older footer design and read as
+       a jarring band against the new tunnel-mouth footer. The
+       new footer (BlogV4Footer) handles its own page→
+       footer hand-off via its top edge, so the cavity itself
+       no longer needs to anticipate the footer colour. */
+    background: #f6f8fa;
+    border-top-left-radius:  calc(var(--curve-r) - var(--road-w));
+    border-top-right-radius: calc(var(--curve-r) - var(--road-w));
+    z-index: 1;
+  }
+
+  /* Outer shoulder — cream border on the OUTSIDE perimeter of
+     the U-road. Sub-pixel positioning notes:
+       · top/left/right: -1.5 px shifts the element OUT by half
+         the 3 px border so the cream stripe is CENTERED on the
+         .bv4-root edge (x=80 in viewport), exactly where the
+         footer arch's stroke is centered too.
+       · bottom: -8 px extends the cream stripe DOWN INTO the
+         footer area by 8 px. The footer arch's outer leg
+         stroke also lands here, so cream-over-cream means any
+         subpixel difference between CSS border rendering and
+         SVG stroke rendering is invisible — the line reads as
+         one cohesive unit through the seam.
+     z-index 70 lifts the stripe ABOVE both the HeaderV4
+     lefter rail (z:50) and the footer road column (z:60). The
+     cream renders on top in every dev-mode state and through
+     the overlap zone. */
+  .bv4-u-shoulder-outer {
+    /* Cream borders REMOVED — the road outline is now drawn as
+       ONE unified SVG stroke (#road-outline-path in the
+       centerline overlay). Keeping this element so any code
+       that queries it still works, but it no longer paints. */
+    display: none;
+  }
+
+  /* Headline tunnel — horizontal "ridge" cut into the road's
+     top horizontal section. The cream-lipped semi-elliptical
+     caps at left/right are the tunnel mouths; the dark
+     gradient interior between them dims the road + dashes
+     visually. Cars dim independently via the @property
+     keyframes below so they stay visible inside.
+
+     Position spans the road's top horizontal exactly: from
+     just after the top-left curve (left:var(--curve-r)) to
+     just before the top-right curve (right:var(--curve-r)).
+     z-index 150 sits above the road centerline overlay (100)
+     so dashes inside the tunnel are darkened by the fill,
+     and below the headline (200) + cars (160) so neither is
+     painted over. */
+  .bv4-headline-tunnel {
+    position: absolute;
+    top: 0;
+    /* Headline tunnel sits in the straight horizontal segment
+       of the U (between the rounded corners). With the road
+       inset by --road-margin, that segment now starts at
+       (--road-margin + --curve-r) from each edge. */
+    left:  calc(var(--road-margin) + var(--curve-r));
+    right: calc(var(--road-margin) + var(--curve-r));
+    height: var(--road-w);
+    z-index: 150;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .bv4-ht-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+
+  /* Billboard bottom — the closing horizontal frame piece of
+     the U, sitting at the body's bottom edge between the two
+     road legs. Cream lip at top matches the inner-shoulder
+     vertical stripes (3px, same color, same green inner halo);
+     dark gradient body matches the road asphalt and transitions
+     cleanly into the footer's cliff face below. Left/right
+     edges align with the OUTER edges of the inner-shoulder
+     vertical cream stripes (var(--road-w) - 1.5px) so the
+     frame corners form clean L-junctions. */
+  /* Billboard-bottom — horizontal frame piece at the bottom of
+     the body cavity, sitting between the two road legs. Cream
+     lip at top + dark gradient body. Acts as the closing
+     bottom rail of the U-road frame. The two cliff-face roof
+     rings get an extra stacked ring via the dedicated
+     `.bv4-roof-ring-extra` strips below — those handle the
+     "one more roof ring per tunnel" framing on each side. */
+  .bv4-billboard-bottom {
+    position: absolute;
+    bottom: 0;
+    /* Billboard hugs the cavity's bottom edge (just past the
+       inner cream lip of the road column). With the road inset
+       by --road-margin, the cavity starts at margin + road-w. */
+    left:  calc(var(--road-margin) + var(--road-w) - 1.5px);
+    right: calc(var(--road-margin) + var(--road-w) - 1.5px);
+    height: clamp(36px, 4vw, 52px);
+    z-index: 4;
+    pointer-events: none;
+    box-sizing: border-box;
+    /* Bottom stop is #06101a so the billboard ends at the EXACT
+       same color the cliff face starts at — no color step at
+       the body-footer seam. */
+    background:
+      linear-gradient(180deg,
+        #1d2c44 0%,
+        #16213e 28%,
+        #0d1626 65%,
+        #06101a 100%);
+    border-top: 3px solid rgba(244, 242, 232, 1);
+    box-shadow:
+      inset 0 1px 0 rgba(45, 200, 86, 0.18),
+      inset 0 6px 14px -8px rgba(0, 0, 0, 0.55);
+  }
+
+  /* ─── One more roof ring per tunnel ──────────────────────────
+     The footer's two tunnels each have a roof-ring stack
+     (.ftrt-ext on each side of the cliff face). To stack ONE
+     more ring above the seam on each tunnel's roof, this strip
+     sits at the bottom of the body cavity at the same
+     horizontal position as the cliff-face extension below,
+     sized to EXACTLY one ring period tall, with one ring
+     placed at the same offset-within-period the cliff face
+     SVG pattern uses (y=0.5 of 14.286 = 3.5% from top).
+
+     `--roof-ring-period` is published by `BlogV4Footer.astro`
+     as `cliffHeight / 7` — IDENTICAL to the cliff-face SVG
+     patterns' screen-pixel period (pattern height 14.286
+     viewBox out of 100 stretched to cliff height = cliffHeight
+     × 14.286 / 100 = cliffHeight / 7). So the strip's height,
+     the ring's vertical position within the strip, and the
+     ring's thickness all resolve to the SAME screen pixels as
+     the cliff face's first ring resolves to in the cliff face
+     SVG. An observer can't tell where the body strip ends and
+     the cliff face starts in the ring rhythm.
+
+     Ring band proportions (matching cliff-face pattern):
+       dark band      = 0.9   viewBox / 14.286 = 6.30%  of period
+       highlight band = 0.28  viewBox / 14.286 = 1.96%  of period
+       ring offset    = 0.5   viewBox / 14.286 = 3.50%  of period
+     so:
+       0     ..3.5%   transparent (concrete shows)
+       3.5%  ..5.46%  highlight + dark (lighter top edge of ring)
+       5.46% ..9.80%  dark only
+       9.80% ..100%   transparent (concrete fills the rest)
+
+     Concrete-gradient base is the MIRROR of the cliff-face
+     concrete gradient at the corresponding region above the
+     seam: from the seam (#222a36, matching cliff-face top
+     stop) ascending to #303946 at the strip's top (= one
+     period above the seam, computed as
+     LERP(#222a36, #37414f, 14.286/22) ≈ #303946). The
+     two-stop gradient avoids the previous "compressed cliff
+     face gradient" mistake where the strip had a #4b5666 light
+     spot in its middle that didn't continue below the seam —
+     now the strip is just a faint linear lightening from
+     #222a36 at the seam up to #303946 below the cream lip,
+     which is exactly what the cliff face concrete would do if
+     it were extended one period upward by mirror symmetry.
+
+     z-index 5 puts it above the billboard-bottom (4) so the
+     concrete strip + ring overlay the dark frame on the side
+     where the corresponding cliff-face extension sits below.
+     The middle of the cavity stays dark (billboard-bottom
+     shows through) — no band crosses it. */
+  .bv4-roof-ring-extra {
+    position: absolute;
+    bottom: 0;
+    /* Fallback ≈80px if JS hasn't run yet (typical cliff
+       height ≈560px → period ≈80px). */
+    height: var(--roof-ring-period, 80px);
+    /* Width matches the footer content's horizontal padding
+       offset on each side (see .ftrt-content padding) — the
+       strip fits exactly in the gap between the road column
+       and the footer text columns, so its rings extend slightly
+       past the bore but stop before the content area. The
+       cliff-face .ftrt-ext below uses the same value so seam
+       continuity is preserved. */
+    width: clamp(20px, 2.5vw, 40px);
+    z-index: 5;
+    pointer-events: none;
+    background:
+      /* (1) Highlight on top of dark — same y range as the
+         cliff-face pattern's highlight rect (y=0.5..0.78 of
+         viewBox 14.286 = 3.5%..5.46% of the period). */
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.08) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.08) calc(var(--roof-ring-period, 80px) * 0.0546),
+        transparent calc(var(--roof-ring-period, 80px) * 0.0546)
+      ),
+      /* (2) Dark band — same y range as the cliff-face
+         pattern's dark rect (y=0.5..1.4 of viewBox 14.286 =
+         3.5%..9.8% of the period). */
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.45) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.45) calc(var(--roof-ring-period, 80px) * 0.098),
+        transparent calc(var(--roof-ring-period, 80px) * 0.098)
+      ),
+      /* (3) Mirror concrete gradient — bottom (at seam) =
+         #222a36 to match the cliff-face concrete's top stop;
+         top (one period above the seam) = #303946, the LERP
+         that the cliff-face concrete gradient would give one
+         period BELOW the seam (cliffH × 14.286 / 100 / 22 of
+         the way from #222a36 to #37414f). Linear, no compressed
+         5-stop curve = no spurious light-spot in the strip's
+         middle. */
+      linear-gradient(180deg,
+        #303946  0%,
+        #222a36 100%);
+  }
+  /* Side variants — each redeclares its own `background` so it
+     can stack a SIDE-CURVE-DROP gradient ON TOP of the parent's
+     ring + concrete layers. The curve drop simulates the
+     concrete-pipe surface curving DOWN at the inner edge: it's
+     transparent at the bore-side (the brightest "top" of the
+     curve) and darkens to ~cliff-bg color (#06101a) at the inner
+     edge — so the strip's content blends INTO cliff/billboard bg
+     rather than presenting a hard color seam where the mask
+     reaches transparent.
+
+     Stops use a quarter-circle ease-in profile (slow at first,
+     accelerating toward the inner edge) so the curve reads as
+     a real cylindrical drop-off, not a linear ramp.
+
+     The CSS mask is a matching CURVED multi-stop fade — opacity
+     falls off slowly at first then quickly toward the inner
+     edge. Combined with the curve-drop background, the inner
+     edge of the strip dissolves naturally into bg color. */
+  .bv4-roof-ring-extra--left {
+    left: calc(var(--road-margin) + var(--road-w));
+    /* Layer order matches the cliff-face SVG (concrete back →
+       rings mid → curve drop top), reversed because CSS first-
+       listed = on top. So order from top to bottom:
+         (1) curve drop          — darkens everything beneath it
+                                    near the inner edge
+         (2) highlight           — top-edge sheen on the ring
+         (3) dark stripe         — the seam itself (slightly
+                                    darker than before for richer
+                                    contrast)
+         (4) drop shadow         — NEW subtle dark band BELOW the
+                                    ring, gives the seam a real
+                                    recessed-panel depth feel
+         (5) concrete            — constant #222a36 (matches the
+                                    cliff face's gradient TOP
+                                    stop), so the body strip's
+                                    ring sits on the SAME color
+                                    as the cliff face's first ring
+                                    — eliminates the tonal
+                                    mismatch that read as "weird
+                                    lighting" on the body ring.
+       Alphas + drop-shadow position match the cliff face's
+       SVG pattern verbatim (highlight 0.13, dark 0.52, drop
+       shadow 0.16 at fractions 0.1015..0.126 of the period). */
+    background:
+      /* (1) Curve drop on TOP — darkens rings + concrete near
+         the inner edge so the strip rolls out of view naturally. */
+      linear-gradient(to right,
+        rgba(6, 16, 26, 0)    0%,
+        rgba(6, 16, 26, 0.08) 40%,
+        rgba(6, 16, 26, 0.28) 65%,
+        rgba(6, 16, 26, 0.55) 85%,
+        rgba(6, 16, 26, 0.85) 100%
+      ),
+      /* (2) Highlight band */
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.0546),
+        transparent calc(var(--roof-ring-period, 80px) * 0.0546)
+      ),
+      /* (3) Dark stripe */
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.098),
+        transparent calc(var(--roof-ring-period, 80px) * 0.098)
+      ),
+      /* (4) Drop shadow below ring */
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.126),
+        transparent calc(var(--roof-ring-period, 80px) * 0.126)
+      ),
+      /* (5) Concrete — constant #222a36 (matches cliff face
+         gradient top stop) so the body ring sits on the same
+         color as the cliff face's first ring. */
+      linear-gradient(180deg, #222a36 0%, #222a36 100%);
+    /* Two masks intersected:
+         (1) Vertical fade at the strip's TOP — dissolves the
+             dark concrete rectangle into the cavity's white bg
+             above so there's no sharp horizontal edge visible
+             at the strip's top. Fade ends at 3% (just above
+             the ring at 3.5%) so the ring stays fully visible.
+         (2) Horizontal curved fade toward the inner edge
+             (existing) so the rings dissolve toward the cavity
+             centre. */
+    -webkit-mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+            mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+  }
+  .bv4-roof-ring-extra--right {
+    right: calc(var(--road-margin) + var(--road-w));
+    /* See .bv4-roof-ring-extra--left for the layer-order
+       rationale. Curve drop direction is `to left` here so the
+       inner edge (left side, toward cavity centre) darkens. */
+    background:
+      linear-gradient(to left,
+        rgba(6, 16, 26, 0)    0%,
+        rgba(6, 16, 26, 0.08) 40%,
+        rgba(6, 16, 26, 0.28) 65%,
+        rgba(6, 16, 26, 0.55) 85%,
+        rgba(6, 16, 26, 0.85) 100%
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.0546),
+        transparent calc(var(--roof-ring-period, 80px) * 0.0546)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.098),
+        transparent calc(var(--roof-ring-period, 80px) * 0.098)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.126),
+        transparent calc(var(--roof-ring-period, 80px) * 0.126)
+      ),
+      linear-gradient(180deg, #222a36 0%, #222a36 100%);
+    /* Vertical fade at top + horizontal fade toward the
+       inner edge — see --left for full rationale. */
+    -webkit-mask-image: linear-gradient(to left,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+            mask-image: linear-gradient(to left,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+  }
+
+  /* OUTER body roof-ring-extras — sit in the small --road-margin
+     gap on the OUTER side of each road column (between the page
+     wall and the column's outer cream lip). Width = --road-margin
+     so they fill the gap exactly. Bore-side is on the INSIDE of
+     each strip (toward the road column) and inner-edge is on the
+     OUTSIDE (toward the page wall) — masks + curve drops are
+     flipped to match. Same height + ring band style as the inner
+     extras so each tunnel reads as having a symmetric ring stack
+     on both sides like a real concrete tunnel ceiling. */
+  .bv4-roof-ring-extra--outer-left {
+    width: var(--road-margin);
+    left: 0;
+    /* Same 5-layer stack as the inner variants (curve drop top
+       → highlight → dark → drop shadow → constant concrete).
+       Curve drop direction is `to left` so the page-wall side
+       (left of this strip) darkens. */
+    background:
+      linear-gradient(to left,
+        rgba(6, 16, 26, 0)    0%,
+        rgba(6, 16, 26, 0.08) 40%,
+        rgba(6, 16, 26, 0.28) 65%,
+        rgba(6, 16, 26, 0.55) 85%,
+        rgba(6, 16, 26, 0.85) 100%
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.0546),
+        transparent calc(var(--roof-ring-period, 80px) * 0.0546)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.098),
+        transparent calc(var(--roof-ring-period, 80px) * 0.098)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.126),
+        transparent calc(var(--roof-ring-period, 80px) * 0.126)
+      ),
+      linear-gradient(180deg, #222a36 0%, #222a36 100%);
+    /* Vertical fade at top + horizontal fade toward page wall.
+       See --left for full rationale. */
+    -webkit-mask-image: linear-gradient(to left,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+            mask-image: linear-gradient(to left,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+  }
+  .bv4-roof-ring-extra--outer-right {
+    width: var(--road-margin);
+    right: 0;
+    /* Mirror of --outer-left: curve drop direction `to right`
+       so the page-wall side (right of this strip) darkens. */
+    background:
+      linear-gradient(to right,
+        rgba(6, 16, 26, 0)    0%,
+        rgba(6, 16, 26, 0.08) 40%,
+        rgba(6, 16, 26, 0.28) 65%,
+        rgba(6, 16, 26, 0.55) 85%,
+        rgba(6, 16, 26, 0.85) 100%
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(255, 255, 255, 0.13) calc(var(--roof-ring-period, 80px) * 0.0546),
+        transparent calc(var(--roof-ring-period, 80px) * 0.0546)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.035),
+        rgba(0, 0, 0, 0.52) calc(var(--roof-ring-period, 80px) * 0.098),
+        transparent calc(var(--roof-ring-period, 80px) * 0.098)
+      ),
+      linear-gradient(180deg,
+        transparent 0,
+        transparent calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.1015),
+        rgba(0, 0, 0, 0.16) calc(var(--roof-ring-period, 80px) * 0.126),
+        transparent calc(var(--roof-ring-period, 80px) * 0.126)
+      ),
+      linear-gradient(180deg, #222a36 0%, #222a36 100%);
+    /* Vertical fade at top + horizontal fade toward page wall.
+       See --left for full rationale. */
+    -webkit-mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+            mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, 1)    0%,
+      rgba(0, 0, 0, 0.97) 25%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.20) 87%,
+      rgba(0, 0, 0, 0)    100%);
+  }
+
+  /* Inner shoulder — cream border on the INSIDE perimeter of
+     the U-road (the cavity edge). Negative shift of 1.5px on
+     top/left/right (same trick as the outer shoulder) so the
+     3px border ends up CENTERED on the cavity edge — exactly
+     where the footer LEFT column's INNER leg (at viewBox x=100)
+     and the RIGHT column's INNER leg (at viewBox x=0) sit.
+     Width + opacity bumped to match the outer shoulder + the
+     footer arch lips so the whole outline reads as one
+     uniform cream line, not three different weights. */
+  .bv4-u-shoulder-inner {
+    /* Cream borders REMOVED — see .bv4-u-shoulder-outer note.
+       The unified outline path now draws the inner cream
+       perimeter too. */
+    display: none;
+  }
+
+  /* ─── Headline — sits INSIDE the U's top horizontal segment ──
+     Absolute-positioned over the ribbon area: top: 0 with height
+     matching --road-w, so the eyebrow / title / sub stack is
+     centred vertically inside the ribbon. Horizontal padding of
+     --curve-r on each side keeps the text out of the corner
+     curves where the road bends.                                   */
+  .bv4-head {
+    position: absolute;
+    top: 0;
+    /* Headline sits in the straight horizontal segment of the
+       U, AFTER the rounded corners. With the road column inset
+       by --road-margin, that segment now starts at
+       (--road-margin + --curve-r) from each edge. */
+    left:  calc(var(--road-margin) + var(--curve-r));
+    right: calc(var(--road-margin) + var(--curve-r));
+    height: var(--road-w);
+    /* z-index 200 sits ABOVE the road centerline overlay (100)
+       and the cars layer (also 100) so the eyebrow / title /
+       sub stack is never covered by passing dashes or car
+       sprites — the headline reads at the top of the stack. */
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(8px, 1vw, 16px) clamp(16px, 2vw, 32px);
+    text-align: center;
+    pointer-events: none; /* don't trap clicks meant for the page */
+  }
+  .bv4-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: clamp(0.6rem, 0.7vw, 0.72rem);
+    font-weight: 800;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #3AE86E;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.95),
+      0 0 14px rgba(45, 200, 86, 0.5);
+  }
+  /* Bracket marks flanking the eyebrow — small green stripes
+     that echo the road-shoulder language and make the eyebrow
+     read as a label panel rather than floating text. */
+  .bv4-eyebrow-mark {
+    display: inline-block;
+    width: 14px;
+    height: 2px;
+    border-radius: 2px;
+    background: #3AE86E;
+    box-shadow:
+      0 0 6px rgba(45, 200, 86, 0.95),
+      0 0 12px rgba(45, 200, 86, 0.4);
+  }
+  .bv4-title {
+    margin: 0 0 10px;
+    font-size: clamp(24px, 2.9vw, 36px);
+    font-weight: 900;
+    line-height: 1.06;
+    color: #fff;
+    text-wrap: balance;
+    letter-spacing: -0.012em;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 1),
+      0 2px 6px rgba(0, 0, 0, 0.85);
+  }
+  /* Brand-green hairline punctuating title → subtext. Visual
+     "rest" between the two beats of the headline. */
+  .bv4-title-rule {
+    display: block;
+    width: 48px;
+    height: 1px;
+    margin: 0 auto 10px;
+    background: #2DC856;
+    box-shadow: 0 0 8px rgba(45, 200, 86, 0.6);
+    border: 0;
+  }
+  .bv4-sub {
+    margin: 0 auto;
+    max-width: 660px;
+    font-size: clamp(13px, 1.05vw, 15px);
+    line-height: 1.5;
+    color: rgba(244, 242, 232, 0.82);
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.9),
+      0 2px 6px rgba(0, 0, 0, 0.7);
+  }
+
+  /* ─── Topic filter — editorial tab bar ───────────────────────
+     Replaces the previous pill-button row with a unified tab
+     strip: each tab is a flat label + dot + count, with an
+     animated category-colored underline as the active state.
+     Selected tab also gets a soft halo ring around its dot and
+     a tinted count to fully commit to the category color.       */
+  .bv4-filter-panel {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: 0 auto clamp(36px, 4vw, 56px);
+  }
+
+  /* Eyebrow above the tabs — small uppercase label flanked by
+     two short brand-green stripes, mirroring the .bv4-eyebrow
+     marks on the headline so the page's typographic rhythm
+     stays consistent across sections. */
+  .bv4-filter-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 clamp(14px, 1.6vw, 22px);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: rgba(26, 47, 58, 0.42);
+  }
+  .bv4-filter-label-mark {
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: rgba(26, 47, 58, 0.14);
+  }
+
+  .bv4-filters {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0;
+    /* Hairline rule under the whole tab row — gives the bar
+       structural ground that the active-tab underline can
+       visually rest on. */
+    border-bottom: 1px solid rgba(26, 47, 58, 0.10);
+  }
+  .bv4-chip {
+    /* Tab control: flat, no individual borders, no own shadow.
+       Visual state is driven entirely through color + an
+       animated bottom indicator. Sized so the full set fits
+       one row inside the U-road's content width at desktop —
+       padding + letter-spacing tuned together to keep the
+       five categories on a single horizontal rail. */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px clamp(8px, 0.9vw, 14px);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: rgba(26, 47, 58, 0.55);
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  /* Animated underline indicator. Rests on the parent's bottom
+     hairline at -1px so the rule and the indicator share a
+     baseline. Scales from 0 → full width when selected, takes
+     the chip's accent color (the category color the tab
+     filters into). On hover, a short neutral preview indicator
+     shows so users feel the tab is interactive. */
+  .bv4-chip::after {
+    content: '';
+    position: absolute;
+    left:  clamp(10px, 1.2vw, 18px);
+    right: clamp(10px, 1.2vw, 18px);
+    bottom: -1px;
+    height: 2px;
+    background: var(--chip-accent, #2DC856);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition:
+      transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.22s ease;
+  }
+  .bv4-chip:hover {
+    color: #1A2F3A;
+  }
+  .bv4-chip:hover::after {
+    transform: scaleX(0.45);
+    background: rgba(26, 47, 58, 0.32);
+  }
+  .bv4-chip:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--chip-accent, #2DC856) 55%, transparent);
+    outline-offset: -4px;
+  }
+  .bv4-chip[aria-selected="true"] {
+    color: #1A2F3A;
+  }
+  .bv4-chip[aria-selected="true"]::after,
+  .bv4-chip[aria-selected="true"]:hover::after {
+    transform: scaleX(1);
+    background: var(--chip-accent, #2DC856);
+  }
+
+  .bv4-chip-dot {
+    flex-shrink: 0;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--chip-accent, #2DC856);
+    box-shadow: 0 0 0 0 transparent;
+    transition: box-shadow 0.22s ease;
+  }
+  /* Conic gradient on the All-tab dot picks up every category
+     color in one rotation — reads as a category-rainbow
+     marker without resorting to a four-stripe linear bar. */
+  .bv4-chip-dot--all {
+    background: conic-gradient(
+      from 0deg,
+      #5BC8DC 0deg,
+      #E8C030 90deg,
+      #E07428 180deg,
+      #D82020 270deg,
+      #5BC8DC 360deg
+    );
+  }
+  /* Selected dot gets a soft halo ring in its own accent color
+     — a tiny premium signal that the dot is the "current"
+     marker without enlarging the dot itself. */
+  .bv4-chip[aria-selected="true"] .bv4-chip-dot {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--chip-accent, #2DC856) 18%, transparent);
+  }
+  .bv4-chip[data-bv4-filter="all"][aria-selected="true"] .bv4-chip-dot {
+    box-shadow: 0 0 0 4px rgba(26, 47, 58, 0.10);
+  }
+
+  .bv4-chip-count {
+    padding: 0;
+    background: transparent;
+    color: rgba(26, 47, 58, 0.38);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    /* Tabular numerals so counts align cleanly when tabs sit
+       side-by-side. */
+    font-feature-settings: 'tnum' 1;
+    transition: color 0.22s ease;
+  }
+  .bv4-chip[aria-selected="true"] .bv4-chip-count {
+    color: var(--chip-accent, #2DC856);
+  }
+  .bv4-chip[data-bv4-filter="all"][aria-selected="true"] .bv4-chip-count {
+    color: rgba(26, 47, 58, 0.68);
+  }
+
+  /* ─── Rhythm bands ────────────────────────────────────────── */
+  .bv4-band {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .bv4-band + .bv4-band { margin-top: clamp(36px, 4.5vw, 56px); }
+  .bv4-band[hidden] { display: none; }
+
+  /* Eyebrow label + flanking hairlines. Reads as a low-key
+     section divider rather than a heavy header. */
+  .bv4-band-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(14px, 1.6vw, 22px);
+  }
+  .bv4-band-rule {
+    flex: 1;
+    height: 1px;
+    background: rgba(26, 47, 58, 0.08);
+  }
+  .bv4-band-label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(26, 47, 58, 0.55);
+    flex-shrink: 0;
+  }
+
+  /* ─── 3-column card grid ──────────────────────────────────── */
+  .bv4-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.4vw, 30px);
+  }
+
+  .bv4-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Gradient border via padding-box / border-box trick.
+       Two backgrounds:
+         · padding-box: solid white (the card surface)
+         · border-box: vertical brand-green gradient (the border)
+       The transparent border lets the second gradient show
+       through only on the border area, producing a single 1px
+       hairline whose colour shifts top→bottom from full brand
+       green to a quieter teal-green. Reads as the kind of
+       precise outlined-but-not-loud edge modern editorial /
+       product cards use (Vercel, Linear, Stripe). */
+    background:
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(
+        180deg,
+        rgba(45, 200, 86, 0.85) 0%,
+        rgba(45, 200, 86, 0.32) 100%
+      ) border-box;
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #1A2F3A;
+    /* Honest depth shadow with a quiet green ambient layer at the
+       back. The green lives mainly on the border; the shadow's
+       green hint is just enough to feel branded without haloing. */
+    box-shadow:
+      0 1px 2px rgba(26, 47, 58, 0.05),
+      0 4px 10px -4px rgba(45, 200, 86, 0.06),
+      0 12px 24px -10px rgba(26, 47, 58, 0.10),
+      0 24px 48px -20px rgba(26, 47, 58, 0.14);
+    /* Subtle entrance fade — staggered via --card-delay set inline. */
+    opacity: 0;
+    transform: translateY(14px);
+    animation: bv4-card-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--card-delay, 0s);
+    transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  @keyframes bv4-card-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .bv4-card:hover {
+    /* Brighten the border gradient on hover — top edge goes
+       to nearly full brand green, bottom warms up too. */
+    background:
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(
+        180deg,
+        rgba(45, 200, 86, 0.95) 0%,
+        rgba(45, 200, 86, 0.45) 100%
+      ) border-box;
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 2px rgba(26, 47, 58, 0.06),
+      0 10px 20px -8px rgba(26, 47, 58, 0.10),
+      0 24px 48px -16px rgba(45, 200, 86, 0.18),
+      0 30px 60px -20px rgba(26, 47, 58, 0.18);
+  }
+  .bv4-card[hidden] { display: none; }
+
+  /* Card image — pale green-cream panel for the charger PNGs.
+     Quiet, single gradient. No pattern overlay — the surface
+     is meant to disappear so the product photo reads first. */
+  .bv4-card-img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(180deg, #f6faf7 0%, #ebf2ed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(45, 200, 86, 0.10);
+  }
+  .bv4-card-img img {
+    max-width: 76%;
+    max-height: 78%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none; pointer-events: none;
+    filter: drop-shadow(0 6px 16px rgba(26, 47, 58, 0.22));
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bv4-card:hover .bv4-card-img img { transform: scale(1.04); }
+  .bv4-card-noimg {
+    display: block;
+    width: 60%;
+    height: 60%;
+    background: repeating-linear-gradient(45deg,
+      rgba(26, 47, 58, 0.04) 0,
+      rgba(26, 47, 58, 0.04) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  /* Card body */
+  .bv4-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px 20px;
+  }
+  .bv4-card-cat {
+    width: max-content;
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    color: var(--accent, #2DC856);
+    background: color-mix(in srgb, var(--accent, #2DC856) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, #2DC856) 35%, transparent);
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .bv4-card-title {
+    margin: 0;
+    font-size: clamp(15px, 1.18vw, 18px);
+    font-weight: 800;
+    line-height: 1.28;
+    color: #1A2F3A;
+    /* 3-line clamp keeps cards visually aligned in the grid. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bv4-card:hover .bv4-card-title { color: #2DC856; }
+  .bv4-card-excerpt {
+    margin: 0;
+    font-size: clamp(12px, 0.85vw, 13.5px);
+    line-height: 1.5;
+    color: rgba(26, 47, 58, 0.62);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bv4-card-meta {
+    margin-top: auto;
+    padding-top: 8px;
+    /* Green-tinted divider so the meta row reads as part of the
+       branded frame rather than a stock card. */
+    border-top: 1px solid rgba(45, 200, 86, 0.14);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(26, 47, 58, 0.6);
+    text-transform: uppercase;
+  }
+  .bv4-card-meta-dot { color: rgba(26, 47, 58, 0.32); }
+
+  .bv4-empty {
+    position: relative;
+    z-index: 2;
+    margin: clamp(32px, 4vw, 48px) auto 0;
+    text-align: center;
+    color: rgba(26, 47, 58, 0.6);
+    font-size: 0.95rem;
+  }
+  .bv4-empty a {
+    color: #2DC856;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 1100px) {
+    .bv4-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .bv4-root {
+      --road-w: 110px;
+      --curve-r: 140px;
+      padding-left:  clamp(40px, 6vw, 64px);
+      padding-right: clamp(40px, 6vw, 64px);
+    }
+    .bv4-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  /* ─── UNIFIED ROAD-CENTERLINE OVERLAY ────────────────────────
+     Traces ONE path from inside the LEFT footer arch tunnel
+     (at the arch zenith) UP through the seam, around the U on
+     the page, back DOWN through the right seam, into the RIGHT
+     footer arch tunnel zenith. Animated as ONE SVG path so the
+     dashes mathematically cannot shift between page and footer
+     — there's only ONE element with ONE animation. */
+  (() => {
+    const overlay = document.getElementById('road-centerline-overlay') as SVGSVGElement | null;
+    const outlineOverlay = document.getElementById('road-outline-overlay') as SVGSVGElement | null;
+    const path = document.getElementById('road-centerline-path') as SVGPathElement | null;
+    const outlinePath = document.getElementById('road-outline-path') as SVGPathElement | null;
+    const capMortarPath = document.getElementById('road-outline-cap-mortar-path') as SVGPathElement | null;
+    const lanePathCw  = document.getElementById('road-lane-cw-path')  as SVGPathElement | null;
+    const lanePathCcw = document.getElementById('road-lane-ccw-path') as SVGPathElement | null;
+    const root = document.querySelector<HTMLElement>('.bv4-root');
+    const asphalt = document.querySelector<HTMLElement>('.bv4-u-asphalt');
+    const cavity = document.querySelector<HTMLElement>('.bv4-u-cavity');
+    const leftSide = document.querySelector<HTMLElement>('.ftrt-side--left');
+    if (!overlay || !path || !outlinePath || !lanePathCw || !lanePathCcw || !root || !asphalt || !cavity || !leftSide) return;
+
+    let anim: Animation | null = null;
+
+    function trace() {
+      if (!overlay || !path || !root || !asphalt || !cavity || !leftSide) return;
+      const rootRect = root.getBoundingClientRect();
+      const aRect = asphalt.getBoundingClientRect();
+      const cRect = cavity.getBoundingClientRect();
+      const lsRect = leftSide.getBoundingClientRect();
+      /* If the layout hasn't settled yet (one of these elements
+         is still 0-height during initial paint, before fonts /
+         images / async CSS finish), reschedule trace for the
+         next frame instead of bailing silently. Without this
+         retry the path stayed empty across the whole session
+         until something else triggered a resize event. */
+      if (!rootRect.height || !lsRect.height) {
+        requestAnimationFrame(trace);
+        return;
+      }
+
+      // The body has padding-left for the lefter-nav, which
+      // offsets .bv4-root from the viewport. Our absolute
+      // overlay is in the body's positioning context (no
+      // positioned ancestor), so its left:0 = viewport 0.
+      // Match the overlay to .bv4-root's bounds in document
+      // coordinates so the path coords align with the road.
+      const bodyPadLeft = parseFloat(getComputedStyle(document.body).paddingLeft) || 0;
+      const docLeft = rootRect.left - bodyPadLeft + bodyPadLeft;
+      // Top in document coords: rect.top + scrollY
+      const docTop  = rootRect.top + window.scrollY;
+      overlay.style.left  = `${docLeft}px`;
+      overlay.style.top   = `${docTop}px`;
+      overlay.style.width = `${rootRect.width}px`;
+
+      // ALL coordinates are document-absolute (page coord system).
+      // root spans from doc-y=0 to doc-y=root.height. Footer
+      // sits below root. We trace the centerline through both.
+
+      const W = rootRect.width;
+      const Hpage = rootRect.height;
+      const roadW = Math.max(0, cRect.left - aRect.left);
+      const curveR = parseFloat(getComputedStyle(asphalt).borderTopLeftRadius) || 0;
+      const r = Math.max(0, curveR - roadW / 2);
+      // The body's --road-margin insets the asphalt + cavity from
+      // the page edges by this much, opening up a small outer gap
+      // on each side for the body+footer outer roof-ring strips.
+      // Every path coord that USED to anchor at x=0 / x=W now
+      // anchors at x=margin / x=(W-margin) so the centerline
+      // dashes, cars, and cream outline all follow the new road
+      // position.
+      const margin = Math.max(0, aRect.left - rootRect.left);
+
+      // Footer column rendered height + arch zenith offset.
+      const footerH = lsRect.height;
+      // Arch geometry: A 50 21 0 1 0 100 1.5 with viewBox 100x100,
+      // stretched to (roadW × footerH). Zenith at viewBox y=22.5
+      // → y=22.5% of footer column height below the seam.
+      const zenithDepth = footerH * 0.225;
+
+      // Total overlay height = page + footer extension to zenith.
+      const totalH = Hpage + zenithDepth;
+      overlay.setAttribute('viewBox', `0 0 ${W} ${totalH}`);
+      overlay.style.height = `${totalH}px`;
+
+      // Mirror the centerline overlay's positioning onto the
+      // outline overlay so they share an exact coordinate system.
+      if (outlineOverlay) {
+        outlineOverlay.setAttribute('viewBox', `0 0 ${W} ${totalH}`);
+        outlineOverlay.style.left   = overlay.style.left;
+        outlineOverlay.style.top    = overlay.style.top;
+        outlineOverlay.style.width  = overlay.style.width;
+        outlineOverlay.style.height = `${totalH}px`;
+        // Mortar clip rect — covers exactly the road's top
+        // horizontal area so any perpendicular extent of the
+        // mortar stroke at cap-arch endpoints can't leak into
+        // the cavity below (y > roadW) or above the page top.
+        const clipRect = document.getElementById('bv4-cap-mortar-clip-rect');
+        if (clipRect) {
+          clipRect.setAttribute('width',  String(W));
+          clipRect.setAttribute('height', String(roadW));
+        }
+      }
+
+      // Path traces:
+      //   start at footer LEFT centerline at zenith depth (Hpage + zenithDepth)
+      //   up the LEFT footer column to the seam (y=Hpage)
+      //   up the LEFT page leg to the curve (y=curveR)
+      //   round the top-left corner
+      //   across the top
+      //   round the top-right corner
+      //   down the RIGHT page leg to the seam (y=Hpage)
+      //   down the RIGHT footer column to zenith depth
+      // Centerlines now sit at margin+roadW/2 (left leg) and
+      // W-margin-roadW/2 (right leg) since the asphalt is inset
+      // by `margin`. Top horizontal centerline y is unaffected
+      // (margin is horizontal-only).
+      const cx_left  = margin + roadW / 2;
+      const cx_right = W - margin - roadW / 2;
+      const cy_top   = roadW / 2;
+      const d = [
+        `M ${cx_left} ${Hpage + zenithDepth}`,
+        `L ${cx_left} ${curveR}`,
+        `A ${r} ${r} 0 0 1 ${margin + curveR} ${cy_top}`,
+        `L ${W - margin - curveR} ${cy_top}`,
+        `A ${r} ${r} 0 0 1 ${cx_right} ${curveR}`,
+        `L ${cx_right} ${Hpage + zenithDepth}`,
+      ].join(' ');
+      path.setAttribute('d', d);
+
+      /* ─── Unified road outline path ───────────────────────────
+         ONE closed loop tracing the entire cream perimeter:
+           outer top (with rounded page corners)
+           → outer right vertical
+           → RIGHT footer arch (outer leg → curve → inner leg)
+           → inner right vertical
+           → inner top corner (right)
+           → inner top horizontal
+           → inner top corner (left)
+           → inner left vertical
+           → LEFT footer arch (inner leg → curve → outer leg)
+           → outer left vertical → close.
+         All as ONE SVG stroke = identical color, weight, and
+         anti-aliasing through every connection point. */
+      const archRx = roadW / 2;
+      const archRy = zenithDepth;
+      // Inner corner radius — matches the page inner-shoulder's
+      // border-top-X-radius: calc(var(--curve-r) - var(--road-w) + 1.5px).
+      const innerCurveR = Math.max(0, curveR - roadW);
+
+      /* Headline-tunnel cap arch coordinates — these match the
+         existing tunnel SVG's cap shape (rx=10, ry=50 in a
+         100x100 viewBox stretched to tunnelWidth × roadW), but
+         expressed directly in document coords so the cap arches
+         can become subpaths of the unified outline. The caps
+         dip INTO the tunnel: LEFT cap bows rightward (sweep=1
+         going down), RIGHT cap bows leftward (sweep=0).
+         tunnelW now subtracts margin on each side too — the
+         tunnel's straight horizontal section starts at
+         margin+curveR and ends at (W-margin)-curveR. */
+      const tunnelW = Math.max(0, W - 2 * margin - 2 * curveR);
+      const capRx = 0.10 * tunnelW;     // cap depth into cavity
+      const capRy = 0.50 * roadW;       // half the road thickness
+      const capLeftX  = margin + curveR + capRx;       // shifted by margin
+      const capRightX = W - margin - curveR - capRx;   // shifted by margin
+      const d_outline = [
+        // Start at the top of the outer LEFT vertical, just past
+        // where the top-left page corner curve begins. Outer
+        // left edge is at x=margin (asphalt is inset).
+        `M ${margin} ${curveR}`,
+        // Top-left page corner (rounded). sweep=1 → arc passes
+        // through the page corner direction (NW of center) which
+        // is the OUTSIDE of the rounded box — matches CSS
+        // border-radius rendering.
+        `A ${curveR} ${curveR} 0 0 1 ${margin + curveR} 0`,
+        `L ${W - margin - curveR} 0`,
+        // Top-right page corner — same sweep=1 logic, mirrored.
+        `A ${curveR} ${curveR} 0 0 1 ${W - margin} ${curveR}`,
+        // Down the outer RIGHT vertical to the seam
+        `L ${W - margin} ${Hpage}`,
+        // RIGHT footer arch. The original footer path traverses
+        // LEFT-to-RIGHT with sweep=0 to dip DOWN. Our unified
+        // path is going RIGHT-to-LEFT here (W-margin → W-margin-roadW),
+        // which REVERSES the meaning of sweep — so we need
+        // sweep=1 for the same down-dipping arc shape.
+        `A ${archRx} ${archRy} 0 1 1 ${W - margin - roadW} ${Hpage}`,
+        // Up the inner RIGHT vertical to start of inner top-right corner
+        `L ${W - margin - roadW} ${roadW + innerCurveR}`,
+        // Inner top-right corner. The path is traveling LEFT
+        // around the cavity here, so the corner curves TOWARD
+        // the cavity's corner (NE of arc center) — that's the
+        // SHORT arc going CCW visually, which is sweep=0 in SVG
+        // (NOT sweep=1 like the outer corners). Outer corners
+        // round AWAY from their respective box's interior;
+        // inner corners round AWAY from the cavity's interior.
+        // The two situations need OPPOSITE sweep flags.
+        `A ${innerCurveR} ${innerCurveR} 0 0 0 ${W - margin - roadW - innerCurveR} ${roadW}`,
+        // Across the inner top horizontal
+        `L ${margin + roadW + innerCurveR} ${roadW}`,
+        // Inner top-left corner — same sweep=0 logic, mirrored.
+        `A ${innerCurveR} ${innerCurveR} 0 0 0 ${margin + roadW} ${roadW + innerCurveR}`,
+        // Down the inner LEFT vertical to the seam
+        `L ${margin + roadW} ${Hpage}`,
+        // LEFT footer arch — same direction-reversal as RIGHT:
+        // path traverses RIGHT-to-LEFT (margin+roadW → margin),
+        // so sweep=1 gives the down-dipping arc.
+        `A ${archRx} ${archRy} 0 1 1 ${margin} ${Hpage}`,
+        // Up the outer LEFT vertical, closing the loop
+        `L ${margin} ${curveR}`,
+        'Z',
+        /* Headline-tunnel cap arches added as separate
+           subpaths (each "M ... A ..." starts a new subpath).
+           Drawn by the same single stroke as the rest of the
+           outline → identical color, weight, anti-aliasing
+           where the caps meet the outer top edge (y=0) and the
+           inner top horizontal (y=roadW). No more cross-SVG
+           rendering discrepancy at those connection points. */
+        `M ${capLeftX} 0`,
+        `A ${capRx} ${capRy} 0 0 1 ${capLeftX} ${roadW}`,
+        `M ${capRightX} 0`,
+        `A ${capRx} ${capRy} 0 0 0 ${capRightX} ${roadW}`,
+      ].join(' ');
+      outlinePath.setAttribute('d', d_outline);
+
+      /* Cap-arch-only path — used by the dark mortar shadow
+         stroke that sits BEHIND the cream cap arches. Drawn as
+         a wider stroke so its visible halo on either side of
+         the cream cap arch fills the previously-empty gap
+         between cream and shadow that the user flagged. */
+      const d_cap_mortar = [
+        `M ${capLeftX} 0`,
+        `A ${capRx} ${capRy} 0 0 1 ${capLeftX} ${roadW}`,
+        `M ${capRightX} 0`,
+        `A ${capRx} ${capRy} 0 0 0 ${capRightX} ${roadW}`,
+      ].join(' ');
+      capMortarPath?.setAttribute('d', d_cap_mortar);
+
+      // Lane offset: how far each lane sits from the centerline.
+      // 1/4 of the road width keeps each lane comfortably
+      // within the asphalt with breathing room from the cream
+      // shoulders + the dashes.
+      const laneOff = roadW / 4;
+
+      // CLOCKWISE lane (right-hand traffic, INSIDE the U toward
+      // the cavity): up LEFT leg on the cavity side of the
+      // dashes, east across the top on the cavity side, down
+      // the RIGHT leg on the cavity side. Inner-corner radii
+      // are smaller (r - laneOff) since the lane hugs the
+      // inside curves.
+      const r_cw = Math.max(0, r - laneOff);
+      // Corner endpoints for the CW lane shift by margin (same
+      // reasoning as the centerline path). cx_left/cx_right
+      // already include the margin.
+      const d_cw = [
+        `M ${cx_left + laneOff} ${Hpage + zenithDepth}`,
+        `L ${cx_left + laneOff} ${curveR}`,
+        `A ${r_cw} ${r_cw} 0 0 1 ${margin + curveR} ${cy_top + laneOff}`,
+        `L ${W - margin - curveR} ${cy_top + laneOff}`,
+        `A ${r_cw} ${r_cw} 0 0 1 ${cx_right - laneOff} ${curveR}`,
+        `L ${cx_right - laneOff} ${Hpage + zenithDepth}`,
+      ].join(' ');
+      lanePathCw.setAttribute('d', d_cw);
+
+      // COUNTER-CLOCKWISE lane (right-hand traffic, OUTSIDE the
+      // U toward the page edges): up RIGHT leg on the page-edge
+      // side of the dashes, west across the top on the
+      // page-edge side, down the LEFT leg on the page-edge
+      // side. Outer-corner radii are larger (r + laneOff)
+      // since the lane hugs the outside curves. sweep-flag = 0
+      // because we're now traversing the U the OTHER way.
+      const r_ccw = r + laneOff;
+      const d_ccw = [
+        `M ${cx_right + laneOff} ${Hpage + zenithDepth}`,
+        `L ${cx_right + laneOff} ${curveR}`,
+        `A ${r_ccw} ${r_ccw} 0 0 0 ${W - margin - curveR} ${cy_top - laneOff}`,
+        `L ${margin + curveR} ${cy_top - laneOff}`,
+        `A ${r_ccw} ${r_ccw} 0 0 0 ${cx_left - laneOff} ${curveR}`,
+        `L ${cx_left - laneOff} ${Hpage + zenithDepth}`,
+      ].join(' ');
+      lanePathCcw.setAttribute('d', d_ccw);
+
+      // Hook up ONE animation for the centerline dashes.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      anim?.cancel();
+      if (!reduced) {
+        anim = path.animate(
+          [{ strokeDashoffset: '0px' }, { strokeDashoffset: '-50px' }],
+          { duration: 2000, iterations: Infinity, easing: 'linear' }
+        );
+        anim.startTime = document.timeline.currentTime as number;
+      } else {
+        path.style.strokeDashoffset = '0px';
+      }
+    }
+
+    // Hide the footer's per-side dash <line>s — the unified
+    // overlay handles the centerline.
+    const killCss = document.createElement('style');
+    killCss.textContent = `.ftrt-dash { stroke: transparent !important; animation: none !important; }`;
+    document.head.appendChild(killCss);
+
+    requestAnimationFrame(() => requestAnimationFrame(trace));
+    window.addEventListener('resize', () => requestAnimationFrame(trace));
+    /* Re-trace after the page has fully loaded (fonts, images,
+       any late-arriving content that shifts the footer's
+       height). Without this, the path was being computed
+       against a STALE footerH measurement on first render —
+       leaving the dashes' terminus far below the actual arch
+       zenith because the overlay's totalH was locked to the
+       initial (wrong) layout. */
+    window.addEventListener('load', () => requestAnimationFrame(trace));
+    /* And whenever the footer itself reflows (responsive
+       breakpoint, image lazy-load, etc.), re-fire trace so the
+       dashes terminate at the new arch zenith. The overlay's
+       totalH = Hpage + 0.225*footerH is recomputed from the
+       fresh measurement. */
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => requestAnimationFrame(trace));
+      ro.observe(leftSide);
+      ro.observe(root);
+    }
+
+    /* Cars are HTML divs animated via CSS `offset-path` — the
+       browser drives the motion natively (GPU-composited, no
+       JS per-frame work). To make this happen we just need to
+       (a) position the cars container to match the overlay's
+       coordinate frame, (b) set each car's offset-path to its
+       lane's `d` string, and (c) set animation-delay so each
+       car's phase offset is preserved. After this, JS does
+       NOTHING per frame — the browser ticks the animation.
+
+       This was the fix that finally made Safari smooth: SVG
+       <use> elements with per-frame transform updates fall
+       back to CPU-rasterisation in WebKit; HTML divs with
+       offset-path stay on the GPU compositor. */
+    const carContainer = document.getElementById('bv4-cars-container');
+    const carEls = Array.from(document.querySelectorAll<HTMLElement>('#bv4-cars-container .bv4-car'));
+    const DURATION_S = 30;
+
+    function refreshCars() {
+      if (!lanePathCw || !lanePathCcw || !carContainer || !overlay) return;
+      const dCw  = lanePathCw.getAttribute('d');
+      const dCcw = lanePathCcw.getAttribute('d');
+      if (!dCw || !dCcw) return;
+
+      // Position the cars container to match the overlay's box
+      // (left + top + width + height — they'll share the same
+      // coordinate origin so the path strings line up exactly
+      // with where the centerline dashes are drawn).
+      carContainer.style.left   = overlay.style.left   || '0';
+      carContainer.style.top    = overlay.style.top    || '0';
+      carContainer.style.width  = overlay.style.width  || '100%';
+      carContainer.style.height = overlay.style.height || '100%';
+
+      // Set the tunnel-mouth fade as CSS vars (computed from
+      // the same Hpage / totalH the SVG mask uses).
+      const seamFrac = (parseFloat(overlay.style.height || '0')
+                          ? (parseFloat(overlay.style.height || '0') - parseFloat(carContainer.style.height || '0') * 0)
+                          : 0);
+      // Simpler: compute seam fraction from page height vs total.
+      const totalH = parseFloat(overlay.style.height || '0') || 1;
+      const Hpage  = totalH - (totalH * 0.225 / 1.225); // from zenithDepth = footerH * 0.225 derivation
+      // Actual seam fraction along the container:
+      // Hpage / totalH for an overlay whose path goes
+      // [0, totalH] in y. 95% is a safe default.
+      // (This is just the mask cutoff — exact value isn't
+      // critical, the visual fade-in/out reads fine over a
+      // few percent of the page height.)
+      carContainer.style.setProperty('--bv4-cars-fade-start', '95%');
+      carContainer.style.setProperty('--bv4-cars-fade-end',   '100%');
+
+      // Set offset-path on each car based on its lane, and
+      // animation-delay based on phase so cars stay locked in
+      // the spaced-out positions they start at.
+      for (const car of carEls) {
+        const lane = car.getAttribute('data-lane');
+        const phase = parseFloat(car.getAttribute('data-phase') || '0');
+        const d = lane === 'ccw' ? dCcw : dCw;
+        car.style.offsetPath = `path('${d}')`;
+        // Some Safari versions only respond to the un-prefixed
+        // form once the property is set. Setting webkit too is
+        // belt-and-braces.
+        (car.style as any).webkitOffsetPath = `path('${d}')`;
+        car.style.animationDelay = `${-phase * DURATION_S}s`;
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(() => requestAnimationFrame(refreshCars));
+    });
+    window.addEventListener('load', () => requestAnimationFrame(refreshCars));
+    if (typeof ResizeObserver !== 'undefined') {
+      const roCars = new ResizeObserver(() => requestAnimationFrame(refreshCars));
+      roCars.observe(leftSide);
+      roCars.observe(root);
+    }
+    requestAnimationFrame(() => requestAnimationFrame(refreshCars));
+  })();
+
+  /* ─── Filter chips ───────────────────────────────────────────
+     Toggle [hidden] on cards based on the clicked chip's
+     data-bv4-filter. Lightweight — no animation orchestration
+     beyond the per-card entrance fade, since the cards are
+     self-contained and don't need to reflow into a different
+     layout shape. */
+  (() => {
+    const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-bv4-filter]'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.bv4-card'));
+    const bands = Array.from(document.querySelectorAll<HTMLElement>('.bv4-band'));
+    const empty = document.getElementById('bv4-empty');
+    if (chips.length === 0 || cards.length === 0) return;
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const filter = chip.getAttribute('data-bv4-filter') ?? 'all';
+        chips.forEach((c) => c.setAttribute('aria-selected', c === chip ? 'true' : 'false'));
+
+        let visible = 0;
+        cards.forEach((card) => {
+          const cat = card.getAttribute('data-category') ?? '';
+          const show = filter === 'all' || cat === filter;
+          card.toggleAttribute('hidden', !show);
+          if (show) visible += 1;
+        });
+        /* Hide a whole band if every card inside it was filtered
+           out — keeps the section dividers honest. */
+        bands.forEach((band) => {
+          const anyVisible = band.querySelector('.bv4-card:not([hidden])');
+          band.toggleAttribute('hidden', !anyVisible);
+        });
+        if (empty) empty.toggleAttribute('hidden', visible !== 0);
+      });
+    });
+  })();
+</script>

@@ -2,26 +2,39 @@
 /**
  * Dev Mode toggle — floating Apple-Glass pill in the bottom-right.
  * ──────────────────────────────────────────────────────────────
- * Flips `body.dev-mode-off` on/off. When OFF (the default), the
- * dev-only nav items — AI BS, Testing, Other — collapse out of
- * the battery navbar via smooth width/opacity animations driven
- * by CSS transitions in Header.astro. When ON, those slots
- * animate back in and the battery extends in length.
+ * The toggle's job changes based on what shell the page is using
+ * AND, on HeaderV4 pages, whether the full-screen menu is open.
  *
- * Persistence: the ON/OFF choice is stored under
- * `evium-dev-mode` in localStorage, so dev-mode state survives
- * page navigations and refreshes.
+ *   1. OG header pages (Header.astro / no `.has-lefter-nav` on
+ *      <body>):
+ *      Toggle adds / removes `body.dev-mode-off`. The OG header's
+ *      own CSS hides `.is-dev-only` nav items in the OFF state,
+ *      so this is the "show / hide dev-only nav slots" switch.
+ *      Persisted under `evium-dev-mode` (existing key).
+ *
+ *   2. HeaderV4 pages, menu CLOSED:
+ *      Toggle swaps `body[data-lefter-style]` between `"dark"`
+ *      (default — solid #0a1218 rail) and `"light"` (transparent
+ *      shell that lets the page bg show through). Sitewide; the
+ *      old behaviour where this only worked on /blog-v4 has been
+ *      retired in favour of the attribute-driven swap.
+ *      Persisted under `evium-lefter-style`.
+ *
+ *   3. HeaderV4 pages, menu OPEN (`body.lv4-menu-open`):
+ *      Toggle swaps `body[data-menu-variant]` between `"cards"`
+ *      (the existing "Where to?" tile grid) and `"list"` (the
+ *      Skilken-inspired simplified list menu). The lefter style
+ *      is NOT touched in this mode.
+ *      Persisted under `evium-menu-variant`.
+ *
+ * Mode detection runs on every click + every body-class mutation
+ * (so the label updates in real time when the user opens / closes
+ * the menu). A MutationObserver on <body class> handles that.
  *
  * Visibility: the "Toggle the toggle" item in the AI BS nav
- * dropdown hides THIS pill. That key persists separately under
- * `ev-devswitch-hidden`. Hidden means you can't toggle dev-mode
- * from the UI until you click "Toggle the toggle" again.
- *
- * Historical note: this component used to switch a dark/light
- * navbar theme (stored under `evium-theme`). The navbar's colors
- * are now locked to the light-nav palette in global.css. The
- * localStorage key `evium-theme` is no longer read, and the
- * `data-theme` attribute on <html> is no longer set by this file.
+ * dropdown still hides this pill via `ev-devswitch-hidden` — same
+ * key as before. That's a separate concern from any of the 3
+ * functional modes.
  */
 ---
 
@@ -97,11 +110,17 @@
     letter-spacing: 0.12em;
     color: rgba(255, 255, 255, 0.70);
     transition: color 0.2s;
-    min-width: 70px;
+    /* Wider min-width than before so the longer contextual
+       labels ("MENU: CARDS", "RAIL: LIGHT") don't reflow the
+       pill as the user navigates between modes. */
+    min-width: 84px;
     white-space: nowrap;
   }
 
-  /* Dev-mode-on state — thumb slides right, track + label brand-green. */
+  /* "Alternate state" of whichever mode is active — thumb slides
+     right, track + label go brand-green. The same .is-dev-on
+     class drives this regardless of mode (OG dev-on / lefter-
+     light / menu-list) so the visual stays consistent. */
   #dev-toggle.is-dev-on .track {
     background: rgba(45, 200, 86, 0.28);
     border-color: rgba(45, 200, 86, 0.5);
@@ -120,58 +139,184 @@
   const label  = document.getElementById('dev-toggle-label')!;
   const body   = document.body;
 
-  /* Visibility of the pill itself — driven by the AI BS nav's
-     "Toggle the toggle" item. If the `ev-devswitch-hidden` key is
-     set to '1', this pill stays hidden across page navigations
-     until the user explicitly toggles it back on. */
-  try {
-    if (localStorage.getItem('ev-devswitch-hidden') === '1') {
+  /* ─── Pill visibility ─────────────────────────────────────
+     Driven by the HeaderV4 lefter's "Site v3" button. Default
+     for fresh sessions is HIDDEN — the pill only appears once
+     the user explicitly clicks the Site v3 button to reveal
+     it, then stays revealed across navigation until they
+     click again to hide.
+
+     localStorage `ev-devswitch-hidden`:
+       not-set OR '1' → hidden (DEFAULT)
+       '0'            → visible
+
+     The base intended modes (rail: dark, menu: list) are
+     already the defaults read further down, so a fresh
+     visitor lands on dark rail + list menu with the dev
+     pill out of sight.
+
+     SAFETY OVERRIDE: if the Site v3 button is currently
+     disabled (`[data-prndl-disabled]`), the pill is FORCE-
+     HIDDEN regardless of any prior localStorage state, so
+     a returning visitor who previously revealed the pill
+     doesn't see it during the deploy lockdown. */
+  const devswitchDisabled = !!document.querySelector('[data-prndl-devswitch][data-prndl-disabled]');
+  if (devswitchDisabled) {
+    toggle.style.display = 'none';
+    toggle.setAttribute('data-hidden', 'true');
+  } else {
+    try {
+      if (localStorage.getItem('ev-devswitch-hidden') !== '0') {
+        toggle.style.display = 'none';
+        toggle.setAttribute('data-hidden', 'true');
+      }
+    } catch {
       toggle.style.display = 'none';
       toggle.setAttribute('data-hidden', 'true');
     }
-  } catch {}
-
-  /* ─── Dev-mode on/off ──────────────────────────────────
-     Persisted under `evium-dev-mode`. Anything other than the
-     literal string 'off' is treated as ON, so a fresh visitor
-     (no key in localStorage) sees the full nav including
-     Site v2. The pill below the rail still flips to OFF on
-     demand and that choice persists.
-  */
-  function applyDevMode(mode: 'on' | 'off') {
-    if (mode === 'on') {
-      body.classList.remove('dev-mode-off');
-      toggle.classList.add('is-dev-on');
-      label.textContent = 'DEV MODE ON';
-    } else {
-      body.classList.add('dev-mode-off');
-      toggle.classList.remove('is-dev-on');
-      label.textContent = 'DEV MODE OFF';
-    }
-    try { localStorage.setItem('evium-dev-mode', mode); } catch {}
   }
 
-  /* Initial apply. Default is ON now — Site v2 + the active
-     iteration surfaces (Blog, Testing, Other) all live behind
-     the dev-mode flag, and a fresh visitor with no key in
-     localStorage was previously stuck on the public-only menu
-     with no way to discover them. Switching the default makes
-     them visible by default; an explicit OFF still persists. */
-  let saved: string | null = null;
-  try { saved = localStorage.getItem('evium-dev-mode'); } catch {}
-  applyDevMode(saved === 'off' ? 'off' : 'on');
+  /* ─── Mode detection ───────────────────────────────────────
+     Reads the body class state and decides which of the 3 modes
+     the toggle is currently controlling:
+       'og'     — page using the OG header (no .has-lefter-nav)
+       'menu'   — HeaderV4 page WITH the full-screen menu open
+       'lefter' — HeaderV4 page WITHOUT the menu open
+  */
+  type Mode = 'og' | 'lefter' | 'menu';
+  function getMode(): Mode {
+    if (!body.classList.contains('has-lefter-nav')) return 'og';
+    if (body.classList.contains('lv4-menu-open'))   return 'menu';
+    return 'lefter';
+  }
 
-  toggle.addEventListener('click', () => {
-    const current = body.classList.contains('dev-mode-off') ? 'off' : 'on';
-    applyDevMode(current === 'off' ? 'on' : 'off');
-  });
+  /* ─── Initial state from localStorage ─────────────────────
+     All three keys are read on every load so a value set on one
+     page persists to the next. Defaults are baked in:
+       evium-dev-mode      → 'on'    (so dev surfaces stay visible
+                                       for fresh visitors)
+       evium-lefter-style  → 'dark'  (the original solid rail)
+       evium-menu-variant  → 'cards' (the existing Where to? grid)
+  */
+  function readDevMode(): 'on' | 'off' {
+    try { return localStorage.getItem('evium-dev-mode') === 'off' ? 'off' : 'on'; }
+    catch { return 'on'; }
+  }
+  function readLefterStyle(): 'dark' | 'light' {
+    try { return localStorage.getItem('evium-lefter-style') === 'light' ? 'light' : 'dark'; }
+    catch { return 'dark'; }
+  }
+  function readMenuVariant(): 'cards' | 'list' {
+    /* Default is 'list' — the simpler Skilken-inspired primary
+       nav. The 'cards' Where-to? grid is opt-in via the dev
+       toggle. New users (no localStorage entry) and any read
+       failure fall back to 'list'. Returning the legacy
+       'cards' default would surprise users who haven't
+       interacted with the dev toggle. */
+    try { return localStorage.getItem('evium-menu-variant') === 'cards' ? 'cards' : 'list'; }
+    catch { return 'list'; }
+  }
 
+  function applyAllPersistedState() {
+    /* Dev-mode-off body class — drives the OG header's
+       .is-dev-only hiding. Re-applied on every load even on
+       HeaderV4 pages so the OG header behaves correctly the
+       moment the user navigates back to one. */
+    if (readDevMode() === 'off') body.classList.add('dev-mode-off');
+    else                          body.classList.remove('dev-mode-off');
+
+    /* Lefter style — only affects HeaderV4 pages, but we set
+       the attribute unconditionally so it's already correct if
+       the user navigates from an OG page to a HeaderV4 one. */
+    body.dataset.lefterStyle = readLefterStyle();
+
+    /* Menu variant — same logic. The attribute is consulted by
+       the .lv4-menu-list / .lv4-menu-inner CSS in HeaderV4. */
+    body.dataset.menuVariant = readMenuVariant();
+  }
+
+  /* ─── Label + thumb update for the active mode ─────────────
+     Recomputed on every click AND on every body-class mutation
+     (so opening / closing the menu instantly relabels the pill). */
+  function updateUiForMode() {
+    const mode = getMode();
+
+    if (mode === 'og') {
+      const on = !body.classList.contains('dev-mode-off');
+      label.textContent = on ? 'DEV MODE ON' : 'DEV MODE OFF';
+      toggle.classList.toggle('is-dev-on', on);
+      toggle.setAttribute('aria-label',
+        `Toggle dev mode (currently ${on ? 'on' : 'off'})`);
+    } else if (mode === 'lefter') {
+      const light = body.dataset.lefterStyle === 'light';
+      label.textContent = light ? 'RAIL: LIGHT' : 'RAIL: DARK';
+      toggle.classList.toggle('is-dev-on', light);
+      toggle.setAttribute('aria-label',
+        `Switch lefter rail style (currently ${light ? 'light' : 'dark'})`);
+    } else {
+      const list = body.dataset.menuVariant === 'list';
+      label.textContent = list ? 'MENU: LIST' : 'MENU: CARDS';
+      toggle.classList.toggle('is-dev-on', list);
+      toggle.setAttribute('aria-label',
+        `Switch menu variant (currently ${list ? 'list' : 'cards'})`);
+    }
+  }
+
+  /* ─── Click handler — flips the active mode's binary state ── */
+  function handleToggle() {
+    const mode = getMode();
+
+    if (mode === 'og') {
+      const on = !body.classList.contains('dev-mode-off');
+      const next = on ? 'off' : 'on';
+      if (next === 'off') body.classList.add('dev-mode-off');
+      else                body.classList.remove('dev-mode-off');
+      try { localStorage.setItem('evium-dev-mode', next); } catch {}
+    } else if (mode === 'lefter') {
+      const next = body.dataset.lefterStyle === 'light' ? 'dark' : 'light';
+      body.dataset.lefterStyle = next;
+      try { localStorage.setItem('evium-lefter-style', next); } catch {}
+    } else {
+      const next = body.dataset.menuVariant === 'list' ? 'cards' : 'list';
+      body.dataset.menuVariant = next;
+      try { localStorage.setItem('evium-menu-variant', next); } catch {}
+    }
+
+    updateUiForMode();
+  }
+
+  /* ─── Live mode watcher ─────────────────────────────────────
+     The toggle's mode depends on body classes (.has-lefter-nav
+     for "is HeaderV4 page" and .lv4-menu-open for "menu open").
+     Both can change at runtime — has-lefter-nav doesn't but
+     lv4-menu-open is added / removed every time the user opens
+     or closes the menu. A MutationObserver keeps the pill's
+     label and thumb position in sync without HeaderV4 needing
+     to know anything about the toggle. */
+  const modeObserver = new MutationObserver(updateUiForMode);
+  modeObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
+
+  /* ─── One-time cleanup of stale premium-override keys ──────
+     The premium-override experiment was reverted; if a returning
+     visitor still has the body class or the localStorage keys
+     from a previous session, drop them so they don't carry over.
+     Safe to delete this block once the relevant prod sessions
+     have all expired. */
+  body.classList.remove('lefter-premium');
+  try {
+    localStorage.removeItem('evium-lefter-premium');
+    localStorage.removeItem('evium-lefter-premium-stash');
+  } catch {}
+
+  /* ─── Initialise ───────────────────────────────────────── */
+  applyAllPersistedState();
+  updateUiForMode();
+
+  toggle.addEventListener('click', handleToggle);
   toggle.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      toggle.click();
+      handleToggle();
     }
   });
 </script>
-</content>
-</invoke>

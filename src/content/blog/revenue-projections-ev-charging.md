@@ -2,9 +2,10 @@
 title: "What Does an EV Charger Actually Earn? Revenue Projections Explained"
 category: "cost-demand"
 categoryLabel: "Cost & Demand"
-date: "2026-02-05"
+date: "2025-03-11"
 excerpt: "Revenue projections for EV chargers range from $900 to $2,100 per month per unit — but utilization is what determines where you land."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging4.png"
 ---
 
 # What Does an EV Charger Actually Earn? Revenue Projections Explained

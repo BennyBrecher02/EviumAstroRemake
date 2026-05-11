@@ -21,6 +21,7 @@
  */
 import Layout from '../../layouts/Layout.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
+import ConsultationStickyTab from '../../components/ConsultationStickyTab.astro';
 
 /**
  * Customer testimonials — shorter excerpts from Evium's real reviewed
@@ -102,7 +103,7 @@ const routeCards = [
 ];
 ---
 
-<Layout title="Contact — Evium Charging">
+<Layout title="Contact — Evium Charging" headerVariant="v4" bodyClass="page-contact">
   <section class="c-hero" aria-label="Contact — hero">
     <div class="c-hero-inner">
       <nav class="c-crumb" aria-label="Breadcrumb">
@@ -110,7 +111,7 @@ const routeCards = [
         <span class="c-crumb-sep" aria-hidden="true">»</span>
         <span class="c-crumb-current">Contact</span>
       </nav>
-      <h1 class="c-hero-title">Contact</h1>
+      <h1 class="c-hero-title">Contact us</h1>
       <p class="c-hero-sub">Send your message to our specialists — we read every one and reply within one business day.</p>
     </div>
     <div class="c-hero-accent" aria-hidden="true"></div>
@@ -335,17 +336,27 @@ const routeCards = [
   </section>
 
   <SiteFooter />
+
+  <!-- Right-edge sticky consultation CTA. `alwaysVisible`
+       so the tab is present from page load on /contact —
+       keeps the consultation form one click away even on
+       the contact page where the visitor is already in a
+       conversion mindset. -->
+  <ConsultationStickyTab alwaysVisible />
 </Layout>
 
 <style>
   /* ─── Hero ─────────────────────────────────────────── */
+  /* Padding reduced from 120-180 / 60-110 → 72-130 / 56-100 since the
+     lefter rail replaces the production top header — no need for the
+     extra top buffer. */
   .c-hero {
     position: relative;
     background:
       linear-gradient(180deg, #0b161d 0%, #0d1a22 55%, #0e1e28 100%);
     color: #fff;
     font-family: 'Maven Pro', sans-serif;
-    padding: clamp(120px, 16vh, 180px) clamp(24px, 5vw, 80px) clamp(60px, 8vh, 110px);
+    padding: clamp(72px, 11vh, 130px) clamp(24px, 5vw, 80px) clamp(56px, 7vh, 100px);
     overflow: hidden;
     isolation: isolate;
   }
@@ -355,12 +366,16 @@ const routeCards = [
     max-width: 1280px;
     margin: 0 auto;
   }
+  /* Right accent — softer than before. Old gradient peaked at 0.28
+     alpha which read a touch heavy; new peak at 0.20 with the
+     midpoint pulled later (0.40 → 0.55) gives a longer, gentler
+     fall-off across the wedge. */
   .c-hero-accent {
     position: absolute;
     top: 0; right: 0; bottom: 0;
     width: clamp(280px, 36vw, 520px);
     background:
-      linear-gradient(115deg, rgba(45, 200, 86, 0) 0%, rgba(45, 200, 86, 0.14) 40%, rgba(45, 200, 86, 0.28) 100%);
+      linear-gradient(115deg, rgba(45, 200, 86, 0) 0%, rgba(45, 200, 86, 0.10) 55%, rgba(45, 200, 86, 0.20) 100%);
     clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%);
     z-index: 0;
     pointer-events: none;
@@ -368,11 +383,12 @@ const routeCards = [
   .c-crumb {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.82rem;
+    gap: 10px;
+    font-size: 0.86rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.72);
-    margin-bottom: clamp(18px, 2vw, 28px);
+    letter-spacing: 0.005em;
+    color: rgba(255, 255, 255, 0.74);
+    margin-bottom: clamp(22px, 2.6vw, 36px);
   }
   .c-crumb-link {
     color: #2DC856;
@@ -380,22 +396,29 @@ const routeCards = [
     transition: color 0.18s ease;
   }
   .c-crumb-link:hover { color: #36e464; }
-  .c-crumb-sep { color: rgba(255, 255, 255, 0.45); }
-  .c-crumb-current { color: rgba(255, 255, 255, 0.6); }
+  .c-crumb-sep { color: rgba(255, 255, 255, 0.38); }
+  .c-crumb-current { color: rgba(255, 255, 255, 0.62); }
+  /* Title scaled up (3-5rem → 3.5-6.5rem) to claim the now-available
+     vertical space. Tracking pulled tighter (-0.03 → -0.035) for
+     a more confident, premium-feel display set. */
   .c-hero-title {
-    margin: 0 0 14px;
-    font-size: clamp(3rem, 6vw, 5rem);
+    margin: 0 0 18px;
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
     font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
   }
+  /* Subtitle bumped (1-1.15rem → 1.08-1.3rem) to balance the larger
+     headline. Line-height nudged 1.55 → 1.6 for breathing room.
+     Brightness lifted 0.74 → 0.82 so it sits more confidently next
+     to the heavier title. */
   .c-hero-sub {
     margin: 0;
-    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    font-size: clamp(1.08rem, 1.3vw, 1.3rem);
     font-weight: 500;
-    line-height: 1.55;
-    color: rgba(255, 255, 255, 0.74);
-    max-width: 56ch;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 54ch;
   }
 
   /* ─── Body: form + rail ──────────────────────────────── */

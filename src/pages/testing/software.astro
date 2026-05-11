@@ -117,12 +117,13 @@ const features = [
       <a class="sw-side sw-side--google" href={GOOGLE_URL} aria-label="Get it on Google Play">
         <div class="sw-side-inner">
           <svg class="sw-platform-icon" viewBox="0 0 24 24" aria-hidden="true"
-               fill="none" stroke="currentColor" stroke-width="1.2"
-               stroke-linejoin="round" stroke-linecap="round">
+               fill="currentColor">
             {/* Google Play — canonical simple-icons geometry, the 4
                 actual shards of the Google Play brand mark, rendered
-                as outlines. With `fill="none"` each shard's interior
-                becomes an empty triangular GAP bounded by stroke:
+                FILLED so the icon reads as the official Play Store
+                mark (not abstract outlines). The four path shapes
+                are drawn so their bezier edges leave natural micro-
+                gaps between shards — the trademark Play Store look:
                   · Shard 1 — right cap (folded tip)
                   · Shard 2 — left shard (big pointy-right triangle)
                   · Shard 3 — top shard (thin wedge along top edge)
@@ -139,8 +140,7 @@ const features = [
           <p class="sw-side-note">Requires Android 8 (Oreo) or later.</p>
           <div class="sw-badge">
             <svg class="sw-badge-icon" viewBox="0 0 24 24" aria-hidden="true"
-                 fill="none" stroke="currentColor" stroke-width="1.4"
-                 stroke-linejoin="round" stroke-linecap="round">
+                 fill="currentColor">
               <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z"/>
               <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z"/>
               <path d="M13.544 10.989l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z"/>

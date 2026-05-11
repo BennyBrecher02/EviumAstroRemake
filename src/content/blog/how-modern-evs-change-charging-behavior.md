@@ -2,9 +2,10 @@
 title: "How Modern EV Ranges Are Changing When and How Drivers Charge"
 category: "vehicle-efficiency"
 categoryLabel: "Vehicle Efficiency"
-date: "2026-03-05"
+date: "2025-09-09"
 excerpt: "As EV ranges extend past 250–300 miles, driver charging patterns are shifting in ways that have real implications for how you design and size your charging infrastructure."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging3.png"
 ---
 
 # How Modern EV Ranges Are Changing When and How Drivers Charge

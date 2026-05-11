@@ -2,9 +2,10 @@
 title: "EV Adoption Is Accelerating — What Property Owners Need to Know Now"
 category: "market-shifts"
 categoryLabel: "Market Shifts"
-date: "2026-01-10"
+date: "2024-08-12"
 excerpt: "EV ownership is no longer a niche trend — it's a mainstream shift that property owners need to be positioned for before their competitors are."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging2.png"
 ---
 
 # EV Adoption Is Accelerating — What Property Owners Need to Know Now

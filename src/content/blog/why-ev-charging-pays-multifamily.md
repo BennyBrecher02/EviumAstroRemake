@@ -2,9 +2,10 @@
 title: "Why EV Charging Pays for Itself in Multifamily Properties"
 category: "cost-demand"
 categoryLabel: "Cost & Demand"
-date: "2026-01-15"
+date: "2024-09-18"
 excerpt: "EV charging isn't just a perk — for multifamily owners, it's a zero-cost amenity that actively generates revenue and wins leases."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging5.png"
 ---
 
 # Why EV Charging Pays for Itself in Multifamily Properties

@@ -18,6 +18,15 @@ const presets = [
        HERO
   ═══════════════════════════════════════════════ -->
   <section class="relative overflow-hidden bg-evium-dark pt-32 pb-16">
+    <!-- AI-slop / under-construction warning ribbon — pinned top-right
+         of the hero so visitors immediately see this page is WIP. Same
+         ribbon used on commercial / retail / parking / medical /
+         electrician-partners / generate-profits hero sections. -->
+    <img
+      src="/images/logos/evium/under-construction-ai-slop-warning-ribbon.png"
+      alt="Under construction — work in progress"
+      class="pointer-events-none absolute right-0 top-12 z-30 w-64 lg:w-80"
+    />
     <!-- Background grid -->
     <div
       class="absolute inset-0 opacity-[0.04]"
@@ -181,7 +190,7 @@ const presets = [
               <p class="text-evium-green/70 text-xs font-bold tracking-widest uppercase mb-4">Step 2 · Financial Model</p>
               <div class="grid sm:grid-cols-2 gap-3">
                 <label class="model-option cursor-pointer block">
-                  <input type="radio" name="model" value="0.10" checked
+                  <input type="radio" name="model" value="0.60" checked
                          style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;" />
                   <div class="model-card rounded-xl border border-white/10 bg-evium-dark p-5 transition-all hover:border-white/30">
                     <div class="flex items-center justify-between mb-2">
@@ -190,7 +199,7 @@ const presets = [
                         <span class="dot-inner w-1.5 h-1.5 rounded-full bg-evium-dark opacity-0 transition-opacity"></span>
                       </span>
                     </div>
-                    <p class="text-white/50 text-xs leading-relaxed">$0 capital. Evium covers everything. You receive ~10% revenue share.</p>
+                    <p class="text-white/50 text-xs leading-relaxed">$0 capital. Evium covers everything. You receive ~60% gross revenue share.</p>
                   </div>
                 </label>
                 <label class="model-option cursor-pointer block">
@@ -263,7 +272,7 @@ const presets = [
               </div>
               <div class="flex justify-between pt-2.5 border-t border-white/10">
                 <span class="text-white/50">Your share</span>
-                <span id="result-share" class="text-evium-green font-bold">10%</span>
+                <span id="result-share" class="text-evium-green font-bold">60%</span>
               </div>
             </div>
 
@@ -693,7 +702,7 @@ const presets = [
 
     function computeShare(): number {
       const checked = document.querySelector<HTMLInputElement>('input[name="model"]:checked');
-      return checked ? parseFloat(checked.value) : 0.10;
+      return checked ? parseFloat(checked.value) : 0.60;
     }
 
     function calc(): Result {

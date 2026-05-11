@@ -11,6 +11,14 @@ import Layout from '../../layouts/Layout.astro';
        HERO
   ════════════════════════════════════════════════════ -->
   <section class="relative min-h-screen flex items-center bg-evium-dark overflow-hidden pt-20">
+    <!-- AI-slop / under-construction warning ribbon — pinned top-right
+         of the hero so visitors immediately see this page is WIP. Same
+         ribbon used on commercial / parking / medical hero sections. -->
+    <img
+      src="/images/logos/evium/under-construction-ai-slop-warning-ribbon.png"
+      alt="Under construction — work in progress"
+      class="pointer-events-none absolute right-0 top-12 z-30 w-64 lg:w-80"
+    />
     <!-- Background gradient orbs -->
     <div class="absolute inset-0 pointer-events-none">
       <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-evium-green/5 rounded-full blur-[120px]"></div>
@@ -556,11 +564,11 @@ import Layout from '../../layouts/Layout.astro';
           </div>
           <h3 class="text-white font-black text-2xl mb-4">No-Cost Model</h3>
           <p class="text-white/55 text-sm leading-relaxed mb-6 flex-1">
-            Evium covers 100% of hardware, installation, and ongoing maintenance. You receive approximately 10% of session revenue — zero investment, pure passive income from day one.
+            Evium covers 100% of hardware, installation, and ongoing maintenance. Gross session revenue is split approximately 60/40 in your favor — zero investment, pure passive income from day one.
           </p>
           <ul class="space-y-2 text-sm">
             <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>$0 owner investment</li>
-            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>~10% revenue share to property</li>
+            <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>~60% gross revenue share to property</li>
             <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>All maintenance included</li>
             <li class="flex items-center gap-2 text-white/70"><svg class="w-4 h-4 text-evium-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Rebates processed by Evium</li>
           </ul>
@@ -669,7 +677,7 @@ import Layout from '../../layouts/Layout.astro';
           },
           {
             q: "Who pays for the electricity used during charging sessions?",
-            a: "That depends on your financial model. Under Evium's no-cost model, Evium covers all operating costs including electricity and maintenance. The session revenue pays for energy costs, and approximately 10% of net revenue flows to you as the property owner. Under the client investment model, you cover electricity costs as the property owner — but you also keep 100% of session revenue, which typically results in significantly higher net income."
+            a: "That depends on your financial model. Under Evium's no-cost model, Evium covers all operating costs including electricity and maintenance. The session revenue pays for energy costs, and the remaining gross revenue is split approximately 60/40 in your favor as the property owner. Under the client investment model, you cover electricity costs as the property owner — but you also keep 100% of session revenue, which typically results in significantly higher net income."
           },
           {
             q: "How do my customers pay for charging?",

@@ -2,9 +2,10 @@
 title: "The Real Cost of Not Offering EV Charging"
 category: "cost-demand"
 categoryLabel: "Cost & Demand"
-date: "2026-01-22"
+date: "2024-11-04"
 excerpt: "The cost of adding EV charging gets all the attention — but the cost of not adding it is already showing up in lost leases, failed negotiations, and shrinking tenant pools."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging3.png"
 ---
 
 # The Real Cost of Not Offering EV Charging

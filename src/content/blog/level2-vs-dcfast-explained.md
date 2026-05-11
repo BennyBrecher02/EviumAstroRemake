@@ -2,9 +2,10 @@
 title: "Level 2 vs DC Fast Charging: Which Is Right for Your Property?"
 category: "charging-tech"
 categoryLabel: "Charging Tech"
-date: "2026-01-28"
+date: "2025-01-28"
 excerpt: "The right charger depends on how long your users stay — here's how to match charging technology to your property type without overbuilding or underserving."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging4.png"
 ---
 
 # Level 2 vs DC Fast Charging: Which Is Right for Your Property?

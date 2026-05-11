@@ -23,6 +23,7 @@
  * stable.
  */
 import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
 ---
 
 <Layout
@@ -63,12 +64,31 @@ import Layout from '../../layouts/Layout.astro';
        ═══════════════════════════════════════════════════════ */}
   <section class="fv2-hero" aria-label="Fleet Charging — Evium">
 
-    {/* Photo — full saturation, full bleed. Updated to the
-        Evium-branded depot rendering (chargers carry the
-        Evium wordmark instead of OEM branding). */}
+    {/* Photo — full saturation, full bleed. Real-charger depot
+        photo. Desktop and mobile each get their OWN composition:
+
+         · Desktop: landscape crop with EVIUM-branded chargers
+           on the right, vans in middle, asphalt arrow on the
+           lower-left pointing UP toward the chargers AND toward
+           the CTA block (which sits at the lower-middle of the
+           hero on desktop).
+         · Mobile:  portrait crop tightened around the right-
+           side EVIUM charger + vans, with the asphalt arrow on
+           the lower-left pointing toward where the mobile CTA
+           stacks (left-aligned, upper-middle of the hero).
+
+        The browser picks the right source via `<source media>`;
+        the `<img>` is the desktop default for any width above
+        the media query. No JS, no flicker, src attribute
+        carries the desktop image so existing image-handlers
+        + SEO see the same value. */}
     <picture class="fv2-hero-photo" aria-hidden="true">
+      <source
+        media="(max-width: 759px)"
+        srcset="/images/heroes/fleet-hero-real-chargers-mobile.png"
+      />
       <img
-        src="/images/heroes/fleet-depot-hero-evium.png"
+        src="/images/heroes/fleet-hero-real-chargers-desktop.png"
         alt=""
         loading="eager"
         fetchpriority="high"
@@ -350,10 +370,21 @@ import Layout from '../../layouts/Layout.astro';
            sidewalk. */
     .fv2-hero-actions {
       position: absolute;
-      bottom: clamp(40px, 5vh, 80px);
-      /* Pushed slightly further right (was 39vw, now 41vw)
-         to balance the bigger button size below. */
-      left: clamp(380px, 41vw, 590px);
+      /* Second-pass nudge — pulled down a TINY bit further
+         (preferred 3.5vh→3vh; range 30-65 → 22-55). At
+         1440×900 the CTA moves ~5px lower; at 1280×800
+         ~6px. Intentionally subtle — the previous shift
+         was already in the right zone, this just settles
+         the CTA into the asphalt arrow's projection a
+         touch more. */
+      bottom: clamp(22px, 3vh, 55px);
+      /* Third-pass nudge LEFT — preferred 39.5vw→38.5vw,
+         max 565→555, min 365→355. Another ~10-12px left at
+         typical desktop widths so the CTA sits a touch
+         further into the asphalt arrow's projection lane.
+         Still mild — the layout direction is right, this
+         is just dial-in. */
+      left: clamp(355px, 38.5vw, 555px);
       z-index: 4;
       display: flex;
       flex-direction: column;
@@ -527,28 +558,69 @@ import Layout from '../../layouts/Layout.astro';
 
     /* ── Responsive ─────────────────────────────────────── */
     @media (max-width: 759px) {
+      /* Hero exactly fits the area BELOW the sticky mobile
+         navbar (calc(100dvh - 80px)). The base rule sets
+         `min-height: 100vh` — on mobile that overflows the
+         visible viewport by the navbar's 80px height,
+         pushing the lower portion of the photo (incl. the
+         asphalt arrow + part of the CTA + secondary link)
+         past the fold. Subtracting the navbar height keeps
+         everything inside the entry view, so the user lands
+         with the WHOLE hero — full photo + all action
+         buttons — visible at once. */
+      .fv2-hero {
+        min-height: calc(100dvh - 80px);
+      }
+
       /* On mobile the dual-block layout collapses: text and
          CTAs both anchor to the TOP-left as a single stacked
          column. The narrow viewport means there's no room
          for the photo's middle band to play uncovered between
-         them anyway, so a unified darken serves better. */
-      .fv2-hero-photo img { object-position: 70% 40%; }
+         them anyway, so a unified darken serves better.
+
+         Object-position shifted LEFT (40% horizontal) so more
+         of the image's LEFT side — including the asphalt
+         directional arrow — sits in view, with the arrow's
+         tip aligning under the LEFT-anchored CTA block above
+         it. Vertical anchor at 50% keeps the chargers + vans
+         band centered vertically in the visible portrait
+         crop. */
+      /* Object-position 0% (image left edge anchored to
+         container left edge) places the asphalt arrow at the
+         maximum rightward viewport x reachable given the
+         image's natural composition. The mobile image's
+         arrow body — sampled via canvas — sits at image
+         x ≈ 216–304, y ≈ 1060–1140 (out of 1024×1536). With
+         the height-based cover scale of 0.521× and zero
+         horizontal shift, the arrow's tip lands around
+         viewport (113, 552). The actions block is sized +
+         positioned (below) so the CTA sits directly above
+         that point, putting the arrow's up-direction
+         projection right into the green button. */
+      .fv2-hero-photo img { object-position: 0% 50%; }
       .fv2-hero-title-line { white-space: normal; }
+      /* Veil softened heavily on mobile. The previous gradient
+         hit 0.92 alpha on the left edge — turning the photo
+         into a near-black tarmac instead of the vibrant
+         daylight depot shot. New values keep enough darken
+         under the text cluster for legibility (~0.55 left)
+         but let the sky + brick wall + chargers come through
+         at full color across the rest of the image. */
       .fv2-hero-veil {
         background:
           linear-gradient(
             to right,
-            rgba(6, 18, 26, 0.92) 0%,
-            rgba(6, 18, 26, 0.78) 38%,
-            rgba(6, 18, 26, 0.48) 72%,
-            rgba(6, 18, 26, 0.28) 100%
+            rgba(6, 18, 26, 0.65) 0%,
+            rgba(6, 18, 26, 0.42) 40%,
+            rgba(6, 18, 26, 0.18) 75%,
+            rgba(6, 18, 26, 0.08) 100%
           ),
           linear-gradient(
             to bottom,
-            rgba(6, 18, 26, 0.45) 0%,
-            rgba(6, 18, 26, 0.05) 16%,
-            rgba(6, 18, 26, 0.05) 78%,
-            rgba(6, 18, 26, 0.55) 100%
+            rgba(6, 18, 26, 0.30) 0%,
+            rgba(6, 18, 26, 0.02) 18%,
+            rgba(6, 18, 26, 0.02) 78%,
+            rgba(6, 18, 26, 0.35) 100%
           );
       }
       .fv2-hero-content {
@@ -559,13 +631,67 @@ import Layout from '../../layouts/Layout.astro';
         max-width: 100%;
         padding: clamp(60px, 9vh, 100px) 20px 0 24px;
       }
+      /* Actions block on mobile is ABSOLUTELY positioned at
+         the BOTTOM of the hero — directly under where the
+         asphalt arrow in the photo points TO. Per canvas-
+         sampling of the mobile image, the arrow is a
+         CHEVRON pointing DOWN: shaft at image y≈1060-1080
+         (narrow), wide head at y≈1084-1108, tapering point
+         at y≈1108-1136. The arrow's down-pointing tip is at
+         image (292, 1136) → scaled (152, 592) → viewport
+         (152, 672) on a 800-tall hero.
+
+         For the CTA to sit BELOW the arrow's down-projection
+         (matching the desktop's down-arrow → CTA composition):
+           · vertical:  position: absolute + bottom: ~48px so
+                        CTA sits in the lower 1/8 of the hero,
+                        well below the arrow tip at y=672.
+           · horizontal: left: 24 + max-width 260 keeps the
+                        block aligned with the arrow's
+                        x≈152 column (CTA center lands at
+                        x≈154 — within ~2px of the arrow
+                        tip). */
       .fv2-hero-actions {
-        position: relative;
-        bottom: auto;
-        left: auto;
-        padding: clamp(28px, 4vw, 40px) 24px clamp(48px, 7vh, 80px) 24px;
+        position: absolute;
+        bottom: clamp(50px, 6.5vh, 70px);
+        top: auto;
+        /* Tiny additional right shift (left:158 from 154).
+           Paired with the slightly larger CTA + slightly
+           larger text below. Constrained by the 390px viewport
+           — the button's left edge moves a touch further into
+           the asphalt arrow's projection lane while ALL of the
+           "TALK TO A FLEET SPECIALIST" text remains fully
+           inside the readable zone. */
+        left: 158px;
+        right: auto;
+        max-width: 260px;
+        padding: 0;
+        z-index: 4;
       }
-      .fv2-cta-primary { width: auto; }
+      /* CTA: full text on ONE LINE like desktop. nowrap
+         keeps "Talk to a fleet specialist" + arrow on a
+         single row; reduced font-size + tighter horizontal
+         padding keeps the button compact enough that the
+         right-arrow icon remains visible on the viewport
+         even after the +24px right shift above. */
+      .fv2-cta-primary {
+        width: auto;
+        max-width: none;
+      }
+      .fv2-cta-primary-inner {
+        white-space: nowrap;
+        /* Bumped a touch from 0.7 → 0.74 + 0.14 → 0.15. The
+           CTA + the text both end up slightly bigger and a
+           little weightier without crowding the viewport at
+           the new right-shifted position above. Padding-block
+           explicitly bumped so the button has a bit more
+           vertical presence too. */
+        font-size: 0.74rem;
+        letter-spacing: 0.15em;
+        padding-inline: clamp(8px, 2.5vw, 14px);
+        padding-block: clamp(20px, 5vw, 23px);
+        gap: 9px;
+      }
       .fv2-hero-sub { max-width: 100%; }
     }
   </style>
@@ -885,6 +1011,127 @@ import Layout from '../../layouts/Layout.astro';
       .fv2-bridge-grid { grid-template-columns: 1fr; }
       .fv2-bridge-card { min-height: 260px; }
     }
+
+    /* ─── Mobile (≤759px) ─────────────────────────────────────
+       At phone widths the section is condensed substantially so
+       all three cards + the header fit inside one 800px viewport
+       and leave a sliver of the next dark-navy "Engineered for
+       Your Operation" band peeking in at the bottom. Targets:
+         · Section padding: 40 top / 36 bottom (was clamp 72-120)
+         · Header bottom margin: 28 (was clamp 48-80)
+         · ICP font: fixed 19px / 1.3 (was clamp 24-38)
+         · Cards: NO min-height (content drives), tighter padding
+         · Card title 17 / body 14, watermark icons 140px
+       Stays scoped at ≤759px so the existing 760-880 tablet
+       single-column rule above continues to handle tablet. */
+    @media (max-width: 759px) {
+      .fv2-bridge {
+        /* Tight section padding so the whole thing + the 3-up
+           card row fit inside the 720px effective viewport
+           (800 minus the 80px sticky mobile navbar) AND leave
+           room for the next dark-navy section to peek in. */
+        padding: 26px 14px 24px;
+      }
+      .fv2-bridge-head {
+        margin: 0 auto 18px;
+      }
+      .fv2-bridge-eyebrow {
+        margin: 0 0 10px;
+        gap: 8px;
+        letter-spacing: 0.28em;
+      }
+      .fv2-bridge-eyebrow-rule {
+        width: 18px;
+      }
+      .fv2-bridge-icp {
+        /* 16px keeps the editorial italic register without
+           burning vertical pixels; max-width 34ch lets the
+           full ICP wrap to ~4 lines. */
+        font-size: 16px;
+        line-height: 1.26;
+        max-width: 34ch;
+        letter-spacing: -0.01em;
+      }
+      /* ─── 3-COLUMN ROW — match desktop pattern, scaled to mobile.
+         Overrides the existing 880px → 1fr single-column rule
+         above (which applies at tablet 760-880 only now). The
+         three benefit cards live in a single horizontal row,
+         all on-screen simultaneously, sized as compact square-
+         ish tiles. */
+      .fv2-bridge-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .fv2-bridge-card {
+        /* Aspect-ratio 1 forces a clean square tile. Content
+           wraps tightly with `overflow: hidden` from the base
+           rule clipping any body overflow (rare with the
+           sized-down fonts below). */
+        min-height: 0;
+        aspect-ratio: 1 / 1;
+        padding: 11px 11px 12px;
+        border-radius: 11px;
+      }
+      .fv2-bridge-card-body-wrap {
+        max-width: 100%;
+      }
+      .fv2-bridge-card-title {
+        /* Compact title — 11px / 1.14 fits 2-3 lines max for
+           the longer "Capacity for Large Fleets" + "Cost-
+           Effective Solutions" titles within the square. */
+        font-size: 11px;
+        line-height: 1.14;
+        font-weight: 800;
+        margin: 0 0 4px;
+        letter-spacing: -0.01em;
+      }
+      .fv2-bridge-card-body {
+        /* Body sized + clamped so it fills the remaining
+           vertical space in the square tile cleanly: title
+           (~2 lines × 11×1.14 = 25) + body (6 lines × 10×1.3
+           = 78) + padding (23) ≈ 126 ≥ 115 — overflow:hidden
+           on the card naturally truncates the last line. The
+           ellipsis on line 6 reads as intentional editorial
+           teaser; previously 4-line clamp left ~20px of
+           empty space under the body. */
+        font-size: 10px;
+        line-height: 1.3;
+        font-weight: 500;
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      /* Watermark icons — bigger + thicker strokes + higher
+         opacity on mobile so each card has a clear visual
+         identity. The SVG paths inherit `stroke="currentColor"`
+         from the parent's color and pick up `stroke-width`
+         from the override below — bumping stroke-width from
+         the source 2/2.5 → 3 makes the icons read with the
+         weight of a small editorial symbol at 95px scale. */
+      .fv2-bridge-card .fv2-bridge-card-mark {
+        color: rgba(45, 200, 86, 0.26);
+      }
+      .fv2-bridge-card .fv2-bridge-card-mark path,
+      .fv2-bridge-card .fv2-bridge-card-mark circle,
+      .fv2-bridge-card .fv2-bridge-card-mark rect {
+        stroke-width: 3;
+      }
+      .fv2-bridge-card[data-fv2-card="capacity"] .fv2-bridge-card-mark,
+      .fv2-bridge-card[data-fv2-card="future"] .fv2-bridge-card-mark {
+        width: 95px;
+        height: 71px;
+        bottom: -6px;
+        right: -8px;
+      }
+      .fv2-bridge-card[data-fv2-card="cost"] .fv2-bridge-card-mark {
+        width: 92px;
+        height: 92px;
+        top: -14px;
+        right: -14px;
+      }
+    }
   </style>
 
 
@@ -1018,8 +1265,14 @@ import Layout from '../../layouts/Layout.astro';
 
     <!-- Right: flush-right full-bleed photo. Hits the viewport
          right edge, runs the entire height of the section, no
-         frame, no radius, no shadow. -->
-    <div class="hidden lg:block flex-shrink-0 w-[42%] xl:w-[40%]">
+         frame, no radius, no shadow.
+         NOTE: Tailwind's `hidden lg:block` hides this on widths
+         under 1024px, but the mobile media query below restores
+         it for ≤759 — so on phones the truck strip lives on the
+         right half of the section (per user request), while
+         tablet 760-1023 keeps the desktop pattern of full-width
+         content (image hidden). */ -->
+    <div class="fv2-strategy-photo hidden lg:block flex-shrink-0 w-[42%] xl:w-[40%]">
       <img
         src="/images/trucks/truck-vertical.png"
         alt="Electric delivery truck plugged in at an Evium-equipped fleet depot"
@@ -1030,6 +1283,394 @@ import Layout from '../../layouts/Layout.astro';
 
   </section>
 
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       #fleet-strategy — mobile-only overrides
+       ──────────────────────────────────────────────────────
+       Desktop layout (≥1024px) is untouched: full-bleed truck
+       strip on the right via `hidden lg:block`. On mobile we
+       restore the truck strip at ~42% width — it lives on the
+       right HALF of the section as a tall vertical magazine
+       spine, while the content column on the left scrolls
+       through the eyebrow + headline + lede + 5 numbered
+       items + bottom anchor.
+
+       Trade-off: the section is intentionally TALLER than the
+       viewport on mobile because the content list is content-
+       rich. Compressing all 5 items into 720px would force
+       ~10px body text, which fails the premium quality bar.
+       Instead the user scrolls through the list with the
+       truck image alongside as a tall vertical anchor — same
+       magazine treatment desktop gets, just narrower.
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 759px) {
+      /* Show the truck strip on the right half of the section
+         on mobile. The Tailwind `hidden` utility applies
+         display:none; we override with !important because
+         the same-specificity `lg:block` only fires at ≥1024px. */
+      #fleet-strategy .fv2-strategy-photo {
+        display: block !important;
+        width: 42% !important;
+        flex-shrink: 0;
+      }
+      #fleet-strategy .fv2-strategy-photo img {
+        /* Anchor the truck cab + green charger inside the
+           narrow strip so the most expressive part of the
+           image stays in frame at all section heights. */
+        object-position: right center;
+      }
+      /* Content column — tighter padding so the text has more
+         room within the remaining ~58% of width. */
+      #fleet-strategy > div.flex-1 > div {
+        padding-left: 16px;
+        padding-right: 14px;
+        padding-top: 28px;
+        padding-bottom: 28px;
+      }
+      /* Eyebrow + hairline — drop a touch + tighten tracking so
+         "Engineered for Your Operation" fits the narrow col.
+         At 9px / 0.13em the full 28-char string fits the ~196px
+         text-col width without clipping behind the truck strip. */
+      #fleet-strategy header .text-evium-green.text-xs {
+        font-size: 9px;
+        letter-spacing: 0.13em;
+      }
+      /* Tighten the gap between eyebrow text and trailing rule
+         so the layout still feels deliberately spaced. */
+      #fleet-strategy header > div.flex.items-center.gap-4 {
+        column-gap: 8px;
+        margin-bottom: 12px;
+      }
+      /* Headline — shrink hard so "A Charging Strategy. / Not
+         Just Hardware." wraps cleanly to 2-4 short lines. */
+      #fleet-strategy header h2 {
+        font-size: 26px;
+        line-height: 1.04;
+        margin-bottom: 12px;
+      }
+      /* Lede pull-quote — shorter padding-left + smaller body
+         text so the brand-green rule still reads as a signature
+         element without crowding the column. */
+      #fleet-strategy header > div.border-l-2 {
+        padding-left: 12px;
+      }
+      #fleet-strategy header > div.border-l-2 > p {
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      /* Editorial list — tighter grid (smaller badge col +
+         smaller gap), smaller checkmark, smaller body + title
+         text so 5 items remain scannable in the narrow column. */
+      #fleet-strategy ul.my-5 {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+      #fleet-strategy ul.my-5 li {
+        grid-template-columns: 1.25rem 1fr;
+        column-gap: 10px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+      #fleet-strategy ul.my-5 li > span:first-child {
+        width: 20px;
+        height: 20px;
+      }
+      #fleet-strategy ul.my-5 li > span:first-child svg {
+        width: 11px;
+        height: 11px;
+      }
+      #fleet-strategy ul.my-5 li h4 {
+        font-size: 13px;
+        line-height: 1.22;
+        margin-bottom: 2px;
+      }
+      #fleet-strategy ul.my-5 li p {
+        font-size: 11.5px;
+        line-height: 1.42;
+      }
+      /* Bottom anchor — tighten the "Design. Install. Operate."
+         label so it fits inside the narrow content column. */
+      #fleet-strategy > div.flex-1 > div > div.mt-auto > span:first-child {
+        font-size: 9.5px;
+        letter-spacing: 0.18em;
+      }
+    }
+  </style>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCOPE — process-framed, 6 items in the canonical Evium
+       spine (canon Stage 01 + 02 split + 03 split + 04 + 05).
+       Bespoke styling that mirrors multifamily-v3's scope
+       visual pattern (light blue-gray gradient, white cards
+       with hairline + green top accent, numbered tags, icon
+       blocks, lift on hover). Sized to a full viewport.
+  ═══════════════════════════════════════════════════════ -->
+  <section id="fleet-scope" class="fv2-scope" aria-labelledby="fv2-scope-title">
+    <div class="fv2-scope-inner">
+
+      <header class="fv2-scope-head">
+        <p class="fv2-scope-eyebrow">
+          <span>The Full Scope</span>
+        </p>
+        <h2 id="fv2-scope-title" class="fv2-scope-title">
+          Truly Turnkey. One Partner. Everything Covered.
+        </h2>
+        <p class="fv2-scope-sub">
+          From the initial site walk to day-1,000 of operations, Evium owns the entire process so you never have to.
+        </p>
+      </header>
+
+      <div class="fv2-scope-grid">
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">01</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.5-4.5" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Site assessment &amp; engineering</h3>
+          <p class="fv2-scope-card-body">
+            Depot site walk and load study. We inventory your vehicle count, duty cycle, shift patterns, and the panel capacity at each yard. Output is a per-site feasibility read before anyone draws a single line.
+          </p>
+        </article>
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">02</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v4 M12 19v4 M4.22 4.22l2.83 2.83 M16.95 16.95l2.83 2.83 M1 12h4 M19 12h4 M4.22 19.78l2.83-2.83 M16.95 7.05l2.83-2.83" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Hardware spec &amp; system design</h3>
+          <p class="fv2-scope-card-body">
+            A custom proposal that names the charger count and mix — Level 2 for vehicles that sit overnight, DC fast for the ones that turn between routes — sized to your shift schedule. Conduit headroom is sized for the next cohort, not just today's fleet.
+          </p>
+        </article>
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">03</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 2L4 14h6l-2 8 10-12h-6l2-8z" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Full electrical installation</h3>
+          <p class="fv2-scope-card-body">
+            Licensed electricians handle service upgrades, panels, conduit, and equipment mounting. Each charger is provisioned, configured, and tested before handoff. Drivers get their RFID cards.
+          </p>
+        </article>
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">04</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Permits &amp; utility coordination</h3>
+          <p class="fv2-scope-card-body">
+            Building, electrical, and ADA permits where required. Utility interconnection applications, service upgrade requests, and inspections — all filed and chased by Evium.
+          </p>
+        </article>
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">05</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v10" />
+              <path d="M9 9.5c0-1 1-2 3-2s3 .5 3 1.5-1 1.5-3 2-3 1-3 2 1.5 1.5 3 1.5 3-1 3-2" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Rebate &amp; incentive capture</h3>
+          <p class="fv2-scope-card-body">
+            Every applicable utility rebate, state EV program, federal incentive, and demand-response enrollment is identified and submitted. Where the depot qualifies for grid credits, Evium handles the program enrollment.
+          </p>
+        </article>
+
+        <article class="fv2-scope-card">
+          <span class="fv2-scope-card-num" aria-hidden="true">06</span>
+          <span class="fv2-scope-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 3" />
+            </svg>
+          </span>
+          <h3 class="fv2-scope-card-title">Ongoing operations &amp; support</h3>
+          <p class="fv2-scope-card-body">
+            24/7 remote monitoring, dispatch when a unit needs hands, preventive maintenance, firmware management, and revenue optimization where the depot generates charging revenue.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ─── SCOPE — light "showroom" band that mirrors
+         multifamily-v3's scope visual treatment. Local tokens
+         + bespoke class names so this stays self-contained
+         until the page migrates onto ServicePageV2. */
+    .fv2-scope {
+      --fv2-scope-shadow-rgb: 13, 28, 36;
+      --fv2-scope-elev-1:
+        0 1px 1px rgba(var(--fv2-scope-shadow-rgb), 0.04),
+        0 2px 5px rgba(var(--fv2-scope-shadow-rgb), 0.05),
+        0 5px 11px rgba(var(--fv2-scope-shadow-rgb), 0.05);
+      --fv2-scope-elev-2:
+        0 1px 2px rgba(var(--fv2-scope-shadow-rgb), 0.05),
+        0 3px 6px rgba(var(--fv2-scope-shadow-rgb), 0.05),
+        0 7px 14px rgba(var(--fv2-scope-shadow-rgb), 0.06),
+        0 14px 26px rgba(var(--fv2-scope-shadow-rgb), 0.04);
+      --fv2-scope-hairline: 1px solid rgba(0, 0, 0, 0.05);
+      --fv2-scope-hairline-hover: 1px solid rgba(0, 0, 0, 0.08);
+      --fv2-scope-ease: cubic-bezier(0.25, 0, 0, 1);
+
+      /* Outer wrapper carries the gradient full-width; padding +
+         max-width live on the inner so the section sizes itself
+         to its content (matches mf-v3's .svc-section behavior).
+         No min-height: 100vh — content-tall instead of viewport-
+         forced. */
+      background:
+        linear-gradient(180deg, #f4f7fb 0%, #eef2f7 45%, #e7edf4 100%);
+      font-family: 'Maven Pro', system-ui, sans-serif;
+    }
+    .fv2-scope-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: clamp(64px, 9vw, 130px) clamp(20px, 4vw, 60px);
+    }
+
+    .fv2-scope-head {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto clamp(40px, 5vw, 68px);
+    }
+    .fv2-scope-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      color: #2DC856;
+      font-size: clamp(0.56rem, 0.7vw, 0.72rem);
+      font-weight: 900;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .fv2-scope-title {
+      margin: 0 0 clamp(14px, 1.5vw, 20px);
+      color: #1d1d1f;
+      font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: -0.024em;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+    .fv2-scope-sub {
+      margin: 0 auto;
+      max-width: 60ch;
+      color: #4d5963;
+      font-size: clamp(0.96rem, 1.1vw, 1.08rem);
+      line-height: 1.6;
+      text-wrap: pretty;
+    }
+
+    /* Force 3 columns at desktop so 6 cards always sit as a
+       clean 3+3 instead of letting auto-fit drift to 4+2 on
+       wider monitors. Steps down to 2 columns on tablet and
+       1 on mobile. */
+    .fv2-scope-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 2vw, 24px);
+    }
+    @media (max-width: 880px) {
+      .fv2-scope-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .fv2-scope-grid { grid-template-columns: 1fr; }
+    }
+
+    .fv2-scope-card {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      border: var(--fv2-scope-hairline);
+      border-radius: 20px;
+      padding: clamp(22px, 2.4vw, 30px);
+      box-shadow: var(--fv2-scope-elev-1);
+      transition:
+        transform 0.4s var(--fv2-scope-ease),
+        box-shadow 0.4s var(--fv2-scope-ease),
+        border-color 0.4s var(--fv2-scope-ease);
+    }
+    .fv2-scope-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: #2DC856;
+      transform: scaleX(0);
+      transform-origin: 50% 50%;
+      transition: transform 0.45s var(--fv2-scope-ease);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .fv2-scope-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--fv2-scope-elev-2);
+      border: var(--fv2-scope-hairline-hover);
+    }
+    .fv2-scope-card:hover::before {
+      transform: scaleX(0.6);
+    }
+    .fv2-scope-card-num {
+      position: absolute;
+      top: clamp(16px, 2vw, 22px);
+      right: clamp(18px, 2.2vw, 24px);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #aeaeb2;
+      font-variant-numeric: tabular-nums;
+    }
+    .fv2-scope-card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(45, 200, 86, 0.1);
+      color: #2DC856;
+      margin-bottom: 14px;
+    }
+    .fv2-scope-card-icon svg {
+      width: 56%;
+      height: 56%;
+    }
+    .fv2-scope-card-title {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.012em;
+      line-height: 1.25;
+      color: #1d1d1f;
+    }
+    .fv2-scope-card-body {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #4d5963;
+    }
+  </style>
+
 
   <!-- ═══════════════════════════════════════════════════════
        HARDWARE FOR FLEET DEPOTS
@@ -1039,7 +1680,7 @@ import Layout from '../../layouts/Layout.astro';
        Siemens badge replaced with a horizontal trust-signal
        masthead spanning multiple standards/partnerships.
   ═══════════════════════════════════════════════════════ -->
-  <section class="bg-evium-dark py-24 lg:py-28">
+  <section id="fleet-hardware" class="bg-evium-dark py-24 lg:py-28">
     <div class="max-w-7xl mx-auto px-6 md:px-12">
 
       <!-- ── HEADER ─────────────────────────────────────── -->
@@ -1169,11 +1810,150 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </section>
 
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       #fleet-hardware — mobile-only overrides
+       ──────────────────────────────────────────────────────
+       Desktop (≥1024px) stays untouched: `lg:grid-cols-2` keeps
+       the two charger cards side-by-side at their full size.
+       Tablet 640-1023 keeps the existing single-column stack.
+       At ≤759px the user requested the two cards display side-
+       by-side as a 2-up row — same layout idea as desktop, just
+       scaled to fit in the phone viewport. To make 2 cards fit
+       in 390px we restructure each card's internal image-plus-
+       body grid from a 2-col split into a vertical stack
+       (image above, body below), and crank every padding +
+       font size down hard.
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 759px) {
+      /* Section padding — drop from py-24 (96px) to ~40px so
+         the section doesn't waste mobile vertical space. */
+      #fleet-hardware {
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+      /* Outer wrapper — tighter horizontal padding so the two
+         cards have more usable width to work with. */
+      #fleet-hardware > div {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      /* Section header — compress the centered eyebrow +
+         headline + intro block, since it now sits above
+         tighter cards. */
+      #fleet-hardware > div > div.text-center {
+        margin-bottom: 22px;
+      }
+      #fleet-hardware > div > div.text-center > p.text-evium-green {
+        font-size: 10px;
+        margin-bottom: 10px;
+      }
+      #fleet-hardware > div > div.text-center > h2 {
+        font-size: 26px;
+        line-height: 1.08;
+        margin-bottom: 12px;
+      }
+      #fleet-hardware > div > div.text-center > p.text-white\/65 {
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      /* ─── 2-up product cards ─────────────────────────────
+         Override Tailwind's `grid-cols-1` base. Cards now sit
+         side-by-side as a 2-col row, with a tight 8px gap so
+         each card gets ~171px of width. */
+      #fleet-hardware .grid.lg\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      /* Card — drop padding HARD from p-8 (32px) to 12px so
+         the inner content has actual room at 171px wide. */
+      #fleet-hardware article {
+        padding: 14px 12px 12px;
+      }
+      /* Use-case pill — shrink to fit narrow card width.
+         "Overnight Depot · Level 2" / "Quick Turn · DC Fast"
+         both at 8.5px / 0.16em fit cleanly under 150px. */
+      #fleet-hardware article > span.self-start {
+        font-size: 8.5px;
+        letter-spacing: 0.16em;
+        padding: 3px 8px;
+        margin-bottom: 10px;
+      }
+      /* Use-case headline — was text-3xl (30px); knock down
+         hard so 2 short lines fit on a 171px card width. The
+         author's `<br />` is preserved (keeps the editorial
+         line-break rhythm). */
+      #fleet-hardware article > h3 {
+        font-size: 15px;
+        line-height: 1.12;
+        margin-bottom: 4px;
+        letter-spacing: -0.012em;
+      }
+      /* SKU + spec meta line — tighter / smaller. */
+      #fleet-hardware article > p.text-white\/40 {
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        margin-bottom: 10px;
+      }
+      /* Image + body — restructure the 2-col grid into a
+         vertical stack so the image sits cleanly on top and
+         the body text gets full width below it. Image height
+         drops from h-44 (176px) to a compact 80px. */
+      #fleet-hardware article > div.grid.items-center {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      #fleet-hardware article > div.grid.items-center > img {
+        width: 100%;
+        height: 78px;
+        object-fit: contain;
+      }
+      #fleet-hardware article > div.grid.items-center > p {
+        font-size: 11.5px;
+        line-height: 1.4;
+      }
+      /* Spec pills — shrink + tighten so 2-3 pills wrap neatly
+         within the narrow card. */
+      #fleet-hardware article > div.mt-auto {
+        gap: 5px;
+        padding-top: 9px;
+      }
+      #fleet-hardware article > div.mt-auto > span {
+        font-size: 9.5px;
+        padding: 4px 8px;
+      }
+      /* Trust-signal masthead — compress the closing band so
+         it fits without horizontal scroll and reads as a
+         deliberate footer line. */
+      #fleet-hardware > div > div.mt-12 {
+        margin-top: 28px;
+      }
+      #fleet-hardware > div > div.mt-12 > div:first-child {
+        margin-bottom: 10px;
+        gap: 8px;
+      }
+      #fleet-hardware > div > div.mt-12 > div:first-child > span:not(.h-px) {
+        font-size: 9px;
+        letter-spacing: 0.24em;
+      }
+      #fleet-hardware > div > div.mt-12 > div:last-child {
+        gap: 7px 10px;
+      }
+      #fleet-hardware > div > div.mt-12 > div:last-child > span:not(.rounded-full) {
+        font-size: 9.5px;
+        letter-spacing: 0.1em;
+      }
+    }
+  </style>
+
 
   <!-- ═══════════════════════════════════════════════════════
        SOFTWARE & MONITORING
   ═══════════════════════════════════════════════════════ -->
-  <section class="bg-[#0d1f2b] py-28">
+  <section id="fleet-software" class="bg-[#0d1f2b] py-28">
     <div class="max-w-7xl mx-auto px-6 md:px-12">
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -1290,6 +2070,104 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </section>
 
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       #fleet-software — mobile-only overrides
+       ──────────────────────────────────────────────────────
+       Desktop layout (lg:grid-cols-2 split between terminal mock
+       and copy column) stays exactly as designed. On mobile the
+       layout was originally cramped — section padding too big,
+       headline oversized, terminal footer wrapping awkwardly
+       across 3 flex children, and 6 feature cards stacked in a
+       single column running endlessly down the page.
+       This block tightens everything so the section reads as a
+       deliberate, professional block of content rather than a
+       rough vertical scroll.
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 759px) {
+      /* Section padding — py-28 (112px) → ~40px each end. */
+      #fleet-software {
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+      /* Outer container — tighter horizontal padding. */
+      #fleet-software > div {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      /* Grid gap — gap-20 (80px) → 28px between terminal mock
+         and copy column. */
+      #fleet-software > div > div.grid {
+        gap: 28px;
+      }
+      /* Copy column — eyebrow / headline / lede shrink. */
+      #fleet-software p.text-evium-green.tracking-\[0\.22em\] {
+        font-size: 10px;
+        margin-bottom: 10px;
+      }
+      #fleet-software h2 {
+        font-size: 28px;
+        line-height: 1.08;
+        margin-bottom: 14px;
+      }
+      #fleet-software p.text-white\/55 {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+      /* Terminal mock — slightly tighter inner padding. */
+      #fleet-software .font-mono {
+        padding: 14px 14px 16px;
+      }
+      #fleet-software .font-mono.text-xs > div.flex {
+        padding-top: 5px;
+        padding-bottom: 5px;
+      }
+      /* ─── Terminal footer fix ─────────────────────────────
+         The 3-up `flex justify-between` ("Grid load / Peak
+         demand / Updated") wraps each metric across multiple
+         lines on mobile because the labels are wider than
+         ~110px. Restructure to a 2-column compact grid so
+         labels and values pair cleanly without wrapping. */
+      #fleet-software .font-mono .mt-4.pt-4.flex.justify-between {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 12px;
+        font-size: 10.5px;
+        margin-top: 12px;
+        padding-top: 12px;
+      }
+      #fleet-software .font-mono .mt-4.pt-4.flex.justify-between > span {
+        white-space: nowrap;
+      }
+      /* "Updated: live" spans both columns so it sits as the
+         third row of the 2-col layout, full-width. */
+      #fleet-software .font-mono .mt-4.pt-4.flex.justify-between > span:last-child {
+        grid-column: 1 / -1;
+      }
+      /* ─── Feature cards — 2-up grid ───────────────────────
+         6 cards in a single column ran the section endlessly
+         down the page. Switch to a 2-up grid so all 6 cards
+         fit in 3 rows of 2 — much tighter and reads as a
+         deliberate feature matrix. */
+      #fleet-software .grid.sm\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      #fleet-software .grid.sm\:grid-cols-2 > div {
+        padding: 12px;
+      }
+      #fleet-software .grid.sm\:grid-cols-2 > div > h4 {
+        font-size: 12px;
+        margin-bottom: 5px;
+        line-height: 1.18;
+      }
+      #fleet-software .grid.sm\:grid-cols-2 > div > p {
+        font-size: 10.5px;
+        line-height: 1.42;
+      }
+    }
+  </style>
 
 
 
@@ -1781,6 +2659,145 @@ import Layout from '../../layouts/Layout.astro';
       color: #2DC856;
       text-decoration-thickness: 2px;
     }
+
+    /* ═══════════════════════════════════════════════════════
+       Mobile tab bar (.fv2-fin-tabs) — hidden on desktop,
+       visible only at ≤759px. The tab bar is built in JS
+       (see inline script at bottom of page) and inserted
+       before the grid. On desktop we hide it; on mobile we
+       show it and the grid hides every card except the one
+       matching the grid's data-active attribute.
+    ═══════════════════════════════════════════════════════ */
+    .fv2-fin-tabs { display: none; }
+
+    @media (max-width: 759px) {
+      /* Section padding — pull in vertical space so the
+         tabbed single-card view sits closer to the section
+         head and feels purpose-built for mobile. */
+      .fv2-fin {
+        padding-top: 36px;
+        padding-bottom: 36px;
+      }
+      .fv2-fin-inner {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+      /* Compressed section head — shrink the title + sub. */
+      .fv2-fin-head {
+        margin-bottom: 18px;
+      }
+      .fv2-fin-eyebrow {
+        margin-bottom: 10px;
+      }
+      .fv2-fin-title {
+        font-size: 26px !important;
+        line-height: 1.08 !important;
+        margin-bottom: 10px;
+      }
+      .fv2-fin-sub {
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      /* ─── TAB BAR ───────────────────────────────────────
+         Light-register pill row matching the cream section
+         background. Inactive tabs use dark slate text on a
+         translucent dark slab so they're clearly readable
+         against the cream surface. Active tab is the brand-
+         green pill that pops against either bg. Same visual
+         language as the multifamily-v4 mobile tabs. */
+      .fv2-fin-tabs {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        margin: 0 auto 18px;
+        padding: 4px;
+        width: 100%;
+        max-width: 520px;
+        background: rgba(13, 28, 36, 0.06);
+        border: 1px solid rgba(13, 28, 36, 0.10);
+        border-radius: 12px;
+        box-shadow: inset 0 1px 2px rgba(13, 28, 36, 0.06);
+      }
+      .fv2-fin-tab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 11px 8px;
+        font-family: 'Maven Pro', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.15;
+        text-align: center;
+        color: #1d1d1f;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.22s ease, background 0.22s ease;
+      }
+      .fv2-fin-tab[aria-selected="true"] {
+        color: #ffffff;
+        background: #2DC856;
+        box-shadow:
+          0 1px 2px rgba(45, 200, 86, 0.32),
+          0 6px 14px rgba(45, 200, 86, 0.32);
+      }
+      .fv2-fin-tab:hover:not([aria-selected="true"]) {
+        color: #0d1c24;
+        background: rgba(13, 28, 36, 0.08);
+      }
+
+      /* ─── CARDS GRID — single-card view ─────────────────
+         Force the grid to one column on mobile, then hide
+         every card by default. Show only the card whose
+         data-fin-card-idx matches the grid's data-active. */
+      .fv2-fin-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      .fv2-fin-grid .fv2-fin-card {
+        display: none;
+      }
+      .fv2-fin-grid[data-active="0"] .fv2-fin-card[data-fin-card-idx="0"],
+      .fv2-fin-grid[data-active="1"] .fv2-fin-card[data-fin-card-idx="1"],
+      .fv2-fin-grid[data-active="2"] .fv2-fin-card[data-fin-card-idx="2"],
+      .fv2-fin-grid[data-active="3"] .fv2-fin-card[data-fin-card-idx="3"] {
+        display: flex;
+      }
+      /* Tighten the active card's internal padding + name
+         so it doesn't feel oversized when it's the only
+         visible element. */
+      .fv2-fin-card {
+        padding: 26px 22px 22px;
+        border-radius: 18px;
+      }
+      .fv2-fin-name {
+        font-size: 22px;
+      }
+      .fv2-fin-tagline {
+        font-size: 13px;
+      }
+      .fv2-fin-body {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .fv2-fin-bullets li {
+        font-size: 13.5px;
+      }
+      .fv2-fin-highlight-text {
+        font-size: 13px;
+      }
+      .fv2-fin-footnote {
+        font-size: 12px;
+        margin-top: 22px;
+      }
+    }
   </style>
 
 
@@ -2026,6 +3043,108 @@ import Layout from '../../layouts/Layout.astro';
         });
       });
     })();
+
+    /* ═══════════════════════════════════════════════════════
+       FINANCIAL MODELS — mobile tabs
+       ──────────────────────────────────────────────────────
+       Mirrors the pattern in multifamily-v4: desktop keeps the
+       side-by-side grid (Revenue Share | Lease). On mobile we
+       inject a 2-pill tab bar above the grid; clicking a tab
+       sets `data-active="<idx>"` on the grid, and a CSS rule
+       (in the .fv2-fin style block) hides all cards except
+       the one whose data-fin-card-idx matches.
+
+       The tab bar is built in JS so the page markup stays as
+       a plain 2-up product grid — no extra mobile-only DOM
+       drift in the static HTML. The CSS gates the tab bar's
+       visibility at @media (max-width: 759px) so desktop
+       continues to render the original grid untouched.
+    ═══════════════════════════════════════════════════════ */
+    (function () {
+      var finGrid = document.querySelector('.fv2-fin-grid');
+      if (!finGrid) return;
+      var finCards = Array.prototype.slice.call(
+        finGrid.querySelectorAll('.fv2-fin-card')
+      );
+      if (finCards.length < 2) return;
+
+      /* Astro scopes the page's <style> rules with a
+         per-component data attribute (e.g. data-astro-cid-XXX).
+         The dynamically created tab bar + buttons would NOT
+         match the scoped selectors without it — the rules
+         live in the scoped CSS, so we have to copy the
+         attribute from a server-rendered sibling onto the
+         JS-created nodes. */
+      var scopedAttr = null;
+      var attrs = finGrid.attributes;
+      for (var a = 0; a < attrs.length; a++) {
+        if (attrs[a].name.indexOf('data-astro-cid-') === 0) {
+          scopedAttr = attrs[a].name;
+          break;
+        }
+      }
+
+      /* Initial active = the featured/MOST-COMMON card if any,
+         otherwise the first card. */
+      var featuredIdx = -1;
+      for (var i = 0; i < finCards.length; i++) {
+        if (finCards[i].classList.contains('is-featured')) {
+          featuredIdx = i;
+          break;
+        }
+      }
+      var initialIdx = featuredIdx >= 0 ? featuredIdx : 0;
+
+      /* Build tab bar. */
+      var tabBar = document.createElement('nav');
+      tabBar.className = 'fv2-fin-tabs';
+      tabBar.setAttribute('role', 'tablist');
+      tabBar.setAttribute('aria-label', 'Financial models');
+      if (scopedAttr) tabBar.setAttribute(scopedAttr, '');
+
+      finCards.forEach(function (card, idx) {
+        var nameEl = card.querySelector('.fv2-fin-name');
+        var label = nameEl && nameEl.textContent
+          ? nameEl.textContent.trim()
+          : 'Model ' + (idx + 1);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'fv2-fin-tab';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-fin-tab', String(idx));
+        btn.setAttribute(
+          'aria-selected',
+          idx === initialIdx ? 'true' : 'false'
+        );
+        btn.textContent = label;
+        if (scopedAttr) btn.setAttribute(scopedAttr, '');
+        tabBar.appendChild(btn);
+        card.setAttribute('data-fin-card-idx', String(idx));
+      });
+
+      /* Insert tab bar BEFORE the grid. */
+      if (finGrid.parentNode) {
+        finGrid.parentNode.insertBefore(tabBar, finGrid);
+      }
+      finGrid.setAttribute('data-active', String(initialIdx));
+
+      /* Click handler — flips active tab + grid attr. */
+      tabBar.addEventListener('click', function (e) {
+        var t = e.target;
+        var btn = t && t.closest ? t.closest('[data-fin-tab]') : null;
+        if (!btn) return;
+        var idx = btn.getAttribute('data-fin-tab') || '0';
+        finGrid.setAttribute('data-active', idx);
+        var allBtns = tabBar.querySelectorAll('[data-fin-tab]');
+        for (var j = 0; j < allBtns.length; j++) {
+          allBtns[j].setAttribute(
+            'aria-selected',
+            allBtns[j] === btn ? 'true' : 'false'
+          );
+        }
+      });
+    })();
   </script>
 
+  <SiteFooter />
 </Layout>

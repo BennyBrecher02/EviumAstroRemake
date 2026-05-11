@@ -2,9 +2,10 @@
 title: "EV Charging Infrastructure: What to Expect in the Next Five Years"
 category: "charging-tech"
 categoryLabel: "Charging Tech"
-date: "2026-04-01"
+date: "2026-02-03"
 excerpt: "From smart charging and grid integration to national corridor buildout, the next five years will transform EV infrastructure from a niche amenity into essential property infrastructure."
 readTime: "4 min"
+image: "/images/logos/evium/logo.webp"
 ---
 
 # EV Charging Infrastructure: What to Expect in the Next Five Years

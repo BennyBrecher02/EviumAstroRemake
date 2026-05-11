@@ -1,0 +1,3102 @@
+---
+/**
+ * /service-testing/multifamily-v3 — V3 of the multifamily service
+ * page.
+ *
+ * Same exact content as v2 (data duplicated below — single source
+ * of truth for THIS page so it stays self-contained), rendered
+ * through the existing ServicePageV2 template, then visually
+ * unified by a global stylesheet override that:
+ *
+ *   - Replaces the V2 page's light cool gradient with a single
+ *     continuous dark-teal canvas (#142631 → #1A2F3A → #142631).
+ *   - Strips solid background colors + box-shadow/clip-path
+ *     bg-extension tricks from EVERY dark section (`pain`,
+ *     `hardware`, `software`, `proof`, `faq`) so they all just
+ *     show the page canvas — meaning every dark-section boundary
+ *     is now invisible (the "page is dark, the section is
+ *     transparent" trick).
+ *   - Re-renders light sections (`narrative`, `scope`, `fin`,
+ *     `finalCta`) as **feathered light bands** that fade in
+ *     from transparent at the top, hold solid in the middle,
+ *     and fade back to transparent at the bottom. Where the
+ *     band's edge fades to transparent, the dark canvas shows
+ *     through cleanly — no hard boundary line, just a gradient
+ *     dissolve from light into dark.
+ *   - Adds two large atmospheric green orbs that drift behind
+ *     the content for cohesive ambient depth across all sections.
+ *
+ * The overrides are applied via `<style is:global>` keyed on a
+ * runtime-set `html.svc-v3-active` flag — the inline script at
+ * the top of the page sets that class before any V2 content
+ * paints, so the V3 visual lands without flash. ServicePageV2
+ * itself is untouched: same render block, same data shape, same
+ * scoped styles. V3 just bolts a fresh visual skin on top.
+ */
+import ServicePageV2 from '../../components/services/ServicePageV2.astro';
+import type { ServicePageConfig } from '../../components/services/types';
+
+const service: ServicePageConfig = {
+  meta: {
+    title: 'Multifamily EV Charging v4 — Evium',
+    description:
+      'Evium installs, manages, and maintains EV charging at multifamily properties — at zero upfront cost. Earn passive revenue, retain residents, and outpace competing buildings.',
+  },
+
+  hero: {
+    eyebrow: 'Multifamily Real Estate',
+    headline: 'The amenity your tenants are already asking for.',
+    subhead:
+      "EV ownership is rising fast — and residents are choosing properties based on charging access. Add a premium amenity, earn a new revenue stream, and outpace competing buildings. Evium handles everything. You pay nothing upfront.",
+    primaryCta: { label: 'Get a Free Site Assessment', href: '/contact/quote' },
+    secondaryCta: { label: 'See Financing Options', href: '#service-financialModels' },
+    image: {
+      src: '/images/multifamily-realestate-service-hero.jpg',
+      alt: 'Modern multifamily apartment building at golden hour, deep teal facade with warm orange accent and rows of balconies',
+    },
+    stats: [
+      { value: 'How we deliver',     label: 'See the full scope',  href: '#service-scope',    icon: 'compass' },
+      { value: 'Recommended hardware', label: 'View the chargers', href: '#service-hardware', icon: 'bolt'    },
+      { value: 'Talk to our team',   label: 'Start your quote',    href: '#service-cta',      icon: 'users'   },
+    ],
+  },
+
+  sections: [
+    {
+      type: 'narrative',
+      anchor: 'service-market',
+      eyebrow: 'The Market Reality',
+      title: "EV Charging Isn't Optional Anymore.",
+      subhead:
+        'The shift is already underway. Properties without charging infrastructure are losing leases. Properties with it are winning them.',
+      highlights: [
+        {
+          icon: 'trend',
+          title: 'EV Adoption Is Accelerating',
+          body:
+            "Millions of new EVs hit the road every year. By 2030, EV drivers will be the norm, not the exception. Residents without home charging are frustrated residents looking to move.",
+        },
+        {
+          icon: 'home',
+          title: 'Tenants Search for Charging',
+          body:
+            'Apartment-hunting EV drivers filter by charging availability the same way they filter by parking or laundry. Your listing without it is invisible to a growing slice of the renter market.',
+        },
+        {
+          icon: 'compass',
+          title: 'Competitors Are Already Moving',
+          body:
+            "Across NJ, NY, and the rest of the country, forward-thinking property owners are locking in charging before their neighbors do. The time to act is now — not when you're playing catch-up.",
+        },
+      ],
+    },
+    {
+      type: 'painPoints',
+      anchor: 'service-pain',
+      eyebrow: 'Every Objection, Handled',
+      title: "We Know What's Been Holding You Back.",
+      subhead:
+        'Property owners come to us with the same concerns every time. Upfront cost. Electrical complexity. Permits. Liability. Ongoing maintenance. Resident billing headaches. Here\'s how Evium eliminates all of it.',
+      cta: { label: 'Talk to Our Team', href: '/contact/quote' },
+      items: [
+        {
+          problem: 'Upfront capital costs are prohibitive.',
+          solution:
+            'Under our no-cost model, Evium covers 100% of hardware, installation, and electrical work. Zero capital required from you.',
+        },
+        {
+          problem: 'Electrical infrastructure is complicated.',
+          solution:
+            "Our engineers assess your property's electrical capacity, design the optimal layout, and handle every aspect of the upgrade or new installation.",
+        },
+        {
+          problem: 'Permits and compliance are a maze.',
+          solution:
+            'We manage all permits, inspections, utility coordination, and code compliance from start to finish. You sign once — we handle the rest.',
+        },
+        {
+          problem: 'Ongoing maintenance is a burden.',
+          solution:
+            'Evium provides 24/7 remote monitoring, preventative maintenance, and on-site repair service. If a charger goes down, we fix it — not you.',
+        },
+        {
+          problem: 'Resident billing and access are complex.',
+          solution:
+            'Our software platform handles resident access control, usage tracking, and billing automatically. Residents pay per session. You see the revenue.',
+        },
+      ],
+    },
+
+    {
+      type: 'scope',
+      anchor: 'service-scope',
+      eyebrow: 'The Full Scope',
+      title: 'Truly Turnkey. One Partner. Everything Covered.',
+      subhead:
+        'From the initial site walk to day-1,000 of operations, Evium owns the entire process so you never have to.',
+      items: [
+        {
+          title: 'Site assessment & engineering',
+          body: 'We evaluate your electrical capacity, parking layout, and resident density to design the right charging footprint for your property.',
+          icon: 'map',
+        },
+        {
+          title: 'Hardware selection',
+          body: 'We match Level 2 chargers to your property type, resident profile, and parking configuration — no guessing, no oversizing.',
+          icon: 'bolt',
+        },
+        {
+          title: 'Full electrical installation',
+          body: 'Licensed electricians handle all panel work, conduit, wiring, and equipment mounting. We work around your residents with minimal disruption.',
+          icon: 'hammer',
+        },
+        {
+          title: 'Permits & utility coordination',
+          body: 'All permitting, inspections, utility applications, and compliance paperwork managed end-to-end. You stay focused on your property.',
+          icon: 'shield',
+        },
+        {
+          title: 'Rebate processing',
+          body: 'We identify and file applicable utility rebates, state incentives, and NEVI-aligned programs to maximize value for every project.',
+          icon: 'coin',
+        },
+        {
+          title: 'Ongoing operations & support',
+          body: '24/7 remote monitoring, resident support line, preventative maintenance, and on-site repair service. We never hand you the keys and disappear.',
+          icon: 'clock',
+        },
+      ],
+    },
+
+    {
+      type: 'hardware',
+      anchor: 'service-hardware',
+      eyebrow: 'Recommended hardware',
+      title: 'Level 2 chargers built for shared-access multifamily.',
+      subhead:
+        'Hardware is matched to your property — not a one-size catalog. Below: the workhorses we deploy across most multifamily portfolios.',
+      seeAllLink: { label: 'View All Level 2 Products', href: '/products/level-2' },
+      items: [
+        {
+          name: 'EvoCharge by Evium',
+          image: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',
+          imageAlt: 'EvoCharge Level 2 wall-mount',
+          tier: 'l2',
+          features: [
+            'In-house branded Level 2 wall-mount charger',
+            'ENERGY STAR certified, OCPP 1.6 compatible',
+            'Built for shared-access residential environments',
+          ],
+        },
+        {
+          name: 'Siemens VersiCharge',
+          image: '/images/chargers/siemens/siemens-versicharge-l2-wallmount.png',
+          imageAlt: 'Siemens VersiCharge wall-mount',
+          tier: 'l2',
+          features: [
+            'Commercial-grade Level 2 from our Siemens eMobility partnership',
+            'Configurable for dedicated or shared use',
+            'Durable all-weather construction',
+          ],
+        },
+        {
+          name: 'GSA-approved & code compliant',
+          tier: 'l2',
+          features: [
+            'All hardware sourced from GSA-approved manufacturers',
+            'UL-listed, NEC compliant',
+            'Warranted against defects — no surprises at inspection',
+          ],
+        },
+      ],
+    },
+
+    {
+      type: 'financialModels',
+      anchor: 'service-financialModels',
+      eyebrow: 'Financial models',
+      title: 'You Choose How\nYou Want to Work With Us.',
+      subhead:
+        'Most multifamily owners start with our no-cost model. But if you want more control — or more upside — we have options for that too.',
+      models: [
+        {
+          name: 'No-Cost Model',
+          tagline: '$0 upfront — Evium covers everything',
+          body:
+            'Evium funds 100% of hardware, installation, and ongoing operations. In exchange, gross charging revenue is split approximately 60/40 in your favor — a true passive income stream with zero capital at risk.',
+          bullets: [
+            'Zero operational burden — Evium handles everything.',
+            'Fastest path to launch and revenue.',
+            'No capital approval, no procurement cycle.',
+          ],
+          highlight:
+            'Ideal for property owners who want the amenity and the revenue without any budget commitment or operational burden.',
+          badge: 'Most Popular',
+          featured: true,
+          icon: 'coin',
+        },
+        {
+          name: 'Client Investment',
+          tagline: 'You finance, you keep 100%',
+          body:
+            'Fund the installation yourself and retain 100% of all charging revenue. Best for owners who want maximum return on a long hold and have capital to deploy.',
+          bullets: [
+            'Maximum revenue capture — keep every dollar.',
+            'Best for long holds where capital ROI compounds.',
+            'Evium can still operate the network on a service contract.',
+          ],
+          icon: 'chart',
+        },
+        {
+          name: 'Hybrid Model',
+          tagline: 'Shared cost, shared upside',
+          body:
+            'Both parties contribute to installation costs and share revenue proportionally. A balanced option that improves your revenue share without full capital exposure.',
+          bullets: [
+            'Improved revenue share vs. no-cost.',
+            'Capital exposure scaled to your comfort level.',
+            'Custom terms — no two deals look alike.',
+          ],
+          icon: 'stack',
+        },
+      ],
+      footnote: {
+        before: 'Leasing options also available. ',
+        link: { label: 'Speak with our team', href: '#service-cta' },
+        after: ' to find the right structure for your portfolio.',
+      },
+    },
+
+    {
+      type: 'software',
+      anchor: 'service-software',
+      eyebrow: 'Software & management',
+      title: 'Full Visibility.\nZero Effort.',
+      config: {
+        intro:
+          "Evium's owner portal and resident driver app give you and your tenants a seamless, modern experience — while you watch the revenue flow in from your dashboard.",
+        portalTitle: 'Owner Portal',
+        portalFeatures: [
+          'Real-time revenue reporting and session history',
+          'Remote start/stop and charger management',
+          'Load management to protect your electrical infrastructure',
+          'Resident access whitelisting and permissions',
+          'Maintenance alerts and service ticket tracking',
+          'OCPP 1.6+ protocol — future-proof and interoperable',
+        ],
+        appTitle: 'Evium Driver App',
+        appSubtitle: 'iOS & Android',
+        appBody:
+          'Your residents get a polished, intuitive app to find available chargers, start and stop sessions, manage their payment method, and view their charging history — all from their phone.',
+        appFeatures: [
+          'Find & reserve chargers on-property',
+          'Start/stop sessions remotely',
+          'Contactless payment & digital receipts',
+          'Session history and spend tracking',
+        ],
+        support: {
+          title: '24/7 Live Support',
+          body: "Residents and property managers both have access to Evium's support line around the clock. Charging issues get resolved fast — not left to you to troubleshoot.",
+        },
+      },
+    },
+
+    {
+      type: 'faq',
+      anchor: 'service-faq',
+      eyebrow: 'Frequently Asked Questions',
+      title: 'Good Questions.\nStraight Answers.',
+      items: [
+        {
+          q: 'Who pays for the chargers and installation?',
+          a: 'Under our no-cost model, Evium covers 100% of hardware costs, installation labor, electrical work, permitting, and ongoing maintenance. You pay nothing upfront and nothing ongoing. If you prefer to invest directly and capture 100% of revenue, that option is also available.',
+        },
+        {
+          q: 'Who handles maintenance and repairs?',
+          a: 'Evium does — permanently. We remotely monitor every charger 24/7. If an issue is detected, we resolve it remotely when possible or dispatch a technician when physical service is required. You never need to call an electrician, coordinate a repair, or field resident complaints about broken equipment.',
+        },
+        {
+          q: 'What electrical work does installation involve?',
+          a: "It depends on your property's existing electrical capacity. Our engineers assess your panel, service entrance, and available capacity before proposing a scope. For many properties, installation is straightforward panel additions and conduit runs. For others, a service upgrade may be required — all coordinated and managed by our team.",
+        },
+        {
+          q: 'How do my residents pay for charging?',
+          a: 'Residents pay per session using the Evium Driver App (iOS & Android) with a credit card or linked payment method. Sessions are billed automatically. Residents receive digital receipts. You never handle money from residents — Evium manages all payment processing and pays your revenue share directly to you.',
+        },
+        {
+          q: 'What happens if a charger breaks down?',
+          a: "We're notified before your residents are, in most cases. Our 24/7 remote monitoring system alerts us to faults automatically. We triage remotely and either resolve the issue over-the-air or dispatch a field technician. Our goal is same-day or next-day resolution for any service-affecting fault.",
+        },
+        {
+          q: 'How long does installation take from start to finish?',
+          a: "From initial site assessment to go-live typically takes 6–12 weeks, depending on permit timelines in your municipality, electrical scope, and number of chargers. Permitting is often the longest variable — we set expectations clearly upfront so you're never left wondering where the project stands.",
+        },
+        {
+          q: 'Can I see charging revenue and usage data?',
+          a: "Yes, in real time. Your owner portal gives you a live dashboard with session history, per-charger revenue, total kWh dispensed, and monthly reporting exports. You always know exactly what your property's charging infrastructure is generating.",
+        },
+      ],
+    },
+  ],
+
+  finalCta: {
+    /* eyebrow intentionally omitted in v4 — the "Now Serving"
+       pulsing pill from V2/v3 felt formulaic next to the
+       photo-backed CTA composition v4 introduces. The V2
+       component conditionally renders the pill so omitting
+       the field cleanly removes it. */
+    headline:
+      'Your Property.\n<span class="svc-final-title-accent">Electrified.</span>\nZero Cost to You.',
+    subhead:
+      'Every week you wait is another week competing properties are locking in residents with charging. Book a free site assessment today. No obligation. No sales pressure. Just a clear picture of what EV charging looks like on your property.',
+    primaryCta: { label: 'Book a Free Site Assessment', href: '/contact/quote' },
+    secondaryCta: { label: 'Schedule a Call', href: '/contact/schedule' },
+    footnote:
+      'No upfront cost. No hidden fees. No obligation to proceed after your assessment.',
+  },
+};
+---
+
+{/* Sets the html flag classes BEFORE the V2 component paints
+    so all global overrides below land on first render — no
+    FOUC flash of the V2 light theme.
+
+    v4 inherits everything v3 does (dark canvas, feathered
+    light bands, atmospheric green orbs) PLUS adds its own
+    full-viewport-hero treatment via the additional class. */}
+<script is:inline>
+  document.documentElement.classList.add('svc-v3-active', 'svc-v4-active');
+</script>
+
+<ServicePageV2 service={service} />
+
+{/* Post-render relocation + sizing:
+    1) Find the stat-strip that ServicePageV2 renders inside
+       the hero (overhanging its photo at the bottom).
+    2) Wrap it in a `.svc-v3-hero-actions` band and insert as
+       a sibling right after the hero.
+    3) Size the band to EXACTLY (100vh − hero.offsetHeight)
+       so hero + band = one full viewport, with zero peek of
+       the section below the fold. CSS-only calc didn't work
+       because the hero's height changes by clamp + viewport;
+       computing at runtime guarantees the math is correct.
+    4) Re-fit on window resize. */}
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const hero  = document.querySelector('.svc-hero');
+    const strip = document.querySelector('.svc-hero .svc-stat-strip');
+    if (!hero || !strip) return;
+    const band = document.createElement('div');
+    band.className = 'svc-v3-hero-actions';
+    band.appendChild(strip);
+
+    /* v4 differs from v3 in where the band lives: v3 makes
+       the band a SIBLING below the hero so they tile to
+       100vh (hero photo on top, dark band below). v4 makes
+       the hero ITSELF span 100vh and floats the band as
+       an absolute overlay across the bottom of the hero,
+       so the photo extends through the full viewport with
+       the navtab strip glassed on top. */
+    const isV4 = document.documentElement.classList.contains('svc-v4-active');
+
+    if (isV4) {
+      hero.appendChild(band);
+    } else {
+      hero.parentNode.insertBefore(band, hero.nextSibling);
+
+      function fitBand() {
+        const remaining = window.innerHeight - hero.offsetHeight;
+        // +30px BUFFER so hero+band ALWAYS exceed 100vh — kills
+        // any sub-pixel rounding peek of the next (light) section
+        // below the fold. Floor at 200px for tiny viewports so
+        // the band still reads as a deliberate tray, not a sliver.
+        band.style.height = Math.max(200, remaining + 30) + 'px';
+      }
+      fitBand();
+      window.addEventListener('resize', fitBand);
+      /* Also re-fit after webfonts load — they can change the
+         hero title's measured height by 10–20px, which would
+         leave a small peek of the next section. */
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(fitBand);
+      }
+    }
+
+    /* ─── Pain-points sequential reveal ────────────────────────
+       For each pain card after the first, animate opacity +
+       translateX based on distance from the parallax text's
+       current Y (the sticky .svc-pain-header). Each card
+       runs through ANIM_DISTANCE pixels of scroll worth of
+       animation, ending exactly when its top edge reaches the
+       parallax header's top edge.
+
+       ANIM_DISTANCE (130px) < inter-card gap (~140-200px), so
+       card N's animation completes before card N+1's begins —
+       one card slides in at a time, with a clear interval of
+       pure scroll between reveals.
+
+       Quartic ease-out (1 - (1-p)^4) for smooth deceleration
+       so cards land softly into place rather than snapping.
+
+       Lock-revealed: once a card reaches progress=1, it stays
+       at progress=1 forever — scrolling back up does NOT
+       reverse the animation.
+
+       rAF-throttled passive scroll listener — won't jank the
+       scroll thread. Bails when prefers-reduced-motion is set. */
+    const painCards = document.querySelectorAll('.svc-pain-card');
+    const painHeader = document.querySelector('.svc-pain-header');
+    const reduceMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (painCards.length > 1 && painHeader && !reduceMotion) {
+      const ANIM_DISTANCE = 130;
+      const TRANSLATE_X   = 60;
+      const mobileMql = window.matchMedia('(max-width: 860px)');
+
+      function updatePainCards() {
+        const headerRect = painHeader.getBoundingClientRect();
+        /* Anchor point depends on layout:
+           · DESKTOP (≥960px CSS sticky kicks in): header sits in a
+             LEFT column, cards scroll past it in the RIGHT column.
+             Header and cards never visually overlap, so the anchor
+             is `headerRect.top` — a card is "fully revealed" when
+             its top edge aligns with the header's top.
+           · MOBILE (≤860px): header is sticky at viewport top (just
+             below the page navbar), cards stack vertically BELOW it.
+             Tracking `headerRect.top` would target a position INSIDE
+             the header — cards would fade to opacity 1 while
+             scrolling under it, looking broken. Instead anchor at
+             `headerRect.bottom + 16` so each card finishes revealing
+             right before it slides behind the header. The 16px buffer
+             gives a small visual lead-in below the sticky header
+             before the card starts disappearing. */
+        const isMobile = mobileMql.matches;
+        const parallaxY = isMobile
+          ? Math.max(0, headerRect.bottom + 16)
+          : Math.max(0, headerRect.top);
+        const startY = parallaxY + ANIM_DISTANCE;
+        const endY = parallaxY;
+
+        painCards.forEach((card, i) => {
+          if (i === 0) return;
+          const top = card.getBoundingClientRect().top;
+          let progress;
+          if (top >= startY) {
+            progress = 0;
+          } else if (top <= endY) {
+            progress = 1;
+          } else {
+            progress = (startY - top) / ANIM_DISTANCE;
+          }
+          // Lock-revealed: once we hit 1, stay at 1 forever.
+          if (card.dataset.revealed === '1') {
+            progress = 1;
+          } else if (progress >= 1) {
+            card.dataset.revealed = '1';
+          }
+          // Quartic ease-out — smooth deceleration.
+          const eased = 1 - Math.pow(1 - progress, 4);
+          card.style.opacity = String(eased);
+          /* Slide direction follows layout:
+             · DESKTOP: cards live in the right column; sliding IN
+               from the right (translateX) feels like they're being
+               handed in from off-canvas — matches the side-by-side
+               composition.
+             · MOBILE: cards are stacked vertically below the sticky
+               header; sliding IN from below (translateY) feels like
+               they're rising up into their slot — matches the
+               vertical scroll direction. */
+          if (isMobile) {
+            card.style.transform = `translateY(${(1 - eased) * TRANSLATE_X}px)`;
+          } else {
+            card.style.transform = `translateX(${(1 - eased) * TRANSLATE_X}px)`;
+          }
+        });
+      }
+
+      let rafScheduled = false;
+      function onPainScroll() {
+        if (rafScheduled) return;
+        rafScheduled = true;
+        requestAnimationFrame(() => {
+          updatePainCards();
+          rafScheduled = false;
+        });
+      }
+      window.addEventListener('scroll', onPainScroll, { passive: true });
+      window.addEventListener('resize', onPainScroll, { passive: true });
+      updatePainCards();
+    } else if (painCards.length) {
+      // No-animation fallback: show every card at rest.
+      painCards.forEach((card) => {
+        card.style.opacity = '1';
+        card.style.transform = 'none';
+      });
+    }
+
+    /* ─── Financial models mobile tabs ──────────────────────
+       Desktop shows all 3 models in a side-by-side grid. On
+       mobile that's too wide AND too tall when stacked.
+
+       Mobile UX: inject a small tab bar above the grid with
+       one button per model. Clicking a tab swaps which card
+       is visible (via a `data-active` attribute on the grid).
+       The other cards are hidden on mobile only — desktop
+       continues to show all 3 by default since the mobile
+       CSS rules are gated by @media (max-width: 860px).
+
+       The tab bar is created here in JS rather than in the
+       page markup so the ServicePageV2 template stays
+       untouched. Markup created:
+           <nav class="svc-v4-fin-tabs" role="tablist">
+             <button data-fin-tab="0">No-Cost Model</button>
+             ...
+           </nav> */
+    /* Plain JS only — this script is `is:inline` so Astro
+       doesn't compile TypeScript here. No generics, no `as`
+       casts, no optional-chained method calls. */
+    var finGrid = document.querySelector(
+      '#service-financialModels .svc-fin-grid'
+    );
+    var finCards = finGrid
+      ? Array.from(finGrid.querySelectorAll('.svc-fin-card'))
+      : [];
+    if (finGrid && finCards.length > 1) {
+      /* Find the featured/most-popular card and use it as the
+         initial active tab. Falls back to index 0 if no card
+         is flagged featured. */
+      var featuredIdx = finCards.findIndex(function (c) {
+        return c.classList.contains('is-featured');
+      });
+      var initialIdx = featuredIdx >= 0 ? featuredIdx : 0;
+
+      /* Build the tab bar element. */
+      var tabBar = document.createElement('nav');
+      tabBar.className = 'svc-v4-fin-tabs';
+      tabBar.setAttribute('role', 'tablist');
+      tabBar.setAttribute('aria-label', 'Financial models');
+
+      /* Shorter labels for narrow mobile widths — at 390px
+         viewport, the full names ("No-Cost Model", "Client
+         Investment", "Hybrid Model") get clipped inside their
+         pill tabs. Strip common suffix words and shorten the
+         longest single word so all three fit at narrow phone
+         widths. */
+      function shortenFinLabel(full) {
+        return full
+          .replace(/\s*Model\s*$/i, '')
+          .replace(/^Client\s+/i, '')
+          .replace(/^Investment$/i, 'Invest');
+      }
+      finCards.forEach(function (card, i) {
+        var nameEl = card.querySelector('.svc-fin-name');
+        var fullName = nameEl && nameEl.textContent
+          ? nameEl.textContent.trim()
+          : 'Model ' + (i + 1);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'svc-v4-fin-tab';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-fin-tab', String(i));
+        btn.setAttribute('aria-selected', i === initialIdx ? 'true' : 'false');
+        btn.textContent = shortenFinLabel(fullName);
+        tabBar.appendChild(btn);
+        card.setAttribute('data-fin-card-idx', String(i));
+      });
+
+      /* Insert the tab bar BEFORE the cards grid. */
+      if (finGrid.parentNode) {
+        finGrid.parentNode.insertBefore(tabBar, finGrid);
+      }
+      finGrid.setAttribute('data-active', String(initialIdx));
+
+      /* Click handler — flips active tab + grid data-attr. */
+      tabBar.addEventListener('click', function (e) {
+        var target = e.target;
+        var btn = target && target.closest
+          ? target.closest('[data-fin-tab]')
+          : null;
+        if (!btn) return;
+        var idx = btn.getAttribute('data-fin-tab') || '0';
+        finGrid.setAttribute('data-active', idx);
+        tabBar
+          .querySelectorAll('[data-fin-tab]')
+          .forEach(function (b) {
+            b.setAttribute(
+              'aria-selected',
+              b === btn ? 'true' : 'false'
+            );
+          });
+      });
+    }
+  });
+</script>
+
+<style is:global>
+  /* ═══════════════════════════════════════════════════════════
+     V3 visual skin — applied only when html.svc-v3-active is set
+     (the inline script above sets it on this page only). All
+     overrides are keyed on that flag so V2 pages stay untouched.
+
+     Strategy: turn the page into ONE continuous dark canvas, and
+     reduce every section to either (a) "transparent — dark
+     canvas shows through," or (b) "feathered light band that
+     fades into the dark canvas at top/bottom." Result: zero
+     hard color boundaries between sections.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ─── Flush anchor scroll on every v3 section ────────────────
+     The v2 base sets scroll-margin-top: clamp(40px, 6vw, 80px)
+     on every .svc-section so anchor jumps land 80px below the
+     section's actual top — that buffer was originally there to
+     keep the section number marker (the "/01"-style pill) from
+     colliding with the lefter rail. V3 has hidden every section
+     number marker, so the buffer is now just a leak: the
+     previous section's bg color (often a light band) shows
+     through the 80px above the anchored section.
+     Setting it to 0 makes every anchor land flush at viewport
+     top — visually consistent across sections and no bleed. */
+  html.svc-v3-active .svc-section,
+  html.svc-v3-active .svc-final {
+    scroll-margin-top: 0 !important;
+  }
+
+  /* ─── Smooth anchor scroll ───────────────────────────────────
+     Navtab buttons are <a href="#service-scope"> anchor links.
+     Default browser behavior is instant jump on click; this
+     enables the OS-level smooth-scroll animation so anchor
+     navigation reads as a deliberate transit through the
+     page's user flow rather than a jumpcut. Honors
+     prefers-reduced-motion automatically. */
+  html.svc-v3-active {
+    scroll-behavior: smooth;
+  }
+
+  /* ─── Page canvas ─────────────────────────────────────────── */
+  /* Solid dark teal — no gradient, no fog. Crisp uniform dark
+     across the entire page. */
+  html.svc-v3-active body.page-service-testing,
+  html.svc-v3-active body.page-service-testing .svc-page {
+    background: #1A2F3A !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+  }
+  /* Kill the V2 page-level atmospheric orbs entirely — they
+     were adding the soft "haze" feel across the whole page.
+     The dark canvas reads cleaner without them. */
+  html.svc-v3-active body.page-service-testing .svc-page::before,
+  html.svc-v3-active body.page-service-testing .svc-page::after {
+    display: none !important;
+  }
+
+  /* ─── Dark sections — dissolve into the page canvas ───────── */
+  /* Every dark variant strips its bg, shadow, and bg-extension
+     tricks so the dark canvas shows through. FAQ is back in
+     this group (was an elevation band, now flat-dark again).
+     The visual differentiation between the trailing dark
+     sections (sw → faq) is handled by the mesh-gradient
+     transition zone below, not by section-bg variation. */
+  html.svc-v3-active .svc-section--dark,
+  html.svc-v3-active .svc-section--pain,
+  html.svc-v3-active .svc-section--hardware,
+  html.svc-v3-active .svc-section--sw,
+  html.svc-v3-active .svc-section--faq {
+    background: transparent !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+  }
+  html.svc-v3-active .svc-section--dark::before,
+  html.svc-v3-active .svc-section--dark::after,
+  html.svc-v3-active .svc-section--sw::before,
+  html.svc-v3-active .svc-section--sw::after,
+  html.svc-v3-active .svc-section--faq::after {
+    display: none !important;
+  }
+
+  /* ─── Software → FAQ mesh-gradient transition zone ──────────
+     Both Software and FAQ now sit transparent on the dark
+     canvas, which would otherwise make the boundary between
+     them invisible (one continuous dark zone). To demarcate
+     the two without resorting to a hard line or single-axis
+     fade, we paint a multi-layer atmospheric "mesh" at the
+     boundary — a 400px-tall full-viewport-width zone centered
+     on the seam, anchored to FAQ's top edge but extending
+     200px UP into Software's bottom. Three blended layers
+     create the depth:
+
+       1) A wide ELLIPTICAL GREEN GLOW spanning the seam — a
+          horizontal band of brand-tinted atmospheric light
+          right at the boundary.
+       2) A VERTICAL TINTED BAND that lifts the seam to a
+          slightly lighter teal (#2e465c-ish at peak alpha)
+          before fading back to canvas above and below.
+          This adds the "lift" — the boundary feels elevated.
+       3) A NARROW DARK CENTER VIGNETTE that pulls a soft
+          inverse weight at the very middle, creating a
+          contrast line between the green glow and the
+          lifted band — that's where the multi-level mesh
+          comes from. Layers blend rather than resolve to a
+          single horizontal seam. */
+  html.svc-v3-active #service-faq {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  html.svc-v3-active #service-faq::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: -200px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100vw !important;
+    height: 400px !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background:
+      /* Layer 1 — wide green atmospheric glow at the seam */
+      radial-gradient(
+        ellipse 80% 40% at 50% 50%,
+        rgba(45, 200, 86, 0.09) 0%,
+        rgba(45, 200, 86, 0.04) 30%,
+        transparent 70%
+      ),
+      /* Layer 2 — vertical "lift" tint band */
+      linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(36, 56, 71, 0.40) 24%,
+        rgba(46, 70, 92, 0.55) 50%,
+        rgba(36, 56, 71, 0.40) 76%,
+        transparent 100%
+      ),
+      /* Layer 3 — narrow dark center vignette for the cross-
+         layer contrast that creates the mesh feel */
+      radial-gradient(
+        ellipse 55% 18% at 50% 50%,
+        rgba(13, 25, 33, 0.30) 0%,
+        rgba(13, 25, 33, 0.10) 50%,
+        transparent 80%
+      ) !important;
+  }
+
+  /* Hardware section's "see all" link (existing v2 styling
+     uses a green outline on a dark bg) — works as-is on the
+     transparent dark section, but bump its border alpha a
+     touch so it still pops against the canvas. */
+  html.svc-v3-active .svc-hw-seeall {
+    border-color: rgba(45, 200, 86, 0.5) !important;
+  }
+
+  /* ─── Light sections — feathered bands ────────────────────── */
+  /* The ::before pseudo paints a vertical light gradient that
+     fades from transparent → solid light → transparent over
+     the section's height. Where it's transparent, the dark
+     canvas shows through — zero hard boundary line, just a
+     smooth dissolve from dark into light and back.
+
+     Targeted by id (which V2 sets via section.anchor) so this
+     works without modifying V2's render block:
+       #service-market           → narrative
+       #service-scope            → scope
+       #service-financialModels  → financial models
+       #service-cta              → final CTA */
+  html.svc-v3-active #service-market,
+  html.svc-v3-active #service-scope,
+  html.svc-v3-active #service-financialModels,
+  html.svc-v3-active .svc-final {
+    position: relative !important;
+    background: transparent !important;
+  }
+  html.svc-v3-active #service-market::before,
+  html.svc-v3-active #service-scope::before,
+  html.svc-v3-active #service-financialModels::before,
+  html.svc-v3-active .svc-final::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    /* Extend horizontally to viewport edges — without this the
+       band would only span the section's max-width box. */
+    width: 100vw !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    /* Solid light fill, NO fade. The previous gradient feathers
+       (even tightened to 3%) read as fog at the section seams.
+       A solid color cuts the boundary clean — sharper edges
+       between dark canvas and light band. */
+    background: #f3f7fb !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+  }
+  /* Suppress the green-halo top-radial-gradient that V2 paints
+     on the financial-models section — its ::before now hosts
+     the feathered-band gradient instead. */
+  html.svc-v3-active .svc-section--fin {
+    background: transparent !important;
+  }
+  html.svc-v3-active .svc-section--fin::after {
+    display: none !important;
+  }
+  /* The standard V2 section ::after (top hairline) — hide on
+     light bands too so the only bg art is the feathered band. */
+  html.svc-v3-active #service-market::after,
+  html.svc-v3-active #service-scope::after,
+  html.svc-v3-active #service-financialModels::after {
+    display: none !important;
+  }
+
+  /* ─── Financial-models mobile tabs — desktop hide ──────────
+     The tabs are JS-injected for the mobile single-card view.
+     On desktop the 3-card grid is the right layout, so the
+     tabs should be invisible. The mobile @media block below
+     re-enables them as `display: flex`. */
+  html.svc-v3-active .svc-v4-fin-tabs {
+    display: none !important;
+  }
+
+  /* ─── Mobile scroll-snap catch for scope ──────────────────
+     On desktop the pain → scope → hardware sequence is
+     navigated with mouse wheel/trackpad — short, deliberate
+     scrolls. Scope's 100vh anchor catches the user reliably.
+
+     On mobile, touch scrolling has high momentum: the user
+     reaches the last pain card, naturally keeps scrolling
+     down expecting "more content," and a single flick can
+     coast right through scope into hardware before the user
+     realizes scope was even there.
+
+     CSS scroll-snap with `proximity` (not `mandatory`) plus
+     `scroll-snap-stop: always` on the scope anchor catches
+     the user gracefully:
+       · `proximity` — only snaps when scroll naturally
+         settles NEAR a snap point. Doesn't fight short
+         deliberate scrolls inside long sections.
+       · `scroll-snap-stop: always` — guarantees the user
+         can't FLICK past scope in a single fling. Once the
+         viewport approaches scope's top, the scroll halts
+         there and the user must initiate a fresh gesture
+         to leave.
+
+     Scoped to mobile only via the @media wrapper — desktop
+     keeps its natural free-scroll behavior. */
+  @media (max-width: 860px) {
+    /* The scroller is the documentElement (html) for normal
+       page scroll. Applying the type here makes scope's
+       snap-align value effective.
+
+       `scroll-padding-top: 80px` offsets every snap point's
+       alignment target by the sticky mobile navbar's height
+       (80px). Without it, `scroll-snap-align: start` aligns
+       scope's top to viewport y=0 — which is BEHIND the
+       sticky navbar — so the user sees scope's light
+       background bleed past the translucent navbar, and the
+       section's actual top edge sits invisible under the
+       header. With 80px padding, scope's top aligns to
+       viewport y=80 (right below the navbar) — clean
+       boundary, no bleed-through.
+
+       Hardware is added as a second snap point so the same
+       guarantee applies after scope: the user can't flick
+       into a half-hardware/half-scope position. They snap
+       cleanly from one to the next. */
+    html.svc-v3-active {
+      scroll-snap-type: y proximity;
+      scroll-padding-top: 80px;
+    }
+    /* Scope is the ONLY scroll-snap-stop: always point on
+       this page. Its purpose is to CATCH the user coming
+       out of pain so they don't fling past scope into
+       hardware. Once they're at scope, scrolling DOWN
+       should flow naturally into hardware without another
+       forced stop. */
+    html.svc-v3-active #service-scope {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+  }
+
+  /* ─── Scope section — viewport-anchored ────────────────────
+     The page-flow used to read:
+       hero → market → pain (parallax cards) → scope → hardware
+     where every section EXCEPT scope had either a viewport
+     anchor (hero, hardware via `min-height: 100vh`) or a
+     sticky-internal scroll (pain's parallax). Scope was the
+     odd one out: its height was content-driven (~1020px on
+     desktop) with NO min-height floor.
+
+     Symptom: scrolling fast out of the pain section, the
+     user's momentum carries them right through scope into
+     the next viewport-anchored section (hardware), so scope
+     effectively gets SKIPPED. The hardware's strong 100vh
+     anchor acts like a magnet because scope has nothing to
+     "catch" the scroll.
+
+     Fix: give scope the same viewport-anchor treatment as
+     hardware. Desktop `min-height: 100vh` + flex centering
+     vertically frames scope content. Mobile drops the floor
+     to `calc(100dvh - 80px)` to account for the sticky
+     mobile navbar. Now scope holds its own viewport when
+     the user scrolls into it; the next scroll gesture is
+     required to leave it. */
+  html.svc-v3-active #service-scope {
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    scroll-margin-top: 0 !important;
+  }
+  @media (max-width: 860px) {
+    html.svc-v3-active #service-scope {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: clamp(16px, 2.4vh, 28px) !important;
+      padding-bottom: clamp(20px, 3vh, 36px) !important;
+    }
+    /* Section head compresses so the 6-card grid below
+       claims the rest of the viewport budget. */
+    html.svc-v3-active #service-scope .svc-section-title {
+      font-size: clamp(1.35rem, 5.4vw, 1.75rem) !important;
+      line-height: 1.04 !important;
+      margin-bottom: clamp(4px, 0.6vh, 6px) !important;
+    }
+    html.svc-v3-active #service-scope .svc-section-sub {
+      font-size: clamp(0.82rem, 2.8vw, 0.9rem) !important;
+      line-height: 1.35 !important;
+      margin-bottom: 0 !important;
+    }
+    html.svc-v3-active #service-scope .svc-section-head {
+      margin-bottom: clamp(10px, 1.6vh, 16px) !important;
+    }
+    /* 6 scope items in a 2-column grid (3 rows × 2 cols) on
+       mobile. Card sizing tightened so 3 rows + tight header
+       fit inside calc(100dvh - 80px).
+
+       Math at viewport 700:
+         · section padding 16+20 = 36
+         · header ~110
+         · 3 rows × ~140 height + 2 gaps × 10 = 440
+         · total = 36 + 110 + 440 = 586 ✓ fits in 700 (and
+                  scope's 620 min-height floor stretches to
+                  accommodate). */
+    html.svc-v3-active #service-scope .svc-scope-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+    }
+    html.svc-v3-active #service-scope .svc-scope-card {
+      padding: 14px 16px !important;
+      border-radius: 14px !important;
+    }
+    html.svc-v3-active #service-scope .svc-scope-num {
+      top: 10px !important;
+      right: 12px !important;
+      font-size: 0.6rem !important;
+    }
+    html.svc-v3-active #service-scope .svc-scope-icon {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 9px !important;
+      margin-bottom: 8px !important;
+    }
+    html.svc-v3-active #service-scope .svc-scope-title {
+      font-size: 0.85rem !important;
+      line-height: 1.2 !important;
+      margin-bottom: 4px !important;
+    }
+    html.svc-v3-active #service-scope .svc-scope-body {
+      font-size: 0.72rem !important;
+      line-height: 1.35 !important;
+      /* Clamp to 3 lines so the longer copy doesn't expand
+         one tile past its grid row neighbors. */
+      display: -webkit-box !important;
+      -webkit-line-clamp: 3 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
+  }
+  /* Short-viewport guard — match the hardware-section pattern
+     so super-short laptops/landscape phones don't get a hero-
+     sized scope they can't scroll past. */
+  @media (max-height: 720px) and (min-width: 861px) {
+    html.svc-v3-active #service-scope {
+      min-height: auto !important;
+      justify-content: flex-start !important;
+    }
+  }
+
+  /* ─── Hero quick-nav band (V3-only) ──────────────────────────
+     The inline script above relocates the stat-strip out of
+     the hero into a new `.svc-v3-hero-actions` band that lives
+     between the hero and the first content section. This band
+     fills the gap between the hero's bottom edge and the
+     viewport's bottom edge, so on first paint the user sees:
+       [ hero photo + copy ] +
+       [ quick-nav band  ] = exactly one viewport.
+     Scrolling past lands them at #service-market.
+     ─────────────────────────────────────────────────────────── */
+  html.svc-v3-active .svc-v3-hero-actions {
+    /* Fallback height — the JS at the bottom of the page sizes
+       this band exactly to (100vh - hero.offsetHeight) at
+       runtime so the hero + band always equal exactly one
+       viewport, with no peek of the section below. The CSS
+       value is just a sane pre-script floor. */
+    min-height: 200px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(20px, 3vh, 36px) clamp(20px, 4vw, 60px) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    /* Layered background:
+        1) Soft brand-green spotlight pool centered behind the
+           navtab strip — gives the floating buttons a "lit
+           zone" feeling so they read as floating IN something,
+           not just on top of a flat band.
+        2) Subtle dark edge vignette that pulls the corners
+           down — adds depth, makes the center pool feel more
+           lit by contrast.
+        3) Base vertical gradient — top starts at the same dark
+           value the hero's bottom-tint settles to (~#0d1c24)
+           and bleeds down to the page's dark canvas, keeping
+           the photo→band seam dark-to-dark. */
+    background:
+      radial-gradient(
+        ellipse 55% 70% at 50% 55%,
+        rgba(45, 200, 86, 0.07) 0%,
+        rgba(45, 200, 86, 0.025) 45%,
+        transparent 78%
+      ),
+      radial-gradient(
+        ellipse 100% 80% at 50% 50%,
+        transparent 55%,
+        rgba(0, 0, 0, 0.22) 100%
+      ),
+      linear-gradient(
+        180deg,
+        #0d1c24 0%,
+        #14252f 35%,
+        #1a2f3a 80%,
+        #1a2f3a 100%
+      ) !important;
+  }
+  /* Green divider hairline at the seam between the hero photo
+     and the band. Middle-ground brightness (peak 0.22, edges
+     0.11) — visible enough to read as a deliberate divider
+     accent, soft enough that it doesn't pop. The 12px green
+     box-shadow halo gives the line ambient bloom without
+     making the line itself bright. */
+  html.svc-v3-active .svc-v3-hero-actions::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 1px !important;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(45, 200, 86, 0.11) 15%,
+      rgba(45, 200, 86, 0.22) 50%,
+      rgba(45, 200, 86, 0.11) 85%,
+      transparent 100%
+    ) !important;
+    box-shadow: 0 0 12px rgba(45, 200, 86, 0.14) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     RE-APPLY the V2 strip + button styling to the new band.
+     V2's CSS scoped these to `.svc-hero .svc-stat-strip` etc.,
+     so when the inline script moves the strip out of .svc-hero
+     into .svc-v3-hero-actions, all those rules stop matching
+     and the buttons revert to bare unstyled HTML. The block
+     below mirrors the V2 styles 1:1 but keyed on the new
+     parent class.
+     ───────────────────────────────────────────────────────── */
+
+  /* Glass row container. */
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat-strip {
+    margin: 0 auto !important;
+    max-width: 880px !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 1px !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    box-shadow:
+      0 8px 24px rgba(13, 28, 36, 0.25),
+      0 24px 60px rgba(13, 28, 36, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* Each tile (white glass cell). */
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(24px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+    padding: clamp(20px, 2.4vw, 28px) clamp(20px, 2.4vw, 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  /* Anchor-button variant — flex row layout (icon | text | arrow). */
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: clamp(10px, 1.2vw, 14px) !important;
+    padding: clamp(12px, 1.3vw, 16px) clamp(14px, 1.6vw, 18px) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition:
+      transform 0.28s cubic-bezier(0.25, 0, 0, 1),
+      box-shadow 0.28s cubic-bezier(0.25, 0, 0, 1),
+      background 0.28s cubic-bezier(0.25, 0, 0, 1) !important;
+  }
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn .svc-stat-value {
+    font-size: clamp(0.92rem, 1.05vw, 1.04rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.008em !important;
+    color: #1d1d1f !important;
+    text-transform: none !important;
+    transition: color 0.22s cubic-bezier(0.25, 0, 0, 1) !important;
+  }
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn .svc-stat-label {
+    font-size: clamp(0.58rem, 0.66vw, 0.66rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: #6e7780 !important;
+    transition: color 0.22s cubic-bezier(0.25, 0, 0, 1) !important;
+  }
+  /* Hover — lift, brighten icon, brighten value, slide arrow. */
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn:hover {
+    transform: translateY(-3px) !important;
+    background: #ffffff !important;
+    box-shadow:
+      0 1px 2px rgba(45, 200, 86, 0.18),
+      0 0 28px rgba(45, 200, 86, 0.22),
+      0 16px 36px rgba(13, 28, 36, 0.16) !important;
+  }
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn:hover .svc-stat-icon {
+    background: #2DC856 !important;
+    color: #ffffff !important;
+    transform: scale(1.04) !important;
+  }
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn:hover .svc-stat-value {
+    color: #1d9942 !important;
+  }
+  html.svc-v3-active .svc-v3-hero-actions .svc-stat--btn:hover .svc-stat-arrow {
+    opacity: 1 !important;
+    transform: translateX(3px) !important;
+  }
+  /* The next section (narrative / market reality) used to need
+     extra top padding to clear the overhanging strip. With the
+     strip moved out, that extra padding becomes empty space —
+     trim it back to a normal section top. */
+  html.svc-v3-active .svc-hero + .svc-section,
+  html.svc-v3-active .svc-v3-hero-actions + .svc-section {
+    padding-top: clamp(60px, 8vw, 110px) !important;
+  }
+
+  /* ─── Pain points cards — strictly sequential scroll-bound
+       reveal, JS-driven for cross-browser consistency.
+     ────────────────────────────────────────────────────────────
+     CSS-only `view-timeline` doesn't actually serialize cards
+     (each card has its OWN timeline so neighbors can animate
+     simultaneously) and is also Chromium-only. To get strict
+     one-at-a-time reveals tied to the parallax-text Y, we let
+     a JS scroll handler (in the inline script below) own the
+     per-card opacity + translateX values per frame, based on
+     each card's distance from the sticky parallax header's
+     current Y position.
+
+     Each card runs through ~130px of scroll worth of
+     animation, ending exactly when its top edge reaches the
+     parallax header's top edge. With cards stacked
+     ~140-200px apart, the 130px animation distance is
+     SHORTER than the inter-card gap → card N finishes before
+     card N+1 starts → clear interval between every reveal.
+
+     CSS here just defines the resting states (initial hidden,
+     first-card always visible, reduced-motion override).
+     The JS sets opacity + transform on every card per frame. */
+
+  /* Initial state for cards 2+ (JS overrides this on every
+     scroll frame, but this is the value at-rest before JS
+     runs — handles any FOUC). */
+  html.svc-v3-active .svc-pain-card {
+    opacity: 0;
+    transform: translateX(60px);
+    will-change: opacity, transform;
+  }
+  /* First card always fully visible — JS skips it. */
+  html.svc-v3-active .svc-pain-card:first-child {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Reduced motion — show everything at rest, JS bails. */
+  @media (prefers-reduced-motion: reduce) {
+    html.svc-v3-active .svc-pain-card {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ─── Pain card content sizing + number restyle (all
+         viewports, mobile and desktop) ───
+     Originally these overrides were scoped to mobile only,
+     because the v2 base CSS sized the "The concern" /
+     "Evium handles it" labels at 0.6rem (~9.6px) — barely
+     legible. Bumping them on mobile improved scanability
+     there; promoting the same overrides to desktop applies
+     the same legibility upgrade to the wider layout.
+
+     The label, body, and number are all proportionally
+     bumped so the cards read as "two clearly labeled halves
+     with a confident ordinal stamp" rather than tiny grey
+     metadata floating above body text.
+
+     · Labels   0.6rem  → 0.78rem (visible eyebrow size)
+     · Problem  ~1rem   → 1.05rem (slightly more presence)
+     · Solution 0.92rem → 0.95rem (matches problem weight)
+     · Icon     30px    → 34px    (proportional to labels)
+     · Number   top-left + grey → top-right + brand-green,
+                bumped to 0.85rem with bolder weight so it
+                reads as a deliberate ordinal stamp. */
+  html.svc-v3-active .svc-pain-side-label {
+    font-size: 0.78rem !important;
+    letter-spacing: 0.14em !important;
+  }
+  html.svc-v3-active .svc-pain-side-head {
+    gap: 12px !important;
+    margin-bottom: 4px !important;
+  }
+  html.svc-v3-active .svc-pain-icon {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  html.svc-v3-active .svc-pain-problem {
+    font-size: 1.05rem !important;
+    line-height: 1.35 !important;
+  }
+  html.svc-v3-active .svc-pain-solution {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+  }
+  html.svc-v3-active .svc-pain-card-num {
+    top: 14px !important;
+    left: auto !important;
+    right: 18px !important;
+    font-size: 0.85rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+    color: rgba(45, 200, 86, 0.65) !important;
+  }
+
+  /* ─── Market reality scroll target ───────────────────────────
+     When the user scrolls past viewport 1, they land at
+     #service-market. Sized at 55vh so the bottom ~45vh of
+     viewport 2 reveals the pain section's header AND its
+     first card together as a real teaser into the next zone.
+     Earlier passes at 70-85vh only allowed the pain header to
+     peek (~150-200px) which wasn't enough — at 55vh the
+     remaining ~45vh fits the eyebrow + title + subhead + CTA
+     header (~250px) AND the first pain-point card (~120px)
+     comfortably on a 1080px viewport. Padding-block is also
+     reduced so the section's content stays compact within
+     the 55vh box. */
+  html.svc-v3-active #service-market {
+    min-height: 55vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding-block: clamp(48px, 6vh, 72px) !important;
+  }
+
+  /* ─── Final CTA — white card on the feathered band ────────── */
+  /* The card itself stays as v2 designed it (white bubble +
+     green halo glow); the SECTION around it now uses the same
+     feathered light-band treatment as the other light zones,
+     so the card sits on a smoothly-dissolved light spotlight
+     rather than against a hard dark cutoff. */
+  html.svc-v3-active .svc-final-card {
+    /* Slightly stronger shadow stack so the card pops against
+       the feathered light band underneath. */
+    box-shadow:
+      0 0 0 1px rgba(45, 200, 86, 0.10),
+      0 0 96px rgba(45, 200, 86, 0.16),
+      0 1px 2px rgba(13, 28, 36, 0.06),
+      0 20px 50px rgba(13, 28, 36, 0.14),
+      0 50px 110px rgba(13, 28, 36, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  }
+
+  /* ─── Pain points header — dark canvas means white text ──── */
+  /* V2's pain-points header lives inside .svc-section--dark and
+     gets its white text from .svc-section--dark overrides. With
+     the dark variant's bg now transparent, the white text still
+     reads against the dark canvas — no change needed. The
+     sticky header copy + arrow connector all work as-is. */
+
+  /* Inner cards on the dark canvas — solid darker teal (not
+     translucent rgba) so they read as crisp surfaces, not
+     hazy washes. Each card is a clear darker tile floating
+     on the canvas. */
+
+  /* Software section's right-column cards. */
+  html.svc-v3-active .svc-sw-card,
+  html.svc-v3-active .svc-sw-support {
+    background: #122229 !important;
+  }
+
+  /* FAQ width pin — root cause was .svc-faq-inner and the flex
+     column .svc-faq-list having no explicit width, so they
+     shrunk to the WIDEST CHILD content. When all items were
+     closed (just summary text), the inner was content-sized
+     small (~493px); opening any item revealed the answer's
+     wider text, expanding the inner to its 896px max-width
+     and resizing every other item along with it. Pinning
+     width: 100% on inner + list + every level inside locks
+     every state to the same horizontal layout, so closed,
+     mixed-open, and all-open boxes are all identical width. */
+  html.svc-v3-active .svc-faq-inner,
+  html.svc-v3-active .svc-faq-list {
+    width: 100% !important;
+  }
+  html.svc-v3-active .svc-faq-list {
+    align-items: stretch !important;
+  }
+  html.svc-v3-active .svc-faq-item,
+  html.svc-v3-active .svc-faq-item details,
+  html.svc-v3-active .svc-faq-item .svc-faq-q,
+  html.svc-v3-active .svc-faq-item .svc-faq-a {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+  }
+  html.svc-v3-active .svc-faq-item details {
+    display: block !important;
+  }
+
+  /* FAQ answer reveal — smooth height + padding transition.
+     Native <details> snaps the answer in/out of layout instantly
+     when toggled, which is what the user kept calling out as
+     "boxes resizing on opening." Override that by keeping the
+     answer always in the layout (display: block) and animating
+     its max-height + padding-bottom between collapsed and
+     expanded states. The item itself never resizes laterally
+     (border, padding-inline, width all constant) — only the
+     answer's vertical extent animates smoothly. max-height of
+     800px is a safe ceiling for any FAQ answer in the multi-
+     family content (longest is ~280px tall). */
+  html.svc-v3-active .svc-faq-a {
+    display: block !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 28px !important;
+    transition:
+      max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      padding-bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v3-active .svc-faq-item details[open] .svc-faq-a {
+    max-height: 800px !important;
+    padding: 0 28px 24px !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html.svc-v3-active .svc-faq-a { transition: none !important; }
+  }
+
+  /* FAQ items — restoring the v1 "professional content block"
+     feel without bringing back the section-level elevation
+     band. Items now have:
+
+       - DEEPER bg (#0c1a22) → much stronger contrast against
+         the #1A2F3A canvas (~30 RGB diff vs the previous 14)
+         so each tile reads as a distinct clear surface, the
+         way v1's #1A2F3A items popped against the #243847
+         section bg.
+       - STRONGER border (white/8 → white/9 alpha) with a
+         subtle 2-layer drop shadow giving each item depth.
+         No section-level elevation, but each item now reads
+         as a "raised tile" instead of a flat outlined block.
+       - Hover: border brightens slightly (signals interactive).
+       - Open state: green-tinted border + faint green halo
+         glow + slightly deeper bg → clear visual indicator
+         that this question is currently active, way more
+         deliberate than the previous bg-only color shift. */
+  html.svc-v3-active .svc-faq-item {
+    background: #0c1a22 !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.35),
+      0 6px 16px rgba(0, 0, 0, 0.20) !important;
+    transition:
+      border-color 0.25s ease,
+      background 0.25s ease,
+      box-shadow 0.25s ease !important;
+  }
+  html.svc-v3-active .svc-faq-item:hover {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+  html.svc-v3-active .svc-faq-item:has(details[open]) {
+    background: #08151c !important;
+    border-color: rgba(45, 200, 86, 0.32) !important;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.40),
+      0 8px 22px rgba(0, 0, 0, 0.28),
+      0 0 32px rgba(45, 200, 86, 0.10) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     HARDWARE SECTION — premium showroom treatment.
+     ───────────────────────────────────────────────────────────
+     Goal: each charger reads as a hero product on display, not
+     a feature-list card in a grid. Approach:
+       1) Subtle overhead spotlight on the SECTION (radial green
+          glow from the top center) — suggests studio lighting.
+       2) Larger, deeper-shadowed glass cards — they feel HEAVY,
+          like real product display cases on a dark showroom
+          floor.
+       3) Brighter "stage" floor inside each card with a strong
+          product-specific drop shadow under the image, so the
+          charger feels grounded and lit, not floating.
+       4) Refined typography — bigger names, more confident tag
+          chips, tighter letter-spacing.
+       5) Slow cinematic hover — translateY -10px with a soft
+          green ring + brighter shadow stack, plus the product
+          image lifts and scales subtly inside the stage like
+          a premium product page would do.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Hardware section — overhead spotlight + perfect anchor
+     framing on common laptop viewports (≥ 950px tall).
+
+     Critical compressions vs v2's defaults:
+       - padding-block 86px → 28-44px (saves ~85px vertical)
+       - header margin-bottom 40-68px → 26-36px (saves ~14-32px)
+       - foot margin-top 40-60px → 26-36px (saves ~14-24px)
+       - card stage height 220-280px → 170-220px (saves ~50-60px
+         on each card; grid is 1 row, so total grid saving)
+     Combined: section content fits inside ~950vp instead of
+     overflowing 1100px+ (which was cutting the see-all foot).
+
+     scroll-margin-top: 0 — overrides v2 base's 40-80px buffer
+     that was leaking the previous section (financialModels'
+     white light band) into the top of viewport when anchored.
+
+     min-height: 100vh + flex centering frames content vertically
+     on tall viewports; falls back to natural flow on shorter
+     viewports via the media query at the bottom. */
+  html.svc-v3-active #service-hardware {
+    position: relative !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding-block: clamp(28px, 4vh, 44px) !important;
+    scroll-margin-top: 0 !important;
+  }
+  /* Tighten the section header bottom margin so the grid sits
+     closer to the title instead of leaving a gap. */
+  html.svc-v3-active #service-hardware .svc-section-head {
+    margin-bottom: clamp(26px, 2.6vw, 36px) !important;
+  }
+  /* Tighten the foot's top margin so the see-all link sits
+     closer to the grid bottom. */
+  html.svc-v3-active #service-hardware .svc-hw-foot {
+    margin-top: clamp(26px, 2.6vw, 36px) !important;
+  }
+  /* Reduce card stage (image area) height so the grid is
+     ~50px shorter per card. Cards still feel premium with the
+     drop shadow + subtle gradient bg, just less air around
+     the charger image. */
+  html.svc-v3-active #service-hardware .svc-hw-stage {
+    height: clamp(170px, 21vh, 220px) !important;
+  }
+  /* Mobile / short-viewport guard — drop the 100vh floor so
+     content flows naturally without forcing a viewport-height
+     box on small screens. */
+  @media (max-height: 720px), (max-width: 760px) {
+    html.svc-v3-active #service-hardware {
+      min-height: auto !important;
+      justify-content: flex-start !important;
+    }
+  }
+  html.svc-v3-active #service-hardware::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100vw !important;
+    height: 60% !important;
+    background: radial-gradient(
+      ellipse 50% 100% at 50% 0%,
+      rgba(45, 200, 86, 0.12) 0%,
+      rgba(45, 200, 86, 0.04) 40%,
+      transparent 75%
+    ) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+  }
+
+  /* Premium grid spacing. */
+  html.svc-v3-active .svc-section--hardware .svc-hw-grid {
+    gap: clamp(22px, 2.8vw, 32px) !important;
+  }
+
+  /* Glass-display card — heavier, deeper, more grounded. */
+  html.svc-v3-active .svc-hw-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fafc 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 22px !important;
+    box-shadow:
+      0 0 0 1px rgba(45, 200, 86, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.22),
+      0 14px 36px rgba(0, 0, 0, 0.42),
+      0 40px 90px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    transition:
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v3-active .svc-hw-card::before {
+    /* The base v2 ::before is a green top accent rule — keep it
+       but make the resting visible state subtle and hover/focus
+       fully extend so it reads as a premium top-edge accent. */
+    height: 2px !important;
+    transform: scaleX(0.18) !important;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v3-active .svc-hw-card:hover {
+    transform: translateY(-10px) !important;
+    box-shadow:
+      0 0 0 1px rgba(45, 200, 86, 0.22),
+      0 0 36px rgba(45, 200, 86, 0.22),
+      0 22px 50px rgba(0, 0, 0, 0.50),
+      0 56px 110px rgba(0, 0, 0, 0.44),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  }
+  html.svc-v3-active .svc-hw-card:hover::before {
+    transform: scaleX(0.85) !important;
+  }
+
+  /* Showroom stage — bigger, with overhead spotlight + deeper
+     product-specific drop shadow under the charger. */
+  html.svc-v3-active .svc-hw-stage {
+    height: clamp(220px, 26vh, 280px) !important;
+    background:
+      radial-gradient(
+        ellipse 70% 60% at 50% 0%,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(244, 248, 252, 0.9) 40%,
+        rgba(232, 238, 244, 0.7) 100%
+      ),
+      linear-gradient(180deg, #f4f8fc 0%, #e3eaf2 100%) !important;
+  }
+  html.svc-v3-active .svc-hw-stage::after {
+    bottom: 4% !important;
+    left: 16% !important;
+    right: 16% !important;
+    height: 18% !important;
+    background: radial-gradient(
+      ellipse 70% 100% at 50% 0%,
+      rgba(0, 0, 0, 0.22) 0%,
+      transparent 70%
+    ) !important;
+    filter: blur(6px) !important;
+  }
+  html.svc-v3-active .svc-hw-img {
+    max-width: 76% !important;
+    max-height: 88% !important;
+    filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.20)) !important;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v3-active .svc-hw-card:hover .svc-hw-img {
+    transform: translateY(-4px) scale(1.04) !important;
+  }
+
+  /* Refined typography + spacing. */
+  html.svc-v3-active .svc-hw-body {
+    padding:
+      clamp(22px, 2.6vw, 30px)
+      clamp(24px, 2.8vw, 32px)
+      clamp(26px, 3vw, 34px) !important;
+    gap: 12px !important;
+  }
+  html.svc-v3-active .svc-hw-tag {
+    padding: 5px 13px !important;
+    font-size: 0.62rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.20em !important;
+    border-color: rgba(45, 200, 86, 0.50) !important;
+    background: rgba(45, 200, 86, 0.10) !important;
+  }
+  html.svc-v3-active .svc-hw-name {
+    font-size: clamp(1.15rem, 1.5vw, 1.4rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.022em !important;
+    line-height: 1.2 !important;
+  }
+  html.svc-v3-active .svc-hw-features {
+    gap: 10px !important;
+    margin-top: 8px !important;
+  }
+  html.svc-v3-active .svc-hw-features li {
+    font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+    color: #4d5963 !important;
+  }
+  html.svc-v3-active .svc-hw-tick {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* See-all link — more confident. */
+  html.svc-v3-active .svc-hw-foot {
+    margin-top: clamp(40px, 4.5vw, 60px) !important;
+  }
+  html.svc-v3-active .svc-hw-seeall {
+    border: 1.5px solid rgba(45, 200, 86, 0.55) !important;
+    padding: 14px 28px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.18em !important;
+    transition:
+      background 0.32s var(--ease, cubic-bezier(0.25, 0, 0, 1)),
+      color 0.32s var(--ease, cubic-bezier(0.25, 0, 0, 1)),
+      box-shadow 0.32s var(--ease, cubic-bezier(0.25, 0, 0, 1)),
+      transform 0.32s var(--ease, cubic-bezier(0.25, 0, 0, 1)) !important;
+  }
+  html.svc-v3-active .svc-hw-seeall:hover {
+    transform: translateY(-2px) !important;
+    box-shadow:
+      0 0 0 1px rgba(45, 200, 86, 0.40),
+      0 0 32px rgba(45, 200, 86, 0.30) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     V4 HERO OVERRIDES
+     ─────────────────
+     v4 inherits everything v3 does and changes ONE thing: the
+     hero photo now spans the full viewport, and the navtab strip
+     that v3 places in a separate dark band BELOW the photo is
+     instead floated as an absolute overlay across the bottom of
+     the photo. End result:
+
+       v3:  [ hero photo ] / [ dark band w/ navtab ]   = 100vh
+       v4:  [ hero photo with navtab glassed on bottom ]  = 100vh
+
+     Companion JS (top of file) appends the band INTO the hero
+     when svc-v4-active is set, so position:absolute resolves
+     against the hero rather than the document.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Hero spans the full viewport. Text cluster anchored to
+     the TOP-LEFT (magazine-cover layout) — V2's hero used
+     flex-end + bottom-padding to anchor content to the
+     bottom of a content-height box. With the photo now full
+     viewport, top-left is the right composition: the eyebrow
+     leads the eye in from the top, the headline gets the
+     space it deserves, and the photo's bottom-right area
+     stays uncluttered for the floating navtab below. */
+  html.svc-v4-active .svc-hero {
+    min-height: 100vh !important;
+    position: relative !important;
+    justify-content: flex-start !important;
+    padding-top: clamp(96px, 12vh, 152px) !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Band is now a transparent positioning frame — the photo
+     extends through to the bottom edge unobstructed. The
+     strip's own drop-shadow is what carries the "floating"
+     read; a band gradient was masking that shadow against
+     dark pixels and making it invisible. */
+  html.svc-v4-active .svc-v3-hero-actions {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    z-index: 5 !important;
+    padding-bottom: clamp(64px, 9vh, 104px) !important;
+    background: transparent !important;
+  }
+
+  /* Drop the v3 green hairline divider — there's no longer a
+     hard photo→band seam to mark. */
+  html.svc-v4-active .svc-v3-hero-actions::before {
+    display: none !important;
+  }
+
+  /* ─── Floating drop-shadow stack — three layers to build
+         real perceived altitude:
+
+         1. Contact shadow (5px / 12px blur) — close to the
+            card, gives it weight where it "presses" toward
+            the surface. Without this the card looks
+            disconnected from the scene.
+         2. Lift shadow (24px / 56px blur) — defines the
+            visible drop. This is the layer the eye reads
+            as "the card is floating".
+         3. Ambient pool (48px / 96px blur, large negative
+            spread) — wide diffuse halo that suggests the
+            light source overhead. Negative spread keeps the
+            pool from leaking far past the card's footprint
+            so the photo around the card stays untouched.
+         4. Inset top highlight — catches ambient light from
+            above, reinforces the 3D feel.
+       ─────────────────────────────────────────────────── */
+  html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip {
+    box-shadow:
+      /* Contact shadow — tight to the card edge, defines
+         the card's footprint. Slight horizontal offset
+         consistent with a top-front overhead light source. */
+      2px 10px 18px -2px rgba(4, 12, 20, 0.55),
+      /* Primary lift — large drop for visible altitude.
+         The 40px y-offset is what reads as "this card is
+         clearly hovering above the surface". */
+      3px 42px 84px -10px rgba(4, 12, 20, 0.78),
+      /* Atmospheric pool — wide diffuse halo that anchors
+         the card visually. Negative spread keeps it from
+         leaking far past the card's footprint, preserving
+         the photo around the edges. */
+      0 88px 140px -36px rgba(4, 12, 20, 0.62),
+      /* Top edge highlight — catches overhead ambient light,
+         reinforces the dimensional read. */
+      0 1px 0 rgba(255, 255, 255, 0.12) inset !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     V4 FINAL CTA OVERRIDES
+     ──────────────────────
+     Replaces v3's solid light-band backdrop with a photo
+     ground (garage shot, chargers visible) + a refined scrim
+     stack for legibility. The .svc-final-card becomes a
+     translucent glass slab so the photo behind it reads
+     through, with backdrop-filter blur softening whatever
+     pixels are immediately behind the copy.
+
+     Inspiration aligned with fleets-v2 + highway-v3 final
+     CTAs (photo backdrop + multi-stop scrim) but tuned to
+     multifamily's lighter editorial register — the glass
+     card replaces the photo-only "centered text" treatment
+     so the page still has visible structure, not just text
+     floating over a photo.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Replace v3's solid light fill with the garage photo +
+     a multi-stop scrim, COMPOSED AROUND the logos.
+
+     The photo has Evium-branded charger logos at image
+     y=31-35%, x=37-63%. With default `center` cover
+     positioning they project to section y=236-313, x=533-893
+     — exactly where centered text would sit, covering the
+     branding.
+
+     Two adjustments to keep the logos visible:
+       1. object-position: 50% 100% — anchors the BOTTOM of
+          the image to the bottom of the section, which
+          shifts the logos UP in the visible section to
+          roughly y=185-272 (upper third). The upper portion
+          of the section now reads as "two branded chargers
+          framed by parked vehicles."
+       2. The radial-darken spotlight is moved DOWN to 50% 70%
+          and tightened so it ONLY covers the text area in
+          the lower half — leaves the upper half (where the
+          logos sit) at the lighter scrim intensity so the
+          branding is fully readable.
+
+     Three layered backgrounds:
+       1. Photo (bottom layer = back).
+       2. Vertical anchor scrim — heavier on top + bottom
+          to seam into the dark page; lets the upper-middle
+          breathe at ~25% darkness so logos read clearly.
+       3. Centered text-spotlight in the LOWER half (50% 70%)
+          where the title + subhead + CTAs live. */
+  /* ──────────────────────────────────────────────────────
+     Logo positions in the source image — kept as a note
+     for future iterations even though we're not composing
+     around them in this version (the badge resolution
+     in the source isn't tight enough to make them a focal
+     point worth protecting):
+       Image: 1537 × 1023
+       Left charger EVIUM:   x=37–42%,  y=31–33% of image
+       Right charger EVIUM:  x=55–62%,  y=33–35% of image
+     At cover-fit on standard desktop viewports both badges
+     project to the section's center-middle band, behind
+     the centered text — they read as part of the photo's
+     atmosphere rather than as branded callouts.
+     ────────────────────────────────────────────────────── */
+
+  /* Section background — photo + scrim composition tuned
+     for centered editorial copy. Three layers, painted
+     bottom-to-top in the rule:
+
+       1. Photo — full-bleed garage shot, centered cover.
+       2. Vertical anchor scrim — heavy at top + bottom
+          edges to seam into the dark page above/below;
+          transparent in the middle so the photo's natural
+          lighting + warm-cool palette reads through.
+       3. Centered radial pool — soft elliptical darken at
+          50% / 52% to lift contrast under the headline +
+          subhead + CTAs without darkening the photo's
+          edges where the parked vehicles frame the shot.
+   */
+  html.svc-v4-active .svc-final::before {
+    background:
+      radial-gradient(
+        ellipse 62% 52% at 50% 52%,
+        rgba(8, 18, 26, 0.58) 0%,
+        rgba(8, 18, 26, 0.22) 58%,
+        transparent 85%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(10, 24, 34, 0.72) 0%,
+        rgba(10, 24, 34, 0.22) 16%,
+        rgba(10, 24, 34, 0.22) 84%,
+        rgba(10, 24, 34, 0.72) 100%
+      ),
+      url('/images/heroes/multifamily-cta-garage.png') center / cover no-repeat !important;
+  }
+
+  /* Section padding — generous, editorial. Reset from any
+     prior asymmetric overrides; centered composition gets
+     symmetric breathing room top + bottom. */
+  html.svc-v4-active .svc-final {
+    isolation: isolate !important;
+    padding-top: clamp(112px, 14vh, 168px) !important;
+    padding-bottom: clamp(112px, 14vh, 168px) !important;
+  }
+
+  /* Centered brand-green ambient halo behind the copy —
+     adds depth without competing with the photo. */
+  html.svc-v4-active .svc-final-glow {
+    background: radial-gradient(
+      ellipse at 50% 52%,
+      rgba(45, 200, 86, 0.22) 0%,
+      rgba(45, 200, 86, 0.07) 42%,
+      transparent 72%
+    ) !important;
+    filter: blur(110px) !important;
+  }
+
+  /* Strip the white card chrome — copy sits directly on
+     the scrimmed photo. Centered with editorial max-width. */
+  html.svc-v4-active .svc-final-card {
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 780px !important;
+    text-align: center !important;
+    padding: clamp(48px, 6vw, 80px) clamp(24px, 4vw, 56px) !important;
+  }
+
+  /* CTA row — re-center after any earlier overrides. */
+  html.svc-v4-active .svc-cta-row--centered.svc-final-actions {
+    justify-content: center !important;
+  }
+
+  /* ─── Premium typography on the photo ──────────────────
+     Each text element gets a 4-layer shadow stack tuned
+     for editorial photo overlays:
+       • 1px tight  — character-edge crispness
+       • 4px mid    — ambient halo softens the text against
+                      mixed-luminance pixels
+       • 12px wide  — atmospheric drop
+       • 40px deep  — anchors the type to the photo with
+                      the depth you'd see in printed
+                      magazine overlays
+     ─────────────────────────────────────────────────── */
+
+  /* Headline — slightly tightened tracking for premium
+     feel; full-strength white. */
+  html.svc-v4-active .svc-final-title {
+    color: #ffffff !important;
+    letter-spacing: -0.012em !important;
+    text-shadow:
+      0 1px 2px rgba(8, 18, 26, 0.92),
+      0 4px 12px rgba(8, 18, 26, 0.78),
+      0 12px 36px rgba(8, 18, 26, 0.60),
+      0 40px 80px rgba(8, 18, 26, 0.42) !important;
+  }
+
+  /* "Electrified." accent word — brand green with a
+     two-step ambient brand glow stacked over the dark
+     legibility shadows. The 24px green halo is what reads
+     as "this word is glowing"; the 60px wider green is
+     the atmospheric brand wash. */
+  html.svc-v4-active .svc-final-title-accent {
+    color: #2DC856 !important;
+    text-shadow:
+      0 1px 2px rgba(8, 18, 26, 0.92),
+      0 0 24px rgba(45, 200, 86, 0.50),
+      0 0 60px rgba(45, 200, 86, 0.30),
+      0 8px 32px rgba(8, 18, 26, 0.62) !important;
+  }
+
+  /* Subhead — quieter white, scaled-down shadow stack. */
+  html.svc-v4-active .svc-final-sub {
+    color: rgba(255, 255, 255, 0.88) !important;
+    text-shadow:
+      0 1px 2px rgba(8, 18, 26, 0.92),
+      0 2px 14px rgba(8, 18, 26, 0.78) !important;
+  }
+
+  /* Footnote — quietest, but still photo-legible. */
+  html.svc-v4-active .svc-final-footnote {
+    color: rgba(255, 255, 255, 0.58) !important;
+    text-shadow: 0 1px 6px rgba(8, 18, 26, 0.85) !important;
+  }
+
+  /* ─── Premium CTA buttons ──────────────────────────────
+     Both buttons get refined treatments specifically for
+     sitting on a photo:
+       • Primary: brand-green button + 3-layer shadow that
+         reads as "lit on the photo" — green inner glow,
+         green ambient lift, dark atmospheric drop.
+       • Ghost: white-bordered glass button with 10px
+         backdrop-blur saturation pop. Plays as a confident
+         secondary, not an afterthought.
+     Both have ease-out hover transitions for a tactile
+     feel — buttons lift slightly on hover.
+     ─────────────────────────────────────────────────── */
+
+  html.svc-v4-active .svc-cta--primary.svc-cta--final-btn {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+      0 1px 0 rgba(255, 255, 255, 0.42) inset,
+      0 4px 16px rgba(45, 200, 86, 0.48),
+      0 12px 32px rgba(45, 200, 86, 0.30),
+      0 24px 64px rgba(8, 18, 26, 0.45) !important;
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v4-active .svc-cta--primary.svc-cta--final-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.22) inset,
+      0 1px 0 rgba(255, 255, 255, 0.48) inset,
+      0 6px 20px rgba(45, 200, 86, 0.58),
+      0 18px 44px rgba(45, 200, 86, 0.38),
+      0 32px 72px rgba(8, 18, 26, 0.50) !important;
+  }
+
+  html.svc-v4-active .svc-cta--ghost.svc-cta--final-btn {
+    border: 1px solid rgba(255, 255, 255, 0.34) !important;
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(10px) saturate(1.18) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.18) !important;
+    text-shadow: 0 1px 2px rgba(8, 18, 26, 0.55) !important;
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                background 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  html.svc-v4-active .svc-cta--ghost.svc-cta--final-btn:hover {
+    transform: translateY(-2px) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.58) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     V4 MOBILE OVERRIDES
+     ──────────────────
+     Scoped to BOTH html.svc-v4-active AND a max-width: 760px
+     media query, so:
+       - Desktop is completely unaffected (the rules don't match
+         above 860px viewport — same breakpoint HeaderV4 uses
+         to swap to its mobile bar).
+       - fleets-v2 and highway-v3 are completely unaffected
+         (they don't add the svc-v4-active class).
+
+     Two issues this block fixes:
+
+     1. Navtab strip (.svc-stat-strip) was using
+        `grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))`
+        from the base template. At ~390px viewport that resolves
+        to 2 columns, so the 3 stat tiles wrap as 2-on-top + 1-
+        below — the orphan reads as "expecting a 4th item." Force
+        a single horizontal row of 3 equal tiles, tighten padding
+        and gap, drop the trailing arrow, and stack the icon +
+        text vertically inside each tile so the text doesn't run
+        out of horizontal room at narrow widths.
+
+     2. Hero image (.svc-hero-bg-img) was using the base
+        `object-position: center 30%` which biases toward the top
+        of the photo — meant for landscape-oriented desktop crops
+        where 30% framing captures the building's roofline + sky
+        cleanly. On a portrait phone crop the same offset throws
+        the building off-center and shows mostly upper-floor
+        balconies + wall. Re-anchoring to `50% 55%` centers the
+        building's mid-section (the most architecturally
+        photogenic part) in the visible portrait viewport.
+     ═══════════════════════════════════════════════════════════ */
+  @media (max-width: 860px) {
+    /* ─── Hero box: fit BELOW the sticky mobile navbar AND
+       anchor content to the LOWER HALF for magazine-cover
+       composition ───
+
+       `calc(100dvh - 80px)` fills the visible area below
+       the sticky navbar exactly.
+
+       Switched from `flex-start` (content hugging the top
+       under the navbar) to `flex-end` — the eyebrow / title
+       / sub / CTAs now sit at the BOTTOM of the hero, just
+       above the navtab strip. The mobile hero photo
+       (building shot, looking up at balconies) gets the
+       top half to itself, making the composition read like
+       a magazine cover: photo dominant, headline anchored
+       at the lower-left like editorial credit. Combined
+       with the strip's padding-bottom (set elsewhere) the
+       text cluster + strip together fill the bottom ~50%
+       of the hero, leaving the top ~50% as pure photo
+       breathing room. */
+    html.svc-v4-active .svc-hero {
+      min-height: calc(100dvh - 80px) !important;
+      /* Content top-anchored: text cluster sits HIGH in the
+         hero (just below the photo's top breathing room),
+         with the CTA row pushed down to the BOTTOM of the
+         hero's available content area via margin-top:auto
+         (rule below). This creates the three-zone
+         composition the user wanted:
+           Zone 1: photo + text cluster (eyebrow/title/sub)
+                   stacked at the top
+           Zone 2: visually pleasing breathing room
+           Zone 3: CTAs, then more breathing room, then the
+                   floating navtab strip at the bottom. */
+      justify-content: flex-start !important;
+      padding-top: clamp(72px, 10vh, 110px) !important;
+      /* Padding-bottom holds room for the navtab strip
+         (~97 tall, overhanging from band's padding-bottom
+         ~140) plus a visible ~40-60px gap between CTAs
+         and the strip's top edge. */
+      padding-bottom: clamp(285px, 36vh, 320px) !important;
+    }
+    /* Force the hero-content block to fill the hero's
+       available space so margin-top:auto on the CTA row
+       can push it to the bottom — creating the
+       big gap between sub and CTAs the user requested. */
+    html.svc-v4-active .svc-hero-content {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
+    html.svc-v4-active .svc-cta-row {
+      margin-top: auto !important;
+    }
+
+    /* ─── Hero text content: compressed to fit alongside
+           the bottom-anchored navtab strip ───
+       The base clamp values (title 2.2-4.4rem, sub 1-1.18rem,
+       CTAs 0.74rem) plus their margins build a heroContent
+       block that's ~389px tall at 430px viewport — most of
+       the available below-navbar space on a phone with
+       chrome visible. Dropping each step by ~15-20% gives
+       the photo + navtab room without sacrificing
+       readability:
+         · Title 1.5-2.1rem caps total title height at ~100px
+           (was 150px+).
+         · Sub 0.86-0.95rem with tighter line-height shaves
+           ~30px off a 5-line paragraph.
+         · Margins between blocks compress from clamp(16-26)
+           to clamp(8-14) since the content stack is shorter
+           overall and doesn't need as much breathing room.
+         · CTA padding tightens so buttons stack a bit
+           tighter without cramping the touch target. */
+    html.svc-v4-active .svc-hero-eyebrow {
+      margin-bottom: clamp(10px, 1.4vh, 16px) !important;
+      font-size: 0.66rem !important;
+      letter-spacing: 0.16em !important;
+    }
+    /* Title bumped up for more impact on the magazine-cover
+       composition. Stronger text-shadow so the white type
+       reads cleanly against the warm-toned right side of
+       the new mobile photo. */
+    html.svc-v4-active .svc-hero-title {
+      margin-bottom: clamp(10px, 1.6vh, 18px) !important;
+      font-size: clamp(1.85rem, 7vw, 2.4rem) !important;
+      line-height: 1.02 !important;
+      letter-spacing: -0.018em !important;
+      text-shadow:
+        0 2px 16px rgba(0, 0, 0, 0.55),
+        0 1px 4px rgba(0, 0, 0, 0.45) !important;
+    }
+    html.svc-v4-active .svc-hero-sub {
+      margin-bottom: clamp(16px, 2.2vh, 22px) !important;
+      font-size: clamp(0.88rem, 3.4vw, 0.96rem) !important;
+      line-height: 1.45 !important;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45) !important;
+    }
+    /* CTAs: smaller padding, smaller text, smaller stack
+       gap. Stays touch-target-friendly (still 40px+ tall)
+       but compresses the row by ~25px. */
+    html.svc-v4-active .svc-hero .svc-cta-row {
+      gap: 10px !important;
+    }
+    html.svc-v4-active .svc-hero .svc-cta {
+      padding: 11px 20px !important;
+      font-size: 0.7rem !important;
+    }
+    html.svc-v4-active .svc-hero .svc-cta--ghost-on-image {
+      padding: 11px 20px !important;
+      font-size: 0.7rem !important;
+    }
+
+    /* ─── Hero image: mobile-specific shot ───
+       The desktop hero is landscape-cropped wide
+       (`/images/multifamily-realestate-service-hero.jpg`),
+       which doesn't crop well on portrait phones.
+       `content: url(...)` on the <img> element swaps the
+       rendered image without touching the markup or the
+       img's src attribute. Object-fit + sizing CSS still
+       apply, so the existing hero-anchor viewport math is
+       unchanged — only the actual pixels change. */
+    html.svc-v4-active .svc-hero-bg-img {
+      content: url('/images/multifamily-hero-mobile.png') !important;
+      object-position: 50% 50% !important;
+    }
+
+    /* ─── Navtab: single row, 3 equal columns ─── */
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      max-width: 100% !important;
+      gap: 1px !important;
+      border-radius: 16px !important;
+      /* Desktop pulls the strip 40-72px below the hero bottom
+         to overhang into the next section's top padding —
+         reads as a "lifted card" floating between the photo
+         and the next section. On mobile the same negative
+         margin made the strip kiss the section divider, with
+         no breathing room below it.
+
+         Drop the overhang entirely on mobile: keep the strip
+         INSIDE the hero, with the band's increased
+         padding-bottom (below) lifting it well above the
+         hero's bottom edge so the entry-view composition
+         reads as "hero photo + nav floats in the lower
+         third" instead of "nav slammed against the divider." */
+      margin-bottom: 0 !important;
+    }
+
+    /* Tile contents: stack icon over text, drop the trailing
+       arrow so all three tiles fit horizontally without
+       cramping text. */
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat--btn {
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      padding: 12px 6px !important;
+      text-align: center !important;
+    }
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat-icon {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 8px !important;
+    }
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat-icon svg {
+      width: 14px !important;
+      height: 14px !important;
+    }
+    /* Trailing arrow is omitted on mobile — the icon-on-top +
+       label-below layout already reads as a tap target, and
+       the arrow's horizontal real estate isn't available. */
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat-arrow {
+      display: none !important;
+    }
+    /* Text stack: tighter gap, value bumps slightly larger so
+       it stays the dominant element when the row stops being
+       horizontal; label drops a notch in size + tracking so it
+       fits a single column without breaking. */
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat-text {
+      gap: 2px !important;
+      align-items: center !important;
+      text-align: center !important;
+    }
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat--btn .svc-stat-value {
+      font-size: 0.7rem !important;
+      line-height: 1.15 !important;
+      font-weight: 800 !important;
+    }
+    html.svc-v4-active .svc-v3-hero-actions .svc-stat-strip .svc-stat--btn .svc-stat-label {
+      font-size: 0.5rem !important;
+      letter-spacing: 0.1em !important;
+      line-height: 1.2 !important;
+    }
+    /* Lift the navtab UP from the hero's bottom edge so the
+       entry-view composition reads as "hero photo, with the
+       nav floating in the lower third" rather than "nav
+       slammed at the bottom with a wide empty middle."
+
+       The strip is bottom-anchored, so this padding pushes
+       it UP from the hero's bottom edge. A vh-based clamp
+       scales the lift with viewport height — more on tall
+       phones, less on short ones — keeping the proportion
+       roughly consistent as a fraction of the hero box.
+
+       64–96px of padding (≈10% of viewport height) puts the
+       strip squarely in the lower third of the hero with
+       balanced breathing room above and below it, so the
+       photo doesn't feel like dead empty middle space. */
+    html.svc-v4-active .svc-v3-hero-actions {
+      padding-bottom: clamp(112px, 18vh, 160px) !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE VIEWPORT-ANCHOR FLOW
+       ──────────────────────────
+       Desktop pageflow:
+         · 1st anchor: hero (1 viewport)
+         · 2nd anchor: market reality (≈55vh) + top of objections
+                       sharing the same viewport, parallax-revealing
+                       objections as user continues to scroll
+         · 3rd anchor: scope
+
+       Mobile pageflow (this block):
+         · 1st anchor: hero (1 viewport)              — set above
+         · 2nd anchor: market reality (1 viewport)    — set below
+         · 3rd anchor: objections section, sticky head — set below
+         · 4th anchor: scope                          — natural flow
+
+       Each anchor still corresponds to the same id (`#service-
+       market`, `#service-pain`, `#service-scope`, etc.) so the
+       rail nav's targets are unchanged — the only difference is
+       that on mobile two of them get their own full viewport
+       worth of space instead of sharing one.
+       ─────────────────────────────────────────────────────────── */
+
+    /* ─── #service-market — full viewport on mobile ───
+       Desktop sizes this at 55vh so the lower portion of the
+       same viewport shows the pain-section header (the parallax
+       co-anchor). On mobile that split doesn't work: a 55dvh
+       market section is too short for its own content + the
+       pain header would clip awkwardly and the "next section
+       peeking under the divider" complaint kicks in.
+
+       Use `calc(100dvh - 80px)` (same calc the hero uses) so the
+       market section exactly fills the area below the sticky
+       navbar. No peek from the pain section below; the user
+       lands here cleanly as the 2nd anchor and scrolls down to
+       reach the pain section's top edge (3rd anchor).
+
+       Section content (header + 3 highlight cards) compresses
+       to fit the viewport — the cards become a horizontal
+       scroll-snap carousel (rules below) so they consume a
+       single ~220px row instead of stacking 2-up-then-wrap. */
+    /* Section padding compressed hard so the cards row can
+       claim its full square real estate below. Section head
+       sized tight + small margin-bottom so the 3 stacked
+       squares get most of the section's vertical budget. */
+    html.svc-v3-active #service-market {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: clamp(12px, 1.8vh, 20px) !important;
+      padding-bottom: clamp(16px, 2.4vh, 28px) !important;
+    }
+    html.svc-v3-active #service-market .svc-section-title {
+      font-size: clamp(1.35rem, 5.4vw, 1.75rem) !important;
+      line-height: 1.04 !important;
+      margin-bottom: clamp(4px, 0.6vh, 6px) !important;
+    }
+    html.svc-v3-active #service-market .svc-section-sub {
+      font-size: clamp(0.82rem, 2.8vw, 0.9rem) !important;
+      line-height: 1.35 !important;
+      margin-bottom: 0 !important;
+    }
+    html.svc-v3-active #service-market .svc-section-head {
+      margin-bottom: clamp(10px, 1.6vh, 16px) !important;
+    }
+    /* TRUE SQUARE tiles (aspect-ratio: 1) stacked vertically.
+       Each card is the same width and height — capped at
+       180px so 3 squares + tight header + section padding
+       all fit inside calc(100dvh - 80px) on typical mobile
+       viewports.
+
+       Math at viewport height 700:
+         · section padding 12+16 = 28
+         · header (title + sub + margin) ~110
+         · 3 cards × 180 + 2 gaps × 8 = 556
+         · total = 28 + 110 + 556 = 694 ✓ fits in 700
+
+       At viewport 620 (calc(100dvh - 80px) on 700vh) the
+       same math gives 28 + 110 + 556 = 694 — would slightly
+       exceed 620, BUT the section's min-height anchors at
+       620 and the section grows naturally to fit the content
+       (no overflow because no fixed max-height). The hero +
+       market combine to ~1320 in absolute scroll, which is
+       what we want for a clean 2nd viewport anchor.
+
+       Internal card layout: icon on top, title middle, body
+       bottom (vertical content within a square frame —
+       matches the desktop tile feel). Body line-clamped to
+       2 lines so long copy doesn't overflow the square. */
+    html.svc-v3-active #service-market .svc-narrative-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      grid-template-columns: none !important;
+      gap: clamp(6px, 1vh, 10px) !important;
+      align-items: center !important;
+    }
+    html.svc-v3-active #service-market .svc-narrative-card {
+      /* Width capped at ~90vw / 420px. Height grows freely
+         with content (no aspect-ratio, no max-height) so the
+         full body text always renders and the cards feel
+         appropriately tall for readable type. Padding is
+         bumped from the previous compact sizing so the text
+         has visible breathing room from the card edges. */
+      width: clamp(280px, 90vw, 420px) !important;
+      aspect-ratio: auto !important;
+      padding: clamp(20px, 3vw, 26px) !important;
+      display: grid !important;
+      grid-template-columns: auto 1fr !important;
+      grid-template-rows: auto auto !important;
+      column-gap: 14px !important;
+      row-gap: 12px !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      overflow: visible !important;
+    }
+    html.svc-v3-active #service-market .svc-narrative-icon {
+      width: 40px !important;
+      height: 40px !important;
+      margin: 0 !important;
+      grid-row: 1 !important;
+      grid-column: 1 !important;
+      align-self: center !important;
+    }
+    /* Title sits on the SAME baseline as the icon. Bumped
+       up so the cards feel premium-sized rather than
+       compact-utility. */
+    html.svc-v3-active #service-market .svc-narrative-title {
+      font-size: 1.1rem !important;
+      line-height: 1.18 !important;
+      margin: 0 !important;
+      grid-row: 1 !important;
+      grid-column: 2 !important;
+      align-self: center !important;
+    }
+    /* Body bumped to 0.96rem with looser line-height — most
+       of the readability gain comes from these two numbers.
+       At 90vw card width with ~45 chars per line, body
+       reads as 3-4 comfortable lines. */
+    html.svc-v3-active #service-market .svc-narrative-body {
+      font-size: 0.96rem !important;
+      line-height: 1.55 !important;
+      margin: 0 !important;
+      grid-row: 2 !important;
+      grid-column: 1 / span 2 !important;
+      align-self: start !important;
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      -webkit-box-orient: unset !important;
+      overflow: visible !important;
+    }
+
+    /* ─── #service-pain — sticky header + behind-header reveal ───
+       Desktop uses a 2-column sticky-left header layout (≥960px
+       only). On mobile (≤860px) the section is 1 column and the
+       header would just scroll past the user, losing the parallax
+       co-anchor that makes the objections reveal feel deliberate.
+
+       Re-engineer the parallax for vertical mobile layout:
+         · Header `position: sticky; top: 80px` so it pins right
+           under the page navbar while user scrolls through the
+           section.
+         · Solid dark background on the sticky header so cards
+           scrolling past visually go BEHIND it (rather than
+           overlapping into a soup of text).
+         · Cards in a vertical stack below the header. JS (above)
+           uses `headerRect.bottom + 16` as the parallax anchor
+           on mobile so cards finish revealing right BEFORE they
+           slide behind the header, not while underneath it.
+         · Slide direction switched to translateY so cards rise
+           up into place (matches the vertical scroll). */
+    html.svc-v3-active .svc-pain-header {
+      position: sticky !important;
+      top: 80px !important;
+      z-index: 3 !important;
+      /* Padding stays for internal rhythm. Background is
+         handed off to the ::before pseudo (below) which
+         spans the FULL viewport width — solid #1A2F3A only
+         covering the header's own width left a visible edge
+         line on each side where the page-level atmospheric
+         green/blue orbs (see .svc-page::before/::after,
+         which are fixed-positioned and tint a swath of the
+         viewport behind the section) painted a slightly
+         different tone OUTSIDE the header vs INSIDE. */
+      background: transparent !important;
+      padding: clamp(20px, 3vh, 32px) clamp(16px, 4vw, 24px) !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    /* Full-viewport-width opaque slab BEHIND the header text.
+       100vw + 50%/translateX centering extends the dark fill
+       past the section's content edge to the viewport's
+       actual edges, so there's no visible boundary between
+       "header bg" and "page bg with atmospheric orb tint"
+       on the sides. */
+    html.svc-v3-active .svc-pain-header::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 100vw !important;
+      background: #1A2F3A !important;
+      z-index: -1 !important;
+      pointer-events: none !important;
+    }
+    /* Compact the header's internal type so the sticky band
+       doesn't dominate vertical space — it has to leave room
+       for cards to show below it on a 700-800dvh viewport. */
+    html.svc-v3-active .svc-pain-header .svc-section-title {
+      font-size: clamp(1.4rem, 6vw, 1.9rem) !important;
+      line-height: 1.05 !important;
+      margin: 0 !important;
+    }
+    html.svc-v3-active .svc-pain-header .svc-section-sub {
+      font-size: clamp(0.82rem, 3.2vw, 0.92rem) !important;
+      line-height: 1.45 !important;
+      margin-top: clamp(8px, 1.4vh, 12px) !important;
+    }
+    html.svc-v3-active .svc-pain-header .svc-eyebrow {
+      margin-bottom: clamp(6px, 1vh, 10px) !important;
+      font-size: 0.6rem !important;
+    }
+    /* CTA inside the header — tighten to match the compressed
+       header type. Stays touch-friendly. */
+    html.svc-v3-active .svc-pain-header .svc-pain-cta {
+      margin-top: clamp(12px, 1.8vh, 18px) !important;
+      padding: 10px 18px !important;
+      font-size: 0.68rem !important;
+    }
+    /* Card initial state — overrides the desktop translateX
+       so the first paint (before JS) matches the mobile
+       vertical animation direction. */
+    html.svc-v3-active .svc-pain-card {
+      transform: translateY(60px) !important;
+    }
+    html.svc-v3-active .svc-pain-card:first-child {
+      transform: none !important;
+    }
+    /* Tighten the section's vertical rhythm so the
+       header+cards stack fits with sensible scroll territory
+       (each card visible as it enters, header sticks above). */
+    html.svc-v3-active .svc-section--pain {
+      padding-top: clamp(40px, 5vh, 64px) !important;
+      padding-bottom: clamp(64px, 8vh, 96px) !important;
+    }
+    html.svc-v3-active .svc-pain-layout {
+      gap: clamp(20px, 3vh, 32px) !important;
+    }
+    html.svc-v3-active .svc-pain-stack {
+      gap: clamp(14px, 2vh, 22px) !important;
+    }
+
+    /* ─── Mobile-only pain card tweaks ───
+       The text + number size + position overrides moved out
+       of this @media block and now apply at ALL widths (see
+       the un-wrapped rules earlier in this stylesheet). Two
+       MOBILE-SPECIFIC tweaks remain here:
+
+       1. Tighter side padding — desktop has plenty of
+          horizontal room so its native clamp(22-30) padding
+          looks balanced; mobile cards are narrower and the
+          same padding eats too much width, so tighten to a
+          flat 18px.
+       2. Right-padding on the PROBLEM side — on mobile the
+          card stacks vertically (problem on top, solution
+          below), so the top-right number now sits inside
+          the problem side. Pad the right edge to 56px so
+          the number doesn't overlap the problem label/icon.
+          On desktop the card is horizontal (problem | arrow
+          | solution) and the number sits inside the solution
+          side's top-right naturally — no extra padding
+          needed there. */
+    html.svc-v3-active .svc-pain-side {
+      padding: 18px 18px !important;
+      gap: 10px !important;
+    }
+    html.svc-v3-active .svc-pain-side--problem {
+      padding-right: 56px !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE HARDWARE REDESIGN
+       ────────────────────────
+       Desktop hardware shows 3 cards side-by-side in a wide
+       row: EvoCharge | Siemens VersiCharge | GSA-approved.
+       The third card has NO image (uses svc-hw-img-fallback)
+       because it's an INFORMATIONAL card about hardware
+       sourcing standards rather than a specific product.
+
+       On mobile that 3-card row doesn't fit. Reorganize:
+         · Row 1: EvoCharge + Siemens (the two ACTUAL charger
+           cards) side-by-side, equal columns.
+         · Row 2: GSA card spans BOTH columns as an
+           informational banner — restyled compact (no image
+           stage, just the title + features list as a single
+           horizontal note).
+
+       Selector approach: the third card is detected by the
+       presence of `.svc-hw-img-fallback` inside it (true
+       hardware product cards use `.svc-hw-img` instead).
+       Modern :has() makes the distinction without touching
+       the markup, so the same template renders both
+       desktop and the mobile redesign without forking. */
+
+    /* Override the earlier mobile guard that set hardware
+       to min-height: auto. We want hardware viewport-tall
+       on mobile so the redesigned layout (2 charger cards +
+       GSA banner) has a clear viewport anchor. */
+    html.svc-v3-active #service-hardware {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: clamp(20px, 3vh, 36px) !important;
+      padding-bottom: clamp(20px, 3vh, 36px) !important;
+      justify-content: center !important;
+    }
+    /* Section head compressed so the cards row + GSA banner
+       claim the rest of the viewport budget. */
+    html.svc-v3-active #service-hardware .svc-section-head {
+      margin-bottom: clamp(14px, 2vh, 22px) !important;
+    }
+    html.svc-v3-active #service-hardware .svc-section-title {
+      font-size: clamp(1.35rem, 5.4vw, 1.75rem) !important;
+      line-height: 1.06 !important;
+    }
+    html.svc-v3-active #service-hardware .svc-section-sub {
+      font-size: clamp(0.82rem, 2.8vw, 0.92rem) !important;
+      line-height: 1.4 !important;
+    }
+    /* Force a 2-column grid on the hardware row. The 3rd
+       card spans BOTH columns below (info banner mode). */
+    html.svc-v3-active .svc-section--hardware .svc-hw-grid,
+    html.svc-v3-active .svc-section--hardware .svc-hw-grid--3 {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 10px !important;
+    }
+    /* Card 3 (the one without a real product image, i.e. the
+       GSA informational card) spans both columns. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) {
+      grid-column: 1 / -1 !important;
+    }
+
+    /* TWO PRODUCT CARDS — compressed so they fit in the
+       cards row inside calc(100dvh - 80px). */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-stage {
+      height: clamp(110px, 16vh, 140px) !important;
+      padding: 8px 6px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) {
+      padding: 0 !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-body {
+      padding: 10px 12px 14px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-tag {
+      font-size: 0.55rem !important;
+      padding: 3px 8px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-name {
+      font-size: 0.86rem !important;
+      line-height: 1.18 !important;
+      margin: 6px 0 4px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-features {
+      gap: 4px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-features li {
+      font-size: 0.7rem !important;
+      line-height: 1.3 !important;
+      gap: 6px !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:not(:has(.svc-hw-img-fallback)) .svc-hw-tick {
+      width: 12px !important;
+      height: 12px !important;
+      flex: 0 0 auto !important;
+    }
+
+    /* THIRD CARD — COMPLIANCE STRIP.
+       Not a "card" anymore. The third item is not a product;
+       it's a compliance / sourcing credential note — the kind
+       of content you'd see as a footer-style strip on a spec
+       page, NOT as a card with shadow, border, and big padding.
+
+       Strip all card-like chrome: no background, no border, no
+       border-radius, no shadow, no large padding. What's left
+       is a slim section-footer-style note with:
+         · a small uppercase "Compliance & Standards" feel via
+           the title styled as an eyebrow tag,
+         · the 3 compliance points rendered as inline-flex
+           pill-checks (each on its own line on narrow, can
+           flow into a row on wider), and
+         · a single hairline rule above to visually anchor it
+           to the cards-row it sits below. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) {
+      /* strip the card chrome */
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      /* slim layout */
+      padding: 14px 4px 0 !important;
+      margin-top: 4px !important;
+      position: relative !important;
+      overflow: visible !important;
+      transition: none !important;
+    }
+    /* Hairline divider above to visually attach the strip
+       to the cards row above. Brand-green-tinted on the
+       left, fading to transparent — feels like an editorial
+       separator, not a card outline. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback)::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 4px !important;
+      right: 4px !important;
+      height: 1px !important;
+      background: linear-gradient(
+        90deg,
+        rgba(45, 200, 86, 0.45) 0%,
+        rgba(45, 200, 86, 0.15) 40%,
+        rgba(255, 255, 255, 0.06) 100%
+      ) !important;
+      transform: none !important;
+      display: block !important;
+    }
+    /* Suppress the desktop ::before scaleX hover effect. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback):hover::before {
+      transform: none !important;
+    }
+    /* No image stage. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-stage {
+      display: none !important;
+    }
+    /* Body sits flush with the strip — no inset padding. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-body {
+      padding: 0 !important;
+    }
+    /* Title becomes a small uppercase EYEBROW tag — the
+       "category" of the strip, not a card headline. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-tag {
+      display: none !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-name {
+      font-size: 0.6rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.16em !important;
+      text-transform: uppercase !important;
+      line-height: 1 !important;
+      margin: 0 0 10px !important;
+      color: #2DC856 !important;
+    }
+    /* Features row: each item is a small check + inline label,
+       arranged in a flex-wrap row so the three compliance
+       facts read as a horizontal credentials strip rather
+       than a vertical bullet list. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-features {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 6px 14px !important;
+      list-style: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-features li {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      font-size: 0.72rem !important;
+      line-height: 1.3 !important;
+      color: rgba(255, 255, 255, 0.74) !important;
+      letter-spacing: 0.01em !important;
+    }
+    /* Hide the green pill-tick and replace with a subtle
+       inline brand mark via ::before so the row reads as
+       "credential · credential · credential" rather than
+       a list of fat green check buttons. */
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-tick {
+      display: none !important;
+    }
+    html.svc-v3-active .svc-section--hardware .svc-hw-card:has(.svc-hw-img-fallback) .svc-hw-features li::before {
+      content: '' !important;
+      display: inline-block !important;
+      width: 5px !important;
+      height: 5px !important;
+      border-radius: 50% !important;
+      background: #2DC856 !important;
+      flex: 0 0 auto !important;
+    }
+    /* The hardware "see all" link below the grid also tightens
+       so the entire section fits in the viewport. */
+    html.svc-v3-active #service-hardware .svc-hw-foot {
+      margin-top: clamp(12px, 1.8vh, 18px) !important;
+    }
+    html.svc-v3-active #service-hardware .svc-hw-seeall {
+      font-size: 0.72rem !important;
+      padding: 8px 14px !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       FINANCIAL MODELS — mobile tabs + single-card view
+       ──────────────────────────────────────────────────────────
+       Desktop shows all 3 models in a side-by-side grid. On
+       mobile that's far too wide and stacking would make the
+       section 3× viewport height.
+
+       Mobile redesign:
+         · Section anchored to one viewport via min-height
+           calc(100dvh - 80px).
+         · A tab bar (.svc-v4-fin-tabs, injected by the inline
+           JS at the top of the page) sits above the grid with
+           one button per model.
+         · The grid has data-active="<idx>" set by the tab JS.
+           Cards whose index matches data-active are visible;
+           all others are display:none. So only one card shows
+           at a time — full content of the active model, just
+           swapped by tap.
+       ═══════════════════════════════════════════════════════════ */
+    html.svc-v3-active #service-financialModels {
+      min-height: calc(100dvh - 80px) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      padding-top: clamp(20px, 3vh, 32px) !important;
+      padding-bottom: clamp(20px, 3vh, 36px) !important;
+    }
+    /* Compressed section head — title + sub take less room
+       so the active card has more vertical budget. */
+    html.svc-v3-active #service-financialModels .svc-section-head {
+      margin-bottom: clamp(12px, 1.8vh, 18px) !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-section-title {
+      font-size: clamp(1.35rem, 5.4vw, 1.85rem) !important;
+      line-height: 1.04 !important;
+      margin-bottom: 4px !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-section-sub {
+      font-size: clamp(0.82rem, 2.8vw, 0.92rem) !important;
+      line-height: 1.4 !important;
+    }
+
+    /* TAB BAR — horizontal pill row with the 3 model names.
+       (The default desktop rule below the @media block hides
+       this element entirely; this declaration only takes
+       effect on mobile.)
+
+       CRITICAL color context: the financial-models section
+       sits on a LIGHT band (#f3f7fb feathered into the dark
+       page canvas via the ::before pseudo-element). Earlier
+       passes styled the tab bar as white-on-translucent-white
+       — which disappears against this light section. Inactive
+       tabs MUST use dark text on a tinted-dark bg to read
+       against #f3f7fb.
+
+       Active tab is the brand-green pill that visually pops
+       on either bg; inactive tabs are dark slate-grey on a
+       semi-transparent dark slab. */
+    html.svc-v3-active .svc-v4-fin-tabs {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 4px !important;
+      margin: 0 auto clamp(12px, 1.8vh, 18px) !important;
+      padding: 4px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      background: rgba(13, 28, 36, 0.06) !important;
+      border: 1px solid rgba(13, 28, 36, 0.10) !important;
+      border-radius: 12px !important;
+      box-shadow: inset 0 1px 2px rgba(13, 28, 36, 0.06) !important;
+    }
+    html.svc-v3-active .svc-v4-fin-tab {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      padding: 10px 4px !important;
+      font-family: inherit !important;
+      font-size: 0.78rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+      line-height: 1.15 !important;
+      text-align: center !important;
+      /* INACTIVE TABS — dark slate text on the light section
+         band so they're clearly readable as interactive
+         chips. */
+      color: #1d1d1f !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      transition:
+        color 0.22s ease,
+        background 0.22s ease !important;
+    }
+    html.svc-v3-active .svc-v4-fin-tab[aria-selected="true"] {
+      color: #ffffff !important;
+      background: #2DC856 !important;
+      box-shadow: 0 1px 2px rgba(45, 200, 86, 0.32),
+                  0 6px 14px rgba(45, 200, 86, 0.32) !important;
+    }
+    html.svc-v3-active .svc-v4-fin-tab:hover:not([aria-selected="true"]) {
+      color: #0d1c24 !important;
+      background: rgba(13, 28, 36, 0.08) !important;
+    }
+
+    /* GRID — single column on mobile. Cards visibility
+       controlled by the grid's data-active attribute. */
+    html.svc-v3-active #service-financialModels .svc-fin-grid {
+      grid-template-columns: 1fr !important;
+      gap: 0 !important;
+      max-width: 520px !important;
+      margin: 0 auto !important;
+    }
+    /* Hide every card by default on mobile, then unhide the
+       one whose data-fin-card-idx matches data-active. The
+       attribute-matching avoids any per-card class toggling
+       in JS — the JS just sets a single attribute on the
+       grid. */
+    html.svc-v3-active #service-financialModels .svc-fin-grid .svc-fin-card {
+      display: none !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-grid[data-active="0"] .svc-fin-card[data-fin-card-idx="0"],
+    html.svc-v3-active #service-financialModels .svc-fin-grid[data-active="1"] .svc-fin-card[data-fin-card-idx="1"],
+    html.svc-v3-active #service-financialModels .svc-fin-grid[data-active="2"] .svc-fin-card[data-fin-card-idx="2"],
+    html.svc-v3-active #service-financialModels .svc-fin-grid[data-active="3"] .svc-fin-card[data-fin-card-idx="3"] {
+      display: block !important;
+    }
+    /* Optional: tighten the active card's internal padding
+       to fit the section's viewport budget. */
+    html.svc-v3-active #service-financialModels .svc-fin-card {
+      padding: 18px 18px 20px !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-name {
+      font-size: 1.15rem !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-tagline {
+      font-size: 0.86rem !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-body {
+      font-size: 0.84rem !important;
+      line-height: 1.5 !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-bullets li {
+      font-size: 0.8rem !important;
+      line-height: 1.4 !important;
+    }
+    html.svc-v3-active #service-financialModels .svc-fin-footnote {
+      font-size: 0.76rem !important;
+      margin-top: clamp(10px, 1.6vh, 14px) !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SOFTWARE — mobile compact stack
+       ──────────────────────────────────────────────────────────
+       Desktop: 2-column grid (left = section head + Owner
+       Portal, right = Driver App + Support cards). On mobile
+       that 2-col grid auto-stacks to 1-col and the combined
+       content (header + portal 6-bullet list + app card + app
+       6-bullet list + support card) totals well over 1000px —
+       way past the calc(100dvh - 80px) viewport budget.
+
+       Refine on mobile:
+         · Section anchored at min-height calc(100dvh - 80px).
+         · Section head compressed: small eyebrow + tight title
+           + smaller intro paragraph.
+         · Owner Portal + Driver App + Support stack in one
+           column, each with TIGHTER paddings + smaller type +
+           smaller bullet dots — every block shrinks 25-30%.
+         · Bullet rows compressed line-height + font so the
+           6-item lists feel like a quick scan instead of a
+           wall.
+       Total target height ≈ 100dvh - 80 so the user lands at
+       a clean anchored section; content above the fold tells
+       the full software story without scrolling.
+       ═══════════════════════════════════════════════════════════ */
+    html.svc-v3-active #service-software {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: clamp(16px, 2.4vh, 28px) !important;
+      padding-bottom: clamp(20px, 3vh, 32px) !important;
+    }
+    /* Stack the 2-column grid as one tight column on mobile. */
+    html.svc-v3-active #service-software .svc-sw-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: clamp(12px, 1.8vh, 18px) !important;
+    }
+    /* Section head — small eyebrow + tight title + small intro. */
+    html.svc-v3-active #service-software .svc-sw-eyebrow {
+      font-size: 0.62rem !important;
+      letter-spacing: 0.14em !important;
+      margin-bottom: 6px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-title {
+      font-size: clamp(1.4rem, 5.6vw, 1.85rem) !important;
+      line-height: 1.04 !important;
+      margin-bottom: clamp(6px, 1vh, 10px) !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-intro {
+      font-size: 0.82rem !important;
+      line-height: 1.4 !important;
+      margin-bottom: clamp(12px, 1.6vh, 18px) !important;
+    }
+    /* Portal block: smaller title, compact bullets. */
+    html.svc-v3-active #service-software .svc-sw-portal {
+      padding-top: clamp(10px, 1.4vh, 14px) !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-portal-title {
+      font-size: 0.92rem !important;
+      letter-spacing: 0 !important;
+    }
+    /* Bullet list — both portal AND driver app share this. */
+    html.svc-v3-active #service-software .svc-sw-bullet-list {
+      gap: 4px !important;
+      margin-top: 8px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-bullet-list li {
+      font-size: 0.78rem !important;
+      line-height: 1.35 !important;
+      gap: 8px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-bullet-dot {
+      width: 5px !important;
+      height: 5px !important;
+      margin-top: 7px !important;
+      flex: 0 0 auto !important;
+    }
+    /* Driver App card — compact paddings. */
+    html.svc-v3-active #service-software .svc-sw-card {
+      padding: 14px 14px 16px !important;
+      border-radius: 14px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-card-icon {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-card-title {
+      font-size: 0.95rem !important;
+      line-height: 1.18 !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-card-subtitle {
+      font-size: 0.68rem !important;
+      letter-spacing: 0.08em !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-card-body {
+      font-size: 0.78rem !important;
+      line-height: 1.4 !important;
+      margin: 8px 0 6px !important;
+    }
+    /* Support card — keep it compact, 1-line title + body. */
+    html.svc-v3-active #service-software .svc-sw-support {
+      padding: 10px 12px !important;
+      gap: 10px !important;
+      border-radius: 12px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-support-icon {
+      width: 28px !important;
+      height: 28px !important;
+      flex: 0 0 auto !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-support-title {
+      font-size: 0.82rem !important;
+      line-height: 1.2 !important;
+      margin-bottom: 2px !important;
+    }
+    html.svc-v3-active #service-software .svc-sw-support-body {
+      font-size: 0.72rem !important;
+      line-height: 1.35 !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       FAQ — mobile compact list
+       ──────────────────────────────────────────────────────────
+       Desktop FAQ: large title + 7 expandable items. On mobile
+       the 7 items stacked at desktop sizing total 600-700px,
+       which + title doesn't fit in calc(100dvh - 80px).
+
+       Compress so all 7 questions in their COLLAPSED state are
+       visible at once — that's the "anchored fit" the user
+       expects when they land at FAQ. Expanding an item then
+       lets it grow inline (CSS already handles smooth max-
+       height + padding transition).
+
+       Header compresses to ~80-90px; each collapsed item is
+       ~50px; 7 items × 50 = 350; total ~430-450 well under
+       calc(100dvh - 80px) ≈ 620 on a 700vh phone.
+       ═══════════════════════════════════════════════════════════ */
+    html.svc-v3-active #service-faq {
+      min-height: calc(100dvh - 80px) !important;
+      padding-top: clamp(16px, 2.4vh, 28px) !important;
+      padding-bottom: clamp(20px, 3vh, 32px) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-head {
+      margin-bottom: clamp(10px, 1.6vh, 16px) !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-eyebrow {
+      font-size: 0.62rem !important;
+      letter-spacing: 0.14em !important;
+      margin-bottom: 6px !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-title {
+      font-size: clamp(1.4rem, 5.6vw, 1.85rem) !important;
+      line-height: 1.04 !important;
+    }
+    /* Tighter list gaps between items. */
+    html.svc-v3-active #service-faq .svc-faq-list {
+      gap: 6px !important;
+    }
+    /* Compress each FAQ item: smaller question text, tighter
+       padding, smaller toggle indicator. */
+    html.svc-v3-active #service-faq .svc-faq-item {
+      border-radius: 10px !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-q {
+      padding: 12px 14px !important;
+      font-size: 0.86rem !important;
+      line-height: 1.25 !important;
+      gap: 10px !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-q-text {
+      font-weight: 700 !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-q-toggle {
+      width: 18px !important;
+      height: 18px !important;
+      flex: 0 0 auto !important;
+    }
+    html.svc-v3-active #service-faq .svc-faq-a {
+      font-size: 0.8rem !important;
+      line-height: 1.5 !important;
+    }
+    /* When an item is OPEN, slightly reduce its expanded
+       padding too. */
+    html.svc-v3-active #service-faq .svc-faq-item[open] .svc-faq-a {
+      padding: 4px 14px 14px !important;
+    }
+  }
+
+</style>

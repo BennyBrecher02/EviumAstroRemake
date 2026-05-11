@@ -1,0 +1,692 @@
+---
+/**
+ * ConsultationStickyTab
+ * ─────────────────────
+ * Brand-green tab that pops out from the right edge of the
+ * viewport when the user has scrolled past the page's
+ * primary CTA (the hero's consultation form). Clicking it
+ * opens a right-side drawer with a second copy of the
+ * shared ConsultationForm, so the visitor can request a
+ * consultation from anywhere on the page without scrolling
+ * back to the top.
+ *
+ * Built site-wide-ready but only wired into /home-v3 for
+ * now (per spec: refine here first, deploy site-wide once
+ * stable).
+ *
+ * Visibility logic:
+ *   - Hidden initially (while the hero form is visible).
+ *   - An IntersectionObserver watches the hero's
+ *     `.home-hero` element. Once the hero is mostly out
+ *     of view (intersection ratio < 0.1), the tab fades
+ *     in. Coming back up un-fades it.
+ *
+ * Drawer mechanics:
+ *   - Slides in from the right (transform-driven, no
+ *     layout shift).
+ *   - Backdrop dims + blurs the rest of the page; the
+ *     drawer captures focus.
+ *   - Esc key closes; backdrop click closes; close-button
+ *     closes.
+ *   - Body scroll is locked while the drawer is open.
+ *
+ * The component is intentionally a self-contained unit —
+ * no required props, no slots. Drop it on any page (or
+ * eventually into Layout.astro for site-wide coverage)
+ * and it just works.
+ */
+
+import ConsultationForm from './ConsultationForm.astro';
+
+interface Props {
+  /**
+   * When true, the tab is visible from page load and
+   * doesn't wait for the hero to scroll out of view.
+   * Use on pages that don't have a `.home-hero` element
+   * and where the conversion CTA should be a permanent
+   * affordance (e.g. /products-v2).
+   */
+  alwaysVisible?: boolean;
+}
+
+const { alwaysVisible = false } = Astro.props;
+---
+
+<!-- Right-edge tab — minimal text-only vertical pill,
+     matching the Clozetivity reference (no extra icons,
+     no dots, no arrows). Hidden via [hidden]; JS reveals
+     it once the hero leaves the viewport (or immediately,
+     when data-cst-always-visible is set). -->
+<button
+  type="button"
+  class="cst-tab"
+  data-cst-tab
+  data-cst-always-visible={alwaysVisible ? 'true' : 'false'}
+  aria-label="Open free consultation form"
+  aria-controls="cst-drawer"
+  aria-expanded="false"
+  hidden
+>
+  <span class="cst-tab-label">Free Consultation</span>
+</button>
+
+<!-- Drawer + backdrop. role=dialog so screen readers
+     announce it; aria-modal=true ensures focus stays
+     trapped inside while it's open. -->
+<div
+  class="cst-drawer-root"
+  data-cst-root
+  hidden
+>
+  <button
+    type="button"
+    class="cst-backdrop"
+    data-cst-backdrop
+    aria-label="Close consultation form"
+    tabindex="-1"
+  ></button>
+
+  <aside
+    id="cst-drawer"
+    class="cst-drawer"
+    data-cst-drawer
+    role="dialog"
+    aria-modal="true"
+    aria-label="Free site consultation"
+  >
+    <!-- Drawer chrome — a slim, dedicated top header
+         bar that holds the close button, so the close
+         affordance lives in its own space and never
+         overlaps the form below. The bar has no border
+         and minimal padding; it reads as a clean
+         "title bar" of the glass pane. -->
+    <header class="cst-drawer-bar">
+      <button
+        type="button"
+        class="cst-close"
+        data-cst-close
+        aria-label="Close consultation form"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M7 7l10 10M17 7L7 17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.65"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </header>
+
+    <div class="cst-drawer-body">
+      <ConsultationForm formId="cst-drawer-form" />
+    </div>
+  </aside>
+</div>
+
+<style>
+  /* ─── Right-edge tab ───────────────────────────────
+     Minimal text-only vertical pill matching the
+     Clozetivity reference. Pinned to the right edge,
+     vertically centered. `writing-mode: vertical-rl`
+     rotates the text 90° clockwise so the label reads
+     bottom→top along the page edge.
+
+     Slim — ≈ 32 px wide × 170 px tall. No dot, no
+     arrow, no breathing animation. Just the text. */
+  .cst-tab {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 9px;
+    margin: 0;
+    border-radius: 8px 0 0 8px;
+    border: 0;
+    background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+    color: #ffffff;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    min-height: 170px;
+    transform: translate(0, -50%);
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 280ms ease;
+    box-shadow:
+      inset 1px 0 0 rgba(255, 255, 255, 0.28),
+      0 4px 12px rgba(45, 200, 86, 0.32),
+      0 10px 22px rgba(13, 28, 36, 0.28),
+      -2px 0 10px rgba(45, 200, 86, 0.24);
+  }
+  .cst-tab[hidden] {
+    display: none;
+  }
+  /* Hover state: INVERTS the tab — white background,
+     brand-green text + a white halo glow instead of the
+     green halo. Reads as a deliberate "press me" affordance
+     and stands out distinctly from the resting state. */
+  .cst-tab:hover {
+    background: #ffffff;
+    color: #2DC856;
+    transform: translate(-3px, -50%);
+    box-shadow:
+      inset 1px 0 0 rgba(45, 200, 86, 0.18),
+      0 4px 16px rgba(255, 255, 255, 0.5),
+      0 14px 28px rgba(13, 28, 36, 0.32),
+      -2px 0 22px rgba(255, 255, 255, 0.6);
+  }
+  .cst-tab:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+  }
+
+  .cst-tab-label {
+    white-space: nowrap;
+  }
+
+  /* Faded-in state — controlled via data attribute by
+     the IntersectionObserver. */
+  .cst-tab[data-cst-visible="false"] {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+  .cst-tab[data-cst-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Drawer-open state — hide the tab WHILE the drawer
+     is open AND through the close animation. Without
+     this, the tab peeked out from behind the drawer
+     during the 320 ms slide-close transition. The JS
+     clears this flag only AFTER the drawer is fully
+     hidden again. */
+  .cst-tab[data-cst-drawer-open="true"] {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+
+  /* ─── Drawer root ──────────────────────────────────
+     Wraps backdrop + drawer aside. Hidden initially;
+     `[open]` (or removing [hidden]) shows it. */
+  .cst-drawer-root {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: block;
+  }
+  .cst-drawer-root[hidden] {
+    display: none;
+  }
+
+  /* Backdrop — dim + blur the page behind the drawer. */
+  .cst-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(8, 18, 26, 0.55);
+    backdrop-filter: blur(6px) saturate(70%);
+    -webkit-backdrop-filter: blur(6px) saturate(70%);
+    cursor: pointer;
+    /* Fade in via transition when drawer opens. */
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+  .cst-drawer-root[data-cst-open="true"] .cst-backdrop {
+    opacity: 1;
+  }
+
+  /* Drawer aside — slides in from the right edge.
+     Background: REAL WHITE-ISH GLASS, with DIRECTIONAL
+     lighting (top + left lit, right + bottom in soft
+     shadow). The previous version had all four edges
+     equally bright which read as "painted-on borders".
+     This version commits to a single light source in
+     the upper-left, the way real glass actually behaves.
+
+     Soft, refractive, NOT framed. No crisp white lines.
+     Every highlight has a gentle gradient falloff so the
+     edges read as glass thickness catching light, not
+     as a stroke drawn around the pane. */
+  .cst-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(440px, 100%);
+    background:
+      /* 1. TOP EDGE HIGHLIGHT — soft falloff, no peak.
+         Peak dropped from 0.96 → 0.50, and the falloff
+         starts immediately (0% → 50%, not 0% → 96% →
+         48%). Reads as light catching a polished edge,
+         not a painted white line. */
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.50) 0%,
+        rgba(255, 255, 255, 0.18) 1%,
+        rgba(255, 255, 255, 0.06) 4%,
+        transparent 9%
+      ),
+      /* 2. LEFT-EDGE HIGHLIGHT — same soft falloff
+         treatment. Peak 0.74 → 0.42. */
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.42) 0%,
+        rgba(255, 255, 255, 0.14) 1%,
+        rgba(255, 255, 255, 0.04) 3%,
+        transparent 6%
+      ),
+      /* 3. UPPER-LEFT PRIMARY PEARL — main light
+         source anchor, softened. */
+      radial-gradient(
+        ellipse 58% 40% at 4% 0%,
+        rgba(255, 255, 255, 0.52) 0%,
+        rgba(255, 255, 255, 0) 65%
+      ),
+      /* 4. UPPER-RIGHT FILL PEARL — bounced room fill,
+         softened from 0.26 → 0.16. */
+      radial-gradient(
+        ellipse 40% 30% at 96% 2%,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(255, 255, 255, 0) 72%
+      ),
+      /* 5. WET-GLASS HOTSPOT — subtle specular peak
+         in the upper-third (softened to 0.12). */
+      radial-gradient(
+        ellipse 34% 24% at 38% 16%,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0) 78%
+      ),
+      /* 6. DIAGONAL SHEEN 135° — natural light catch
+         on a vertical pane. */
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.24) 0%,
+        rgba(255, 255, 255, 0.08) 16%,
+        rgba(255, 255, 255, 0) 40%
+      ),
+      /* 7. INTERNAL GREEN BLEED — faint ghost of the
+         submit button caught inside the glass, softened
+         to 0.06. */
+      radial-gradient(
+        ellipse 75% 28% at 50% 100%,
+        rgba(45, 200, 86, 0.06) 0%,
+        rgba(45, 200, 86, 0) 72%
+      ),
+      /* 8. BOTTOM-RIGHT COOL POOL — temperature shift
+         (top warmer, bottom cooler — real lit glass). */
+      radial-gradient(
+        ellipse 58% 52% at 100% 100%,
+        rgba(220, 234, 245, 0.20) 0%,
+        rgba(220, 234, 245, 0) 72%
+      ),
+      /* 9. BASE TRANSLUCENT WHITE — ~32% opacity.
+         Low enough that backdrop-filter does real
+         refractive work; high enough that the glass
+         reads WHITE, not colorless. */
+      linear-gradient(
+        180deg,
+        rgba(252, 254, 255, 0.32) 0%,
+        rgba(246, 250, 254, 0.36) 100%
+      );
+    color: #1a2f3a;
+    /* REFRACTION ENGINE — same as before, this part
+       is doing the right thing. */
+    backdrop-filter: blur(15px) saturate(195%) contrast(115%) brightness(110%);
+    -webkit-backdrop-filter: blur(15px) saturate(195%) contrast(115%) brightness(110%);
+    /* SHADOW STACK — depth without painted bevels.
+       The trick: big-blur + negative-spread inset
+       shadows. They produce SOFT INNER GLOWS that fade
+       inward from the edge, instead of crisp 1 px
+       strokes that read as painted-on borders.
+         • inner top glow — soft white falling from
+           above, blurred 90 px, spread -50 so it
+           hugs the top zone with no hard edge. Reads
+           as light entering through the polished top
+           of the pane.
+         • inner left glow — same treatment from the
+           lit side (where the brand-green rail meets
+           the glass).
+         • inner bottom darkness — subtle seated cue,
+           also soft (no bottom border).
+         • brand-green LEFT hairline + halo bleed
+         • close / mid / deep drops */
+    box-shadow:
+      inset 0 50px 90px -50px rgba(255, 255, 255, 0.55),
+      inset 50px 0 90px -50px rgba(255, 255, 255, 0.42),
+      inset 0 -8px 30px -8px rgba(13, 27, 34, 0.06),
+      -2px 0 0 0 rgba(45, 200, 86, 0.55),
+      -14px 0 40px rgba(45, 200, 86, 0.22),
+      -4px 0 16px rgba(8, 18, 26, 0.18),
+      -18px 0 44px rgba(8, 18, 26, 0.28),
+      -40px 0 88px rgba(8, 18, 26, 0.38);
+    transform: translateX(100%);
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .cst-drawer-root[data-cst-open="true"] .cst-drawer {
+    transform: translateX(0);
+  }
+
+  /* Drawer top bar — slim, no border, holds the close
+     button in the upper-right of the drawer. Lives ABOVE
+     the form so the X never overlaps form content; the
+     form below gets the entire remaining height to
+     center itself in. */
+  .cst-drawer-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 18px 8px;
+  }
+
+  /* Close button — brushed-metal rounded square.
+     Previous versions:
+       • white circle  →  read as a screw
+       • dark teal     →  too dark for a white drawer
+     This version is in the middle: a medium-light
+     cool-gray gradient that reads as a refined
+     control element — like brushed aluminum on a
+     premium device. Not too bright, not too dark.
+
+       • SHAPE: rounded square (10 px radius — matches
+         the form's input radius family). Square = control,
+         not hardware.
+       • COLOR: cool gray gradient (#eef2f4 → #d8dee2).
+         Reads as brushed metal / polished granite. Not
+         white, not dark.
+       • ICON: dark teal X (#15252b), 1.65 px stroke.
+         High contrast against the light face.
+       • DEPTH: refined multi-layer chrome — inset top
+         highlight, inset bottom seated edge, hairline
+         outer ring, four-tier drop shadow.
+
+     HOVER: brand-green wake. X turns brand-green,
+     face brightens slightly, ring picks up green,
+     drop shadow swaps to a green-tinted variant,
+     button lifts 1 px. */
+  .cst-close {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(180deg, #eef2f4 0%, #d8dee2 100%);
+    color: #15252b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(13, 27, 34, 0.08),
+      inset 0 0 0 1px rgba(13, 27, 34, 0.06),
+      0 1px 2px rgba(8, 18, 26, 0.06),
+      0 4px 10px -2px rgba(8, 18, 26, 0.08),
+      0 12px 24px -6px rgba(8, 18, 26, 0.10);
+    transition:
+      color 240ms ease,
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms ease,
+      background 280ms ease;
+  }
+  .cst-close::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 11px;
+    border: 1px solid transparent;
+    pointer-events: none;
+    transition:
+      inset 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 280ms ease;
+  }
+  .cst-close:hover {
+    color: #2DC856;
+    background: linear-gradient(180deg, #f3f7f8 0%, #dee5e7 100%);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(45, 200, 86, 0.10),
+      inset 0 0 0 1px rgba(45, 200, 86, 0.22),
+      0 1px 2px rgba(8, 18, 26, 0.06),
+      0 6px 14px -2px rgba(45, 200, 86, 0.14),
+      0 16px 32px -6px rgba(45, 200, 86, 0.22);
+  }
+  .cst-close:hover::before {
+    inset: -4px;
+    border-color: rgba(45, 200, 86, 0.22);
+  }
+  .cst-close:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(45, 200, 86, 0.14),
+      inset 0 0 0 1px rgba(45, 200, 86, 0.30),
+      0 1px 2px rgba(8, 18, 26, 0.06),
+      0 3px 6px rgba(45, 200, 86, 0.16);
+  }
+  .cst-close:active::before {
+    inset: -1px;
+    border-color: rgba(45, 200, 86, 0.32);
+  }
+  /* X icon — absolute-positioned at the button's exact
+     center via top: 50% / left: 50% + translate(-50%,
+     -50%). This GUARANTEES the icon stays centered
+     regardless of flex quirks, pseudo-elements, or any
+     other layout influence. The SVG path itself draws
+     the X symmetric across both axes within the 24×24
+     viewBox, so visual center matches geometric center. */
+  .cst-close svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translate(-50%, -50%);
+    display: block;
+    z-index: 1;
+  }
+  .cst-close:focus-visible {
+    outline: 2px solid #2DC856;
+    outline-offset: 4px;
+  }
+
+  /* Drawer body — flex column that VERTICALLY centers
+     the form within the available height. Combined with
+     the slim top bar above, the form sits in the middle
+     of the drawer (about 32% from top to balance with
+     the bar's weight up top), so the empty space above
+     and below reads as deliberate breathing room. */
+  .cst-drawer-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* The shared ConsultationForm hands us a .cf-form
+     element. Inside the drawer we want it to fill the
+     available width (the drawer is narrow enough that
+     the form's natural 400 px max is fine, but we
+     stretch a touch wider with !important so the form
+     spans the drawer body's gutter). */
+  .cst-drawer-body :global(.cf-form) {
+    max-width: 100%;
+  }
+
+  /* ─── Body scroll lock helper ──────────────────────
+     When the drawer is open, the document gets a class
+     on <html> that disables overflow so the page behind
+     doesn't scroll. JS toggles this class. */
+  :global(html.cst-locked) {
+    overflow: hidden;
+  }
+
+  /* ─── HeaderV4 menu coexistence ────────────────────
+     When HeaderV4's full-screen list menu is open
+     (body gets `.lv4-menu-open`), the page content is
+     replaced by the menu overlay. The sticky tab and
+     drawer would otherwise float on TOP of that
+     overlay, which reads as messy / unprofessional.
+     Hide both temporarily; CSS transitions handle the
+     fade so the tab smoothly disappears as the menu
+     opens and smoothly reappears when it closes. */
+  :global(body.lv4-menu-open) .cst-tab {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+  :global(body.lv4-menu-open) .cst-drawer-root {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  /* ─── Reduced motion ───────────────────────────────
+     Drawer slide is a discrete action (not ambient)
+     so it stays. The minimal tab has no animations
+     to disable. */
+</style>
+
+<script>
+  // ─── State refs ─────────────────────────────────
+  const tab        = document.querySelector<HTMLButtonElement>('[data-cst-tab]');
+  const drawerRoot = document.querySelector<HTMLElement>('[data-cst-root]');
+  const drawer     = document.querySelector<HTMLElement>('[data-cst-drawer]');
+  const backdrop   = document.querySelector<HTMLButtonElement>('[data-cst-backdrop]');
+  const closeBtn   = document.querySelector<HTMLButtonElement>('[data-cst-close]');
+
+  // ─── Open / close drawer ────────────────────────
+  let lastFocused: Element | null = null;
+
+  function openDrawer() {
+    if (!drawerRoot || !drawer || !tab) return;
+    lastFocused = document.activeElement;
+    drawerRoot.hidden = false;
+    // Hide the tab IMMEDIATELY so it doesn't peek out
+    // from behind the drawer as it slides in or out.
+    tab.setAttribute('data-cst-drawer-open', 'true');
+    // Defer to next frame so the [hidden] removal lands
+    // before we flip the [data-cst-open] flag — that way
+    // the CSS transition (transform + opacity) plays.
+    requestAnimationFrame(() => {
+      drawerRoot.setAttribute('data-cst-open', 'true');
+    });
+    tab.setAttribute('aria-expanded', 'true');
+    document.documentElement.classList.add('cst-locked');
+    // Focus the close button so keyboard users can Esc /
+    // tab back through the form.
+    const firstFocusable = drawer.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    firstFocusable?.focus();
+  }
+
+  function closeDrawer() {
+    if (!drawerRoot || !tab) return;
+    drawerRoot.setAttribute('data-cst-open', 'false');
+    tab.setAttribute('aria-expanded', 'false');
+    document.documentElement.classList.remove('cst-locked');
+    // Wait for the drawer slide-out transition (320ms)
+    // to finish before re-hiding the root AND restoring
+    // the tab. If we restored the tab earlier, it would
+    // pop into view while the drawer is still mid-slide,
+    // which reads as a glitch.
+    setTimeout(() => {
+      drawerRoot.hidden = true;
+      tab.setAttribute('data-cst-drawer-open', 'false');
+    }, 320);
+    // Return focus to whatever triggered the open.
+    if (lastFocused instanceof HTMLElement) {
+      lastFocused.focus();
+    }
+  }
+
+  tab?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawerRoot && drawerRoot.getAttribute('data-cst-open') === 'true') {
+      e.preventDefault();
+      closeDrawer();
+    }
+  });
+
+  // ─── Tab visibility ─────────────────────────────
+  // Three modes, in priority order:
+  //
+  //   1. ALWAYS-VISIBLE: when the component is rendered
+  //      with `alwaysVisible` (data-cst-always-visible
+  //      attribute on the tab is "true"), the tab is
+  //      shown from page load and stays visible — no
+  //      hero-watching, no scroll threshold. Used on
+  //      pages where the consultation CTA should be a
+  //      permanent affordance (e.g. /products-v2).
+  //
+  //   2. HERO OBSERVER: when a `.home-hero` element is
+  //      present, an IntersectionObserver watches it.
+  //      The tab is hidden while the hero is in view
+  //      (the hero's own form is the primary CTA there)
+  //      and revealed once the hero leaves view.
+  //
+  //   3. SCROLL FALLBACK: no hero on the page. Tab
+  //      becomes visible after the user scrolls past
+  //      80 vh.
+  function setTabVisible(visible: boolean) {
+    if (!tab) return;
+    tab.hidden = false;
+    tab.setAttribute('data-cst-visible', visible ? 'true' : 'false');
+  }
+
+  const alwaysVisible = tab?.getAttribute('data-cst-always-visible') === 'true';
+
+  if (alwaysVisible) {
+    setTabVisible(true);
+  } else {
+    const heroEl = document.querySelector('.home-hero');
+    if (heroEl) {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          setTabVisible(entry.intersectionRatio < 0.1);
+        },
+        { threshold: [0, 0.1, 0.5, 1] }
+      );
+      io.observe(heroEl);
+      setTabVisible(false);
+    } else {
+      setTabVisible(false);
+      let scrollHandlerRunning = false;
+      window.addEventListener('scroll', () => {
+        if (scrollHandlerRunning) return;
+        scrollHandlerRunning = true;
+        requestAnimationFrame(() => {
+          const past = window.scrollY > window.innerHeight * 0.8;
+          setTabVisible(past);
+          scrollHandlerRunning = false;
+        });
+      }, { passive: true });
+    }
+  }
+</script>

@@ -59,6 +59,8 @@ const navItems = [
       { label: 'Desktop v1', href: '/blog'                  },
       { label: 'Desktop v2', href: '/blog-v2'               },
       { label: 'Desktop v3', href: '/blog-v3'               },
+      { label: 'Desktop v4', href: '/blog-v4'               },
+      { label: 'Desktop v5', href: '/blog-v5'               },
       { label: 'Mobile v1',  href: '/testing/mobile-blogs'  },
       { label: 'Mobile v2',  href: '/testing/mobile-v2'     },
     ],
@@ -129,11 +131,11 @@ const navItems = [
     // fit neatly under Contact (message-style) or the product /
     // solutions columns. Also gated behind dev mode for now.
     //
-    // As of the Home v2 split, this dropdown also holds the three
+    // As of the Home v2 split, this dropdown also holds the two
     // items that used to live under the retired "AI BS" slot —
-    // Old Saved Sections, Old Electrician Partners, and the dev
-    // "Toggle the toggle" item that hides/shows the floating
-    // dev-mode pill.
+    // Old Saved Sections and Old Electrician Partners. The dev
+    // "Toggle the toggle" pill control has been migrated to the
+    // HeaderV4 lefter's Site v3 button.
     label: 'Other',
     href: '#',
     noNavigate: true,
@@ -143,10 +145,6 @@ const navItems = [
       { label: 'Electrician Partners',    href: '/solutions/electrician-partners' },
       { label: 'Old Saved Sections',      href: '/ai-bs/old-saved-sections'       },
       { label: 'Old Electrician Partners',href: '/ai-bs/old-electrician-partners' },
-      // Dev convenience — hides/reveals the floating dev-mode pill
-      // in the bottom-right. Hash href + devSwitch flag keep it
-      // from ever navigating; the JS hook in DevToggle picks it up.
-      { label: 'Toggle the toggle',       href: '#',                             devSwitch: true },
     ],
   },
 ];
@@ -846,34 +844,10 @@ const currentPath = Astro.url.pathname;
 </style>
 
 <script>
-  // Dev-switch toggle — intercepts clicks on any dropdown item
-  // marked `data-toggle-devswitch` and flips the #dev-toggle
-  // floating pill between visible and hidden. Used from the AI
-  // BS dropdown's "Toggle the toggle" entry for clean screenshots.
-  //
-  // State persists in localStorage under `ev-devswitch-hidden` so
-  // the hidden choice survives navigation — the floating pill
-  // stays hidden across page changes until the user toggles it
-  // back on. Default (no key set) = visible on a fresh session.
-  // DevToggle.astro reads the same key on mount so the applied
-  // state is consistent before first paint.
-  document.addEventListener('click', (e) => {
-    const trigger = (e.target as HTMLElement | null)?.closest?.('[data-toggle-devswitch]');
-    if (!trigger) return;
-    e.preventDefault();
-    const devToggle = document.getElementById('dev-toggle');
-    if (!devToggle) return;
-    const currentlyHidden = devToggle.getAttribute('data-hidden') === 'true';
-    if (currentlyHidden) {
-      devToggle.style.display = '';
-      devToggle.removeAttribute('data-hidden');
-      try { localStorage.removeItem('ev-devswitch-hidden'); } catch {}
-    } else {
-      devToggle.style.display = 'none';
-      devToggle.setAttribute('data-hidden', 'true');
-      try { localStorage.setItem('ev-devswitch-hidden', '1'); } catch {}
-    }
-  });
+  // The "Toggle the toggle" devswitch click handler used to
+  // live here; it has been retired in favour of the HeaderV4
+  // lefter's "Site v3" button, which now owns the pill
+  // visibility toggle sitewide.
 
   const items = document.querySelectorAll<HTMLElement>('[data-nav-item]');
   const batteryBody = document.querySelector<HTMLElement>('.battery-body')!;

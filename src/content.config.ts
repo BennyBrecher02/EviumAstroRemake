@@ -10,6 +10,11 @@ const blog = defineCollection({
     date: z.string(),
     excerpt: z.string(),
     readTime: z.string(),
+    /* Optional cover image — used by /blog-v4 for its 3-column card
+       grid and by the [...slug] article template for the in-article
+       hero. Path is served-public, e.g.
+       `/images/blog/charger-plugs/ev-charging1.png`. */
+    image: z.string().optional(),
   }),
 });
 

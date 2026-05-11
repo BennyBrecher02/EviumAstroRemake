@@ -1,0 +1,955 @@
+---
+/**
+ * /blog/[...slug] — individual blog article surface (editorial v2).
+ *
+ * Three-zone layout that reads as a single magazine spread:
+ *
+ *   1. HERO BAND (full-bleed dark teal)
+ *      Brand-green ambient washes give the dark band depth without
+ *      stealing focus from the title. The eyebrow row carries the
+ *      back link + the per-category chip on a single baseline so
+ *      the brow reads as a deliberate header, not a stack of
+ *      detached pills. The display title sits below at 60–72px
+ *      / weight 900 with tight tracking — confident editorial type.
+ *      Meta (date • read-time) and a brand-green divider rule
+ *      anchor the bottom of the band.
+ *
+ *   2. COVER FRAME (overlaps hero, contained card)
+ *      A dark-teal frame with rounded corners, soft drop shadow,
+ *      and an inner 12px paper inset around the photo. The image
+ *      itself uses aspect-ratio 3/2 + object-fit:cover so every
+ *      article gets the same cinematic silhouette regardless of
+ *      source dimensions. Frame width is intentionally narrower
+ *      than the hero (1040px) so the frame reads as a deliberate
+ *      object on the page rather than a full-bleed photo.
+ *
+ *   3. BODY SHEET (paper-card on plaza)
+ *      The article text lives on a wide white "sheet" sitting on
+ *      the plaza bg. Sheet is ~960px wide; reading column inside
+ *      is capped at 720px with generous 80–100px side padding. The
+ *      card has a soft 22px radius + multi-stop drop shadow so it
+ *      reads as a premium document, not a flat rectangle. A small
+ *      brand-green ornament sits at the top of the sheet.
+ *
+ *      Inside: a magazine-style drop cap on the first letter,
+ *      brand-green tick rules above each H2, italic lede paragraph,
+ *      brand-green decorative HR, pull-quote callouts, animated
+ *      brand-green underline links, dark-teal code blocks.
+ *
+ *   4. MORE-ARTICLES GRID (between body and footer)
+ *      Three related-post cards in a grid, picked from the same
+ *      category first then filled with newest other posts. Each
+ *      card mirrors the v4 blog-list aesthetic (image plate +
+ *      category chip + title + meta) at compact scale. Adds the
+ *      breathing room the body sheet needs from the SiteFooter
+ *      and gives the reader an obvious next-step instead of a
+ *      dead end.
+ *
+ * Header: HeaderV4 lefter rail with `bodyClass="page-blog-v4"`,
+ * which puts the rail in free-scroll mode (no section anchoring)
+ * so a long article scrolls naturally without the rail trying to
+ * snap the user back to a section.
+ *
+ * Astro static-site generation: `getStaticPaths()` returns one
+ * entry per .md file in src/content/blog, so every article gets
+ * a prebuilt route at build time.
+ */
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import ConsultationStickyTab from '../../components/ConsultationStickyTab.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+/* Re-query the full collection at render time to build the
+   "More from the Evium blog" lineup. Re-querying (instead of
+   passing allPosts via getStaticPaths props) avoids a dev-mode
+   SSR edge case where props from getStaticPaths can come back
+   undefined, and is the same pattern blog-v4.astro uses. */
+const allPosts = await getCollection('blog');
+
+/* Brand colour per category — matches the palette used by every
+   blog list variant on the site so the article eyebrow reads as
+   a continuation of the card the user clicked. */
+const CATEGORY_COLORS: Record<string, string> = {
+  'cost-demand':        '#5BC8DC',
+  'market-shifts':      '#E8C030',
+  'charging-tech':      '#E07428',
+  'vehicle-efficiency': '#D82020',
+};
+const accent = CATEGORY_COLORS[post.data.category] ?? '#2DC856';
+
+/* Format the ISO date for human display. */
+const dateLabel = new Date(post.data.date).toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+
+/* Build the "More from the Evium blog" lineup.
+   Sort all posts newest-first, drop the current one, and prefer
+   posts that share this article's category — falling back to the
+   newest others to fill the row. Capped at 3 so the grid stays a
+   single row at desktop widths. */
+const otherPosts = allPosts
+  .filter((p: typeof post) => p.id !== post.id)
+  .sort((a: typeof post, b: typeof post) =>
+    new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+  );
+const sameCat = otherPosts.filter((p: typeof post) => p.data.category === post.data.category);
+const otherCat = otherPosts.filter((p: typeof post) => p.data.category !== post.data.category);
+const moreReads = [...sameCat, ...otherCat].slice(0, 3);
+---
+
+<Layout
+  title={`${post.data.title} — Evium Charging`}
+  description={post.data.excerpt}
+  headerVariant="v4"
+  bodyClass="page-blog-v4"
+>
+<main class="article" style={`--accent: ${accent};`}>
+
+  <!-- ─── 1. HERO BAND — dark Evium-branded display ─────────── -->
+  <header class="article-hero">
+    <div class="article-hero-bg" aria-hidden="true"></div>
+    <div class="article-hero-inner">
+
+      <div class="article-brow">
+        <a href="/blog-v4" class="article-back" aria-label="Back to all articles">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 12 6 8l4-4"/>
+          </svg>
+          <span>All articles</span>
+        </a>
+        <span class="article-brow-rule" aria-hidden="true"></span>
+        <span class="article-cat">{post.data.categoryLabel}</span>
+      </div>
+
+      <h1 class="article-title">{post.data.title}</h1>
+
+      <div class="article-meta">
+        <span>{dateLabel}</span>
+        <span class="article-meta-dot" aria-hidden="true">●</span>
+        <span>{post.data.readTime} read</span>
+      </div>
+
+      <span class="article-divider" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <!-- ─── 2. COVER FRAME — contained editorial photo card ────
+       For placeholder articles (post.id === 'placeholder-blog')
+       the cover renders the Evium wordmark on a dark navy plate
+       with a faint diagonal hatch and the logo dimmed to a low-
+       opacity grayscale ghost, mirroring how older v5/v3 blog
+       grids treat their placeholder cards. Real articles render
+       the regular 3:2 cover-fitted photo. -->
+  {post.data.image && (
+    <figure class="article-cover" data-placeholder={post.id === 'placeholder-blog' ? '1' : '0'}>
+      <div class="article-cover-frame">
+        <div class="article-cover-glow" aria-hidden="true"></div>
+        <div class="article-cover-inset">
+          <img src={post.data.image} alt="" draggable="false" />
+        </div>
+      </div>
+    </figure>
+  )}
+
+  <!-- ─── 3. BODY SHEET — premium paper card on plaza ──────── -->
+  <section class="article-body-wrap">
+    <article class="article-body">
+      <span class="article-body-mark" aria-hidden="true"></span>
+      <div class="article-prose">
+        <Content />
+      </div>
+    </article>
+  </section>
+
+  <!-- ─── 4. MORE FROM EVIUM — related-posts grid ──────────── -->
+  {moreReads.length > 0 && (
+    <aside class="article-more">
+      <header class="article-more-head">
+        <span class="article-more-eyebrow">Keep reading</span>
+        <h2 class="article-more-title">More from the Evium blog</h2>
+        <a href="/blog-v4" class="article-more-all">
+          All articles
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </header>
+
+      <div class="article-more-grid">
+        {moreReads.map((p: typeof post) => {
+          const pAccent = CATEGORY_COLORS[p.data.category] ?? '#2DC856';
+          return (
+            <a href={`/blog/${p.id}`} class="article-mcard" style={`--accent:${pAccent};`}>
+              <div class="article-mcard-img">
+                {p.data.image ? (
+                  <img src={p.data.image} alt="" draggable="false" />
+                ) : (
+                  <span class="article-mcard-noimg" aria-hidden="true"></span>
+                )}
+              </div>
+              <div class="article-mcard-body">
+                <span class="article-mcard-cat">{p.data.categoryLabel}</span>
+                <h3 class="article-mcard-title">{p.data.title}</h3>
+                <div class="article-mcard-meta">
+                  <span>{new Date(p.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span class="article-mcard-meta-dot" aria-hidden="true">·</span>
+                  <span>{p.data.readTime}</span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </aside>
+  )}
+
+</main>
+
+<SiteFooter />
+
+<!-- Right-edge sticky consultation CTA. `alwaysVisible`
+     so the tab is present from page load on every blog
+     post — long-form reading pages have no in-content
+     conversion path, so the consultation CTA stays
+     persistently reachable from any scroll position. -->
+<ConsultationStickyTab alwaysVisible />
+</Layout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     PAGE SURFACE
+     The article surface itself sits on the brand's light "plaza"
+     colour (#f6f8fa) so the body card reads on the same background
+     the v4 blog list uses inside its U-road frame.
+     ═══════════════════════════════════════════════════════════ */
+  .article {
+    font-family: 'Maven Pro', sans-serif;
+    background: #eef1f5;
+    color: #1A2F3A;
+    min-height: 100vh;
+    /* Bottom padding lives ON the article surface (not as a
+       margin on the last child) so the plaza bg extends all the
+       way down to the SiteFooter. Without this the last child's
+       margin-bottom collapses out of main and the html-level
+       dark-teal bg shows through as a "deadspace" band. Value is
+       tuned to give the recommended-blogs grid clean breathing
+       room above the footer divide without a vacant gap. */
+    padding-bottom: clamp(64px, 6.5vw, 96px);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     1. HERO BAND
+     ═══════════════════════════════════════════════════════════ */
+  .article-hero {
+    position: relative;
+    background: linear-gradient(160deg,
+      #1A2F3A 0%,
+      #122430 55%,
+      #0c1c25 100%
+    );
+    color: #ffffff;
+    /* Top: just enough to clear the lefter rail's "EVIUM" mark
+       without leaving the brow stranded mid-band. Bottom: enough
+       for the cover frame to overlap into without revealing the
+       bottom of the hero. */
+    padding: clamp(40px, 4.5vw, 64px) clamp(24px, 6vw, 80px) clamp(72px, 8vw, 116px);
+    overflow: hidden;
+  }
+  /* Two ambient brand-green radial washes — gives the hero subtle
+     depth + a touch of brand identity at the top of every article
+     without competing with the title. */
+  .article-hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 80% at 92% 12%,
+        rgba(45, 200, 86, 0.12) 0%,
+        rgba(45, 200, 86, 0.04) 35%,
+        transparent 65%),
+      radial-gradient(ellipse 80% 90% at 5% 100%,
+        rgba(45, 200, 86, 0.07) 0%,
+        transparent 55%);
+  }
+  .article-hero-inner {
+    position: relative;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  /* ── Brow row (back link · rule · category chip) ─────────── */
+  .article-brow {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    /* Tighter than before — the brow used to leave a big gap
+       above the title that read as wasted space at the top of
+       the page. */
+    margin-bottom: clamp(20px, 2.6vw, 36px);
+  }
+  .article-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .article-back svg { transition: transform 0.2s ease; }
+  .article-back:hover { color: #2DC856; }
+  .article-back:hover svg { transform: translateX(-3px); }
+
+  .article-brow-rule {
+    flex: 0 0 28px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* Category chip — translucent pill in per-category accent. */
+  .article-cat {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .article-title {
+    margin: 0 0 clamp(18px, 2.2vw, 30px);
+    /* Slightly smaller upper cap than before so long titles fit
+       without a ragged tail of one or two words on a final line.
+       Combined with text-wrap:balance below this gives every
+       headline a tidy, visually-weighted block regardless of
+       length. */
+    font-size: clamp(34px, 4.8vw, 60px);
+    font-weight: 900;
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+    color: #ffffff;
+    /* text-wrap: balance distributes characters across lines so
+       no single line ends up much shorter than the others — kills
+       the orphan-word problem that long blog titles produce. */
+    text-wrap: balance;
+    /* No max-width — let balance do the work, capped only by the
+       hero-inner container width above. */
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .article-meta-dot {
+    color: rgba(45, 200, 86, 0.75);
+    font-size: 0.55em;
+    line-height: 1;
+  }
+
+  .article-divider {
+    display: block;
+    width: 72px;
+    height: 3px;
+    background: linear-gradient(to right,
+      #2DC856 0%,
+      rgba(45, 200, 86, 0.45) 65%,
+      transparent 100%);
+    border-radius: 3px;
+    margin-top: clamp(20px, 2.6vw, 32px);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     2. COVER FRAME
+     The cover overlaps the hero (negative margin-top) so the
+     image rises out of the dark band — modern editorial touch.
+     The frame is intentionally narrower than the hero band so it
+     reads as a deliberate object on the page, with proper margin
+     to the page edges. The image inside fills a 3:2 plate via
+     object-fit:cover for a consistent magazine silhouette across
+     all articles regardless of source aspect ratio.
+     ═══════════════════════════════════════════════════════════ */
+  .article-cover {
+    position: relative;
+    max-width: 1200px;
+    /* Smaller overlap than before — paired with the shorter hero
+       this keeps the cover frame sitting at a better height (not
+       buried half-way down the page) without losing the magazine
+       "rises out of the band" effect. */
+    margin: clamp(-72px, -5.5vw, -48px) auto 0;
+    padding: 0 clamp(24px, 5vw, 48px);
+  }
+  .article-cover-frame {
+    position: relative;
+    background: linear-gradient(135deg,
+      #1A2F3A 0%,
+      #243847 50%,
+      #1A2F3A 100%);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.07) inset,
+      0 0 0 1px rgba(26, 47, 58, 0.06),
+      0 12px 24px rgba(26, 47, 58, 0.14),
+      0 40px 80px rgba(26, 47, 58, 0.22);
+  }
+  .article-cover-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 18px;
+    background: radial-gradient(ellipse 60% 50% at 50% 105%,
+      rgba(45, 200, 86, 0.18) 0%,
+      rgba(45, 200, 86, 0.05) 40%,
+      transparent 70%);
+  }
+  .article-cover-inset {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f6f8fa;
+  }
+  .article-cover-inset img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* ── Placeholder cover treatment ─────────────────────────────
+     When the article being viewed is the placeholder-blog (i.e.
+     a card the v5 grid filled with the "coming soon" logo
+     image), the 3:2 photo plate would crop and color the
+     wordmark wrong. Override the inset to a dark navy plate
+     with a faint diagonal hatch, render the wordmark with
+     object-fit:contain + generous padding, and dim it to a low-
+     opacity grayscale ghost — same treatment used on the v5
+     grid's placeholder cards. The dark teal frame and green
+     ambient glow that wrap the inset remain unchanged so the
+     cover still reads as part of the editorial layout. */
+  .article-cover[data-placeholder="1"] .article-cover-inset {
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.018) 0,
+        rgba(255, 255, 255, 0.018) 1px,
+        transparent 1px,
+        transparent 8px
+      ),
+      #0c1520;
+  }
+  .article-cover[data-placeholder="1"] .article-cover-inset img {
+    object-fit: contain;
+    object-position: center;
+    padding: 14% 18%;
+    opacity: 0.22;
+    filter: grayscale(1) brightness(1.4);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     3. BODY SHEET
+     A premium "paper" sheet sitting on the plaza bg. Soft 22px
+     radius + multi-stop drop shadow. Reading column inside is
+     capped at 720px with very generous side padding so the text
+     never feels like a thin rectangle. A small brand-green
+     ornament marks the top of the sheet.
+     ═══════════════════════════════════════════════════════════ */
+  .article-body-wrap {
+    max-width: 1200px;
+    margin: clamp(48px, 6vw, 80px) auto 0;
+    padding: 0 clamp(24px, 5vw, 48px);
+  }
+  .article-body {
+    position: relative;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: clamp(56px, 7vw, 104px) clamp(32px, 8vw, 128px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 0 0 1px rgba(26, 47, 58, 0.05),
+      0 6px 16px rgba(26, 47, 58, 0.06),
+      0 24px 48px rgba(26, 47, 58, 0.08),
+      0 56px 112px rgba(26, 47, 58, 0.06);
+  }
+  /* Brand-green ornament — three small notches centred at the top
+     edge of the sheet, like a magazine page mark. */
+  .article-body-mark {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 4px;
+    background: #2DC856;
+    border-radius: 999px;
+    box-shadow: 0 0 0 6px #ffffff;
+  }
+  .article-prose {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: clamp(17px, 1.12vw, 19px);
+    line-height: 1.78;
+    color: #1A2F3A;
+  }
+
+  /* Hide the leading H1 in markdown — the hero already covers it. */
+  .article-prose :global(h1) {
+    display: none;
+  }
+
+  /* H2 — brand-green tick rule + display weight */
+  .article-prose :global(h2) {
+    margin: clamp(2em, 3vw, 2.6em) 0 0.55em;
+    font-size: clamp(24px, 2vw, 32px);
+    font-weight: 900;
+    color: #1A2F3A;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  .article-prose :global(h2)::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 3px;
+    background: #2DC856;
+    border-radius: 3px;
+    margin-bottom: 18px;
+  }
+  .article-prose :global(h3) {
+    margin: 1.8em 0 0.45em;
+    font-size: clamp(18px, 1.4vw, 22px);
+    font-weight: 800;
+    color: #1A2F3A;
+    letter-spacing: -0.005em;
+  }
+
+  /* Lede first paragraph — magazine-style larger, lighter weight */
+  .article-prose :global(> p:first-of-type) {
+    font-size: 1.16em;
+    color: #1A2F3A;
+    line-height: 1.65;
+    font-weight: 500;
+    margin-bottom: 1.4em;
+  }
+  /* Drop cap — large brand-green initial on the very first letter
+     of the very first paragraph.
+     ──────────────────────────────────────────────────────────
+     Cap-top alignment: a naive floated ::first-letter sits TOO
+     LOW because the browser wraps the giant glyph in a line-box
+     whose half-leading + ascender push the visible cap below the
+     surrounding text's cap-top. Fix:
+       1. `line-height: 1` removes the half-leading the paragraph's
+          1.78 line-height would otherwise add above the dropcap.
+       2. `margin-top` of about -1 em-cap-height-difference pulls
+          the dropcap's cap-top up so it aligns with the first
+          row's cap-top. The math is empirical for Maven Pro; the
+          glyph's cap-height fraction (~0.72) means a margin of
+          roughly -(1 - 0.72) * 1em ≈ -0.18em over the dropcap's
+          em-square does the trick.
+       3. The negative bottom margin lets the third line of body
+          text sit flush against the dropcap's baseline. */
+  .article-prose :global(> p:first-of-type::first-letter) {
+    float: left;
+    font-size: 3.4em;
+    line-height: 1;
+    font-weight: 900;
+    color: #2DC856;
+    margin: -0.18em 0.08em -0.10em 0;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  .article-prose :global(p) { margin: 0 0 1.3em; }
+  .article-prose :global(strong) { color: #1A2F3A; font-weight: 700; }
+  .article-prose :global(em) { font-style: italic; }
+
+  /* Magazine-style links — thick brand-green underline animates
+     to a full hover background. */
+  .article-prose :global(a) {
+    color: #1A2F3A;
+    font-weight: 600;
+    text-decoration: none;
+    background-image: linear-gradient(to right,
+      rgba(45, 200, 86, 0.32),
+      rgba(45, 200, 86, 0.32));
+    background-position: 0 88%;
+    background-size: 100% 6px;
+    background-repeat: no-repeat;
+    transition: background-size 0.28s ease, color 0.18s ease;
+  }
+  .article-prose :global(a:hover) {
+    background-size: 100% 100%;
+    color: #1A2F3A;
+  }
+
+  .article-prose :global(ul),
+  .article-prose :global(ol) {
+    margin: 0.6em 0 1.3em;
+    padding-left: 1.6em;
+  }
+  .article-prose :global(li) { margin: 0.5em 0; }
+  .article-prose :global(li::marker) { color: #2DC856; }
+
+  /* Pull-quote — brand-green left rule + quote glyph + tinted bg */
+  .article-prose :global(blockquote) {
+    position: relative;
+    margin: 2em 0;
+    padding: 26px 30px 26px 48px;
+    border-left: 4px solid #2DC856;
+    background: linear-gradient(135deg,
+      rgba(45, 200, 86, 0.08) 0%,
+      transparent 65%);
+    border-radius: 0 14px 14px 0;
+    font-size: 1.16em;
+    font-style: italic;
+    font-weight: 500;
+    color: #1A2F3A;
+    line-height: 1.6;
+  }
+  .article-prose :global(blockquote)::before {
+    content: '\201C';
+    position: absolute;
+    top: 4px;
+    left: 14px;
+    font-size: 2.6em;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(45, 200, 86, 0.45);
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .article-prose :global(blockquote p:last-child) { margin-bottom: 0; }
+
+  /* Inline code — brand-green tinted chip */
+  .article-prose :global(code) {
+    padding: 2px 7px;
+    background: rgba(45, 200, 86, 0.10);
+    border: 1px solid rgba(45, 200, 86, 0.20);
+    border-radius: 5px;
+    font-size: 0.92em;
+    color: #1A2F3A;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  /* Block code — dark teal panel with white code, matches hero */
+  .article-prose :global(pre) {
+    margin: 1.5em 0;
+    padding: 22px 26px;
+    background: #1A2F3A;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 8px 24px rgba(26, 47, 58, 0.14);
+  }
+  .article-prose :global(pre code) {
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.96);
+    padding: 0;
+    font-size: 0.92em;
+  }
+
+  /* Section divider — three brand-green diamond glyphs */
+  .article-prose :global(hr) {
+    margin: 3em 0;
+    border: 0;
+    height: 1.4em;
+    text-align: center;
+    position: relative;
+  }
+  .article-prose :global(hr)::before {
+    content: '\25C6 \25C6 \25C6';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(45, 200, 86, 0.55);
+    font-size: 0.65em;
+    letter-spacing: 0.6em;
+  }
+
+  .article-prose :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 1.6em 0;
+    box-shadow: 0 8px 24px rgba(26, 47, 58, 0.10);
+  }
+  .article-prose :global(figure) { margin: 1.8em 0; }
+  .article-prose :global(figcaption) {
+    margin-top: 0.6em;
+    font-size: 0.88em;
+    color: rgba(26, 47, 58, 0.6);
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     4. MORE FROM EVIUM — related-posts grid
+     A 3-card grid of other articles (same category first, then
+     newest others) sitting on the plaza below the body sheet.
+     The cards use a compact version of the v4 blog-list card
+     vocabulary — pale image plate up top, category chip + title
+     + meta row on the body — so the surface reads as a
+     continuation of /blog-v4 rather than a different design.
+     ═══════════════════════════════════════════════════════════ */
+  .article-more {
+    max-width: 1200px;
+    /* Bottom margin removed — the bottom-clearance to the footer
+       lives on `main.article` as padding-bottom (so the plaza bg
+       extends through, instead of margin-collapsing out of main
+       and exposing the html-level dark-teal bg as deadspace). */
+    margin: clamp(56px, 7vw, 96px) auto 0;
+    padding: 0 clamp(24px, 5vw, 48px);
+  }
+
+  /* ── Section header (eyebrow / title / "all articles" link) ── */
+  .article-more-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 24px;
+    align-items: end;
+    margin-bottom: clamp(20px, 2.4vw, 32px);
+    padding-bottom: clamp(14px, 1.6vw, 20px);
+    border-bottom: 1px solid rgba(26, 47, 58, 0.10);
+  }
+  .article-more-eyebrow {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: #2DC856;
+    margin-bottom: 4px;
+  }
+  .article-more-title {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 900;
+    color: #1A2F3A;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  .article-more-all {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(45, 200, 86, 0.08);
+    border: 1px solid rgba(45, 200, 86, 0.32);
+    color: #1A2F3A;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  }
+  .article-more-all:hover {
+    background: #2DC856;
+    color: #ffffff;
+    border-color: #2DC856;
+    transform: translateY(-1px);
+  }
+  .article-more-all svg { transition: transform 0.2s ease; }
+  .article-more-all:hover svg { transform: translateX(3px); }
+
+  /* ── Three-column card grid ──────────────────────────────── */
+  .article-more-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.4vw, 28px);
+  }
+
+  .article-mcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Same gradient-border trick as bv4-card so these read as the
+       same family without re-implementing every detail. */
+    background:
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(180deg,
+        rgba(45, 200, 86, 0.7) 0%,
+        rgba(45, 200, 86, 0.25) 100%) border-box;
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #1A2F3A;
+    box-shadow:
+      0 1px 2px rgba(26, 47, 58, 0.05),
+      0 4px 10px -4px rgba(45, 200, 86, 0.05),
+      0 14px 28px -12px rgba(26, 47, 58, 0.10),
+      0 28px 56px -22px rgba(26, 47, 58, 0.14);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .article-mcard:hover {
+    transform: translateY(-2px);
+    background:
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(180deg,
+        rgba(45, 200, 86, 0.95) 0%,
+        rgba(45, 200, 86, 0.40) 100%) border-box;
+    box-shadow:
+      0 1px 2px rgba(26, 47, 58, 0.06),
+      0 10px 20px -8px rgba(26, 47, 58, 0.10),
+      0 24px 48px -16px rgba(45, 200, 86, 0.18),
+      0 30px 60px -20px rgba(26, 47, 58, 0.18);
+  }
+
+  /* Image plate — pale green-cream so PNGs with transparent bg
+     blend in. Same vocabulary as the v4 grid. */
+  .article-mcard-img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(180deg, #f6faf7 0%, #ebf2ed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(45, 200, 86, 0.10);
+  }
+  .article-mcard-img img {
+    max-width: 76%;
+    max-height: 78%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 16px rgba(26, 47, 58, 0.22));
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .article-mcard:hover .article-mcard-img img { transform: scale(1.04); }
+  .article-mcard-noimg {
+    display: block;
+    width: 60%;
+    height: 60%;
+    background: repeating-linear-gradient(45deg,
+      rgba(26, 47, 58, 0.04) 0,
+      rgba(26, 47, 58, 0.04) 6px,
+      transparent 6px,
+      transparent 12px);
+  }
+
+  .article-mcard-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px 20px;
+  }
+  .article-mcard-cat {
+    width: max-content;
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    color: var(--accent, #2DC856);
+    background: color-mix(in srgb, var(--accent, #2DC856) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, #2DC856) 35%, transparent);
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .article-mcard-title {
+    margin: 0;
+    font-size: clamp(15px, 1.18vw, 18px);
+    font-weight: 800;
+    line-height: 1.28;
+    color: #1A2F3A;
+    /* 3-line clamp keeps cards visually aligned. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.18s ease;
+  }
+  .article-mcard:hover .article-mcard-title { color: #2DC856; }
+  .article-mcard-meta {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(45, 200, 86, 0.14);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(26, 47, 58, 0.6);
+    text-transform: uppercase;
+  }
+  .article-mcard-meta-dot { color: rgba(26, 47, 58, 0.32); }
+
+  /* ═══════════════════════════════════════════════════════════
+     RESPONSIVE
+     ═══════════════════════════════════════════════════════════ */
+  /* ── tablet: 2-up cards ──────────────────────────────────── */
+  @media (max-width: 980px) {
+    .article-more-grid { grid-template-columns: repeat(2, 1fr); }
+    /* Hide the 3rd card on 2-up so the grid stays a clean
+       single row. The link in the section header still gets
+       readers to the full list. */
+    .article-mcard:nth-child(3) { display: none; }
+  }
+
+  /* ── mobile: stack everything ────────────────────────────── */
+  @media (max-width: 720px) {
+    .article-brow { flex-wrap: wrap; gap: 12px; }
+    .article-brow-rule { display: none; }
+    .article-cover-inset { aspect-ratio: 4 / 3; }
+    .article-body { padding: 44px 26px; border-radius: 16px; }
+    .article-prose :global(> p:first-of-type::first-letter) {
+      font-size: 3.4em;
+    }
+    .article-more-head {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+    .article-more-all {
+      grid-column: 1;
+      grid-row: 3;
+      align-self: start;
+      justify-self: start;
+      margin-top: 14px;
+    }
+    .article-more-grid { grid-template-columns: 1fr; }
+    .article-mcard:nth-child(3) { display: flex; }
+  }
+</style>
+

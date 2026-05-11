@@ -2,9 +2,10 @@
 title: "How NEVI Funding Is Reshaping Highway Charging Economics"
 category: "market-shifts"
 categoryLabel: "Market Shifts"
-date: "2026-02-12"
+date: "2025-05-22"
 excerpt: "NEVI's $5 billion federal investment is building a national charging network — and eligible site hosts can participate at zero cost while earning ongoing revenue."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging5.png"
 ---
 
 # How NEVI Funding Is Reshaping Highway Charging Economics

@@ -2,9 +2,10 @@
 title: "OCPP Explained: Why Open Standards Protect Your Charging Investment"
 category: "charging-tech"
 categoryLabel: "Charging Tech"
-date: "2026-02-19"
+date: "2024-12-19"
 excerpt: "OCPP 1.6 is the protocol that ensures your charging hardware can talk to any management platform — here's why that matters for your long-term investment."
 readTime: "5 min"
+image: "/images/blog/charger-plugs/ev-charging1.png"
 ---
 
 # OCPP Explained: Why Open Standards Protect Your Charging Investment

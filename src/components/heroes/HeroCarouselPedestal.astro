@@ -590,6 +590,27 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
   @media (max-height: 560px) {
     .cp-hud { bottom: 10px; padding: 8px 14px; }
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     CAROUSEL PAUSE HOOK — body.carousel-paused
+     ───────────────────────────────────────────────────────────────
+     Pages that scroll users far past the hero into deep states
+     (e.g. products-v2's brand catalog, ~1340px down) can opt the
+     carousel into a paused state by adding `body.carousel-paused`.
+     Every CSS animation on the slides + dots + spotlight freezes
+     via `animation-play-state: paused`. The JS auto-rotate timer
+     also halts via the MutationObserver in the script below — so
+     no compositor or main-thread cycles are wasted on the offscreen
+     hero while the user is doing heavy work elsewhere on the page.
+
+     Pages that DON'T set the body class (the default — including
+     /products-v2 in production) are unaffected: the carousel keeps
+     animating exactly as before. This hook is purely opt-in. */
+  :global(body.carousel-paused) .cp-slide,
+  :global(body.carousel-paused) .cp-dot,
+  :global(body.carousel-paused) .featured-spotlight {
+    animation-play-state: paused;
+  }
 </style>
 
 <script>
@@ -717,6 +738,44 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
       timer = setInterval(() => goTo(current + 1), 3600);
     }
 
+    /* Stop the auto-rotate timer without restarting it. Used by
+       the carousel-paused MutationObserver below — when a page
+       deeply-scrolls into a state where the hero is invisible
+       (products-v2 brand catalog etc.), there's no point
+       firing setInterval ticks that the user can never see. */
+    function stopAuto() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    /* ─── Carousel-paused observer ─────────────────────────────
+       Watch <body> for the `carousel-paused` class. When present,
+       freeze the auto-rotate timer (CSS animations on the slides
+       freeze via the `animation-play-state` rule in the <style>
+       block above; this just covers the JS layer). When absent,
+       resume from where we left off — the user is on their way
+       back UP toward the hero, so the carousel becomes visible
+       again shortly. Pages that never add the class are
+       unaffected; the observer just sits idle. */
+    const body = document.body;
+    function syncPauseState() {
+      if (body.classList.contains('carousel-paused')) stopAuto();
+      else if (!timer)                                 startAuto();
+    }
+    const pauseObserver = new MutationObserver(syncPauseState);
+    pauseObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
+    /* Initial sync — covers the case where a returning visitor
+       lands on a page with `carousel-paused` already set from a
+       prior state (e.g. nav from another tab). */
+    if (body.classList.contains('carousel-paused')) {
+      // startAuto runs at the bottom of the IIFE; we'll need to
+      // suppress it from there too, so flag it here. The bottom-
+      // of-IIFE call checks this flag.
+      // (Implemented below — see the conditional startAuto call.)
+    }
+
     dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); startAuto(); }));
 
     // ── Prev / next arrow buttons in the bottom HUD ──
@@ -833,6 +892,14 @@ const SLOT_BR = { x: 74.0, y: 60.0 }; // back-right — exiting slide (nudged up
     });
 
     update();
-    startAuto();
+    /* Only start auto-rotate if the page hasn't already opted into
+       the paused state (via body.carousel-paused). If they have,
+       the MutationObserver above handles a later resume when the
+       class is removed. Without this guard, a page that loads
+       directly into a deep-scrolled state (e.g. via hash anchor)
+       would briefly start the timer before the observer paused it. */
+    if (!document.body.classList.contains('carousel-paused')) {
+      startAuto();
+    }
   })();
 </script>

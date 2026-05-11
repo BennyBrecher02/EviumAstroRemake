@@ -11,6 +11,14 @@ import Layout from '../../layouts/Layout.astro';
        HERO
        ═══════════════════════════════════════════ -->
   <section class="relative min-h-screen flex items-center overflow-hidden bg-evium-dark pt-20">
+    <!-- AI-slop / under-construction warning ribbon — pinned top-right
+         of the hero so visitors immediately see this page is WIP. Same
+         ribbon used on retail / parking / medical hero sections. -->
+    <img
+      src="/images/logos/evium/under-construction-ai-slop-warning-ribbon.png"
+      alt="Under construction — work in progress"
+      class="pointer-events-none absolute right-0 top-12 z-30 w-64 lg:w-80"
+    />
     <!-- Background grid pattern -->
     <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(rgba(45,200,86,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45,200,86,0.4) 1px, transparent 1px); background-size: 60px 60px;"></div>
 
@@ -535,10 +543,10 @@ import Layout from '../../layouts/Layout.astro';
           <h3 class="text-white font-black text-xl mb-2">No-Cost Model</h3>
           <p class="text-evium-green font-semibold text-sm mb-5">Zero capital. Revenue share. Full management.</p>
           <p class="text-white/60 text-sm leading-relaxed mb-6">
-            Evium covers all hardware, installation, and electrical costs. You receive approximately 10% of charging revenue. Zero upfront. Zero operating burden. Best for buildings that want charging without capital allocation.
+            Evium covers all hardware, installation, and electrical costs. Gross charging revenue is split approximately 60/40 in your favor. Zero upfront. Zero operating burden. Best for buildings that want charging without capital allocation.
           </p>
           <ul class="space-y-2.5">
-            {["$0 upfront investment", "~10% charging revenue to owner", "All maintenance covered by Evium", "Rebates processed and retained by Evium"].map(pt => (
+            {["$0 upfront investment", "~60% gross revenue share to owner", "All maintenance covered by Evium", "Rebates processed and retained by Evium"].map(pt => (
               <li class="flex items-center gap-3 text-sm text-white/65">
                 <span class="w-1.5 h-1.5 rounded-full bg-evium-green flex-shrink-0"></span>
                 {pt}
