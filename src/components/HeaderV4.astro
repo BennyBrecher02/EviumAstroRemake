@@ -2683,6 +2683,11 @@ const mobileMenu: Array<{
                                  register form → FAQ). Long-form with
                                  a primary CTA scroll anchor, no
                                  canonical multi-section rail.
+         · page-referral       — /contact/referral. Long-form
+                                 marketing + form page. Same reasoning
+                                 as page-quote / page-contact — single
+                                 conversion target, no canonical
+                                 section anchors.
     */
     const isFreeScroll =
       document.body.classList.contains('page-blog-v3') ||
@@ -2694,7 +2699,8 @@ const mobileMenu: Array<{
       document.body.classList.contains('page-quote') ||
       document.body.classList.contains('page-contact') ||
       document.body.classList.contains('page-services') ||
-      document.body.classList.contains('page-electrician-partners');
+      document.body.classList.contains('page-electrician-partners') ||
+      document.body.classList.contains('page-referral');
 
     const anchors: Anchor[] = isFreeScroll
       ? []
