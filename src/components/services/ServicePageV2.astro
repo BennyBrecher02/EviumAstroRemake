@@ -11,8 +11,9 @@
  * Visual style matches the v2 sandbox (home-v2, products-v2):
  * Apple-light theme — white card surfaces, neutral 3-layer
  * elevation, brand-green accents, glass UI for premium
- * elements. Uses HeaderV4 lefter rail via Layout's
- * `headerVariant="v4"`.
+ * elements. Renders the lefter rail via Layout — defaults to
+ * `headerVariant="v4"`, but accepts an optional `headerVariant`
+ * prop so a page can opt into `'v5'` (multifamily-v4 does).
  *
  * Adding a new section type:
  *   1. extend `Section` union below
@@ -29,9 +30,20 @@ import type { ServicePageConfig, IconName } from './types';
 
 interface Props {
   service: ServicePageConfig;
+  /**
+   * Which header variant the wrapping Layout should render.
+   * Defaults to `'v4'` (the Tesla-PRNDL lefter rail) so every
+   * existing service page is unchanged. A page can opt into
+   * `'v5'` (the newer fork of the rail) by passing it through —
+   * e.g. multifamily-v4 does this to ride the current header.
+   * The bodyClass stays `page-service-testing` either way, so
+   * the header's `isServiceTesting` rail branch (implemented in
+   * both v4 and v5) activates identically.
+   */
+  headerVariant?: 'default' | 'v4' | 'v5';
 }
 
-const { service } = Astro.props;
+const { service, headerVariant = 'v4' } = Astro.props;
 
 /* ── Icon registry ───────────────────────────────────────────
    Each entry is { viewBox, body } so icons can mix viewBox sizes
@@ -200,7 +212,7 @@ const ICONS: Record<IconName, { viewBox: string; body: string }> = {
 <Layout
   title={service.meta.title}
   description={service.meta.description}
-  headerVariant="v4"
+  headerVariant={headerVariant}
   bodyClass="page-service-testing"
 >
   <main class="svc-page">

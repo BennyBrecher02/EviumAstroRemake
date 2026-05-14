@@ -2634,6 +2634,12 @@ const mobileMenu: Array<{
                                  as page-quote / page-contact — single
                                  conversion target, no canonical
                                  section anchors.
+         · page-profits        — /testing/profits. The profit
+                                 calculator page's section flow is
+                                 still too jumpy for rail anchoring,
+                                 so it free-scrolls for now — anchor
+                                 list to be added once the section
+                                 structure is refined.
     */
     const isFreeScroll =
       document.body.classList.contains('page-blog-v3') ||
@@ -2646,7 +2652,8 @@ const mobileMenu: Array<{
       document.body.classList.contains('page-contact') ||
       document.body.classList.contains('page-services') ||
       document.body.classList.contains('page-electrician-partners') ||
-      document.body.classList.contains('page-referral');
+      document.body.classList.contains('page-referral') ||
+      document.body.classList.contains('page-profits');
 
     const anchors: Anchor[] = isFreeScroll
       ? []
