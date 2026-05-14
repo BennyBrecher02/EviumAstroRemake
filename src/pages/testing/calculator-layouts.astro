@@ -1,0 +1,3950 @@
+---
+/**
+ * /testing/calculator-layouts — LAYOUT COMPARISON PAGE
+ * ────────────────────────────────────────────────────
+ * A side-by-side showcase of four candidate layouts for the
+ * profits-page calculator, each a fully-working instance:
+ *
+ *   Option A — Result-First Hero      (big number on top, controls beneath)
+ *   Option B — Editorial 2-Zone       (controls left, tall result panel right)
+ *   Option C — Stage Flow             (3 control stages → result stage)
+ *   Option D — Floating Result Band   (result hero band, controls grid below)
+ *
+ * All four share one reusable `initCalculator(root)` engine and one
+ * estimate modal. Each calculator root is `[data-calc-root]` with a
+ * `data-option` id; the engine scopes every query to its root so the
+ * four instances are fully independent (their model radios use
+ * per-instance `name` values too).
+ *
+ * The repeated sub-pieces — scenario pills, utilization pills, input
+ * fields, model cards, result block — are rendered from frontmatter
+ * helper functions via `set:html` so the markup isn't copy-pasted
+ * four times.
+ *
+ * This page is for picking a direction; once chosen, the winning
+ * layout gets ported into /testing/profits.
+ */
+import Layout from '../../layouts/Layout.astro';
+
+/* ── Scenario presets (Property Type) ───────────────────────────
+   Same data shape as /testing/profits. The per-scenario L/M/H
+   session rates remain illustrative (not internally sourced) —
+   see the note on the profits page. */
+const presets = [
+  {
+    id: 'l2-residential',
+    label: 'Multifamily',
+    type: 'L2',
+    ports: 4,
+    utilization: { low: 1, medium: 2.5, high: 4 },
+    kwh: 18,
+    price: 0.32,
+  },
+  {
+    id: 'dcfc-highway',
+    label: 'Highway',
+    type: 'DCFC',
+    ports: 4,
+    utilization: { low: 6, medium: 12, high: 18 },
+    kwh: 45,
+    price: 0.55,
+  },
+  {
+    id: 'l2-fleets',
+    label: 'Fleets',
+    type: 'L2',
+    ports: 8,
+    utilization: { low: 1, medium: 1.5, high: 2 },
+    kwh: 60,
+    price: 0.35,
+  },
+];
+
+/* ── Financial models (Step 3) ──────────────────────────────────
+   No-Cost share is ~10% per project_evium_business_model.md. */
+const models = [
+  { id: 'no-cost',    label: 'No-Cost',           share: 0.10, badge: '~10%',       blurb: '$0 capital. Evium handles everything.' },
+  { id: 'investment', label: 'Client Investment', share: 1.00, badge: '100%',       blurb: 'You own equipment. Keep all revenue.' },
+  { id: 'hybrid',     label: 'Hybrid',            share: 0.50, badge: 'Negotiated', blurb: 'Shared capital. Split negotiated.' },
+  { id: 'leasing',    label: 'Leasing',           share: 1.00, badge: '100%',       blurb: 'Lease hardware. Keep revenue, pay fee.' },
+];
+
+/* ── Layout option metadata (intro + section headers) ──────────── */
+const layoutOptions = [
+  {
+    id: 'a',
+    name: 'Option A',
+    tagline: 'Result-First Hero',
+    desc: 'The big number leads. Controls flow underneath in a clean 01 → 02 → 03 narrative. One unified card, no internal grid — the strongest "wow" moment of the four.',
+  },
+  {
+    id: 'b',
+    name: 'Option B',
+    tagline: 'Editorial 2-Zone',
+    desc: 'Controls stack vertically on the left, a tall result panel sits on the right with its own greener surface. Keeps the live-update side-by-side feel while killing the fragmentation.',
+  },
+  {
+    id: 'c',
+    name: 'Option C',
+    tagline: 'Stage Flow',
+    desc: 'Three control stages laid out left-to-right with connectors, resolving into a final result stage. Reads as a deliberate, guided process — every stage visible at once, no Next clicks.',
+  },
+  {
+    id: 'd',
+    name: 'Option D',
+    tagline: 'Floating Result Band',
+    desc: 'The result becomes a full-width hero band. Controls sit in an equal-weight three-column grid below, breakdown beneath that. Maximum drama on the number; every control gets its own column.',
+  },
+  {
+    id: 'e',
+    name: 'Option E',
+    tagline: 'Showroom Console',
+    desc: 'The one bright-surfaced direction — a light "showroom" card. Every picker is a pill-shaped segmented control with a sliding thumb, paired into labelled zones; the whole thing resolves into a full-width outcome panel. Reads like a product configurator, not a form. Inspired by the highway "Economics" dashboard.',
+  },
+  {
+    id: 'f',
+    name: 'Option F',
+    tagline: 'Live Console',
+    desc: 'The synthesis. Two columns: controls on the left, a result panel on the right that stays stuck in view as you scroll — so the number is always live while you tweak. Segmented controls from E for the simple picks; the financial model gets a segmented picker plus a description card that rewrites itself per selection (the highway "picker-owns-a-card" idea, fully). Configure → watch → understand, all in one frame.',
+  },
+  {
+    id: 'o',
+    name: 'Option O',
+    tagline: 'Original',
+    desc: 'The calculator currently live on /testing/profits, preserved here for reference before F replaces it. A two-pill scenario picker (Custom · Property Type · Utilization) above a two-column inputs-and-results card, with the four financial models as a full-width card row beneath. Same shared engine and data as every option above.',
+  },
+];
+
+/* ── SVG icon paths (kept here so they aren't repeated 12+ times) ── */
+const scenarioIconPaths: Record<string, string> = {
+  'l2-residential': 'M3 21h18M5 21V7l8-4v18M13 21V11l6 2v8M9 9h.01M9 13h.01M9 17h.01M16 15h.01M16 19h.01',
+  'dcfc-highway':   'M5 21l4-18M19 21l-4-18M3 9h18M3 15h18',
+  'l2-fleets':      'M2 8h11v9H2zM13 11h5l3 3v3h-8zM6 17a2 2 0 11-4 0 2 2 0 014 0zM20 17a2 2 0 11-4 0 2 2 0 014 0z',
+};
+const customIconPath = 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z';
+
+/* ── Reusable markup helpers (rendered via set:html) ──────────── */
+function scenarioPillsHTML(): string {
+  return presets.map(p => `
+    <button type="button" class="lc-scenario-btn"
+      data-scenario="${p.id}" data-ports="${p.ports}"
+      data-util-low="${p.utilization.low}" data-util-medium="${p.utilization.medium}" data-util-high="${p.utilization.high}"
+      data-kwh="${p.kwh}" data-price="${p.price}" data-type="${p.type}">
+      <span class="lc-scenario-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="${scenarioIconPaths[p.id]}" />
+        </svg>
+      </span>
+      <span class="lc-scenario-text">
+        <span class="lc-scenario-label">${p.label}</span>
+        <span class="lc-scenario-type">${p.type}</span>
+      </span>
+    </button>
+  `).join('');
+}
+
+function customPillHTML(): string {
+  return `
+    <button type="button" class="lc-scenario-btn lc-scenario-btn--custom" data-scenario="custom">
+      <span class="lc-scenario-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="${customIconPath}" />
+        </svg>
+      </span>
+      <span class="lc-scenario-text">
+        <span class="lc-scenario-label">Custom</span>
+        <span class="lc-scenario-type">Off-preset</span>
+      </span>
+    </button>
+  `;
+}
+
+function utilPillsHTML(): string {
+  return (['low', 'medium', 'high'] as const).map(level => `
+    <button type="button" class="lc-util-btn" data-utilization="${level}">
+      <span class="lc-util-label">${level}</span>
+      <span class="lc-util-rate" data-util-rate>—</span>
+      <span class="lc-util-mini">/ port / day</span>
+    </button>
+  `).join('');
+}
+
+function inputFieldsHTML(): string {
+  const fields = [
+    { id: 'sessions', label: 'Sessions / Port / Day', suffix: '/ day', value: '6',    step: '0.5',  hint: 'Typical L2: 2–4 · DC Fast: 8–14',          prefix: '' },
+    { id: 'ports',    label: 'Number of Ports',       suffix: 'ports', value: '4',    step: '1',    hint: 'Each charger has 1–2 ports',               prefix: '' },
+    { id: 'kwh',      label: 'kWh / Session',         suffix: 'kWh',   value: '25',   step: '1',    hint: 'Typical L2: 15–25 · DC Fast: 30–50',       prefix: '' },
+    { id: 'price',    label: 'Price / kWh',           suffix: '/ kWh', value: '0.42', step: '0.01', hint: 'Public charging average: $0.30–$0.55',     prefix: '$' },
+  ];
+  return fields.map(f => `
+    <div class="lc-input-field">
+      <label class="lc-input-label">${f.label}</label>
+      <div class="lc-input-wrap${f.prefix ? ' lc-input-wrap--prefixed' : ''}">
+        ${f.prefix ? '<span class="lc-input-prefix">' + f.prefix + '</span>' : ''}
+        <input data-input="${f.id}" type="number" inputmode="decimal" min="0" step="${f.step}" value="${f.value}" class="lc-input" />
+        <span class="lc-input-suffix">${f.suffix}</span>
+      </div>
+      <p class="lc-input-hint">${f.hint}</p>
+    </div>
+  `).join('');
+}
+
+function modelCardsHTML(optId: string): string {
+  return models.map((m, i) => `
+    <label class="lc-model-option">
+      <input type="radio" name="model-${optId}" value="${m.share}" data-model-id="${m.id}" ${i === 0 ? 'checked' : ''} class="lc-sr-only" />
+      <div class="lc-model-card">
+        <div class="lc-model-card-top">
+          <p class="lc-model-label">${m.label}</p>
+          <span class="lc-model-dot"><span class="lc-model-dot-inner"></span></span>
+        </div>
+        <span class="lc-model-badge">${m.badge}</span>
+        <p class="lc-model-blurb">${m.blurb}</p>
+      </div>
+    </label>
+  `).join('');
+}
+
+function resultBlockHTML(): string {
+  return `
+    <p class="lc-result-eyebrow">Your Monthly Share</p>
+    <p class="lc-result-monthly" data-out="monthly">$0</p>
+    <p class="lc-result-caption" data-out="caption">—</p>
+    <div class="lc-result-secondary">
+      <div class="lc-result-stat">
+        <span class="lc-result-stat-num" data-out="yearly">$0</span>
+        <span class="lc-result-stat-lbl">per year</span>
+      </div>
+      <div class="lc-result-stat">
+        <span class="lc-result-stat-num lc-result-stat-num--accent" data-out="fiveyr">$0</span>
+        <span class="lc-result-stat-lbl">over 5 years</span>
+      </div>
+    </div>
+    <div class="lc-breakdown">
+      <div class="lc-breakdown-row"><span>Gross monthly</span><span data-out="gross">$0</span></div>
+      <div class="lc-breakdown-row"><span>Sessions / month</span><span data-out="sessions">0</span></div>
+      <div class="lc-breakdown-row"><span>Energy delivered (kWh/mo)</span><span data-out="energy">0</span></div>
+      <div class="lc-breakdown-row lc-breakdown-row--total"><span>Your revenue share</span><span data-out="share">10%</span></div>
+    </div>
+    <button type="button" data-open-estimate class="lc-cta">
+      Get a Personalized Estimate
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </button>
+  `;
+}
+
+/* Step header (icon + eyebrow + title). Icons: 1=bars, 2=sliders, 3=scale. */
+function stepHeaderHTML(num: string, title: string, icon: 'bars' | 'sliders' | 'scale'): string {
+  const paths = {
+    bars:    'M9 17V7m4 10V11m4 6V4M3 21h18',
+    sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
+    scale:   'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
+  };
+  return `
+    <div class="lc-step-header">
+      <div class="lc-step-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="${paths[icon]}" />
+        </svg>
+      </div>
+      <div>
+        <p class="lc-step-eyebrow">Step ${num}</p>
+        <h4 class="lc-step-title">${title}</h4>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Option E — segmented-control renderers ─────────────────────
+   These feed the SAME calculator engine as the pill renderers
+   above — the buttons keep every hook the engine reads
+   (data-scenario / data-ports / data-util-* / data-type, the
+   .lc-scenario-label the caption pulls from, [data-util-rate],
+   the model radios + .lc-model-label) — they're just laid out
+   as flat segments inside a pill-shaped track. The leading
+   <span class="lc-e-thumb"> is the sliding indicator; a small
+   enhancement script mirrors the active index onto the track's
+   data-thumb attribute, which the CSS slides the thumb by. */
+function scenarioSegmentsHTML(): string {
+  const preset = presets.map(p => `
+    <button type="button" class="lc-e-seg-btn" data-scenario="${p.id}"
+      data-ports="${p.ports}" data-util-low="${p.utilization.low}"
+      data-util-medium="${p.utilization.medium}" data-util-high="${p.utilization.high}"
+      data-kwh="${p.kwh}" data-price="${p.price}" data-type="${p.type}">
+      <span class="lc-scenario-label lc-e-seg-name">${p.label}</span>
+      <span class="lc-e-seg-sub">${p.type}</span>
+    </button>
+  `).join('');
+  const custom = `
+    <button type="button" class="lc-e-seg-btn lc-e-seg-btn--custom" data-scenario="custom">
+      <span class="lc-scenario-label lc-e-seg-name">Custom</span>
+      <span class="lc-e-seg-sub">Off-preset</span>
+    </button>
+  `;
+  return `<span class="lc-e-thumb" aria-hidden="true"></span>${preset}${custom}`;
+}
+
+function utilSegmentsHTML(): string {
+  const btns = (['low', 'medium', 'high'] as const).map(level => `
+    <button type="button" class="lc-e-seg-btn" data-utilization="${level}">
+      <span class="lc-e-seg-name">${level}</span>
+      <span class="lc-e-seg-sub"><span data-util-rate>—</span>&nbsp;/ port / day</span>
+    </button>
+  `).join('');
+  return `<span class="lc-e-thumb" aria-hidden="true"></span>${btns}`;
+}
+
+function modelSegmentsHTML(optId: string): string {
+  const items = models.map((m, i) => `
+    <label class="lc-model-option lc-e-seg-model-item">
+      <input type="radio" name="model-${optId}" value="${m.share}" data-model-id="${m.id}" ${i === 0 ? 'checked' : ''} class="lc-sr-only" />
+      <span class="lc-e-seg-model-card">
+        <span class="lc-model-label lc-e-seg-name">${m.label}</span>
+        <span class="lc-e-seg-model-badge">${m.badge}</span>
+      </span>
+    </label>
+  `).join('');
+  return `<span class="lc-e-thumb" aria-hidden="true"></span>${items}`;
+}
+---
+
+<Layout
+  title="Calculator Layout Options — Evium Testing"
+  description="Side-by-side comparison of four candidate layouts for the Evium profit calculator."
+>
+
+  <!-- ═══════════════════════════════════════════════
+       INTRO + JUMP NAV
+  ═══════════════════════════════════════════════ -->
+  <section class="lc-intro">
+    <div class="lc-intro-bg" aria-hidden="true"></div>
+    <div class="lc-intro-inner">
+      <p class="lc-intro-eyebrow">Internal · Layout Exploration</p>
+      <h1 class="lc-intro-title">
+        Calculator layout,<br />
+        <span class="lc-intro-title-accent">seven ways.</span>
+      </h1>
+      <p class="lc-intro-sub">
+        Seven fully-working takes on the profits-page calculator — same engine, same data,
+        seven different compositions. Each is live: pick a scenario, tweak the inputs, switch
+        the financial model, watch the number move. <strong>F, Live Console</strong> is the
+        synthesis — the best of A–E pulled into one direction — and <strong>O, Original</strong>
+        is the build currently live on /profits, kept here for reference.
+      </p>
+      <nav class="lc-jump" aria-label="Jump to layout option">
+        {layoutOptions.map(o => (
+          <a href={`#option-${o.id}`} class="lc-jump-link">
+            <span class="lc-jump-tag">{o.name}</span>
+            <span class="lc-jump-name">{o.tagline}</span>
+          </a>
+        ))}
+      </nav>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION A — RESULT-FIRST HERO
+  ═══════════════════════════════════════════════ -->
+  <section id="option-a" class="lc-option lc-option--a">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">A</div>
+        <div>
+          <h2 class="lc-option-title">Result-First Hero</h2>
+          <p class="lc-option-desc">{layoutOptions[0].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-card lc-layout-a" data-calc-root data-option="a">
+        <!-- RESULT HERO -->
+        <div class="lc-a-result">
+          <div class="lc-a-result-glow" aria-hidden="true"></div>
+          <div class="lc-result lc-result--hero" set:html={resultBlockHTML()}></div>
+        </div>
+
+        <div class="lc-a-divider" aria-hidden="true"></div>
+
+        <!-- CONTROLS -->
+        <div class="lc-a-controls">
+          <!-- 01 Scenario -->
+          <div class="lc-a-step">
+            <Fragment set:html={stepHeaderHTML('01', 'Pick a Scenario', 'bars')} />
+            <div class="lc-scenario-zones">
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Off-Preset</p>
+                <div class="lc-chips" set:html={customPillHTML()}></div>
+              </div>
+              <div class="lc-scenario-zone lc-scenario-zone--type">
+                <p class="lc-group-label">Property Type</p>
+                <div class="lc-chips" set:html={scenarioPillsHTML()}></div>
+              </div>
+              <div class="lc-scenario-zone lc-scenario-zone--util">
+                <p class="lc-group-label">Projected Utilization</p>
+                <div class="lc-chips" set:html={utilPillsHTML()}></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 02 Inputs -->
+          <div class="lc-a-step">
+            <Fragment set:html={stepHeaderHTML('02', 'Refine the Inputs', 'sliders')} />
+            <div class="lc-input-row" set:html={inputFieldsHTML()}></div>
+          </div>
+
+          <!-- 03 Model -->
+          <div class="lc-a-step">
+            <Fragment set:html={stepHeaderHTML('03', 'Choose a Financial Model', 'scale')} />
+            <div class="lc-model-grid" set:html={modelCardsHTML('a')}></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION B — EDITORIAL 2-ZONE
+  ═══════════════════════════════════════════════ -->
+  <section id="option-b" class="lc-option lc-option--b">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">B</div>
+        <div>
+          <h2 class="lc-option-title">Editorial 2-Zone</h2>
+          <p class="lc-option-desc">{layoutOptions[1].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-card lc-layout-b" data-calc-root data-option="b">
+        <!-- LEFT — controls -->
+        <div class="lc-b-controls">
+          <div class="lc-b-step">
+            <Fragment set:html={stepHeaderHTML('01', 'Pick a Scenario', 'bars')} />
+            <div class="lc-b-scenario">
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Property Type</p>
+                <div class="lc-chips" set:html={scenarioPillsHTML() + customPillHTML()}></div>
+              </div>
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Projected Utilization</p>
+                <div class="lc-chips" set:html={utilPillsHTML()}></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lc-b-divider" aria-hidden="true"></div>
+
+          <div class="lc-b-step">
+            <Fragment set:html={stepHeaderHTML('02', 'Refine the Inputs', 'sliders')} />
+            <div class="lc-input-row lc-input-row--2col" set:html={inputFieldsHTML()}></div>
+          </div>
+
+          <div class="lc-b-divider" aria-hidden="true"></div>
+
+          <div class="lc-b-step">
+            <Fragment set:html={stepHeaderHTML('03', 'Choose a Financial Model', 'scale')} />
+            <div class="lc-model-grid lc-model-grid--2col" set:html={modelCardsHTML('b')}></div>
+          </div>
+        </div>
+
+        <!-- RIGHT — result zone -->
+        <div class="lc-b-result">
+          <div class="lc-b-result-glow" aria-hidden="true"></div>
+          <div class="lc-result lc-result--panel" set:html={resultBlockHTML()}></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION C — STAGE FLOW
+  ═══════════════════════════════════════════════ -->
+  <section id="option-c" class="lc-option lc-option--c">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">C</div>
+        <div>
+          <h2 class="lc-option-title">Stage Flow</h2>
+          <p class="lc-option-desc">{layoutOptions[2].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-card lc-layout-c" data-calc-root data-option="c">
+        <!-- STAGE 1 — Scenario -->
+        <div class="lc-c-stage">
+          <div class="lc-c-stage-num">1</div>
+          <Fragment set:html={stepHeaderHTML('01', 'Scenario', 'bars')} />
+          <div class="lc-c-stage-body">
+            <div class="lc-scenario-zone">
+              <p class="lc-group-label">Property Type</p>
+              <div class="lc-chips lc-chips--stacked" set:html={scenarioPillsHTML()}></div>
+            </div>
+            <div class="lc-scenario-zone">
+              <p class="lc-group-label">Off-Preset</p>
+              <div class="lc-chips lc-chips--stacked" set:html={customPillHTML()}></div>
+            </div>
+            <div class="lc-scenario-zone">
+              <p class="lc-group-label">Projected Utilization</p>
+              <div class="lc-chips lc-chips--stacked" set:html={utilPillsHTML()}></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lc-c-connector" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+
+        <!-- STAGE 2 — Inputs -->
+        <div class="lc-c-stage">
+          <div class="lc-c-stage-num">2</div>
+          <Fragment set:html={stepHeaderHTML('02', 'Inputs', 'sliders')} />
+          <div class="lc-c-stage-body">
+            <div class="lc-input-row lc-input-row--stacked" set:html={inputFieldsHTML()}></div>
+          </div>
+        </div>
+
+        <div class="lc-c-connector" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+
+        <!-- STAGE 3 — Model -->
+        <div class="lc-c-stage">
+          <div class="lc-c-stage-num">3</div>
+          <Fragment set:html={stepHeaderHTML('03', 'Model', 'scale')} />
+          <div class="lc-c-stage-body">
+            <div class="lc-model-grid lc-model-grid--stacked" set:html={modelCardsHTML('c')}></div>
+          </div>
+        </div>
+
+        <div class="lc-c-connector lc-c-connector--final" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+
+        <!-- RESULT STAGE -->
+        <div class="lc-c-stage lc-c-stage--result">
+          <div class="lc-c-stage-num lc-c-stage-num--result">$</div>
+          <div class="lc-c-result-glow" aria-hidden="true"></div>
+          <div class="lc-result lc-result--stage" set:html={resultBlockHTML()}></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION D — FLOATING RESULT BAND
+  ═══════════════════════════════════════════════ -->
+  <section id="option-d" class="lc-option lc-option--d">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">D</div>
+        <div>
+          <h2 class="lc-option-title">Floating Result Band</h2>
+          <p class="lc-option-desc">{layoutOptions[3].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-layout-d" data-calc-root data-option="d">
+        <!-- RESULT BAND -->
+        <div class="lc-d-band">
+          <div class="lc-d-band-glow" aria-hidden="true"></div>
+          <div class="lc-result lc-result--band" set:html={resultBlockHTML()}></div>
+        </div>
+
+        <!-- CONTROLS GRID -->
+        <div class="lc-d-controls">
+          <div class="lc-d-control-col">
+            <Fragment set:html={stepHeaderHTML('01', 'Scenario', 'bars')} />
+            <div class="lc-d-control-body">
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Property Type</p>
+                <div class="lc-chips" set:html={scenarioPillsHTML()}></div>
+              </div>
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Off-Preset</p>
+                <div class="lc-chips" set:html={customPillHTML()}></div>
+              </div>
+              <div class="lc-scenario-zone">
+                <p class="lc-group-label">Projected Utilization</p>
+                <div class="lc-chips" set:html={utilPillsHTML()}></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lc-d-control-col">
+            <Fragment set:html={stepHeaderHTML('02', 'Inputs', 'sliders')} />
+            <div class="lc-d-control-body">
+              <div class="lc-input-row lc-input-row--stacked" set:html={inputFieldsHTML()}></div>
+            </div>
+          </div>
+
+          <div class="lc-d-control-col">
+            <Fragment set:html={stepHeaderHTML('03', 'Model', 'scale')} />
+            <div class="lc-d-control-body">
+              <div class="lc-model-grid lc-model-grid--stacked" set:html={modelCardsHTML('d')}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION E — SHOWROOM CONSOLE
+       Light "showroom" surface. Segmented-control pickers
+       with sliding thumbs, paired into labelled zones,
+       resolving to a full-width outcome panel. Inspired by
+       the highway-v3 "Economics" dashboard.
+  ═══════════════════════════════════════════════ -->
+  <section id="option-e" class="lc-option lc-option--e">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">E</div>
+        <div>
+          <h2 class="lc-option-title">Showroom Console</h2>
+          <p class="lc-option-desc">{layoutOptions[4].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-card lc-layout-e" data-calc-root data-option="e">
+        <div class="lc-e-bg" aria-hidden="true"></div>
+        <div class="lc-e-frame">
+
+          <!-- ZONES — property type + utilization, each a
+               segmented control under its own label bar -->
+          <div class="lc-e-zones">
+            <div class="lc-e-zone">
+              <div class="lc-e-zone-head">
+                <span class="lc-e-zone-label">Property Type</span>
+                <span class="lc-e-zone-hint">What the site is charging for</span>
+              </div>
+              <div class="lc-e-seg lc-e-seg--4" role="group" aria-label="Property type" set:html={scenarioSegmentsHTML()}></div>
+            </div>
+            <div class="lc-e-zone">
+              <div class="lc-e-zone-head">
+                <span class="lc-e-zone-label">Projected Utilization</span>
+                <span class="lc-e-zone-hint">How hard the chargers run</span>
+              </div>
+              <div class="lc-e-seg lc-e-seg--3" role="group" aria-label="Projected utilization" set:html={utilSegmentsHTML()}></div>
+            </div>
+          </div>
+
+          <!-- SITE INPUTS — fine-tune any number -->
+          <div class="lc-e-zone lc-e-zone--inputs">
+            <div class="lc-e-zone-head">
+              <span class="lc-e-zone-label">Site Inputs</span>
+              <span class="lc-e-zone-hint">Edit any field — the pickers switch to Custom</span>
+            </div>
+            <div class="lc-input-row" set:html={inputFieldsHTML()}></div>
+          </div>
+
+          <!-- FINANCIAL MODEL — full-width segmented control -->
+          <div class="lc-e-zone lc-e-zone--model">
+            <div class="lc-e-zone-head">
+              <span class="lc-e-zone-label">Financial Model</span>
+              <span class="lc-e-zone-hint">How capital and revenue are split</span>
+            </div>
+            <div class="lc-e-seg lc-e-seg--4 lc-e-seg-model" role="group" aria-label="Financial model" set:html={modelSegmentsHTML('e')}></div>
+          </div>
+
+          <!-- OUTCOME PANEL — full width, derived figures -->
+          <div class="lc-e-outcome">
+            <div class="lc-e-out-glow" aria-hidden="true"></div>
+            <p class="lc-e-out-eyebrow">
+              <span class="lc-e-out-tag">Outcome</span>
+              <span class="lc-e-out-combo" data-out="caption">—</span>
+            </p>
+            <div class="lc-e-out-main">
+              <div class="lc-e-out-figure-block">
+                <p class="lc-e-out-label">Your monthly share</p>
+                <p class="lc-e-out-primary">
+                  <span class="lc-e-out-figure" data-out="monthly">$0</span>
+                  <span class="lc-e-out-unit">/ month</span>
+                </p>
+              </div>
+              <span class="lc-e-out-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 12" fill="none">
+                  <path d="M1 6 L22 6 M16 1 L22 6 L16 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <div class="lc-e-out-projections">
+                <div class="lc-e-out-proj">
+                  <span class="lc-e-out-proj-num" data-out="yearly">$0</span>
+                  <span class="lc-e-out-proj-lbl">per year</span>
+                </div>
+                <div class="lc-e-out-proj">
+                  <span class="lc-e-out-proj-num lc-e-out-proj-num--accent" data-out="fiveyr">$0</span>
+                  <span class="lc-e-out-proj-lbl">over 5 years</span>
+                </div>
+              </div>
+            </div>
+            <dl class="lc-e-out-breakdown">
+              <div><dt>Gross monthly</dt><dd data-out="gross">$0</dd></div>
+              <div><dt>Sessions / mo</dt><dd data-out="sessions">0</dd></div>
+              <div><dt>Energy / mo</dt><dd><span data-out="energy">0</span>&nbsp;<span class="lc-e-out-bd-unit">kWh</span></dd></div>
+              <div class="lc-e-out-breakdown-accent"><dt>Revenue share</dt><dd data-out="share">10%</dd></div>
+            </dl>
+            <button type="button" data-open-estimate class="lc-e-cta">
+              Get a Personalized Estimate
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION F — LIVE CONSOLE  (the synthesis)
+       Two-column: controls left, sticky result right, so
+       the number stays live while you configure. Segmented
+       controls (from E) for the simple picks; the financial
+       model gets a segmented picker + a description card
+       that rewrites per selection (the highway-v3
+       "picker-owns-a-card" idea, fully ported).
+  ═══════════════════════════════════════════════ -->
+  <section id="option-f" class="lc-option lc-option--f">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">F</div>
+        <div>
+          <h2 class="lc-option-title">Live Console</h2>
+          <p class="lc-option-desc">{layoutOptions[5].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-card lc-layout-f" data-calc-root data-option="f">
+
+        <!-- LEFT — controls -->
+        <div class="lc-f-controls">
+
+          <!-- Property type + utilization — segmented controls -->
+          <div class="lc-f-zones">
+            <div class="lc-f-zone">
+              <div class="lc-f-zone-head">
+                <span class="lc-f-zone-label">Property Type</span>
+              </div>
+              <div class="lc-e-seg lc-e-seg--4" role="group" aria-label="Property type" set:html={scenarioSegmentsHTML()}></div>
+            </div>
+            <div class="lc-f-zone">
+              <div class="lc-f-zone-head">
+                <span class="lc-f-zone-label">Projected Utilization</span>
+              </div>
+              <div class="lc-e-seg lc-e-seg--3" role="group" aria-label="Projected utilization" set:html={utilSegmentsHTML()}></div>
+            </div>
+          </div>
+
+          <!-- Site inputs — tied to the scenario -->
+          <div class="lc-f-inputs">
+            <div class="lc-f-zone-head">
+              <span class="lc-f-zone-label">Site Inputs</span>
+              <span class="lc-f-zone-note">Auto-filled from your property type — fine-tune anything and the picker switches to Custom</span>
+            </div>
+            <div class="lc-input-row" set:html={inputFieldsHTML()}></div>
+          </div>
+
+          <!-- Financial model — segmented picker + live description card -->
+          <div class="lc-f-model">
+            <div class="lc-f-zone-head">
+              <span class="lc-f-zone-label">Financial Model</span>
+            </div>
+            <div class="lc-e-seg lc-e-seg--4 lc-e-seg-model" role="group" aria-label="Financial model" set:html={modelSegmentsHTML('f')}></div>
+            <div class="lc-f-model-card" data-model-card>
+              <div class="lc-f-model-card-head">
+                <h4 class="lc-f-model-card-title" data-model-title>No-Cost</h4>
+                <span class="lc-f-model-card-badge" data-model-badge>~10% revenue share</span>
+              </div>
+              <p class="lc-f-model-card-blurb" data-model-blurb>
+                Evium funds the capital and runs the site end to end — hardware, install,
+                software, support, and the cost of every kilowatt sold. You contribute the
+                location; revenue is shared, weighted in your favor.
+              </p>
+              <dl class="lc-f-model-spec">
+                <div><dt>Capital</dt><dd data-spec-capital>Evium</dd></div>
+                <div><dt>Operations</dt><dd data-spec-ops>Evium</dd></div>
+                <div><dt>Revenue</dt><dd data-spec-revenue>Shared, host-favored</dd></div>
+                <div><dt>Term</dt><dd data-spec-term>5 yr + 5</dd></div>
+              </dl>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT — sticky live result -->
+        <div class="lc-f-result">
+          <div class="lc-f-out-glow" aria-hidden="true"></div>
+          <p class="lc-f-out-eyebrow">
+            <span class="lc-f-out-tag">Live estimate</span>
+          </p>
+          <p class="lc-f-out-combo" data-out="caption">—</p>
+          <div class="lc-f-out-figure-block">
+            <p class="lc-f-out-label">Your monthly share</p>
+            <p class="lc-f-out-figure" data-out="monthly">$0</p>
+          </div>
+          <div class="lc-f-out-projections">
+            <div class="lc-f-out-proj">
+              <span class="lc-f-out-proj-num" data-out="yearly">$0</span>
+              <span class="lc-f-out-proj-lbl">per year</span>
+            </div>
+            <div class="lc-f-out-proj">
+              <span class="lc-f-out-proj-num lc-f-out-proj-num--accent" data-out="fiveyr">$0</span>
+              <span class="lc-f-out-proj-lbl">over 5 years</span>
+            </div>
+          </div>
+          <dl class="lc-f-out-breakdown">
+            <div><dt>Gross monthly</dt><dd data-out="gross">$0</dd></div>
+            <div><dt>Sessions / mo</dt><dd data-out="sessions">0</dd></div>
+            <div><dt>Energy / mo</dt><dd><span data-out="energy">0</span>&nbsp;<span class="lc-f-out-bd-unit">kWh</span></dd></div>
+            <div class="lc-f-out-breakdown-accent"><dt>Revenue share</dt><dd data-out="share">10%</dd></div>
+          </dl>
+          <button type="button" data-open-estimate class="lc-f-cta">
+            Get a Personalized Estimate
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       OPTION O — ORIGINAL  (preserved /profits build)
+       A faithful snapshot of the calculator currently
+       live on /testing/profits — two-pill scenario
+       picker above a two-column inputs/results card,
+       with the four financial models as a full-width
+       row beneath. Kept here for reference before
+       Option F replaces it. Wired to the same shared
+       initCalculator engine (id="" → data-input/data-out,
+       name="model-o", .lc-scenario-label / .lc-model-*
+       hooks added) so it behaves identically.
+  ═══════════════════════════════════════════════ -->
+  <section id="option-o" class="lc-option lc-option--o">
+    <div class="lc-option-inner">
+      <header class="lc-option-header">
+        <div class="lc-option-badge">O</div>
+        <div>
+          <h2 class="lc-option-title">Original</h2>
+          <p class="lc-option-desc">{layoutOptions[6].desc}</p>
+        </div>
+      </header>
+
+      <div class="lc-layout-o" data-calc-root data-option="o">
+
+        <!-- Scenario picker — single line, three zones -->
+        <div class="profits-calc-picker mb-10 lg:mb-12">
+          <div class="profits-calc-picker-line">
+
+            <!-- LEFT — Custom pill (off-preset) -->
+            <div class="profits-calc-picker-zone profits-calc-picker-zone--custom">
+              <p class="profits-calc-picker-label">Off-Preset</p>
+              <div class="profits-calc-picker-chips">
+                <button
+                  type="button"
+                  class="profits-calc-scenario-btn profits-calc-scenario-btn--custom"
+                  data-scenario="custom"
+                >
+                  <span class="profits-calc-scenario-icon" aria-hidden="true">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </span>
+                  <span class="profits-calc-scenario-label lc-scenario-label">Custom</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- MIDDLE — Property Type -->
+            <div class="profits-calc-picker-zone profits-calc-picker-zone--type">
+              <p class="profits-calc-picker-label">Property Type</p>
+              <div class="profits-calc-picker-chips">
+                {presets.map(p => (
+                  <button
+                    type="button"
+                    class="profits-calc-scenario-btn"
+                    data-scenario={p.id}
+                    data-ports={p.ports}
+                    data-util-low={p.utilization.low}
+                    data-util-medium={p.utilization.medium}
+                    data-util-high={p.utilization.high}
+                    data-kwh={p.kwh}
+                    data-price={p.price}
+                    data-type={p.type}
+                  >
+                    <span class="profits-calc-scenario-icon" aria-hidden="true">
+                      {p.id === 'l2-residential' && (
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M13 21V11l6 2v8M9 9h.01M9 13h.01M9 17h.01M16 15h.01M16 19h.01" />
+                        </svg>
+                      )}
+                      {p.id === 'dcfc-highway' && (
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 21l4-18M19 21l-4-18M3 9h18M3 15h18" />
+                        </svg>
+                      )}
+                      {p.id === 'l2-fleets' && (
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2 8h11v9H2zM13 11h5l3 3v3h-8zM6 17a2 2 0 11-4 0 2 2 0 014 0zM20 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      )}
+                    </span>
+                    <span class="profits-calc-scenario-label lc-scenario-label">{p.label}</span>
+                    <span class="profits-calc-scenario-type">{p.type}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <!-- RIGHT — Projected Utilization -->
+            <div class="profits-calc-picker-zone profits-calc-picker-zone--util">
+              <p class="profits-calc-picker-label">Projected Utilization</p>
+              <div class="profits-calc-picker-chips">
+                <button type="button" class="profits-calc-util-btn" data-utilization="low">
+                  <span class="profits-calc-util-label">Low</span>
+                  <span class="profits-calc-util-rate" data-util-rate>—</span>
+                  <span class="profits-calc-util-mini">/ port / day</span>
+                </button>
+                <button type="button" class="profits-calc-util-btn" data-utilization="medium">
+                  <span class="profits-calc-util-label">Medium</span>
+                  <span class="profits-calc-util-rate" data-util-rate>—</span>
+                  <span class="profits-calc-util-mini">/ port / day</span>
+                </button>
+                <button type="button" class="profits-calc-util-btn" data-utilization="high">
+                  <span class="profits-calc-util-label">High</span>
+                  <span class="profits-calc-util-rate" data-util-rate>—</span>
+                  <span class="profits-calc-util-mini">/ port / day</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Calculator Card -->
+        <div class="lc-o-card relative rounded-3xl bg-gradient-to-br from-evium-dark-light to-[#1a3040] border border-white/10 overflow-hidden shadow-2xl shadow-black/40">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/50 to-transparent"></div>
+          <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20 pointer-events-none"
+               style="background: radial-gradient(circle, #2DC856 0%, transparent 70%);"></div>
+
+          <div class="relative grid lg:grid-cols-5 gap-0">
+
+            <!-- INPUTS -->
+            <div class="lg:col-span-3 p-8 lg:p-12 lg:border-r lg:border-white/10">
+              <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-evium-green/15 border border-evium-green/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m4 10V11m4 6V4M3 21h18" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-evium-green/70 text-xs font-bold tracking-widest uppercase">Step 1</p>
+                  <h3 class="text-2xl font-black text-white">Your Inputs</h3>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label for="sessions" class="block text-sm font-bold text-white mb-2">Sessions Per Port / Day</label>
+                  <div class="relative">
+                    <input
+                      id="sessions"
+                      data-input="sessions"
+                      type="number"
+                      inputmode="decimal"
+                      min="0" step="0.5"
+                      value="6"
+                      class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">/ day</span>
+                  </div>
+                  <p class="text-white/40 text-xs mt-2">Typical L2: 2–4 · DC Fast: 8–14</p>
+                </div>
+
+                <div>
+                  <label for="ports" class="block text-sm font-bold text-white mb-2">Number of Ports</label>
+                  <div class="relative">
+                    <input
+                      id="ports"
+                      data-input="ports"
+                      type="number"
+                      inputmode="numeric"
+                      min="1" step="1"
+                      value="4"
+                      class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">ports</span>
+                  </div>
+                  <p class="text-white/40 text-xs mt-2">Each charger has 1–2 ports</p>
+                </div>
+
+                <div>
+                  <label for="kwh" class="block text-sm font-bold text-white mb-2">kWh Per Session</label>
+                  <div class="relative">
+                    <input
+                      id="kwh"
+                      data-input="kwh"
+                      type="number"
+                      inputmode="decimal"
+                      min="0" step="1"
+                      value="25"
+                      class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">kWh</span>
+                  </div>
+                  <p class="text-white/40 text-xs mt-2">Typical L2: 15–25 · DC Fast: 30–50</p>
+                </div>
+
+                <div>
+                  <label for="price" class="block text-sm font-bold text-white mb-2">Price Per kWh</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-lg font-semibold pointer-events-none">$</span>
+                    <input
+                      id="price"
+                      data-input="price"
+                      type="number"
+                      inputmode="decimal"
+                      min="0" step="0.01"
+                      value="0.42"
+                      class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-9 pr-16 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">/ kWh</span>
+                  </div>
+                  <p class="text-white/40 text-xs mt-2">National average for public charging: $0.30–$0.55</p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RESULTS -->
+            <div class="lg:col-span-2 p-8 lg:p-12 bg-gradient-to-b from-evium-dark/40 to-evium-dark/80 lg:bg-none lg:bg-evium-dark/30">
+              <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-evium-green flex items-center justify-center">
+                  <svg class="w-5 h-5 text-evium-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-evium-green/70 text-xs font-bold tracking-widest uppercase">Your Estimate</p>
+                  <h3 class="text-2xl font-black text-white">Revenue Potential</h3>
+                </div>
+              </div>
+
+              <!-- Headline result -->
+              <div class="rounded-2xl bg-evium-green/[0.07] border border-evium-green/30 p-6 mb-4 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-30 pointer-events-none"
+                     style="background: radial-gradient(circle at 80% 20%, #2DC856 0%, transparent 60%);"></div>
+                <div class="relative min-w-0">
+                  <p class="text-evium-green text-xs font-bold tracking-widest uppercase mb-2">Your Monthly Share</p>
+                  <p
+                    data-out="monthly"
+                    class="font-black text-white leading-none mb-1 tabular-nums whitespace-nowrap"
+                    style="font-size: clamp(2rem, 4.6vw, 3.5rem);"
+                  >$0</p>
+                  <p class="text-white/40 text-xs mt-2">Based on a 30-day month</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="rounded-xl bg-evium-dark border border-white/10 p-4 min-w-0 overflow-hidden">
+                  <p class="text-white/40 text-xs font-semibold uppercase tracking-wider mb-1">Per Year</p>
+                  <p
+                    data-out="yearly"
+                    class="font-black text-white tabular-nums whitespace-nowrap"
+                    style="font-size: clamp(1.1rem, 1.6vw, 1.5rem);"
+                  >$0</p>
+                </div>
+                <div class="rounded-xl bg-evium-dark border border-white/10 p-4 min-w-0 overflow-hidden">
+                  <p class="text-white/40 text-xs font-semibold uppercase tracking-wider mb-1">5-Year Total</p>
+                  <p
+                    data-out="fiveyr"
+                    class="font-black text-evium-green tabular-nums whitespace-nowrap"
+                    style="font-size: clamp(1.1rem, 1.6vw, 1.5rem);"
+                  >$0</p>
+                </div>
+              </div>
+
+              <!-- Breakdown -->
+              <div class="rounded-xl bg-evium-dark/60 border border-white/5 p-5 space-y-2.5 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-white/50">Gross monthly (all sessions)</span>
+                  <span data-out="gross" class="text-white font-semibold">$0</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-white/50">Sessions per month</span>
+                  <span data-out="sessions" class="text-white font-semibold">0</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-white/50">Energy delivered (kWh / mo)</span>
+                  <span data-out="energy" class="text-white font-semibold">0</span>
+                </div>
+                <div class="flex justify-between pt-2.5 border-t border-white/10">
+                  <span class="text-white/50">Your share</span>
+                  <span data-out="share" class="text-evium-green font-bold">10%</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                data-open-estimate
+                class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold text-sm px-6 py-4 rounded-xl hover:bg-white transition-colors cursor-pointer"
+              >
+                Get a Personalized Estimate
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2 · Financial Model -->
+          <div class="relative border-t border-white/10 p-8 lg:p-10">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-lg bg-evium-green/15 border border-evium-green/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-evium-green/70 text-xs font-bold tracking-widest uppercase">Step 2</p>
+                <h3 class="text-2xl font-black text-white">Financial Model</h3>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+              {models.map((m, i) => (
+                <label class="model-option lc-model-option cursor-pointer block">
+                  <input
+                    type="radio"
+                    name="model-o"
+                    value={m.share}
+                    data-model-id={m.id}
+                    checked={i === 0}
+                    style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;"
+                  />
+                  <div class="model-card relative rounded-xl border border-white/10 bg-evium-dark p-5 transition-all hover:border-white/30 h-full">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <p class="lc-model-label font-bold text-white text-base leading-tight">{m.label}</p>
+                      <span class="model-dot w-4 h-4 rounded-full border-2 border-white/30 grid place-items-center transition-colors flex-shrink-0 mt-1">
+                        <span class="dot-inner w-1.5 h-1.5 rounded-full bg-evium-dark opacity-0 transition-opacity"></span>
+                      </span>
+                    </div>
+                    <span class="model-badge inline-block text-[0.66rem] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-evium-green/10 border border-evium-green/25 text-evium-green/80 mb-2.5">{m.badge}</span>
+                    <p class="text-white/55 text-[0.82rem] leading-relaxed">{m.blurb}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div><!-- /.lc-o-card -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SHARED ESTIMATE MODAL
+  ═══════════════════════════════════════════════ -->
+  <div id="lc-modal" role="dialog" aria-modal="true" aria-labelledby="lc-modal-title"
+       class="lc-modal" hidden>
+    <div class="lc-modal-backdrop" data-close-estimate></div>
+    <div class="lc-modal-panel" id="lc-modal-panel">
+      <div class="lc-modal-rail" aria-hidden="true"></div>
+      <button type="button" class="lc-modal-close" data-close-estimate aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div id="lc-modal-form-view">
+        <p class="lc-modal-eyebrow">Personalized Estimate</p>
+        <h2 id="lc-modal-title" class="lc-modal-title">
+          Get a real number for<br /><span class="lc-modal-title-accent">your property.</span>
+        </h2>
+        <p class="lc-modal-lead">
+          We'll model real revenue using local traffic, EV registrations, and Evium deployment
+          data — typically within 48 hours. No commitment.
+        </p>
+
+        <div class="lc-modal-recap">
+          <p class="lc-modal-recap-label">Your Scenario</p>
+          <div class="lc-modal-recap-grid">
+            <div><span class="lc-modal-recap-k">Sessions / port / day</span><span class="lc-modal-recap-v" id="lc-recap-sessions">—</span></div>
+            <div><span class="lc-modal-recap-k">Ports</span><span class="lc-modal-recap-v" id="lc-recap-ports">—</span></div>
+            <div><span class="lc-modal-recap-k">kWh / session</span><span class="lc-modal-recap-v" id="lc-recap-kwh">—</span></div>
+            <div><span class="lc-modal-recap-k">Price / kWh</span><span class="lc-modal-recap-v" id="lc-recap-price">—</span></div>
+          </div>
+          <div class="lc-modal-recap-foot">
+            <div><span class="lc-modal-recap-k">Model</span><span class="lc-modal-recap-v" id="lc-recap-model">—</span></div>
+            <div class="lc-modal-recap-foot-right"><span class="lc-modal-recap-k">Modeled monthly share</span><span class="lc-modal-recap-v lc-modal-recap-v--accent" id="lc-recap-monthly">—</span></div>
+          </div>
+        </div>
+
+        <form id="lc-modal-form" class="lc-modal-form" novalidate>
+          <input type="text" name="company_website" tabindex="-1" autocomplete="off" class="lc-sr-only" />
+          <div class="lc-modal-form-grid">
+            <div>
+              <label for="lc-ef-name" class="lc-modal-label">Full Name</label>
+              <input id="lc-ef-name" name="name" type="text" required autocomplete="name" class="lc-modal-input" />
+            </div>
+            <div>
+              <label for="lc-ef-email" class="lc-modal-label">Email</label>
+              <input id="lc-ef-email" name="email" type="email" required autocomplete="email" class="lc-modal-input" />
+            </div>
+            <div>
+              <label for="lc-ef-phone" class="lc-modal-label">Phone</label>
+              <input id="lc-ef-phone" name="phone" type="tel" autocomplete="tel" class="lc-modal-input" />
+            </div>
+            <div>
+              <label for="lc-ef-type" class="lc-modal-label">Property Type</label>
+              <select id="lc-ef-type" name="property_type" class="lc-modal-input lc-modal-select">
+                <option value="multifamily">Multifamily / Apartments</option>
+                <option value="commercial">Commercial / Office</option>
+                <option value="retail">Retail / Strip Center</option>
+                <option value="parking">Parking Lot</option>
+                <option value="fleet">Fleet</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="lc-ef-address" class="lc-modal-label">Property Address</label>
+            <input id="lc-ef-address" name="address" type="text" required autocomplete="street-address"
+                   placeholder="123 Main St, City, State" class="lc-modal-input" />
+          </div>
+          <p id="lc-ef-error" class="lc-modal-error" hidden>Please complete the required fields.</p>
+          <div class="lc-modal-actions">
+            <button type="button" data-close-estimate class="lc-modal-cancel">Cancel</button>
+            <button type="submit" id="lc-ef-submit" class="lc-modal-submit">
+              <span id="lc-ef-submit-label">Send My Estimate Request</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="lc-modal-success-view" hidden>
+        <div class="lc-modal-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="lc-modal-title">Request received.</h2>
+        <p class="lc-modal-lead">
+          An Evium specialist will be in touch within <strong class="lc-modal-accent">48 hours</strong>
+          with a custom revenue model for your property.
+        </p>
+        <button type="button" data-close-estimate class="lc-modal-submit lc-modal-submit--center">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       STYLES
+  ═══════════════════════════════════════════════ -->
+  <!-- is:global — the scenario pills, step headers, input fields, model cards
+       and result blocks are injected via set:html from frontmatter helpers, so
+       they never receive Astro's data-astro-cid scoping attribute. Every rule
+       below is .lc-* prefixed and unique to this page, so going global is safe. -->
+  <style is:global>
+    /* ════════ TOKENS / RESET ════════ */
+    .lc-sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ════════ INTRO ════════ */
+    .lc-intro {
+      position: relative;
+      overflow: hidden;
+      background: #0d1b22;
+      padding: 9rem 1.5rem 5rem;
+    }
+    .lc-intro-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.045;
+      background-image:
+        linear-gradient(#2DC856 1px, transparent 1px),
+        linear-gradient(90deg, #2DC856 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+    .lc-intro-bg::after {
+      content: '';
+      position: absolute;
+      top: -10%; left: 10%;
+      width: clamp(500px, 55vw, 900px);
+      height: clamp(360px, 40vw, 620px);
+      border-radius: 9999px;
+      opacity: 2.6;
+      background: radial-gradient(ellipse at center, rgba(45,200,86,0.5) 0%, transparent 70%);
+      filter: blur(12px);
+    }
+    .lc-intro-inner {
+      position: relative;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .lc-intro-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.75);
+      margin: 0 0 1.25rem;
+    }
+    .lc-intro-title {
+      font-size: clamp(2.75rem, 6vw, 4.75rem);
+      font-weight: 900;
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin: 0 0 1.5rem;
+    }
+    .lc-intro-title-accent {
+      color: #2DC856;
+      text-shadow: 0 2px 30px rgba(45,200,86,0.4), 0 0 64px rgba(45,200,86,0.16);
+    }
+    .lc-intro-sub {
+      font-size: clamp(1rem, 1.3vw, 1.2rem);
+      line-height: 1.6;
+      color: rgba(255,255,255,0.6);
+      max-width: 46rem;
+      margin: 0 0 2.75rem;
+    }
+    .lc-jump {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+    }
+    .lc-jump-link {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 1.05rem 1.25rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.9rem;
+      background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%);
+      text-decoration: none;
+      transition: transform 220ms cubic-bezier(0.22,1,0.36,1), border-color 220ms ease, background 220ms ease;
+    }
+    .lc-jump-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(45,200,86,0.4);
+      background: linear-gradient(165deg, rgba(45,200,86,0.09) 0%, rgba(45,200,86,0.02) 100%);
+    }
+    .lc-jump-tag {
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.8);
+    }
+    .lc-jump-name {
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+    }
+
+    /* ════════ OPTION SECTION SHELL ════════ */
+    .lc-option {
+      position: relative;
+      padding: 5.5rem 1.5rem;
+      scroll-margin-top: 1.5rem;
+    }
+    .lc-option--a { background: #0d1b22; }
+    .lc-option--b { background: #112430; }
+    .lc-option--c { background: #0d1b22; }
+    .lc-option--d { background: #112430; }
+    .lc-option-inner {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+    .lc-option-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 2.75rem;
+      max-width: 60rem;
+    }
+    .lc-option-badge {
+      flex-shrink: 0;
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 0.9rem;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #0a1418;
+      background: linear-gradient(180deg, #34d962 0%, #28b94e 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        0 8px 20px -6px rgba(45,200,86,0.5);
+    }
+    .lc-option-title {
+      font-size: clamp(1.65rem, 2.6vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin: 0 0 0.5rem;
+    }
+    .lc-option-desc {
+      font-size: 0.96rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.55);
+      margin: 0;
+    }
+
+    /* ════════ CALC CARD BASE ════════ */
+    .lc-card {
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1.75rem;
+      background: linear-gradient(165deg, #16303e 0%, #0f2531 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 30px 70px -20px rgba(0,0,0,0.6),
+        0 0 90px -30px rgba(45,200,86,0.18);
+      overflow: hidden;
+    }
+    .lc-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45,200,86,0.55), transparent);
+      pointer-events: none;
+    }
+
+    /* ════════ SHARED — GROUP LABELS ════════ */
+    .lc-group-label {
+      font-size: 0.64rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.72);
+      margin: 0 0 0.7rem;
+    }
+
+    /* ════════ SHARED — STEP HEADER ════════ */
+    .lc-step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.4rem;
+    }
+    .lc-step-icon {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.7rem;
+      display: grid;
+      place-items: center;
+      color: #2DC856;
+      background: linear-gradient(155deg, rgba(45,200,86,0.2) 0%, rgba(45,200,86,0.05) 100%);
+      border: 1px solid rgba(45,200,86,0.3);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -3px rgba(45,200,86,0.25);
+    }
+    .lc-step-icon svg { width: 1.25rem; height: 1.25rem; }
+    .lc-step-eyebrow {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.7);
+      margin: 0;
+    }
+    .lc-step-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -0.015em;
+      color: #ffffff;
+      margin: 0.1rem 0 0;
+    }
+
+    /* ════════ SHARED — CHIPS WRAPPER ════════ */
+    .lc-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+    .lc-chips--stacked {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+
+    /* ════════ SHARED — SCENARIO PILL ════════ */
+    .lc-scenario-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 1rem 0.6rem 0.7rem;
+      background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.85rem;
+      color: rgba(255,255,255,0.78);
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 220ms cubic-bezier(0.22,1,0.36,1), border-color 220ms ease, background 220ms ease, box-shadow 220ms ease, color 220ms ease;
+    }
+    .lc-scenario-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45,200,86,0.42);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45,200,86,0.1) 0%, rgba(45,200,86,0.03) 100%);
+    }
+    .lc-scenario-btn.is-active {
+      border-color: rgba(45,200,86,0.75);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45,200,86,0.18) 0%, rgba(45,200,86,0.06) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        0 0 24px -5px rgba(45,200,86,0.5),
+        0 6px 14px -6px rgba(45,200,86,0.3);
+    }
+    .lc-scenario-icon {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.55rem;
+      background: linear-gradient(155deg, rgba(45,200,86,0.2) 0%, rgba(45,200,86,0.05) 100%);
+      border: 1px solid rgba(45,200,86,0.3);
+      color: #2DC856;
+    }
+    .lc-scenario-icon svg { width: 1rem; height: 1rem; }
+    .lc-scenario-btn.is-active .lc-scenario-icon {
+      background: linear-gradient(155deg, rgba(45,200,86,0.34) 0%, rgba(45,200,86,0.12) 100%);
+      border-color: rgba(45,200,86,0.55);
+    }
+    .lc-scenario-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      line-height: 1.1;
+    }
+    .lc-scenario-label {
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: -0.008em;
+    }
+    .lc-scenario-type {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.6);
+    }
+    .lc-scenario-btn.is-active .lc-scenario-type { color: rgba(45,200,86,0.95); }
+
+    /* ════════ SHARED — UTILIZATION PILL ════════ */
+    .lc-util-btn {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.08rem;
+      padding: 0.55rem 1rem 0.65rem;
+      background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.85rem;
+      color: rgba(255,255,255,0.78);
+      font-family: inherit;
+      cursor: pointer;
+      min-width: 116px;
+      transition: transform 220ms cubic-bezier(0.22,1,0.36,1), border-color 220ms ease, background 220ms ease, box-shadow 220ms ease, color 220ms ease;
+    }
+    .lc-util-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45,200,86,0.42);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45,200,86,0.08) 0%, rgba(45,200,86,0.02) 100%);
+    }
+    .lc-util-btn.is-active {
+      border-color: rgba(45,200,86,0.75);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45,200,86,0.18) 0%, rgba(45,200,86,0.06) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        0 0 24px -5px rgba(45,200,86,0.5),
+        0 6px 14px -6px rgba(45,200,86,0.3);
+    }
+    .lc-util-label {
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .lc-util-rate {
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      color: #2DC856;
+      line-height: 1.15;
+      margin-top: 0.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-util-btn.is-active .lc-util-rate { color: #ffffff; }
+    .lc-util-mini {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.4);
+      line-height: 1;
+    }
+
+    /* ════════ SHARED — INPUT FIELD ════════ */
+    .lc-input-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .lc-input-row--2col { grid-template-columns: repeat(2, 1fr); }
+    .lc-input-row--stacked { grid-template-columns: 1fr; gap: 0.85rem; }
+    .lc-input-field { min-width: 0; }
+    .lc-input-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+    .lc-input-wrap { position: relative; }
+    .lc-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.8rem 3.4rem 0.8rem 0.9rem;
+      background: #0c1a22;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.7rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .lc-input-wrap--prefixed .lc-input { padding-left: 2rem; }
+    .lc-input:focus {
+      outline: none;
+      border-color: #2DC856;
+      box-shadow: 0 0 0 3px rgba(45,200,86,0.2);
+    }
+    .lc-input-prefix {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.4);
+      font-size: 1.05rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .lc-input-suffix {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.3);
+      font-size: 0.72rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .lc-input-hint {
+      font-size: 0.68rem;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.38);
+      margin: 0.5rem 0 0;
+    }
+
+    /* ════════ SHARED — MODEL CARD ════════ */
+    .lc-model-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.85rem;
+    }
+    .lc-model-grid--2col { grid-template-columns: repeat(2, 1fr); }
+    .lc-model-grid--stacked { grid-template-columns: 1fr; gap: 0.7rem; }
+    .lc-model-option { cursor: pointer; display: block; }
+    .lc-model-card {
+      height: 100%;
+      padding: 1.1rem 1.15rem 1.2rem;
+      background: #0c1a22;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.85rem;
+      transition: transform 240ms cubic-bezier(0.22,1,0.36,1), border-color 240ms ease, background 240ms ease, box-shadow 240ms ease;
+    }
+    .lc-model-option:hover .lc-model-card {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.28);
+    }
+    .lc-model-option input:checked ~ .lc-model-card {
+      border-color: rgba(45,200,86,0.7);
+      background: linear-gradient(165deg, rgba(45,200,86,0.1) 0%, rgba(12,26,34,0.9) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 0 26px -6px rgba(45,200,86,0.34);
+    }
+    .lc-model-option input:focus-visible ~ .lc-model-card {
+      outline: 2px solid #2DC856;
+      outline-offset: 2px;
+    }
+    .lc-model-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+    .lc-model-label {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      line-height: 1.2;
+      margin: 0;
+    }
+    .lc-model-dot {
+      flex-shrink: 0;
+      width: 1.05rem;
+      height: 1.05rem;
+      margin-top: 0.1rem;
+      border-radius: 9999px;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: grid;
+      place-items: center;
+      transition: border-color 240ms ease, background 240ms ease;
+    }
+    .lc-model-dot-inner {
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 9999px;
+      background: #0c1a22;
+      opacity: 0;
+      transition: opacity 240ms ease;
+    }
+    .lc-model-option input:checked ~ .lc-model-card .lc-model-dot {
+      border-color: #2DC856;
+      background: #2DC856;
+    }
+    .lc-model-option input:checked ~ .lc-model-card .lc-model-dot-inner { opacity: 1; }
+    .lc-model-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 9999px;
+      background: rgba(45,200,86,0.1);
+      border: 1px solid rgba(45,200,86,0.25);
+      color: rgba(45,200,86,0.82);
+      margin-bottom: 0.6rem;
+      transition: background 240ms ease, border-color 240ms ease, color 240ms ease;
+    }
+    .lc-model-option input:checked ~ .lc-model-card .lc-model-badge {
+      background: rgba(45,200,86,0.22);
+      border-color: rgba(45,200,86,0.5);
+      color: #ffffff;
+    }
+    .lc-model-blurb {
+      font-size: 0.76rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.55);
+      margin: 0;
+    }
+
+    /* ════════ SHARED — RESULT BLOCK ════════ */
+    .lc-result {
+      position: relative;
+      z-index: 1;
+    }
+    .lc-result-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.8);
+      margin: 0 0 0.6rem;
+    }
+    .lc-result-monthly {
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+      color: #ffffff;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .lc-result-caption {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      margin: 0.7rem 0 0;
+      letter-spacing: 0.005em;
+    }
+    .lc-result-secondary {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.4rem;
+    }
+    .lc-result-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .lc-result-stat-num {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-result-stat-num--accent { color: #2DC856; }
+    .lc-result-stat-lbl {
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .lc-breakdown {
+      margin-top: 1.5rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 0.85rem;
+      background: rgba(12,26,34,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .lc-breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.82rem;
+      padding: 0.32rem 0;
+    }
+    .lc-breakdown-row span:first-child { color: rgba(255,255,255,0.5); }
+    .lc-breakdown-row span:last-child {
+      color: #ffffff;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-breakdown-row--total {
+      margin-top: 0.3rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .lc-breakdown-row--total span:last-child { color: #2DC856; }
+    .lc-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-top: 1.5rem;
+      padding: 0.95rem 1.75rem;
+      width: 100%;
+      background: linear-gradient(180deg, #34d962 0%, #28b94e 100%);
+      color: #0a1418;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.22),
+        0 8px 18px -4px rgba(45,200,86,0.42),
+        0 18px 40px -10px rgba(45,200,86,0.45);
+      transition: transform 220ms cubic-bezier(0.22,1,0.36,1), box-shadow 220ms ease, background 220ms ease;
+    }
+    .lc-cta:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, #3ce069 0%, #2cc454 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.28),
+        0 10px 22px -4px rgba(45,200,86,0.55),
+        0 22px 50px -10px rgba(45,200,86,0.55);
+    }
+    .lc-cta svg {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 220ms cubic-bezier(0.22,1,0.36,1);
+    }
+    .lc-cta:hover svg { transform: translateX(4px); }
+
+    /* ════════════════════════════════════════════════════
+       LAYOUT A — RESULT-FIRST HERO
+       ════════════════════════════════════════════════════ */
+    .lc-layout-a { padding: 0; }
+    .lc-a-result {
+      position: relative;
+      padding: 3.5rem 3rem 3rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .lc-a-result-glow {
+      position: absolute;
+      top: -40%; left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 200%;
+      border-radius: 9999px;
+      opacity: 0.16;
+      background: radial-gradient(ellipse at center, rgba(45,200,86,0.6) 0%, transparent 65%);
+      filter: blur(20px);
+      pointer-events: none;
+    }
+    .lc-layout-a .lc-result--hero .lc-result-monthly {
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      margin-top: 0.2rem;
+    }
+    .lc-layout-a .lc-result--hero .lc-result-caption { font-size: 0.92rem; }
+    .lc-layout-a .lc-result--hero .lc-result-secondary {
+      justify-content: center;
+      margin-top: 1.6rem;
+    }
+    .lc-layout-a .lc-result--hero .lc-result-stat { align-items: center; }
+    .lc-layout-a .lc-result--hero .lc-breakdown {
+      display: none; /* breakdown moves to its own step row at the bottom */
+    }
+    .lc-layout-a .lc-result--hero .lc-cta {
+      width: auto;
+      margin-top: 1.8rem;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+    .lc-a-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+    .lc-a-controls {
+      padding: 2.75rem 3rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    .lc-a-step {}
+    .lc-scenario-zones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem 2.5rem;
+      align-items: flex-start;
+    }
+    .lc-scenario-zone--type { flex: 1 1 auto; }
+
+    /* ════════════════════════════════════════════════════
+       LAYOUT B — EDITORIAL 2-ZONE
+       ════════════════════════════════════════════════════ */
+    .lc-layout-b {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+    }
+    .lc-b-controls {
+      padding: 2.75rem 2.75rem 3rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .lc-b-step {}
+    .lc-b-scenario {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+    .lc-b-divider {
+      height: 1px;
+      margin: 1.85rem 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12), transparent);
+    }
+    .lc-b-result {
+      position: relative;
+      padding: 3rem 2.75rem;
+      background: linear-gradient(170deg, rgba(45,200,86,0.1) 0%, rgba(12,26,34,0.55) 60%, rgba(12,26,34,0.4) 100%);
+      border-left: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .lc-b-result-glow {
+      position: absolute;
+      top: -20%; right: -30%;
+      width: 90%;
+      height: 90%;
+      border-radius: 9999px;
+      opacity: 0.2;
+      background: radial-gradient(circle, rgba(45,200,86,0.55) 0%, transparent 65%);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+    .lc-layout-b .lc-result--panel .lc-result-monthly {
+      font-size: clamp(2.75rem, 4.5vw, 4.25rem);
+      margin-top: 0.15rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+       LAYOUT C — STAGE FLOW
+       ════════════════════════════════════════════════════ */
+    .lc-layout-c {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1.05fr;
+      align-items: stretch;
+    }
+    .lc-c-stage {
+      position: relative;
+      padding: 2.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .lc-c-stage-num {
+      position: absolute;
+      top: 1.3rem;
+      right: 1.3rem;
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 9999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.03);
+    }
+    .lc-c-stage-num--result {
+      color: #0a1418;
+      background: linear-gradient(180deg, #34d962 0%, #28b94e 100%);
+      border-color: transparent;
+      box-shadow: 0 0 18px -2px rgba(45,200,86,0.5);
+    }
+    .lc-c-stage-body { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 1.3rem; }
+    .lc-c-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.75rem;
+      color: rgba(45,200,86,0.4);
+    }
+    .lc-c-connector svg { width: 1.25rem; height: 1.25rem; }
+    .lc-c-connector--final { color: rgba(45,200,86,0.7); }
+    .lc-c-stage--result {
+      background: linear-gradient(170deg, rgba(45,200,86,0.1) 0%, rgba(12,26,34,0.5) 70%);
+      border-left: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+      justify-content: center;
+    }
+    .lc-c-result-glow {
+      position: absolute;
+      top: 10%; right: -40%;
+      width: 110%;
+      height: 80%;
+      border-radius: 9999px;
+      opacity: 0.18;
+      background: radial-gradient(circle, rgba(45,200,86,0.5) 0%, transparent 65%);
+      filter: blur(12px);
+      pointer-events: none;
+    }
+    .lc-layout-c .lc-result--stage .lc-result-monthly {
+      font-size: clamp(2.4rem, 3.4vw, 3.4rem);
+      margin-top: 0.15rem;
+    }
+    .lc-layout-c .lc-result--stage .lc-result-secondary {
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-top: 1.2rem;
+    }
+    .lc-layout-c .lc-result--stage .lc-breakdown { display: none; }
+    .lc-layout-c .lc-c-stage-num { /* keep ordinal visible above content */ }
+    /* slimmer model/input/pill density inside the narrow stage columns */
+    .lc-layout-c .lc-scenario-btn { padding: 0.5rem 0.75rem 0.5rem 0.55rem; }
+    .lc-layout-c .lc-util-btn { min-width: 0; width: 100%; }
+
+    /* ════════════════════════════════════════════════════
+       LAYOUT D — FLOATING RESULT BAND
+       ════════════════════════════════════════════════════ */
+    .lc-layout-d {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .lc-d-band {
+      position: relative;
+      border: 1px solid rgba(45,200,86,0.25);
+      border-radius: 1.5rem;
+      background: linear-gradient(150deg, rgba(45,200,86,0.14) 0%, #12303d 45%, #0f2531 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 26px 60px -18px rgba(0,0,0,0.55),
+        0 0 90px -24px rgba(45,200,86,0.32);
+      padding: 2.75rem 3rem;
+      overflow: hidden;
+    }
+    .lc-d-band-glow {
+      position: absolute;
+      top: -60%; left: 8%;
+      width: 50%;
+      height: 240%;
+      border-radius: 9999px;
+      opacity: 0.22;
+      background: radial-gradient(ellipse at center, rgba(45,200,86,0.6) 0%, transparent 62%);
+      filter: blur(16px);
+      pointer-events: none;
+    }
+    .lc-layout-d .lc-result--band {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+    .lc-layout-d .lc-result--band .lc-result-eyebrow,
+    .lc-layout-d .lc-result--band .lc-result-monthly,
+    .lc-layout-d .lc-result--band .lc-result-caption {
+      grid-column: 1;
+    }
+    .lc-layout-d .lc-result--band .lc-result-monthly {
+      font-size: clamp(3rem, 6vw, 5.25rem);
+      margin-top: 0.15rem;
+    }
+    .lc-layout-d .lc-result--band .lc-result-caption { font-size: 0.9rem; }
+    .lc-layout-d .lc-result--band .lc-result-secondary {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0;
+      padding-left: 2.5rem;
+      border-left: 1px solid rgba(255,255,255,0.12);
+    }
+    .lc-layout-d .lc-result--band .lc-result-stat-num { font-size: 1.85rem; }
+    .lc-layout-d .lc-result--band .lc-breakdown {
+      grid-column: 1 / -1;
+      margin-top: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      padding: 1.1rem 0 0;
+      background: transparent;
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0;
+    }
+    .lc-layout-d .lc-result--band .lc-breakdown-row {
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 1.25rem;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .lc-layout-d .lc-result--band .lc-breakdown-row:first-child { padding-left: 0; }
+    .lc-layout-d .lc-result--band .lc-breakdown-row:last-child { border-right: none; }
+    .lc-layout-d .lc-result--band .lc-breakdown-row--total { margin-top: 0; padding-top: 0; border-top: none; }
+    .lc-layout-d .lc-result--band .lc-breakdown-row span:first-child {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .lc-layout-d .lc-result--band .lc-breakdown-row span:last-child { font-size: 1.05rem; }
+    .lc-layout-d .lc-result--band .lc-cta {
+      grid-column: 2;
+      width: auto;
+      margin-top: 0;
+      align-self: end;
+    }
+    .lc-d-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .lc-d-control-col {
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1.5rem;
+      background: linear-gradient(165deg, #16303e 0%, #0f2531 100%);
+      padding: 2rem 1.85rem 2.25rem;
+      box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
+    }
+    .lc-d-control-body { display: flex; flex-direction: column; gap: 1.4rem; }
+
+    /* ════════════════════════════════════════════════════
+       MODAL
+       ════════════════════════════════════════════════════ */
+    .lc-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .lc-modal[hidden] { display: none; }
+    .lc-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(4,10,14,0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      animation: lc-modal-fade 200ms ease forwards;
+    }
+    @keyframes lc-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    .lc-modal-panel {
+      position: relative;
+      width: 100%;
+      max-width: 38rem;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: linear-gradient(165deg, #16303e 0%, #0f2531 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      box-shadow: 0 40px 90px -20px rgba(0,0,0,0.7);
+      animation: lc-modal-rise 240ms cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes lc-modal-rise {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .lc-modal-rail {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45,200,86,0.6), transparent);
+    }
+    .lc-modal-close {
+      position: absolute;
+      top: 1.1rem; right: 1.1rem;
+      width: 2.1rem; height: 2.1rem;
+      display: grid;
+      place-items: center;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: color 200ms ease, background 200ms ease, border-color 200ms ease;
+    }
+    .lc-modal-close:hover {
+      color: #ffffff;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.3);
+    }
+    .lc-modal-close svg { width: 0.95rem; height: 0.95rem; }
+    .lc-modal-eyebrow {
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.85);
+      padding: 0.3rem 0.7rem;
+      border-radius: 9999px;
+      background: rgba(45,200,86,0.1);
+      border: 1px solid rgba(45,200,86,0.3);
+      margin: 0 0 1.1rem;
+    }
+    .lc-modal-title {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin: 0 0 0.85rem;
+    }
+    .lc-modal-title-accent { color: #2DC856; }
+    .lc-modal-lead {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.58);
+      margin: 0 0 1.6rem;
+    }
+    .lc-modal-accent { color: #2DC856; }
+    .lc-modal-recap {
+      padding: 1.25rem;
+      border-radius: 0.85rem;
+      background: #0c1a22;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 1.6rem;
+    }
+    .lc-modal-recap-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(45,200,86,0.7);
+      margin: 0 0 0.85rem;
+    }
+    .lc-modal-recap-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.9rem;
+    }
+    @media (min-width: 540px) {
+      .lc-modal-recap-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .lc-modal-recap-k {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .lc-modal-recap-v {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 0.15rem;
+    }
+    .lc-modal-recap-v--accent { color: #2DC856; }
+    .lc-modal-recap-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .lc-modal-recap-foot-right { text-align: right; }
+    .lc-modal-form { display: flex; flex-direction: column; gap: 1.1rem; }
+    .lc-modal-form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 540px) {
+      .lc-modal-form-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .lc-modal-label {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.45rem;
+    }
+    .lc-modal-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.7rem 0.9rem;
+      background: #0c1a22;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.6rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .lc-modal-input:focus {
+      outline: none;
+      border-color: #2DC856;
+      box-shadow: 0 0 0 3px rgba(45,200,86,0.2);
+    }
+    .lc-modal-select { appearance: none; -webkit-appearance: none; }
+    .lc-modal-error { font-size: 0.78rem; color: #f87171; font-weight: 600; margin: 0; }
+    .lc-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding-top: 0.3rem;
+    }
+    .lc-modal-cancel {
+      padding: 0.7rem 1.3rem;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: color 200ms ease;
+    }
+    .lc-modal-cancel:hover { color: #ffffff; }
+    .lc-modal-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      background: linear-gradient(180deg, #34d962 0%, #28b94e 100%);
+      color: #0a1418;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.86rem;
+      border: none;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -6px rgba(45,200,86,0.5);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .lc-modal-submit:hover { transform: translateY(-1px); }
+    .lc-modal-submit svg { width: 0.95rem; height: 0.95rem; }
+    .lc-modal-submit--center { margin: 1.5rem auto 0; }
+    .lc-modal-success-icon {
+      width: 4rem; height: 4rem;
+      margin: 0 auto 1.5rem;
+      border-radius: 9999px;
+      display: grid;
+      place-items: center;
+      background: rgba(45,200,86,0.15);
+      border: 1px solid rgba(45,200,86,0.4);
+      color: #2DC856;
+    }
+    .lc-modal-success-icon svg { width: 2rem; height: 2rem; }
+    #lc-modal-success-view { text-align: center; }
+
+    /* ════════════════════════════════════════════════════
+       OPTION E — SHOWROOM CONSOLE
+       The one light-surfaced layout. Segmented controls
+       (sliding thumb driven by a data-thumb index attribute),
+       labelled zones, full-width outcome panel. Inspired by
+       the highway-v3 "Economics" dashboard.
+       ════════════════════════════════════════════════════ */
+    .lc-option--e { background: #0d1b22; }
+
+    /* Light "showroom" card — overrides the dark .lc-card base. */
+    .lc-layout-e {
+      background: linear-gradient(180deg, #f4f7fb 0%, #eef2f7 55%, #e7edf4 100%);
+      border-color: rgba(13,27,34,0.10);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        0 44px 90px -52px rgba(0,0,0,0.65),
+        0 10px 34px -18px rgba(0,0,0,0.45);
+      color: #0d1b22;
+      overflow: hidden;
+    }
+    .lc-e-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .lc-e-bg::before,
+    .lc-e-bg::after {
+      content: "";
+      position: absolute;
+    }
+    .lc-e-bg::before {
+      top: -12%;
+      right: -6%;
+      width: 52%;
+      height: 60%;
+      background: radial-gradient(ellipse at top right, rgba(45,200,86,0.12) 0%, transparent 64%);
+    }
+    .lc-e-bg::after {
+      bottom: -14%;
+      left: -8%;
+      width: 48%;
+      height: 55%;
+      background: radial-gradient(ellipse at bottom left, rgba(26,47,58,0.07) 0%, transparent 70%);
+    }
+    .lc-e-frame {
+      position: relative;
+      z-index: 1;
+      padding: clamp(1.6rem, 3vw, 2.85rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.15rem, 2vw, 1.8rem);
+    }
+
+    /* ── Zones ── */
+    .lc-e-zones {
+      display: grid;
+      grid-template-columns: minmax(0,1.42fr) minmax(0,1fr);
+      gap: clamp(0.95rem, 1.8vw, 1.5rem);
+    }
+    .lc-e-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      min-width: 0;
+    }
+    .lc-e-zone-head {
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+    }
+    .lc-e-zone-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(13,27,34,0.55);
+    }
+    .lc-e-zone-hint {
+      font-size: 0.78rem;
+      font-weight: 500;
+      line-height: 1.35;
+      color: rgba(13,27,34,0.5);
+    }
+
+    /* ── Segmented control — shared by all three pickers ── */
+    .lc-e-seg {
+      position: relative;
+      display: grid;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(13,27,34,0.08);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 1px 2px rgba(13,27,34,0.04),
+        0 14px 30px -18px rgba(13,27,34,0.22);
+    }
+    .lc-e-seg--4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .lc-e-seg--3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+
+    .lc-e-thumb {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 5px;
+      z-index: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.35) inset,
+        0 6px 16px -6px rgba(45,200,86,0.55),
+        0 2px 4px rgba(13,27,34,0.12);
+      transition: transform 420ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease;
+      will-change: transform;
+      pointer-events: none;
+    }
+    .lc-e-seg--4 .lc-e-thumb { width: calc((100% - 22px) / 4); }
+    .lc-e-seg--3 .lc-e-thumb { width: calc((100% - 18px) / 3); }
+
+    /* Thumb position + width are written inline by the Option E
+       enhancement script — it measures the active segment and
+       sets thumb.style.{width,transform,opacity} directly, so the
+       base `transition: transform` animates the slide. (Driving
+       the thumb from a state attribute via descendant CSS rules
+       proved unreliable in this environment; measuring the live
+       layout and setting inline styles is bulletproof.) The CSS
+       width below is just the pre-script fallback. */
+
+    /* Segment buttons (scenario + utilization). */
+    .lc-e-seg-btn {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      padding: 0.52rem 0.4rem;
+      border-radius: 999px;
+      min-width: 0;
+      color: rgba(13,27,34,0.62);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-btn:hover:not(.is-active) { color: #1A2F3A; }
+    .lc-e-seg-btn.is-active { color: #ffffff; }
+    .lc-e-seg-btn:focus-visible { outline: 2px solid #2DC856; outline-offset: 3px; }
+    .lc-e-seg-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      line-height: 1.1;
+      white-space: nowrap;
+      text-transform: capitalize;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lc-e-seg-sub {
+      font-size: 0.6rem;
+      font-weight: 600;
+      line-height: 1.1;
+      white-space: nowrap;
+      color: rgba(13,27,34,0.46);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-sub [data-util-rate] { font-weight: 800; }
+    .lc-e-seg-btn.is-active .lc-e-seg-sub { color: rgba(255,255,255,0.82); }
+
+    /* Model segment items (radio-backed labels). */
+    .lc-layout-e .lc-model-option { display: block; }
+    .lc-e-seg-model-item {
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+    }
+    .lc-e-seg-model-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 0.52rem 0.4rem;
+      border-radius: 999px;
+      min-width: 0;
+      color: rgba(13,27,34,0.62);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-model-item:hover .lc-e-seg-model-card { color: #1A2F3A; }
+    .lc-e-seg-model-item input:checked ~ .lc-e-seg-model-card { color: #ffffff; }
+    .lc-e-seg-model-item input:focus-visible ~ .lc-e-seg-model-card {
+      outline: 2px solid #2DC856;
+      outline-offset: 3px;
+    }
+    .lc-layout-e .lc-model-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: inherit;
+      margin: 0;
+    }
+    .lc-e-seg-model-badge {
+      font-size: 0.575rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      color: rgba(13,27,34,0.46);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-model-item input:checked ~ .lc-e-seg-model-card .lc-e-seg-model-badge {
+      color: rgba(255,255,255,0.82);
+    }
+
+    /* ── Site inputs — light-themed overrides of the shared
+         input fields (default styling is built for dark cards). ── */
+    .lc-layout-e .lc-input-label { color: #1A2F3A; }
+    .lc-layout-e .lc-input {
+      background: #ffffff;
+      border-color: rgba(13,27,34,0.13);
+      color: #0d1b22;
+    }
+    .lc-layout-e .lc-input:focus {
+      border-color: #2DC856;
+      box-shadow: 0 0 0 3px rgba(45,200,86,0.18);
+    }
+    .lc-layout-e .lc-input-prefix { color: rgba(13,27,34,0.5); }
+    .lc-layout-e .lc-input-suffix { color: rgba(13,27,34,0.42); }
+    .lc-layout-e .lc-input-hint { color: rgba(13,27,34,0.5); }
+
+    /* ── Outcome panel ── */
+    .lc-e-outcome {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(1.4rem, 2.4vw, 2.15rem);
+      border-radius: 1.2rem;
+      background:
+        linear-gradient(180deg, rgba(45,200,86,0.07) 0%, rgba(45,200,86,0.02) 45%, #ffffff 100%),
+        #ffffff;
+      border: 1px solid rgba(45,200,86,0.30);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 30px 60px -34px rgba(45,200,86,0.30),
+        0 6px 16px -8px rgba(13,27,34,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1rem, 1.6vw, 1.45rem);
+    }
+    .lc-e-out-glow {
+      position: absolute;
+      top: -45%;
+      right: -8%;
+      width: 48%;
+      height: 130%;
+      pointer-events: none;
+      background: radial-gradient(ellipse, rgba(45,200,86,0.16) 0%, transparent 70%);
+    }
+    .lc-e-out-eyebrow {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.7rem;
+      margin: 0;
+    }
+    .lc-e-out-tag {
+      font-size: 0.56rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.72rem;
+      border-radius: 999px;
+      background: #1A2F3A;
+      color: #ffffff;
+    }
+    .lc-e-out-combo {
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      color: rgba(13,27,34,0.7);
+    }
+    .lc-e-out-main {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      align-items: center;
+      gap: clamp(0.9rem, 2vw, 1.7rem);
+    }
+    .lc-e-out-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(13,27,34,0.5);
+      margin: 0 0 0.4rem;
+    }
+    .lc-e-out-primary {
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.3rem 0.45rem;
+    }
+    .lc-e-out-figure {
+      font-size: clamp(2.35rem, 5vw, 3.55rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: #0d1b22;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-e-out-unit {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(13,27,34,0.55);
+      flex-basis: 100%;
+    }
+    .lc-e-out-arrow {
+      display: grid;
+      place-items: center;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      background: rgba(45,200,86,0.12);
+      color: #2DC856;
+      flex-shrink: 0;
+    }
+    .lc-e-out-arrow svg { width: 1.2rem; height: 0.6rem; }
+    .lc-e-out-projections {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .lc-e-out-proj {
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+    }
+    .lc-e-out-proj-num {
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: #1A2F3A;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-e-out-proj-num--accent { color: #2DC856; }
+    .lc-e-out-proj-lbl {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(13,27,34,0.45);
+    }
+    .lc-e-out-breakdown {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 1px;
+      margin: 0;
+      background: rgba(13,27,34,0.09);
+      border: 1px solid rgba(13,27,34,0.08);
+      border-radius: 0.8rem;
+      overflow: hidden;
+    }
+    .lc-e-out-breakdown > div {
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+      padding: 0.72rem 0.85rem 0.78rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+      min-width: 0;
+    }
+    .lc-e-out-breakdown dt {
+      font-size: 0.54rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(13,27,34,0.46);
+      line-height: 1.25;
+    }
+    .lc-e-out-breakdown dd {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #0d1b22;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-e-out-breakdown-accent {
+      background: linear-gradient(180deg, rgba(45,200,86,0.12) 0%, rgba(45,200,86,0.05) 100%) !important;
+    }
+    .lc-e-out-breakdown-accent dd { color: #1f9c44; }
+    .lc-e-out-bd-unit {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(13,27,34,0.5);
+    }
+    .lc-e-cta {
+      position: relative;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.85rem;
+      border: 0;
+      border-radius: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #06210f;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 14px 30px -12px rgba(45,200,86,0.6),
+        0 4px 10px -4px rgba(13,27,34,0.2);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .lc-e-cta:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 20px 40px -12px rgba(45,200,86,0.7),
+        0 6px 14px -4px rgba(13,27,34,0.25);
+    }
+    .lc-e-cta:focus-visible { outline: 2px solid #1A2F3A; outline-offset: 3px; }
+    .lc-e-cta svg {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 200ms ease;
+    }
+    .lc-e-cta:hover svg { transform: translateX(3px); }
+
+    /* Option E responsive. */
+    @media (max-width: 1100px) {
+      .lc-e-zones { grid-template-columns: 1fr; }
+      .lc-e-out-main { grid-template-columns: 1fr; text-align: center; }
+      .lc-e-out-primary { justify-content: center; }
+      .lc-e-out-arrow { transform: rotate(90deg); margin: 0 auto; }
+      .lc-e-out-projections { flex-direction: row; justify-content: center; gap: 1.6rem; }
+    }
+    @media (max-width: 720px) {
+      .lc-e-out-breakdown { grid-template-columns: repeat(2, 1fr); }
+      .lc-e-seg-name { font-size: 0.74rem; }
+      .lc-e-seg-model-badge { font-size: 0.52rem; }
+    }
+    @media (max-width: 460px) {
+      .lc-e-out-breakdown { grid-template-columns: 1fr; }
+      .lc-e-seg-sub { display: none; }
+      .lc-e-seg-btn,
+      .lc-e-seg-model-card { padding: 0.6rem 0.3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lc-e-thumb,
+      .lc-e-seg-btn,
+      .lc-e-seg-model-card,
+      .lc-e-cta,
+      .lc-e-cta svg { transition: none; }
+    }
+
+    /* ════════════════════════════════════════════════════
+       OPTION F — LIVE CONSOLE  (the synthesis)
+       Two-column shell: controls left, a sticky result panel
+       right so the number stays live while you configure.
+       Reuses E's segmented controls (re-themed dark here) and
+       adds a live, self-rewriting model description card.
+       ════════════════════════════════════════════════════ */
+    .lc-option--f { background: #112430; }
+
+    /* Shell — controls + sticky result. Dark .lc-card base is
+       inherited; no surface override needed. */
+    .lc-layout-f {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 384px;
+      align-items: start;
+    }
+    .lc-f-controls {
+      padding: clamp(1.75rem, 3vw, 2.85rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.5rem, 2.4vw, 2.1rem);
+      min-width: 0;
+    }
+    /* Sticky result panel — its own surface, floats on the card. */
+    .lc-f-result {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      margin: clamp(1.5rem, 2.4vw, 2.25rem);
+      overflow: hidden;
+      padding: clamp(1.4rem, 2vw, 1.85rem);
+      border-radius: 1.25rem;
+      background: linear-gradient(170deg, #163443 0%, #0e2531 100%);
+      border: 1px solid rgba(45,200,86,0.26);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 28px 56px -32px rgba(45,200,86,0.32),
+        0 8px 22px -12px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Zone heads. */
+    .lc-f-zones {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: clamp(0.9rem, 1.8vw, 1.4rem);
+    }
+    .lc-f-zone,
+    .lc-f-inputs,
+    .lc-f-model {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      min-width: 0;
+    }
+    .lc-f-zone-head {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .lc-f-zone-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .lc-f-zone-note {
+      font-size: 0.74rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.42);
+    }
+
+    /* Dark re-theme for the shared (E-built) segmented controls. */
+    .lc-layout-f .lc-e-seg {
+      background: rgba(255,255,255,0.045);
+      border-color: rgba(255,255,255,0.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 2px 8px -4px rgba(0,0,0,0.55);
+    }
+    .lc-layout-f .lc-e-seg-btn { color: rgba(255,255,255,0.58); }
+    .lc-layout-f .lc-e-seg-btn:hover:not(.is-active) { color: rgba(255,255,255,0.9); }
+    .lc-layout-f .lc-e-seg-sub { color: rgba(255,255,255,0.4); }
+    .lc-layout-f .lc-e-seg-model-card { color: rgba(255,255,255,0.58); }
+    .lc-layout-f .lc-e-seg-model-item:hover .lc-e-seg-model-card { color: rgba(255,255,255,0.9); }
+    .lc-layout-f .lc-e-seg-model-badge { color: rgba(255,255,255,0.4); }
+    .lc-layout-f .lc-model-label { color: inherit; }
+
+    /* Live model description card — rewrites itself per model. */
+    .lc-f-model-card {
+      margin-top: 0.15rem;
+      padding: clamp(1rem, 1.6vw, 1.35rem);
+      border-radius: 1rem;
+      background: linear-gradient(165deg, rgba(45,200,86,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(45,200,86,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: opacity 160ms ease;
+    }
+    .lc-f-model-card.is-swapping { opacity: 0; }
+    .lc-f-model-card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem 0.7rem;
+      flex-wrap: wrap;
+    }
+    .lc-f-model-card-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.012em;
+      color: #ffffff;
+    }
+    .lc-f-model-card-badge {
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(45,200,86,0.14);
+      color: #58e07f;
+      border: 1px solid rgba(45,200,86,0.3);
+      white-space: nowrap;
+    }
+    .lc-f-model-card-blurb {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.62);
+    }
+    .lc-f-model-spec {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 1px;
+      margin: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.7rem;
+      overflow: hidden;
+    }
+    .lc-f-model-spec > div {
+      background: #122a37;
+      padding: 0.62rem 0.7rem 0.66rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 0;
+    }
+    .lc-f-model-spec dt {
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      line-height: 1.2;
+    }
+    .lc-f-model-spec dd {
+      margin: 0;
+      font-size: 0.76rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #ffffff;
+      letter-spacing: -0.005em;
+    }
+
+    /* Result panel internals. */
+    .lc-f-out-glow {
+      position: absolute;
+      top: -32%;
+      right: -22%;
+      width: 72%;
+      height: 82%;
+      pointer-events: none;
+      background: radial-gradient(ellipse, rgba(45,200,86,0.2) 0%, transparent 70%);
+    }
+    .lc-f-out-eyebrow {
+      position: relative;
+      margin: 0;
+    }
+    .lc-f-out-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      font-size: 0.54rem;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(45,200,86,0.15);
+      color: #58e07f;
+      border: 1px solid rgba(45,200,86,0.32);
+    }
+    .lc-f-out-tag::before {
+      content: "";
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      background: #2DC856;
+      box-shadow: 0 0 8px #2DC856;
+      animation: lc-f-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes lc-f-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .lc-f-out-combo {
+      position: relative;
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.6);
+    }
+    .lc-f-out-figure-block {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .lc-f-out-label {
+      margin: 0;
+      font-size: 0.56rem;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+    .lc-f-out-figure {
+      margin: 0;
+      font-size: clamp(2.6rem, 4vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -0.032em;
+      line-height: 1;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-projections {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .lc-f-out-proj {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.7rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .lc-f-out-proj-num {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-proj-num--accent { color: #2DC856; }
+    .lc-f-out-proj-lbl {
+      font-size: 0.56rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+    }
+    .lc-f-out-breakdown {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      margin: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.7rem;
+      overflow: hidden;
+    }
+    .lc-f-out-breakdown > div {
+      background: rgba(255,255,255,0.025);
+      padding: 0.6rem 0.75rem 0.64rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.26rem;
+      min-width: 0;
+    }
+    .lc-f-out-breakdown dt {
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      line-height: 1.2;
+    }
+    .lc-f-out-breakdown dd {
+      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-breakdown-accent { background: linear-gradient(180deg, rgba(45,200,86,0.12) 0%, rgba(45,200,86,0.04) 100%) !important; }
+    .lc-f-out-breakdown-accent dd { color: #2DC856; }
+    .lc-f-out-bd-unit {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+    .lc-f-cta {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.95rem 1.4rem;
+      border: 0;
+      border-radius: 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #06210f;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 14px 30px -12px rgba(45,200,86,0.6),
+        0 4px 10px -4px rgba(0,0,0,0.35);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .lc-f-cta:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 20px 40px -12px rgba(45,200,86,0.72),
+        0 6px 14px -4px rgba(0,0,0,0.4);
+    }
+    .lc-f-cta:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+    .lc-f-cta svg {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 200ms ease;
+    }
+    .lc-f-cta:hover svg { transform: translateX(3px); }
+
+    /* Option F responsive. */
+    @media (max-width: 1100px) {
+      .lc-layout-f { grid-template-columns: 1fr; }
+      .lc-f-result {
+        position: static;
+        margin-top: 0;
+        border-top: 1px solid rgba(45,200,86,0.22);
+      }
+    }
+    @media (max-width: 720px) {
+      .lc-f-zones { grid-template-columns: 1fr; }
+      .lc-f-model-spec { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 460px) {
+      .lc-layout-f .lc-e-seg-sub { display: none; }
+      .lc-f-out-projections,
+      .lc-f-out-breakdown { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lc-f-model-card,
+      .lc-f-cta,
+      .lc-f-cta svg { transition: none; }
+      .lc-f-out-tag::before { animation: none; }
+    }
+
+    /* ════════════════════════════════════════════════════
+       RESPONSIVE
+       ════════════════════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      .lc-layout-b { grid-template-columns: 1fr; }
+      .lc-b-result { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+      .lc-layout-c {
+        grid-template-columns: 1fr;
+      }
+      .lc-c-connector {
+        width: 100%;
+        height: 2.75rem;
+        transform: rotate(90deg);
+      }
+      .lc-c-stage--result { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+      .lc-d-controls { grid-template-columns: 1fr; }
+      .lc-layout-d .lc-result--band { grid-template-columns: 1fr; }
+      .lc-layout-d .lc-result--band .lc-result-eyebrow,
+      .lc-layout-d .lc-result--band .lc-result-monthly,
+      .lc-layout-d .lc-result--band .lc-result-caption,
+      .lc-layout-d .lc-result--band .lc-result-secondary,
+      .lc-layout-d .lc-result--band .lc-cta {
+        grid-column: 1;
+      }
+      .lc-layout-d .lc-result--band .lc-result-secondary {
+        grid-row: auto;
+        flex-direction: row;
+        padding-left: 0;
+        border-left: none;
+        margin-top: 1.2rem;
+      }
+      .lc-layout-d .lc-result--band .lc-cta { align-self: stretch; width: 100%; margin-top: 1.5rem; }
+      .lc-layout-d .lc-result--band .lc-breakdown { grid-template-columns: repeat(2, 1fr); gap: 1rem 0; }
+    }
+    @media (max-width: 720px) {
+      .lc-input-row,
+      .lc-input-row--2col { grid-template-columns: repeat(2, 1fr); }
+      .lc-model-grid,
+      .lc-model-grid--2col { grid-template-columns: repeat(2, 1fr); }
+      .lc-a-result { padding: 2.5rem 1.5rem 2rem; }
+      .lc-a-controls { padding: 2rem 1.5rem 2.25rem; }
+      .lc-b-controls { padding: 2rem 1.5rem; }
+      .lc-b-result { padding: 2.25rem 1.5rem; }
+      .lc-d-band { padding: 2rem 1.5rem; }
+      .lc-option { padding: 4rem 1.25rem; }
+      .lc-option-header { gap: 0.9rem; }
+      .lc-layout-d .lc-result--band .lc-breakdown { grid-template-columns: 1fr; }
+      .lc-layout-d .lc-result--band .lc-breakdown-row {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.4rem 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+    }
+    @media (max-width: 460px) {
+      .lc-input-row,
+      .lc-input-row--2col,
+      .lc-model-grid,
+      .lc-model-grid--2col { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lc-modal-backdrop,
+      .lc-modal-panel { animation: none; }
+      .lc-jump-link,
+      .lc-scenario-btn,
+      .lc-util-btn,
+      .lc-model-card,
+      .lc-cta { transition: none; }
+    }
+
+    /* ════════════════════════════════════════════════════
+       OPTION O — ORIGINAL  (preserved /profits build)
+       Verbatim port of the calculator styles currently live
+       on /testing/profits — the two-pill scenario picker and
+       its model-card states. .profits-calc-* names are unique
+       to this page; the generic .model-* states are scoped
+       under .lc-layout-o. Model active states are pure-CSS
+       here (the /profits page used a syncModelCards() JS
+       helper; the shared initCalculator engine doesn't).
+       ════════════════════════════════════════════════════ */
+    .lc-option--o { background: #0d1b22; }
+    .lc-layout-o { position: relative; }
+
+    .profits-calc-picker { position: relative; }
+    .profits-calc-picker-line {
+      display: flex;
+      flex-direction: column;
+      gap: 1.65rem;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .profits-calc-picker-line {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1.5rem;
+      }
+    }
+    .profits-calc-picker-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .profits-calc-picker-zone--custom { align-items: flex-start; }
+      .profits-calc-picker-zone--util   { align-items: flex-end; }
+    }
+    .profits-calc-picker-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(45, 200, 86, 0.72);
+      margin: 0 0 0.85rem;
+      text-align: center;
+    }
+    @media (min-width: 1024px) {
+      .profits-calc-picker-zone--custom .profits-calc-picker-label { text-align: left; }
+      .profits-calc-picker-zone--util   .profits-calc-picker-label { text-align: right; }
+    }
+    .profits-calc-picker-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+
+    /* Scenario pill (Property Type) — icon + label + type tag */
+    .profits-calc-scenario-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1.15rem 0.7rem 0.85rem;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.015) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      cursor: pointer;
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 220ms ease,
+        background 220ms ease,
+        color 220ms ease,
+        box-shadow 220ms ease;
+    }
+    .profits-calc-scenario-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45, 200, 86, 0.42);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45, 200, 86, 0.10) 0%, rgba(45, 200, 86, 0.03) 100%);
+    }
+    .profits-calc-scenario-btn.is-active {
+      border-color: rgba(45, 200, 86, 0.75);
+      background: linear-gradient(165deg, rgba(45, 200, 86, 0.18) 0%, rgba(45, 200, 86, 0.06) 100%);
+      color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 0 22px -4px rgba(45, 200, 86, 0.45),
+        0 6px 14px -6px rgba(45, 200, 86, 0.30);
+    }
+    .profits-calc-scenario-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(155deg, rgba(45, 200, 86, 0.20) 0%, rgba(45, 200, 86, 0.05) 100%);
+      border: 1px solid rgba(45, 200, 86, 0.30);
+      color: #2DC856;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: background 220ms ease, border-color 220ms ease;
+    }
+    .profits-calc-scenario-icon svg { width: 16px; height: 16px; }
+    .profits-calc-scenario-btn.is-active .profits-calc-scenario-icon {
+      background: linear-gradient(155deg, rgba(45, 200, 86, 0.34) 0%, rgba(45, 200, 86, 0.12) 100%);
+      border-color: rgba(45, 200, 86, 0.55);
+    }
+    .profits-calc-scenario-type {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: rgba(45, 200, 86, 0.65);
+      padding: 0.18rem 0.4rem;
+      border-radius: 5px;
+      background: rgba(45, 200, 86, 0.08);
+      border: 1px solid rgba(45, 200, 86, 0.18);
+    }
+    .profits-calc-scenario-btn.is-active .profits-calc-scenario-type {
+      color: rgba(45, 200, 86, 0.95);
+      background: rgba(45, 200, 86, 0.15);
+      border-color: rgba(45, 200, 86, 0.35);
+    }
+
+    /* Utilization pill (Low / Medium / High) */
+    .profits-calc-util-btn {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.1rem;
+      padding: 0.6rem 1.1rem 0.7rem;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.015) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: inherit;
+      cursor: pointer;
+      min-width: 130px;
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 220ms ease,
+        background 220ms ease,
+        color 220ms ease,
+        box-shadow 220ms ease;
+    }
+    .profits-calc-util-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45, 200, 86, 0.42);
+      color: #ffffff;
+      background: linear-gradient(165deg, rgba(45, 200, 86, 0.08) 0%, rgba(45, 200, 86, 0.02) 100%);
+    }
+    .profits-calc-util-btn.is-active {
+      border-color: rgba(45, 200, 86, 0.75);
+      background: linear-gradient(165deg, rgba(45, 200, 86, 0.18) 0%, rgba(45, 200, 86, 0.06) 100%);
+      color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 0 22px -4px rgba(45, 200, 86, 0.45),
+        0 6px 14px -6px rgba(45, 200, 86, 0.30);
+    }
+    .profits-calc-util-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .profits-calc-util-rate {
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      color: #2DC856;
+      line-height: 1.1;
+      margin-top: 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .profits-calc-util-btn.is-active .profits-calc-util-rate { color: #ffffff; }
+    .profits-calc-util-mini {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.4);
+      line-height: 1;
+    }
+
+    /* Model cards — pure-CSS active states (scoped to Option O). */
+    .lc-layout-o .model-card {
+      transition: border-color 240ms ease, background 240ms ease;
+    }
+    .lc-layout-o .model-option:hover .model-card { border-color: rgba(255, 255, 255, 0.3); }
+    .lc-layout-o .model-option input:checked ~ .model-card {
+      border-color: #2DC856;
+      background: rgba(45, 200, 86, 0.06);
+    }
+    .lc-layout-o .model-option input:focus-visible ~ .model-card {
+      outline: 2px solid #2DC856;
+      outline-offset: 2px;
+    }
+    .lc-layout-o .model-dot { transition: border-color 240ms ease, background 240ms ease; }
+    .lc-layout-o .model-option input:checked ~ .model-card .model-dot {
+      border-color: #2DC856;
+      background: #2DC856;
+    }
+    .lc-layout-o .model-option input:checked ~ .model-card .dot-inner { opacity: 1; }
+    .lc-layout-o .model-card .model-badge {
+      transition: background 240ms ease, border-color 240ms ease, color 240ms ease;
+    }
+    .lc-layout-o .model-option input:checked ~ .model-card .model-badge {
+      background: rgba(45, 200, 86, 0.20);
+      border-color: rgba(45, 200, 86, 0.45);
+      color: #ffffff;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .profits-calc-scenario-btn,
+      .profits-calc-util-btn,
+      .lc-layout-o .model-card,
+      .lc-layout-o .model-dot { transition: none; }
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════
+       SCRIPT — reusable calculator engine + shared modal
+  ═══════════════════════════════════════════════ -->
+  <script>
+    type CalcInstance = {
+      root: HTMLElement;
+      getRecap: () => {
+        sessions: string; ports: string; kwh: string; price: string;
+        model: string; monthly: string;
+      };
+    };
+
+    const fmtUSD = (n: number) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+        .format(Math.max(0, Math.round(n)));
+    const fmtNum = (n: number) =>
+      new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.max(0, Math.round(n)));
+
+    const calcInstances = new Map<HTMLElement, CalcInstance>();
+
+    /* ─── Reusable per-root calculator engine ─── */
+    function initCalculator(root: HTMLElement): CalcInstance | null {
+      const q  = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s);
+      const qa = <T extends HTMLElement = HTMLElement>(s: string) => Array.from(root.querySelectorAll<T>(s));
+
+      const sessionsEl = q<HTMLInputElement>('[data-input="sessions"]');
+      const portsEl    = q<HTMLInputElement>('[data-input="ports"]');
+      const kwhEl      = q<HTMLInputElement>('[data-input="kwh"]');
+      const priceEl    = q<HTMLInputElement>('[data-input="price"]');
+      if (!sessionsEl || !portsEl || !kwhEl || !priceEl) return null;
+
+      const scenarioBtns    = qa<HTMLButtonElement>('[data-scenario]');
+      const utilizationBtns = qa<HTMLButtonElement>('[data-utilization]');
+      const customBtn       = q<HTMLButtonElement>('[data-scenario="custom"]');
+      const modelInputs     = qa<HTMLInputElement>('input[name^="model-"]');
+
+      const out = {
+        monthly:  q('[data-out="monthly"]'),
+        yearly:   q('[data-out="yearly"]'),
+        fiveyr:   q('[data-out="fiveyr"]'),
+        gross:    q('[data-out="gross"]'),
+        sessions: q('[data-out="sessions"]'),
+        energy:   q('[data-out="energy"]'),
+        share:    q('[data-out="share"]'),
+        caption:  q('[data-out="caption"]'),
+      };
+
+      let activeScenario: HTMLButtonElement | null = null;
+      let activeUtilization: 'low' | 'medium' | 'high' | null = null;
+
+      const numFmt = (n: number) => {
+        const r = Math.round(n * 10) / 10;
+        return `~${r % 1 === 0 ? r.toFixed(0) : r.toFixed(1)}`;
+      };
+
+      function computeShare(): number {
+        const checked = root.querySelector<HTMLInputElement>('input[name^="model-"]:checked');
+        return checked ? parseFloat(checked.value) : 0.10;
+      }
+
+      function calc() {
+        const s  = Math.max(0, parseFloat(sessionsEl!.value) || 0);
+        const p  = Math.max(0, parseFloat(portsEl!.value)    || 0);
+        const k  = Math.max(0, parseFloat(kwhEl!.value)      || 0);
+        const pr = Math.max(0, parseFloat(priceEl!.value)    || 0);
+        const sessionsPerMonth = s * p * 30;
+        const energyPerMonth   = sessionsPerMonth * k;
+        const grossMonthly     = energyPerMonth * pr;
+        const share   = computeShare();
+        const monthly = grossMonthly * share;
+        return {
+          gross: grossMonthly, monthly, yearly: monthly * 12, fiveYr: monthly * 60,
+          sessions: sessionsPerMonth, energy: energyPerMonth, share,
+        };
+      }
+
+      function captionText(): string {
+        let scenario = 'Custom inputs';
+        if (activeScenario && activeScenario.dataset.scenario !== 'custom') {
+          const label = activeScenario.querySelector('.lc-scenario-label')?.textContent ?? '';
+          const type  = activeScenario.dataset.type ?? '';
+          scenario = `${label} ${type}`.trim();
+        }
+        const util = activeUtilization
+          ? activeUtilization[0].toUpperCase() + activeUtilization.slice(1) + ' utilization'
+          : 'Custom utilization';
+        const checked = root.querySelector<HTMLInputElement>('input[name^="model-"]:checked');
+        const modelLabel = checked
+          ? checked.closest('.lc-model-option')?.querySelector('.lc-model-label')?.textContent ?? ''
+          : '';
+        return `${scenario} · ${util} · ${modelLabel}`;
+      }
+
+      function render() {
+        const r = calc();
+        if (out.monthly)  out.monthly.textContent  = fmtUSD(r.monthly);
+        if (out.yearly)   out.yearly.textContent   = fmtUSD(r.yearly);
+        if (out.fiveyr)   out.fiveyr.textContent   = fmtUSD(r.fiveYr);
+        if (out.gross)    out.gross.textContent    = fmtUSD(r.gross);
+        if (out.sessions) out.sessions.textContent = fmtNum(r.sessions);
+        if (out.energy)   out.energy.textContent   = fmtNum(r.energy);
+        if (out.share)    out.share.textContent    = `${Math.round(r.share * 100)}%`;
+        if (out.caption)  out.caption.textContent  = captionText();
+      }
+
+      function setActiveScenario(btn: HTMLButtonElement | null) {
+        activeScenario = btn;
+        scenarioBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+      }
+      function setActiveUtilization(level: 'low' | 'medium' | 'high' | null) {
+        activeUtilization = level;
+        utilizationBtns.forEach(b => b.classList.toggle('is-active', b.dataset.utilization === level));
+      }
+      function refreshUtilLabels() {
+        utilizationBtns.forEach(btn => {
+          const level = btn.dataset.utilization as 'low' | 'medium' | 'high';
+          const rateEl = btn.querySelector<HTMLElement>('[data-util-rate]');
+          if (!rateEl) return;
+          const key = `util${level[0].toUpperCase()}${level.slice(1)}`;
+          const rateAttr = activeScenario?.dataset[key];
+          rateEl.textContent = rateAttr !== undefined ? numFmt(parseFloat(rateAttr)) : '—';
+        });
+      }
+      function applyUtilization(level: 'low' | 'medium' | 'high') {
+        setActiveUtilization(level);
+        if (activeScenario && activeScenario.dataset.scenario !== 'custom') {
+          const key = `util${level[0].toUpperCase()}${level.slice(1)}`;
+          const rate = parseFloat(activeScenario.dataset[key] || '0');
+          sessionsEl!.value = String(rate);
+        }
+        render();
+      }
+      function applyScenario(btn: HTMLButtonElement) {
+        setActiveScenario(btn);
+        if (btn.dataset.scenario !== 'custom') {
+          portsEl!.value = btn.dataset.ports ?? portsEl!.value;
+          kwhEl!.value   = btn.dataset.kwh   ?? kwhEl!.value;
+          priceEl!.value = btn.dataset.price ?? priceEl!.value;
+          refreshUtilLabels();
+          applyUtilization('medium');
+        } else {
+          setActiveUtilization(null);
+          refreshUtilLabels();
+          render();
+        }
+      }
+
+      scenarioBtns.forEach(btn => btn.addEventListener('click', () => applyScenario(btn)));
+      utilizationBtns.forEach(btn => btn.addEventListener('click', () =>
+        applyUtilization(btn.dataset.utilization as 'low' | 'medium' | 'high')
+      ));
+      modelInputs.forEach(input => input.addEventListener('change', render));
+
+      sessionsEl.addEventListener('input', () => { setActiveUtilization(null); render(); });
+      [portsEl, kwhEl, priceEl].forEach(el => {
+        el.addEventListener('input', () => {
+          if (customBtn) setActiveScenario(customBtn);
+          else setActiveScenario(null);
+          setActiveUtilization(null);
+          refreshUtilLabels();
+          render();
+        });
+      });
+
+      // First paint: first real scenario at Medium utilization.
+      const firstReal = scenarioBtns.find(b => b.dataset.scenario !== 'custom');
+      if (firstReal) applyScenario(firstReal);
+      else render();
+
+      return {
+        root,
+        getRecap() {
+          const r = calc();
+          const checked = root.querySelector<HTMLInputElement>('input[name^="model-"]:checked');
+          const modelLabel = checked
+            ? checked.closest('.lc-model-option')?.querySelector('.lc-model-label')?.textContent ?? '—'
+            : '—';
+          const share = checked ? Math.round(parseFloat(checked.value) * 100) : 10;
+          return {
+            sessions: sessionsEl!.value || '—',
+            ports:    portsEl!.value    || '—',
+            kwh:      kwhEl!.value      || '—',
+            price:    `$${parseFloat(priceEl!.value || '0').toFixed(2)}`,
+            model:    `${modelLabel} (${share}%)`,
+            monthly:  fmtUSD(r.monthly) + ' / mo',
+          };
+        },
+      };
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-calc-root]').forEach(root => {
+      const inst = initCalculator(root);
+      if (inst) calcInstances.set(root, inst);
+    });
+
+    /* ─── Options E & F — segmented-control enhancements ───
+       Both the light Option E and the dark Option F use the
+       segmented controls. This block (1) slides each green thumb
+       by measuring the active segment and writing width +
+       translateX to inline style — the base `transition:
+       transform` animates the slide — and (2) for Option F,
+       rewrites the live model-description card when the
+       financial-model segment changes. A MutationObserver keeps
+       the thumbs correct even when state changes without a click
+       (manual input edits deselect the scenario + utilization);
+       a resize listener re-measures when a track reflows. */
+    (() => {
+      const hosts = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-option="e"], [data-option="f"]')
+      );
+      if (!hosts.length) return;
+      const segs = hosts.flatMap(h => Array.from(h.querySelectorAll<HTMLElement>('.lc-e-seg')));
+
+      const syncThumbs = () => {
+        segs.forEach(seg => {
+          const thumb = seg.querySelector<HTMLElement>('.lc-e-thumb');
+          if (!thumb) return;
+          let active: HTMLElement | null = null;
+          if (seg.classList.contains('lc-e-seg-model')) {
+            active = Array.from(seg.querySelectorAll<HTMLElement>('.lc-model-option'))
+              .find(o => o.querySelector<HTMLInputElement>('input')?.checked) || null;
+          } else {
+            active = seg.querySelector<HTMLElement>('.lc-e-seg-btn.is-active');
+          }
+          if (!active) { thumb.style.opacity = '0'; return; }
+          thumb.style.opacity = '';
+          thumb.style.width = active.offsetWidth + 'px';
+          thumb.style.transform = `translateX(${active.offsetLeft - thumb.offsetLeft}px)`;
+        });
+      };
+
+      /* Option F — the live, self-rewriting model description card.
+         Detail + spec copy lives here (it's display-only and not
+         needed server-side); grounded in the four canonical Evium
+         financial models. */
+      const F_MODEL_DETAIL: Record<string, {
+        title: string; badge: string; detail: string;
+        capital: string; operations: string; revenue: string; term: string;
+      }> = {
+        'no-cost': {
+          title: 'No-Cost', badge: '~10% revenue share',
+          detail: 'Evium funds the capital and runs the site end to end — hardware, install, software, support, and the cost of every kilowatt sold. You contribute the location; revenue is shared, weighted in your favor.',
+          capital: 'Evium', operations: 'Evium', revenue: 'Shared, host-favored', term: '5 yr + 5',
+        },
+        'investment': {
+          title: 'Client Investment', badge: '100% revenue',
+          detail: 'You finance and own the entire installation, run it, and keep every dollar it earns. Evium’s role narrows to rebate processing and incentive capture — the best fit when you have the capital and an operations team.',
+          capital: 'You', operations: 'You', revenue: '100% yours', term: 'You own it',
+        },
+        'hybrid': {
+          title: 'Hybrid', badge: 'Negotiated split',
+          detail: 'A blend of No-Cost and Client Investment — you contribute part of the capital, and your share of revenue scales up with what you put in. Tuned site by site to land where you want on the risk-vs-upside curve.',
+          capital: 'Shared', operations: 'Evium', revenue: 'Scales with capital', term: 'Negotiated',
+        },
+        'leasing': {
+          title: 'Leasing', badge: '100% revenue',
+          detail: 'Evium finances the hardware as a lease. You make a fixed monthly payment, keep all gross revenue, and hold a buy-out option at term end — payment and term sized to your site’s projected throughput.',
+          capital: 'Evium-financed', operations: 'Negotiated', revenue: 'Gross − lease', term: 'Buy-out at end',
+        },
+      };
+
+      const optionF = document.querySelector<HTMLElement>('[data-option="f"]');
+      const fCard = optionF?.querySelector<HTMLElement>('[data-model-card]') ?? null;
+      const fEls = fCard ? {
+        title:   fCard.querySelector<HTMLElement>('[data-model-title]'),
+        badge:   fCard.querySelector<HTMLElement>('[data-model-badge]'),
+        blurb:   fCard.querySelector<HTMLElement>('[data-model-blurb]'),
+        capital: fCard.querySelector<HTMLElement>('[data-spec-capital]'),
+        ops:     fCard.querySelector<HTMLElement>('[data-spec-ops]'),
+        revenue: fCard.querySelector<HTMLElement>('[data-spec-revenue]'),
+        term:    fCard.querySelector<HTMLElement>('[data-spec-term]'),
+      } : null;
+      const updateFCard = (immediate?: boolean) => {
+        if (!optionF || !fCard || !fEls) return;
+        const checked = optionF.querySelector<HTMLInputElement>('input[name="model-f"]:checked');
+        const id = checked?.dataset.modelId;
+        const d = id ? F_MODEL_DETAIL[id] : null;
+        if (!d) return;
+        const apply = () => {
+          if (fEls.title)   fEls.title.textContent   = d.title;
+          if (fEls.badge)   fEls.badge.textContent   = d.badge;
+          if (fEls.blurb)   fEls.blurb.textContent   = d.detail;
+          if (fEls.capital) fEls.capital.textContent = d.capital;
+          if (fEls.ops)     fEls.ops.textContent     = d.operations;
+          if (fEls.revenue) fEls.revenue.textContent = d.revenue;
+          if (fEls.term)    fEls.term.textContent    = d.term;
+          fCard.classList.remove('is-swapping');
+        };
+        if (immediate) { apply(); return; }
+        fCard.classList.add('is-swapping');
+        window.setTimeout(apply, 150);
+      };
+
+      syncThumbs();
+      updateFCard(true);
+      requestAnimationFrame(syncThumbs);
+      hosts.forEach(host => {
+        new MutationObserver(syncThumbs).observe(host, {
+          subtree: true, attributes: true, attributeFilter: ['class'],
+        });
+        host.addEventListener('change', (e) => {
+          const t = e.target;
+          if (t instanceof HTMLInputElement && /^model-/.test(t.name)) {
+            syncThumbs();
+            if (t.name === 'model-f') updateFCard();
+          }
+        });
+      });
+      window.addEventListener('resize', syncThumbs);
+    })();
+
+    /* ─── Shared estimate modal ─── */
+    const modal       = document.getElementById('lc-modal')!;
+    const formView    = document.getElementById('lc-modal-form-view')!;
+    const successView = document.getElementById('lc-modal-success-view')!;
+    const form        = document.getElementById('lc-modal-form') as HTMLFormElement;
+    const submitBtn   = document.getElementById('lc-ef-submit') as HTMLButtonElement;
+    const submitLabel = document.getElementById('lc-ef-submit-label')!;
+    const errorEl     = document.getElementById('lc-ef-error')!;
+    const recap = {
+      sessions: document.getElementById('lc-recap-sessions')!,
+      ports:    document.getElementById('lc-recap-ports')!,
+      kwh:      document.getElementById('lc-recap-kwh')!,
+      price:    document.getElementById('lc-recap-price')!,
+      model:    document.getElementById('lc-recap-model')!,
+      monthly:  document.getElementById('lc-recap-monthly')!,
+    };
+    let lastFocus: HTMLElement | null = null;
+
+    function openModal(fromRoot: HTMLElement) {
+      lastFocus = document.activeElement as HTMLElement;
+      const inst = calcInstances.get(fromRoot);
+      if (inst) {
+        const r = inst.getRecap();
+        recap.sessions.textContent = r.sessions;
+        recap.ports.textContent    = r.ports;
+        recap.kwh.textContent      = r.kwh;
+        recap.price.textContent    = r.price;
+        recap.model.textContent    = r.model;
+        recap.monthly.textContent  = r.monthly;
+      }
+      formView.hidden = false;
+      successView.hidden = true;
+      errorEl.hidden = true;
+      submitBtn.disabled = false;
+      submitLabel.textContent = 'Send My Estimate Request';
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('lc-ef-name')?.focus(), 120);
+    }
+    function closeModal() {
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      lastFocus?.focus?.();
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-open-estimate]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const root = btn.closest<HTMLElement>('[data-calc-root]');
+        if (root) openModal(root);
+      });
+    });
+    document.querySelectorAll<HTMLElement>('[data-close-estimate]').forEach(el =>
+      el.addEventListener('click', closeModal)
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      const honeypot = (form.elements.namedItem('company_website') as HTMLInputElement | null)?.value;
+      if (honeypot) return;
+      const name    = (form.elements.namedItem('name')    as HTMLInputElement).value.trim();
+      const email   = (form.elements.namedItem('email')   as HTMLInputElement).value.trim();
+      const address = (form.elements.namedItem('address') as HTMLInputElement).value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!name || !emailOk || !address) {
+        errorEl.textContent = !emailOk && email
+          ? 'Please enter a valid email address.'
+          : 'Please complete name, email, and property address.';
+        errorEl.hidden = false;
+        return;
+      }
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'Sending…';
+      // No backend — simulate the round-trip (this is a layout-testing page).
+      await new Promise(r => setTimeout(r, 650));
+      formView.hidden = true;
+      successView.hidden = false;
+    });
+  </script>
+
+</Layout>

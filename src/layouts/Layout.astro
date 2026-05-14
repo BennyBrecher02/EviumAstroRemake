@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import HeaderV4 from '../components/HeaderV4.astro';
+import HeaderV5 from '../components/HeaderV5.astro';
 import DevToggle from '../components/DevToggle.astro';
 
 interface Props {
@@ -10,14 +11,17 @@ interface Props {
   /**
    * Which header variant to render. Defaults to the production
    * top-battery Header. `'v4'` swaps in the Tesla-PRNDL nav rail
-   * (the v2 sandbox pages use this). Archived variants sit in
-   * src/components/ for reference but none are imported by this
-   * Layout:
+   * (the v2 sandbox pages use this). `'v5'` is the experimental
+   * fork of v4 used by /home-v2 only — same rail, but the car-
+   * drag peek-scroll engine is being rebuilt (rAF spring follow,
+   * sticky-scene-aware multiplier, drag-fights-snap gating).
+   * Archived variants sit in src/components/ for reference but
+   * none are imported by this Layout:
    *   - HeaderV1RadialTransparency.astro  (obscuring-band header)
    *   - HeaderV2BatteryLefter.astro       (battery rail)
    *   - HeaderV3SolidLefterMenu.astro     (solid rail + mega-menu overlay)
    */
-  headerVariant?: 'default' | 'v4';
+  headerVariant?: 'default' | 'v4' | 'v5';
   /**
    * Optional extra className applied to <body>. Used by the v2
    * sandbox pages to flag which page HeaderV4 is rendering on so
@@ -42,10 +46,10 @@ const {
   bodyClass: extraBodyClass = '',
 } = Astro.props;
 
-/* Any lefter-style nav (currently only v4) adds `has-lefter-nav`
-   to the body so the global padding-left rule pushes page content
-   right by the nav's width. Other pages render unaffected. */
-const isLefter = headerVariant === 'v4';
+/* Any lefter-style nav (v4 or v5) adds `has-lefter-nav` to the
+   body so the global padding-left rule pushes page content right
+   by the nav's width. Other pages render unaffected. */
+const isLefter = headerVariant === 'v4' || headerVariant === 'v5';
 const bodyClass = [isLefter ? 'has-lefter-nav' : '', extraBodyClass].filter(Boolean).join(' ');
 ---
 
@@ -59,7 +63,11 @@ const bodyClass = [isLefter ? 'has-lefter-nav' : '', extraBodyClass].filter(Bool
     <meta name="description" content={description} />
   </head>
   <body class={bodyClass}>
-    {headerVariant === 'v4' ? <HeaderV4 /> : <Header />}
+    {headerVariant === 'v5'
+      ? <HeaderV5 />
+      : headerVariant === 'v4'
+        ? <HeaderV4 />
+        : <Header />}
     <slot />
     <DevToggle />
   </body>

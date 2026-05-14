@@ -119,9 +119,9 @@ const presets = [
                     inputmode="decimal"
                     min="0" step="0.5"
                     value="6"
-                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl px-4 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
                   />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold">/ day</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">/ day</span>
                 </div>
                 <p class="text-white/40 text-xs mt-2">Typical L2: 2–4 · DC Fast: 8–14</p>
               </div>
@@ -138,9 +138,9 @@ const presets = [
                     inputmode="numeric"
                     min="1" step="1"
                     value="4"
-                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl px-4 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
                   />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold">ports</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">ports</span>
                 </div>
                 <p class="text-white/40 text-xs mt-2">Each charger has 1–2 ports</p>
               </div>
@@ -157,9 +157,9 @@ const presets = [
                     inputmode="decimal"
                     min="0" step="1"
                     value="25"
-                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl px-4 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
+                    class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-4 pr-14 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
                   />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold">kWh</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">kWh</span>
                 </div>
                 <p class="text-white/40 text-xs mt-2">Typical L2: 15–25 · DC Fast: 30–50</p>
               </div>
@@ -170,7 +170,7 @@ const presets = [
                   Price Per kWh
                 </label>
                 <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-lg font-semibold">$</span>
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-lg font-semibold pointer-events-none">$</span>
                   <input
                     id="price"
                     type="number"
@@ -179,7 +179,7 @@ const presets = [
                     value="0.42"
                     class="calc-input w-full bg-evium-dark border border-white/10 rounded-xl pl-9 pr-16 py-3.5 text-white text-lg font-semibold focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all"
                   />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold">/ kWh</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-semibold pointer-events-none">/ kWh</span>
                 </div>
                 <p class="text-white/40 text-xs mt-2">National average for public charging: $0.30–$0.55</p>
               </div>
@@ -237,22 +237,40 @@ const presets = [
             <div class="rounded-2xl bg-evium-green/[0.07] border border-evium-green/30 p-6 mb-4 relative overflow-hidden">
               <div class="absolute inset-0 opacity-30 pointer-events-none"
                    style="background: radial-gradient(circle at 80% 20%, #2DC856 0%, transparent 60%);"></div>
-              <div class="relative">
+              <div class="relative min-w-0">
                 <p class="text-evium-green text-xs font-bold tracking-widest uppercase mb-2">Your Monthly Share</p>
-                <p id="result-monthly" class="text-5xl lg:text-6xl font-black text-white leading-none mb-1">$0</p>
+                {/* Result number: font-size scales fluidly with the
+                    container so a $4,536 default and a $67M edge-case
+                    both fit cleanly. tabular-nums keeps the digits
+                    column-aligned; whitespace-nowrap + min-w-0 + the
+                    parent's overflow-hidden keeps any overflow clipped
+                    to the card instead of spilling onto the CTA below. */}
+                <p
+                  id="result-monthly"
+                  class="font-black text-white leading-none mb-1 tabular-nums whitespace-nowrap"
+                  style="font-size: clamp(2rem, 4.6vw, 3.5rem);"
+                >$0</p>
                 <p class="text-white/40 text-xs mt-2">Based on a 30-day month</p>
               </div>
             </div>
 
             <!-- Secondary results -->
             <div class="grid grid-cols-2 gap-3 mb-6">
-              <div class="rounded-xl bg-evium-dark border border-white/10 p-4">
+              <div class="rounded-xl bg-evium-dark border border-white/10 p-4 min-w-0 overflow-hidden">
                 <p class="text-white/40 text-xs font-semibold uppercase tracking-wider mb-1">Per Year</p>
-                <p id="result-yearly" class="text-2xl font-black text-white">$0</p>
+                <p
+                  id="result-yearly"
+                  class="font-black text-white tabular-nums whitespace-nowrap"
+                  style="font-size: clamp(1.1rem, 1.6vw, 1.5rem);"
+                >$0</p>
               </div>
-              <div class="rounded-xl bg-evium-dark border border-white/10 p-4">
+              <div class="rounded-xl bg-evium-dark border border-white/10 p-4 min-w-0 overflow-hidden">
                 <p class="text-white/40 text-xs font-semibold uppercase tracking-wider mb-1">5-Year Total</p>
-                <p id="result-5yr" class="text-2xl font-black text-evium-green">$0</p>
+                <p
+                  id="result-5yr"
+                  class="font-black text-evium-green tabular-nums whitespace-nowrap"
+                  style="font-size: clamp(1.1rem, 1.6vw, 1.5rem);"
+                >$0</p>
               </div>
             </div>
 

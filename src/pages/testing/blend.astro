@@ -1,0 +1,167 @@
+---
+/**
+ * /testing/blend
+ * ──────────────
+ * Isolated color-blend lab. Two viewport-tall sections so we
+ * can diagnose and tune the polygon → shell-cream blend
+ * outside the noise of the actual /services hero composition.
+ *
+ *   Section 1  — HARD SPLIT
+ *   ───────────────────────
+ *   Top half = #eceae3 (polygon Shade A, the "top color"
+ *   from the user's reference screenshot). Bottom half =
+ *   #faf8f2 (shell Shade B cream). One hard horizontal line
+ *   at the 50% mark. This is the "before" — exactly what the
+ *   user keeps reporting they see on the live site.
+ *
+ *   Section 2  — SEAMLESS GRADIENT
+ *   ───────────────────────────────
+ *   Same two colors, but with a wide gradient transition
+ *   zone in the middle of the viewport. Top stays solid
+ *   #eceae3 ("don't change the top color" — explicit
+ *   constraint from the user). Bottom #faf8f2 fades UP into
+ *   the top color over a tall transition zone (40vh).
+ *
+ *   The gradient uses CSS `linear-gradient(... in oklch ...)`
+ *   so the interpolation is perceptually uniform — even
+ *   though sRGB linear is mathematically continuous, OKLCH
+ *   produces a gradient with no visible "midpoint band"
+ *   that the eye picks up on warm-to-warm transitions.
+ *
+ *   Additional micro-stops at 25/50/75% of the gradient zone
+ *   add explicit hand-picked intermediate colors that bridge
+ *   the warm-gray → cream temperature shift smoothly, so the
+ *   gradient holds up even on displays that don't render
+ *   OKLCH (and falls back to sRGB interpolation with the
+ *   intermediates as anchors).
+ */
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blend Test — #eceae3 → #faf8f2</title>
+    <style is:global>
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: #000; }
+    </style>
+    <style>
+
+      .stage {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* ─── Section 1: HARD SPLIT (the "before") ──────────── */
+
+      .hard-split {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hard-split .top,
+      .hard-split .bottom {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.32);
+      }
+
+      .hard-split .top    { background: #eceae3; }
+      .hard-split .bottom { background: #faf8f2; }
+
+      /* ─── Section 2: SEAMLESS GRADIENT (the "after") ────── */
+
+      .gradient-blend {
+        display: grid;
+        grid-template-rows: 1fr auto 1fr;
+      }
+
+      .gradient-blend .top-block {
+        background: #eceae3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.32);
+      }
+
+      .gradient-blend .bottom-block {
+        background: #faf8f2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.32);
+      }
+
+      /* The gradient transition strip — 40vh tall, smoothly
+         fading bottom color UP into the top color. */
+      .gradient-blend .gradient-strip {
+        height: 40vh;
+        background: linear-gradient(
+          180deg in oklch,
+          #eceae3 0%,
+          #eeebe5 25%,
+          #f1eee8 50%,
+          #f5f2ec 75%,
+          #faf8f2 100%
+        );
+      }
+
+      .badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.55);
+        background: rgba(255, 255, 255, 0.7);
+        padding: 0.4rem 0.7rem;
+        border-radius: 999px;
+        backdrop-filter: blur(4px);
+      }
+
+      .swatch-label {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Section 1: hard split (the "before") -->
+    <section class="stage hard-split">
+      <span class="badge">Section 1 — Hard split</span>
+      <div class="top">
+        <span class="swatch-label">Top color: #eceae3</span>
+      </div>
+      <div class="bottom">
+        <span class="swatch-label">Bottom color: #faf8f2</span>
+      </div>
+    </section>
+
+    <!-- Section 2: seamless gradient (the "after") -->
+    <section class="stage gradient-blend">
+      <span class="badge">Section 2 — Gradient blend</span>
+      <div class="top-block">
+        <span class="swatch-label">Solid #eceae3 (unchanged)</span>
+      </div>
+      <div class="gradient-strip"></div>
+      <div class="bottom-block">
+        <span class="swatch-label">Solid #faf8f2</span>
+      </div>
+    </section>
+  </body>
+</html>

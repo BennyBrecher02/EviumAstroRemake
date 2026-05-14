@@ -1,0 +1,2950 @@
+---
+/**
+ * /testing/profits — MERGED candidate combining the full content of
+ * /solutions/profit-calculator and /solutions/generate-profits into a
+ * single best-of-both-worlds page. Lives under /testing/ for review
+ * before promoting to a canonical URL (e.g. /solutions/generate-profits).
+ *
+ * Section order (visitor journey: hook → tool → math → scenarios →
+ * models → benefits → rebates → social proof → CTA):
+ *
+ *   1. HERO                    (from generate-profits — "Your parking lot
+ *                               is already an asset" + 4-stat strip)
+ *   2. CALCULATOR (#calculator)(from profit-calculator — preset chips,
+ *                               live inputs, 2-model toggle, results)
+ *   3. REVENUE OPPORTUNITY     (from generate-profits — 3 list cards)
+ *   4. REVENUE FORMULA         (from generate-profits — U × P × V visual)
+ *   5. PROJECTION RANGES       (from generate-profits — Low/Med/High)
+ *   6. FINANCIAL MODELS        (from generate-profits — 4 model cards)
+ *   7. BEYOND CHARGING REVENUE (merged — calc page's "Grid Monetization /
+ *                               Carbon / Revenue Optimization" + calc
+ *                               page's "Tenant / Property Value /
+ *                               Rebates / Adoption Curve")
+ *   8. REBATES & INCENTIVES    (from generate-profits — NEVI / CEC /
+ *                               State & Utility)
+ *   9. WHY ZERO-COST PAYS      (from generate-profits — "10% beats 100%")
+ *   10. OWNER PORTAL           (from generate-profits — 4 mini cards)
+ *   11. SOCIAL PROOF           (from generate-profits — 2 testimonials +
+ *                               portfolio stat card)
+ *   12. FAQ                    (from generate-profits — 6 expandable items)
+ *   13. FINAL CTA              (merged — single CTA opening the estimate
+ *                               modal that lives at the page root)
+ *   14. ESTIMATE MODAL         (from profit-calculator — pre-fills with
+ *                               the live calc state when opened)
+ *
+ * The calculator script + estimate modal logic at the bottom of the file
+ * is copied verbatim from /solutions/profit-calculator so the interactive
+ * widget behaves identically here.
+ */
+import Layout from '../../layouts/Layout.astro';
+
+/**
+ * Scenario presets (Property Type pills, row 1).
+ *
+ * NOTE on data sourcing: these per-scenario session-rate values
+ * (low/medium/high utilization, kWh per session, $/kWh) are
+ * NOT directly sourced from any internal Evium document. They're
+ * industry-rough estimates that whoever built the original
+ * calculator picked. Should be confirmed with David before
+ * shipping out of /testing/. The L/M/H benchmark band sourced
+ * from the NEVI proposal data ($900 / $1,500 / $2,100 per
+ * single 180kW DCFC) IS preserved as the DCFC-Highway scenario's
+ * three utilization rates.
+ *
+ * Commercial + Retail commented out per spec; can be re-enabled
+ * once their numbers are sourced.
+ */
+const presets = [
+  {
+    id: 'l2-residential',
+    label: 'Multifamily',
+    type: 'L2',
+    ports: 4,
+    utilization: { low: 1,   medium: 2.5, high: 4 },
+    kwh: 18,
+    price: 0.32,
+  },
+  /* COMMENTED OUT — re-enable when sourced
+  {
+    id: 'l2-commercial',
+    label: 'Commercial',
+    type: 'L2',
+    ports: 6,
+    utilization: { low: 1.5, medium: 3,   high: 5 },
+    kwh: 22,
+    price: 0.38,
+  },
+  {
+    id: 'dcfc-retail',
+    label: 'Retail',
+    type: 'DCFC',
+    ports: 2,
+    utilization: { low: 4,   medium: 8,   high: 12 },
+    kwh: 35,
+    price: 0.49,
+  },
+  */
+  {
+    id: 'dcfc-highway',
+    label: 'Highway',
+    type: 'DCFC',
+    ports: 4,
+    utilization: { low: 6,   medium: 12,  high: 18 },
+    kwh: 45,
+    price: 0.55,
+  },
+  {
+    id: 'l2-fleets',
+    label: 'Fleets',
+    type: 'L2',
+    ports: 8,
+    utilization: { low: 1,   medium: 1.5, high: 2 },
+    kwh: 60,
+    price: 0.35,
+  },
+];
+
+/**
+ * Financial model presets (Step 3 in the calculator).
+ * The "share" is the property owner's portion of gross
+ * charging revenue under each model. Per
+ * project_evium_business_model.md, the No-Cost model is
+ * ~10% to the host / ~90% to Evium — fixing the prior
+ * incorrect 0.60 default that this page used to ship with.
+ */
+const models = [
+  {
+    id: 'no-cost',
+    label: 'No-Cost',
+    share: 0.10,
+    badge: '~10%',
+    blurb: '$0 capital. Evium handles everything.',
+  },
+  {
+    id: 'investment',
+    label: 'Client Investment',
+    share: 1.00,
+    badge: '100%',
+    blurb: 'You own equipment. Keep all revenue.',
+  },
+  {
+    id: 'hybrid',
+    label: 'Hybrid',
+    share: 0.50,
+    badge: 'Negotiated',
+    blurb: 'Shared capital. Split negotiated.',
+  },
+  {
+    id: 'leasing',
+    label: 'Leasing',
+    share: 1.00,
+    badge: '100%',
+    blurb: 'Lease hardware. Keep revenue, pay fee.',
+  },
+];
+---
+
+<Layout
+  title="Profits — Evium Charging"
+  description="Estimate revenue, compare financial models, and see how Evium's no-cost EV charging program turns parking into a passive revenue stream — with a live calculator and projections grounded in real deployment data."
+>
+
+  <!-- ═══════════════════════════════════════════════
+       1) HERO — single-section composition. Vertical flow:
+       H1 → tight subhead → CTA row → generous breath →
+       3-card evidence band as the closer. No pill eyebrow,
+       no stat-strip; credibility lives inside the prose
+       (the bike-rack analogy + "every rebate handled" +
+       "no capital, no operations"). The 3 cards from the
+       old Opportunity section are demoted visually so the
+       H1 stays the loudest element on the page.
+       Background is a layered stack: grid, primary green
+       glow behind the H1, a second smaller accent glow
+       bottom-right, and a bottom fade that hands off to
+       the calculator section seamlessly.
+  ═══════════════════════════════════════════════ -->
+  <section class="profits-hero relative min-h-screen flex items-center overflow-hidden bg-evium-dark pt-20">
+    <!-- Layered background — order matters (bottom → top) -->
+    <!-- 1. Subtle grid -->
+    <div
+      class="absolute inset-0 opacity-[0.045] pointer-events-none"
+      style="background-image: linear-gradient(#2DC856 1px, transparent 1px), linear-gradient(90deg, #2DC856 1px, transparent 1px); background-size: 64px 64px;"
+      aria-hidden="true"
+    ></div>
+    <!-- 2. Primary green radial glow, positioned behind the H1's accent line -->
+    <div
+      class="profits-hero-glow-primary absolute pointer-events-none"
+      aria-hidden="true"
+    ></div>
+    <!-- 3. Secondary accent glow, top-right (where the ribbon used to live —
+            fills that corner so the visual weight stays balanced now that
+            the ribbon's gone). -->
+    <div
+      class="profits-hero-glow-secondary absolute pointer-events-none"
+      aria-hidden="true"
+    ></div>
+    <!-- 4. Bottom-right ambient accent -->
+    <div
+      class="absolute bottom-0 right-0 w-[560px] h-[400px] rounded-full opacity-[0.06] pointer-events-none translate-x-1/4 translate-y-1/4"
+      style="background: radial-gradient(ellipse at center, #2DC856 0%, transparent 70%);"
+      aria-hidden="true"
+    ></div>
+    <!-- 5. Top-edge subtle white wash (lit-from-above) -->
+    <div
+      class="absolute top-0 inset-x-0 h-48 opacity-[0.025] pointer-events-none"
+      style="background: linear-gradient(180deg, rgba(255,255,255,1) 0%, transparent 100%);"
+      aria-hidden="true"
+    ></div>
+    <!-- 6. Bottom fade that hands off to the next section -->
+    <div
+      class="absolute bottom-0 inset-x-0 h-40 pointer-events-none"
+      style="background: linear-gradient(180deg, transparent 0%, #0d1b22 100%);"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative w-full max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+      <!-- Asymmetric grid: left col grows to fill remaining
+           space, right col is fixed 320 px. This lets the H1
+           and subhead truly stretch right instead of being
+           capped at col-span-8 of a 12-col grid (which left a
+           300 px dead band between the pitch and the testimonial). -->
+      <div class="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-10 lg:gap-14 items-center">
+
+        <!-- LEFT — pitch -->
+        <div>
+          <h1 class="profits-hero-h1 text-[2.75rem] sm:text-5xl md:text-[3.75rem] lg:text-[4.4rem] xl:text-[5.25rem] font-black leading-[0.98] tracking-[-0.024em] mb-7 lg:mb-9">
+            Your parking lot is<br />
+            <span class="profits-hero-accent">already an asset.</span><br />
+            Time it paid like one.
+          </h1>
+
+          <p class="profits-hero-sub text-lg md:text-xl lg:text-[1.32rem] text-white/65 leading-[1.55] max-w-[44rem] mb-10 lg:mb-12">
+            Unlike a bike rack, an EV charger collects real dollars every time it's used. Evium builds the opportunity for you — installation, software, maintenance, every rebate handled — at zero capital cost.
+          </p>
+
+          <div class="profits-hero-ctas flex flex-col sm:flex-row gap-4">
+            <a href="#calculator" class="profits-hero-cta-primary group">
+              <span>Try the Live Calculator</span>
+              <svg class="profits-hero-cta-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+            <a href="#revenue-projection" class="profits-hero-cta-secondary">
+              See Revenue Projections
+            </a>
+          </div>
+        </div>
+
+        <!-- RIGHT — Vin Gureeno testimonial (fixed 320 px column,
+             pinned to the right edge of the hero). -->
+        <aside class="w-full" aria-label="Customer testimonial">
+          <figure class="profits-hero-testimonial">
+            <!-- accent rail along the left edge -->
+            <span class="profits-hero-testimonial-rail" aria-hidden="true"></span>
+            <!-- decorative oversized open-quote glyph -->
+            <svg class="profits-hero-testimonial-mark" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+              <path d="M9.5 8.5C5.4 8.5 2 11.9 2 16v7.5h7.5V16H5.5c0-2.2 1.8-4 4-4V8.5zm15 0c-4.1 0-7.5 3.4-7.5 7.5v7.5H24.5V16h-4c0-2.2 1.8-4 4-4V8.5z"/>
+            </svg>
+
+            <!-- 5 stars -->
+            <div class="profits-hero-testimonial-stars" aria-label="5 out of 5 stars">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+
+            <blockquote class="profits-hero-testimonial-quote">
+              The ROI on our Evium installation exceeded projections. I didn't expect it to perform this well this quickly.
+            </blockquote>
+
+            <figcaption class="profits-hero-testimonial-attr">
+              <div class="profits-hero-testimonial-avatar" aria-hidden="true">VG</div>
+              <div>
+                <p class="profits-hero-testimonial-name">Vin Gureeno</p>
+                <p class="profits-hero-testimonial-role">Commercial Property Owner, Northeast</p>
+              </div>
+            </figcaption>
+          </figure>
+        </aside>
+
+      </div>
+    </div>
+
+    <!-- Scroll cue — sits centered at the bottom of the hero,
+         pointing visitors to the calculator below. Animated soft
+         bounce, muted color, drops out below 760 px so it never
+         eats handset vertical space. -->
+    <a href="#calculator" class="profits-hero-scroll" aria-label="Scroll to calculator">
+      <span class="profits-hero-scroll-label">Scroll</span>
+      <svg class="profits-hero-scroll-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </a>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       Hero styling — premium polish layer
+  ═══════════════════════════════════════════════ -->
+  <style>
+    /* Primary green radial glow — anchored behind the H1's
+       green word for a "lit from inside" reading. */
+    .profits-hero-glow-primary {
+      top: 18%;
+      left: 6%;
+      width: clamp(640px, 60vw, 1100px);
+      height: clamp(440px, 42vw, 760px);
+      border-radius: 9999px;
+      opacity: 0.14;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(45, 200, 86, 0.55) 0%,
+        rgba(45, 200, 86, 0.18) 35%,
+        transparent 70%
+      );
+      filter: blur(10px);
+      animation: profits-hero-glow-pulse 9s ease-in-out infinite;
+    }
+    @keyframes profits-hero-glow-pulse {
+      0%, 100% { opacity: 0.14; transform: scale(1); }
+      50%      { opacity: 0.18; transform: scale(1.04); }
+    }
+
+    /* Secondary green glow — top-right of the hero. Fills the
+       corner space where the under-construction ribbon used to
+       live, so the visual mass stays balanced now that the
+       ribbon's removed. Breathes on an offset rhythm from the
+       primary glow so they don't pulse in sync. */
+    .profits-hero-glow-secondary {
+      top: -6%;
+      right: -4%;
+      width: clamp(420px, 38vw, 700px);
+      height: clamp(320px, 30vw, 520px);
+      border-radius: 9999px;
+      opacity: 0.10;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(45, 200, 86, 0.55) 0%,
+        rgba(45, 200, 86, 0.15) 38%,
+        transparent 72%
+      );
+      filter: blur(8px);
+      animation: profits-hero-glow-pulse-alt 11s ease-in-out infinite -3.2s;
+    }
+    @keyframes profits-hero-glow-pulse-alt {
+      0%, 100% { opacity: 0.10; transform: scale(1); }
+      50%      { opacity: 0.14; transform: scale(1.05); }
+    }
+
+    /* H1 — generous tracking, micro text-shadow to lift
+       from the dark bg. White lines get a subtle warmth
+       so they don't read as flat off-white. */
+    .profits-hero-h1 {
+      color: #ffffff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    }
+    /* Accent line — brand green with soft glow underneath
+       so the focal sentence reads as the page's center of
+       gravity without needing decoration. */
+    .profits-hero-accent {
+      color: #2DC856;
+      text-shadow:
+        0 2px 30px rgba(45, 200, 86, 0.42),
+        0 0 64px rgba(45, 200, 86, 0.18);
+    }
+
+    /* Subhead — sits one notch lighter than the H1; keep
+       the line-length generous so the bike-rack sentence
+       breaks naturally at "used." rather than mid-clause. */
+    .profits-hero-sub {
+      letter-spacing: -0.005em;
+    }
+
+    /* PRIMARY CTA — green pill, weighted with multi-layer
+       shadows + inset highlight for a "tactile premium"
+       feel. Hover lifts and brightens the green halo. */
+    .profits-hero-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(180deg, #34d962 0%, #28b94e 100%);
+      color: #0a1418;
+      font-weight: 800;
+      font-size: 0.98rem;
+      letter-spacing: -0.005em;
+      border-radius: 0.75rem;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        0 1px 2px rgba(0, 0, 0, 0.20),
+        0 8px 18px -4px rgba(45, 200, 86, 0.42),
+        0 18px 40px -10px rgba(45, 200, 86, 0.45);
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms ease,
+        background 220ms ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .profits-hero-cta-primary:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, #3ce069 0%, #2cc454 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 2px 3px rgba(0, 0, 0, 0.22),
+        0 10px 22px -4px rgba(45, 200, 86, 0.55),
+        0 22px 50px -10px rgba(45, 200, 86, 0.55);
+    }
+    .profits-hero-cta-primary:active {
+      transform: translateY(0);
+    }
+    .profits-hero-cta-primary:focus-visible {
+      outline: 2px solid #2DC856;
+      outline-offset: 3px;
+    }
+    .profits-hero-cta-arrow {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .profits-hero-cta-primary:hover .profits-hero-cta-arrow {
+      transform: translateX(4px);
+    }
+
+    /* SECONDARY CTA — ghost button. Hairline border, hover
+       brightens the border and shifts text toward brand
+       green. Same height + radius as primary so the row
+       reads as a balanced pair. */
+    .profits-hero-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      color: rgba(255, 255, 255, 0.88);
+      font-weight: 700;
+      font-size: 0.98rem;
+      letter-spacing: -0.005em;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.025);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition:
+        border-color 220ms ease,
+        color 220ms ease,
+        background 220ms ease,
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .profits-hero-cta-secondary:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45, 200, 86, 0.55);
+      color: #2DC856;
+      background: rgba(45, 200, 86, 0.06);
+    }
+    .profits-hero-cta-secondary:focus-visible {
+      outline: 2px solid #2DC856;
+      outline-offset: 3px;
+    }
+
+    /* EVIDENCE BAND — 3 cards as the closing visual stop.
+       Visually demoted vs. the H1: smaller titles, muted
+       borders, tinted gradient background so they read as
+       proof footnotes rather than competing headings. */
+    .profits-hero-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      padding: 1.5rem 1.5rem 1.65rem;
+      background:
+        linear-gradient(
+          165deg,
+          rgba(26, 48, 64, 0.65) 0%,
+          rgba(13, 27, 34, 0.55) 100%
+        );
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      border-radius: 1rem;
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 6px 16px -6px rgba(0, 0, 0, 0.4);
+      transition:
+        transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 320ms ease,
+        background 320ms ease,
+        box-shadow 320ms ease;
+    }
+    .profits-hero-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(45, 200, 86, 0.32);
+      background:
+        linear-gradient(
+          165deg,
+          rgba(28, 52, 68, 0.82) 0%,
+          rgba(15, 30, 38, 0.7) 100%
+        );
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 12px 28px -8px rgba(0, 0, 0, 0.5),
+        0 0 36px -8px rgba(45, 200, 86, 0.22);
+    }
+    .profits-hero-card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: linear-gradient(
+        155deg,
+        rgba(45, 200, 86, 0.22) 0%,
+        rgba(45, 200, 86, 0.06) 100%
+      );
+      border: 1px solid rgba(45, 200, 86, 0.28);
+      color: #2DC856;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 0 18px -2px rgba(45, 200, 86, 0.25);
+      transition:
+        background 320ms ease,
+        border-color 320ms ease,
+        box-shadow 320ms ease;
+    }
+    .profits-hero-card:hover .profits-hero-card-icon {
+      background: linear-gradient(
+        155deg,
+        rgba(45, 200, 86, 0.34) 0%,
+        rgba(45, 200, 86, 0.12) 100%
+      );
+      border-color: rgba(45, 200, 86, 0.48);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 0 26px -2px rgba(45, 200, 86, 0.4);
+    }
+    .profits-hero-card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.012em;
+      line-height: 1.25;
+      color: #ffffff;
+      margin: 0 0 0.55rem;
+    }
+    .profits-hero-card-body {
+      font-size: 0.875rem;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+    /* Editorial ordinal (01 / 02 / 03) sitting in the top-right
+       of each card. Muted by default; warms toward green on
+       card hover to reinforce the sequenced reading. */
+    .profits-hero-card-ordinal {
+      position: absolute;
+      top: 1.1rem;
+      right: 1.25rem;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.22);
+      transition: color 320ms ease;
+    }
+    .profits-hero-card:hover .profits-hero-card-ordinal {
+      color: rgba(45, 200, 86, 0.55);
+    }
+
+    /* Scroll cue — bottom-centered, animated soft bounce, drops
+       out under 760 px so it doesn't crowd handset layout.
+       Subtle enough to feel like a wayfinding hint, not a
+       carnival pointer. */
+    .profits-hero-scroll {
+      position: absolute;
+      bottom: 1.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 240ms ease;
+      z-index: 4;
+    }
+    .profits-hero-scroll:hover {
+      color: rgba(45, 200, 86, 0.85);
+    }
+    .profits-hero-scroll-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+    }
+    .profits-hero-scroll-arrow {
+      width: 1rem;
+      height: 1rem;
+      animation: profits-hero-scroll-bounce 2.4s ease-in-out infinite;
+    }
+    @keyframes profits-hero-scroll-bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.7; }
+      50%      { transform: translateY(4px); opacity: 1; }
+    }
+    @media (max-width: 760px) {
+      .profits-hero-scroll { display: none; }
+    }
+
+    /* ─── Vin Gureeno testimonial — right-side hero anchor ───
+       Premium pulled-quote card. Glass surface, brand-green
+       accent rail on the left edge, oversized decorative quote
+       glyph in the top-right corner, identity row with monogram
+       avatar at the bottom. Sized to feel weighty alongside the
+       H1 without overpowering it. */
+    .profits-hero-testimonial {
+      position: relative;
+      padding: 1.75rem 1.65rem 1.5rem 1.85rem;
+      background:
+        linear-gradient(
+          155deg,
+          rgba(26, 48, 64, 0.78) 0%,
+          rgba(13, 27, 34, 0.62) 55%,
+          rgba(13, 27, 34, 0.55) 100%
+        );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.15rem;
+      backdrop-filter: blur(14px) saturate(125%);
+      -webkit-backdrop-filter: blur(14px) saturate(125%);
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 32px -8px rgba(0, 0, 0, 0.55),
+        0 0 50px -12px rgba(45, 200, 86, 0.18);
+      margin: 0;
+    }
+    /* Vertical brand-green rail on the left edge — gives the
+       card a focal anchor and ties it to the green H1 accent. */
+    .profits-hero-testimonial-rail {
+      position: absolute;
+      top: 2rem;
+      bottom: 2rem;
+      left: 0;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: linear-gradient(
+        180deg,
+        rgba(45, 200, 86, 0) 0%,
+        rgba(45, 200, 86, 0.85) 25%,
+        rgba(45, 200, 86, 0.85) 75%,
+        rgba(45, 200, 86, 0) 100%
+      );
+      box-shadow: 0 0 14px rgba(45, 200, 86, 0.4);
+    }
+    /* Oversized open-quote glyph — sits in the top-right
+       corner of the card, very low opacity so it reads as a
+       decorative watermark, not a primary element. */
+    .profits-hero-testimonial-mark {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+      width: 3.25rem;
+      height: 3.25rem;
+      color: rgba(45, 200, 86, 0.18);
+      pointer-events: none;
+    }
+    /* 5-star row */
+    .profits-hero-testimonial-stars {
+      display: inline-flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      color: #2DC856;
+      filter: drop-shadow(0 0 8px rgba(45, 200, 86, 0.35));
+    }
+    .profits-hero-testimonial-stars svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+    /* The quote itself — serif-adjacent weight so it reads as
+       a real human voice, generous line-height, large enough
+       to anchor the right column without dominating the H1. */
+    .profits-hero-testimonial-quote {
+      font-size: 1.02rem;
+      line-height: 1.45;
+      letter-spacing: -0.012em;
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 500;
+      margin: 0 0 1.35rem;
+      quotes: '"' '"';
+    }
+    .profits-hero-testimonial-quote::before { content: open-quote; }
+    .profits-hero-testimonial-quote::after  { content: close-quote; }
+    /* Identity row — monogram avatar + name/role. */
+    .profits-hero-testimonial-attr {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .profits-hero-testimonial-avatar {
+      flex-shrink: 0;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(
+        145deg,
+        rgba(45, 200, 86, 0.35) 0%,
+        rgba(45, 200, 86, 0.12) 100%
+      );
+      border: 1px solid rgba(45, 200, 86, 0.45);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 0 16px -2px rgba(45, 200, 86, 0.3);
+    }
+    .profits-hero-testimonial-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      color: #ffffff;
+      margin: 0;
+    }
+    .profits-hero-testimonial-role {
+      font-size: 0.74rem;
+      letter-spacing: 0.01em;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0.1rem 0 0;
+    }
+
+    /* Mobile: testimonial card stacks below the pitch with
+       generous top margin so it doesn't crowd the CTA row. */
+    @media (max-width: 1023px) {
+      .profits-hero-testimonial {
+        margin-top: 2.5rem;
+      }
+    }
+
+    /* Staggered fade-up entrance on first paint. The four
+       elements (H1, sub, CTAs, testimonial) flow in with a
+       130ms cascade — slow enough to feel deliberate, fast
+       enough to not gate the read. */
+    .profits-hero-h1,
+    .profits-hero-sub,
+    .profits-hero-ctas,
+    .profits-hero-testimonial {
+      animation: profits-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .profits-hero-h1           { animation-delay: 0.05s; }
+    .profits-hero-sub          { animation-delay: 0.18s; }
+    .profits-hero-ctas         { animation-delay: 0.32s; }
+    .profits-hero-testimonial  { animation-delay: 0.42s; }
+    @keyframes profits-hero-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Reduced-motion: drop the cascade, the glow pulses, and
+       the scroll-cue bounce so motion-sensitive visitors get a
+       static hero. */
+    @media (prefers-reduced-motion: reduce) {
+      .profits-hero-h1,
+      .profits-hero-sub,
+      .profits-hero-ctas,
+      .profits-hero-testimonial,
+      .profits-hero-glow-primary,
+      .profits-hero-glow-secondary,
+      .profits-hero-scroll-arrow {
+        animation: none;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       LIVE CONSOLE (Option F) — the calculator
+       Two-column console: segmented-control pickers + a live,
+       self-rewriting model-description card on the left; a
+       sticky result panel on the right. Ported verbatim from
+       /testing/calculator-layouts Option F (the .lc-card base
+       it inherited there is baked into .lc-layout-f below).
+       ════════════════════════════════════════════════════════ */
+
+    /* sr-only — the visually-hidden model radios */
+    .lc-sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ── Input fields ── */
+    .lc-input-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .lc-input-field { min-width: 0; }
+    .lc-input-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+    .lc-input-wrap { position: relative; }
+    .lc-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.8rem 3.4rem 0.8rem 0.9rem;
+      background: #0c1a22;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.7rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .lc-input-wrap--prefixed .lc-input { padding-left: 2rem; }
+    .lc-input:focus {
+      outline: none;
+      border-color: #2DC856;
+      box-shadow: 0 0 0 3px rgba(45,200,86,0.2);
+    }
+    .lc-input-prefix {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.4);
+      font-size: 1.05rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .lc-input-suffix {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.3);
+      font-size: 0.72rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .lc-input-hint {
+      font-size: 0.68rem;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.38);
+      margin: 0.5rem 0 0;
+    }
+
+    /* ── Segmented control — shared by all three pickers ── */
+    .lc-e-seg {
+      position: relative;
+      display: grid;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(13,27,34,0.08);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 1px 2px rgba(13,27,34,0.04),
+        0 14px 30px -18px rgba(13,27,34,0.22);
+    }
+    .lc-e-seg--4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .lc-e-seg--3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .lc-e-thumb {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 5px;
+      z-index: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.35) inset,
+        0 6px 16px -6px rgba(45,200,86,0.55),
+        0 2px 4px rgba(13,27,34,0.12);
+      transition: transform 420ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease;
+      will-change: transform;
+      pointer-events: none;
+    }
+    /* Thumb width/position are written inline by the enhancement
+       script (it measures the active segment); these widths are
+       just the pre-script fallback. */
+    .lc-e-seg--4 .lc-e-thumb { width: calc((100% - 22px) / 4); }
+    .lc-e-seg--3 .lc-e-thumb { width: calc((100% - 18px) / 3); }
+    .lc-e-seg-btn {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      padding: 0.52rem 0.4rem;
+      border-radius: 999px;
+      min-width: 0;
+      color: rgba(13,27,34,0.62);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-btn:hover:not(.is-active) { color: #1A2F3A; }
+    .lc-e-seg-btn.is-active { color: #ffffff; }
+    .lc-e-seg-btn:focus-visible { outline: 2px solid #2DC856; outline-offset: 3px; }
+    .lc-e-seg-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      line-height: 1.1;
+      white-space: nowrap;
+      text-transform: capitalize;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lc-e-seg-sub {
+      font-size: 0.6rem;
+      font-weight: 600;
+      line-height: 1.1;
+      white-space: nowrap;
+      color: rgba(13,27,34,0.46);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-sub [data-util-rate] { font-weight: 800; }
+    .lc-e-seg-btn.is-active .lc-e-seg-sub { color: rgba(255,255,255,0.82); }
+    .lc-e-seg-model-item {
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+    }
+    .lc-e-seg-model-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 0.52rem 0.4rem;
+      border-radius: 999px;
+      min-width: 0;
+      color: rgba(13,27,34,0.62);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-model-item:hover .lc-e-seg-model-card { color: #1A2F3A; }
+    .lc-e-seg-model-item input:checked ~ .lc-e-seg-model-card { color: #ffffff; }
+    .lc-e-seg-model-item input:focus-visible ~ .lc-e-seg-model-card {
+      outline: 2px solid #2DC856;
+      outline-offset: 3px;
+    }
+    .lc-e-seg-model-badge {
+      font-size: 0.575rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      color: rgba(13,27,34,0.46);
+      transition: color 220ms ease;
+    }
+    .lc-e-seg-model-item input:checked ~ .lc-e-seg-model-card .lc-e-seg-model-badge {
+      color: rgba(255,255,255,0.82);
+    }
+
+    /* ── Console shell — controls left, sticky result right.
+         (.lc-card base from calculator-layouts baked in here.) ── */
+    .lc-layout-f {
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1.75rem;
+      background: linear-gradient(165deg, #16303e 0%, #0f2531 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 40px 80px -40px rgba(0,0,0,0.6),
+        0 8px 30px -14px rgba(0,0,0,0.5);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 384px;
+      align-items: start;
+    }
+    .lc-f-controls {
+      padding: clamp(1.75rem, 3vw, 2.85rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.5rem, 2.4vw, 2.1rem);
+      min-width: 0;
+    }
+    .lc-f-result {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      margin: clamp(1.5rem, 2.4vw, 2.25rem);
+      overflow: hidden;
+      padding: clamp(1.4rem, 2vw, 1.85rem);
+      border-radius: 1.25rem;
+      background: linear-gradient(170deg, #163443 0%, #0e2531 100%);
+      border: 1px solid rgba(45,200,86,0.26);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 28px 56px -32px rgba(45,200,86,0.32),
+        0 8px 22px -12px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .lc-f-zones {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: clamp(0.9rem, 1.8vw, 1.4rem);
+    }
+    .lc-f-zone,
+    .lc-f-inputs,
+    .lc-f-model {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      min-width: 0;
+    }
+    .lc-f-zone-head {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .lc-f-zone-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .lc-f-zone-note {
+      font-size: 0.74rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.42);
+    }
+
+    /* Dark re-theme for the shared segmented controls. */
+    .lc-layout-f .lc-e-seg {
+      background: rgba(255,255,255,0.045);
+      border-color: rgba(255,255,255,0.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 2px 8px -4px rgba(0,0,0,0.55);
+    }
+    .lc-layout-f .lc-e-seg-btn { color: rgba(255,255,255,0.58); }
+    .lc-layout-f .lc-e-seg-btn:hover:not(.is-active) { color: rgba(255,255,255,0.9); }
+    .lc-layout-f .lc-e-seg-sub { color: rgba(255,255,255,0.4); }
+    .lc-layout-f .lc-e-seg-model-card { color: rgba(255,255,255,0.58); }
+    .lc-layout-f .lc-e-seg-model-item:hover .lc-e-seg-model-card { color: rgba(255,255,255,0.9); }
+    .lc-layout-f .lc-e-seg-model-badge { color: rgba(255,255,255,0.4); }
+    .lc-layout-f .lc-model-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: inherit;
+      margin: 0;
+    }
+
+    /* Live model description card — rewrites itself per model. */
+    .lc-f-model-card {
+      margin-top: 0.15rem;
+      padding: clamp(1rem, 1.6vw, 1.35rem);
+      border-radius: 1rem;
+      background: linear-gradient(165deg, rgba(45,200,86,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(45,200,86,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: opacity 160ms ease;
+    }
+    .lc-f-model-card.is-swapping { opacity: 0; }
+    .lc-f-model-card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem 0.7rem;
+      flex-wrap: wrap;
+    }
+    .lc-f-model-card-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.012em;
+      color: #ffffff;
+    }
+    .lc-f-model-card-badge {
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(45,200,86,0.14);
+      color: #58e07f;
+      border: 1px solid rgba(45,200,86,0.3);
+      white-space: nowrap;
+    }
+    .lc-f-model-card-blurb {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.62);
+    }
+    .lc-f-model-spec {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 1px;
+      margin: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.7rem;
+      overflow: hidden;
+    }
+    .lc-f-model-spec > div {
+      background: #122a37;
+      padding: 0.62rem 0.7rem 0.66rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 0;
+    }
+    .lc-f-model-spec dt {
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      line-height: 1.2;
+    }
+    .lc-f-model-spec dd {
+      margin: 0;
+      font-size: 0.76rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #ffffff;
+      letter-spacing: -0.005em;
+    }
+
+    /* Result panel internals. */
+    .lc-f-out-glow {
+      position: absolute;
+      top: -32%;
+      right: -22%;
+      width: 72%;
+      height: 82%;
+      pointer-events: none;
+      background: radial-gradient(ellipse, rgba(45,200,86,0.2) 0%, transparent 70%);
+    }
+    .lc-f-out-eyebrow {
+      position: relative;
+      margin: 0;
+    }
+    .lc-f-out-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      font-size: 0.54rem;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(45,200,86,0.15);
+      color: #58e07f;
+      border: 1px solid rgba(45,200,86,0.32);
+    }
+    .lc-f-out-tag::before {
+      content: "";
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      background: #2DC856;
+      box-shadow: 0 0 8px #2DC856;
+      animation: lc-f-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes lc-f-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .lc-f-out-combo {
+      position: relative;
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.6);
+    }
+    .lc-f-out-figure-block {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .lc-f-out-label {
+      margin: 0;
+      font-size: 0.56rem;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+    .lc-f-out-figure {
+      margin: 0;
+      font-size: clamp(2.6rem, 4vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -0.032em;
+      line-height: 1;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-projections {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .lc-f-out-proj {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.7rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .lc-f-out-proj-num {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-proj-num--accent { color: #2DC856; }
+    .lc-f-out-proj-lbl {
+      font-size: 0.56rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+    }
+    .lc-f-out-breakdown {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      margin: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.7rem;
+      overflow: hidden;
+    }
+    .lc-f-out-breakdown > div {
+      background: rgba(255,255,255,0.025);
+      padding: 0.6rem 0.75rem 0.64rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.26rem;
+      min-width: 0;
+    }
+    .lc-f-out-breakdown dt {
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      line-height: 1.2;
+    }
+    .lc-f-out-breakdown dd {
+      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .lc-f-out-breakdown-accent { background: linear-gradient(180deg, rgba(45,200,86,0.12) 0%, rgba(45,200,86,0.04) 100%) !important; }
+    .lc-f-out-breakdown-accent dd { color: #2DC856; }
+    .lc-f-out-bd-unit {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+    .lc-f-cta {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.95rem 1.4rem;
+      border: 0;
+      border-radius: 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #06210f;
+      background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 14px 30px -12px rgba(45,200,86,0.6),
+        0 4px 10px -4px rgba(0,0,0,0.35);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .lc-f-cta:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 20px 40px -12px rgba(45,200,86,0.72),
+        0 6px 14px -4px rgba(0,0,0,0.4);
+    }
+    .lc-f-cta:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+    .lc-f-cta svg {
+      width: 1.05rem;
+      height: 1.05rem;
+      transition: transform 200ms ease;
+    }
+    .lc-f-cta:hover svg { transform: translateX(3px); }
+
+    /* Relocated context tabs — keep the prose readable across
+       the now-full-width tabbed panel. */
+    .lc-f-tab-panel > p { max-width: 52rem; }
+
+    /* ── Console responsive ── */
+    @media (max-width: 1100px) {
+      .lc-layout-f { grid-template-columns: 1fr; }
+      .lc-f-result {
+        position: static;
+        margin-top: 0;
+        border-top: 1px solid rgba(45,200,86,0.22);
+      }
+    }
+    @media (max-width: 720px) {
+      .lc-f-zones { grid-template-columns: 1fr; }
+      .lc-f-model-spec { grid-template-columns: repeat(2, 1fr); }
+      .lc-input-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 460px) {
+      .lc-layout-f .lc-e-seg-sub { display: none; }
+      .lc-f-out-projections,
+      .lc-f-out-breakdown { grid-template-columns: 1fr; }
+      .lc-input-row { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lc-e-thumb,
+      .lc-e-seg-btn,
+      .lc-e-seg-model-card,
+      .lc-f-model-card,
+      .lc-f-cta,
+      .lc-f-cta svg { transition: none; }
+      .lc-f-out-tag::before { animation: none; }
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════
+       2) CALCULATOR + SIDEBAR TABS
+       The calculator card now shares the row with a compact
+       tabbed sidebar offering three on-demand context views:
+         · How It Works (the U × P × V formula)
+         · Beyond the Numbers (3 platform upsides)
+         · The Bigger Picture (4 indirect value drivers)
+       Sidebar collapses below the calc on mobile/tablet.
+  ═══════════════════════════════════════════════ -->
+  <section id="calculator" class="relative bg-evium-dark pt-28 pb-16 scroll-mt-20">
+    <div class="max-w-[1480px] mx-auto px-6 lg:px-8">
+
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-evium-green/10 border border-evium-green/30 rounded-full px-4 py-1.5 mb-6">
+          <span class="w-1.5 h-1.5 rounded-full bg-evium-green animate-pulse"></span>
+          <span class="text-evium-green text-sm font-semibold tracking-widest uppercase">Live Profit Calculator</span>
+        </div>
+        <h2 class="text-4xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5">
+          Calculate your<br class="hidden sm:block" />
+          <span class="text-evium-green">EV charging revenue.</span>
+        </h2>
+        <p class="text-lg lg:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
+          Adjust the inputs below to model the recurring income your property could generate.
+          Numbers update in real time — no email, no signup, no commitment.
+        </p>
+      </div>
+
+      <!-- ── LIVE CONSOLE — full-width two-column calculator:
+           controls on the left, a sticky result panel on the
+           right so the number stays live while you configure.
+           Segmented controls for the picks; the financial model
+           gets a segmented picker plus a description card that
+           rewrites itself per selection. ── -->
+      <div class="lc-console-wrap">
+        <div class="lc-layout-f">
+
+          <!-- LEFT — controls -->
+          <div class="lc-f-controls">
+
+            <!-- Property type + utilization — segmented controls -->
+            <div class="lc-f-zones">
+              <div class="lc-f-zone">
+                <div class="lc-f-zone-head">
+                  <span class="lc-f-zone-label">Property Type</span>
+                </div>
+                <div class="lc-e-seg lc-e-seg--4" role="group" aria-label="Property type">
+                  <span class="lc-e-thumb" aria-hidden="true"></span>
+                  {presets.map(p => (
+                    <button
+                      type="button"
+                      class="lc-e-seg-btn"
+                      data-scenario={p.id}
+                      data-ports={p.ports}
+                      data-util-low={p.utilization.low}
+                      data-util-medium={p.utilization.medium}
+                      data-util-high={p.utilization.high}
+                      data-kwh={p.kwh}
+                      data-price={p.price}
+                      data-type={p.type}
+                    >
+                      <span class="lc-scenario-label lc-e-seg-name">{p.label}</span>
+                      <span class="lc-e-seg-sub">{p.type}</span>
+                    </button>
+                  ))}
+                  <button type="button" class="lc-e-seg-btn lc-e-seg-btn--custom" data-scenario="custom">
+                    <span class="lc-scenario-label lc-e-seg-name">Custom</span>
+                    <span class="lc-e-seg-sub">Off-preset</span>
+                  </button>
+                </div>
+              </div>
+              <div class="lc-f-zone">
+                <div class="lc-f-zone-head">
+                  <span class="lc-f-zone-label">Projected Utilization</span>
+                </div>
+                <div class="lc-e-seg lc-e-seg--3" role="group" aria-label="Projected utilization">
+                  <span class="lc-e-thumb" aria-hidden="true"></span>
+                  <button type="button" class="lc-e-seg-btn" data-utilization="low">
+                    <span class="lc-e-seg-name">low</span>
+                    <span class="lc-e-seg-sub"><span data-util-rate>—</span>&nbsp;/ port / day</span>
+                  </button>
+                  <button type="button" class="lc-e-seg-btn" data-utilization="medium">
+                    <span class="lc-e-seg-name">medium</span>
+                    <span class="lc-e-seg-sub"><span data-util-rate>—</span>&nbsp;/ port / day</span>
+                  </button>
+                  <button type="button" class="lc-e-seg-btn" data-utilization="high">
+                    <span class="lc-e-seg-name">high</span>
+                    <span class="lc-e-seg-sub"><span data-util-rate>—</span>&nbsp;/ port / day</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Site inputs — tied to the scenario -->
+            <div class="lc-f-inputs">
+              <div class="lc-f-zone-head">
+                <span class="lc-f-zone-label">Site Inputs</span>
+                <span class="lc-f-zone-note">Auto-filled from your property type — fine-tune anything and the picker switches to Custom</span>
+              </div>
+              <div class="lc-input-row">
+                <div class="lc-input-field">
+                  <label for="sessions" class="lc-input-label">Sessions / Port / Day</label>
+                  <div class="lc-input-wrap">
+                    <input id="sessions" type="number" inputmode="decimal" min="0" step="0.5" value="6" class="lc-input" />
+                    <span class="lc-input-suffix">/ day</span>
+                  </div>
+                  <p class="lc-input-hint">Typical L2: 2–4 · DC Fast: 8–14</p>
+                </div>
+                <div class="lc-input-field">
+                  <label for="ports" class="lc-input-label">Number of Ports</label>
+                  <div class="lc-input-wrap">
+                    <input id="ports" type="number" inputmode="numeric" min="1" step="1" value="4" class="lc-input" />
+                    <span class="lc-input-suffix">ports</span>
+                  </div>
+                  <p class="lc-input-hint">Each charger has 1–2 ports</p>
+                </div>
+                <div class="lc-input-field">
+                  <label for="kwh" class="lc-input-label">kWh / Session</label>
+                  <div class="lc-input-wrap">
+                    <input id="kwh" type="number" inputmode="decimal" min="0" step="1" value="25" class="lc-input" />
+                    <span class="lc-input-suffix">kWh</span>
+                  </div>
+                  <p class="lc-input-hint">Typical L2: 15–25 · DC Fast: 30–50</p>
+                </div>
+                <div class="lc-input-field">
+                  <label for="price" class="lc-input-label">Price / kWh</label>
+                  <div class="lc-input-wrap lc-input-wrap--prefixed">
+                    <span class="lc-input-prefix">$</span>
+                    <input id="price" type="number" inputmode="decimal" min="0" step="0.01" value="0.42" class="lc-input" />
+                    <span class="lc-input-suffix">/ kWh</span>
+                  </div>
+                  <p class="lc-input-hint">Public charging average: $0.30–$0.55</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Financial model — segmented picker + live description card -->
+            <div class="lc-f-model">
+              <div class="lc-f-zone-head">
+                <span class="lc-f-zone-label">Financial Model</span>
+              </div>
+              <div class="lc-e-seg lc-e-seg--4 lc-e-seg-model" role="group" aria-label="Financial model">
+                <span class="lc-e-thumb" aria-hidden="true"></span>
+                {models.map((m, i) => (
+                  <label class="lc-model-option lc-e-seg-model-item">
+                    <input
+                      type="radio"
+                      name="model"
+                      value={m.share}
+                      data-model-id={m.id}
+                      checked={i === 0}
+                      class="lc-sr-only"
+                    />
+                    <span class="lc-e-seg-model-card">
+                      <span class="lc-model-label lc-e-seg-name">{m.label}</span>
+                      <span class="lc-e-seg-model-badge">{m.badge}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <div class="lc-f-model-card" data-model-card>
+                <div class="lc-f-model-card-head">
+                  <h4 class="lc-f-model-card-title" data-model-title>No-Cost</h4>
+                  <span class="lc-f-model-card-badge" data-model-badge>~10% revenue share</span>
+                </div>
+                <p class="lc-f-model-card-blurb" data-model-blurb>
+                  Evium funds the capital and runs the site end to end — hardware, install,
+                  software, support, and the cost of every kilowatt sold. You contribute the
+                  location; revenue is shared, weighted in your favor.
+                </p>
+                <dl class="lc-f-model-spec">
+                  <div><dt>Capital</dt><dd data-spec-capital>Evium</dd></div>
+                  <div><dt>Operations</dt><dd data-spec-ops>Evium</dd></div>
+                  <div><dt>Revenue</dt><dd data-spec-revenue>Shared, host-favored</dd></div>
+                  <div><dt>Term</dt><dd data-spec-term>5 yr + 5</dd></div>
+                </dl>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT — sticky live result -->
+          <div class="lc-f-result">
+            <div class="lc-f-out-glow" aria-hidden="true"></div>
+            <p class="lc-f-out-eyebrow">
+              <span class="lc-f-out-tag">Live estimate</span>
+            </p>
+            <p class="lc-f-out-combo" id="result-caption">—</p>
+            <div class="lc-f-out-figure-block">
+              <p class="lc-f-out-label">Your monthly share</p>
+              <p class="lc-f-out-figure" id="result-monthly">$0</p>
+            </div>
+            <div class="lc-f-out-projections">
+              <div class="lc-f-out-proj">
+                <span class="lc-f-out-proj-num" id="result-yearly">$0</span>
+                <span class="lc-f-out-proj-lbl">per year</span>
+              </div>
+              <div class="lc-f-out-proj">
+                <span class="lc-f-out-proj-num lc-f-out-proj-num--accent" id="result-5yr">$0</span>
+                <span class="lc-f-out-proj-lbl">over 5 years</span>
+              </div>
+            </div>
+            <dl class="lc-f-out-breakdown">
+              <div><dt>Gross monthly</dt><dd id="result-gross">$0</dd></div>
+              <div><dt>Sessions / mo</dt><dd id="result-sessions">0</dd></div>
+              <div><dt>Energy / mo</dt><dd><span id="result-energy">0</span>&nbsp;<span class="lc-f-out-bd-unit">kWh</span></dd></div>
+              <div class="lc-f-out-breakdown-accent"><dt>Revenue share</dt><dd id="result-share">10%</dd></div>
+            </dl>
+            <button
+              type="button"
+              data-open-estimate
+              class="lc-f-cta"
+            >
+              Get a Personalized Estimate
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
+
+      <!-- Context tabs — the calculator's former sidebar, kept
+           in full and relocated to a full-width tabbed panel
+           directly below the console. -->
+      <!-- SIDEBAR TABS — now a full-width tabbed panel below the console -->
+      <div
+        class="lc-f-tabs rounded-3xl bg-gradient-to-br from-evium-dark-light to-[#1a3040] border border-white/10 overflow-hidden shadow-2xl shadow-black/40 mt-8 lg:mt-10"
+        data-sidebar-tabs
+      >
+        <!-- Tab bar — order: How It Works → Incentives →
+             Beyond Numbers → Bigger Picture. Incentives is
+             pulled up to the second position so the rebate
+             content sits next to the formula it offsets. -->
+        <div class="flex border-b border-white/10" role="tablist" aria-label="Calculator context">
+          <button
+            type="button"
+            data-tab-btn="howitworks"
+            role="tab"
+            aria-selected="true"
+            aria-controls="tab-panel-howitworks"
+            class="sidebar-tab-btn flex-1 px-2 py-3.5 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-white/60 hover:text-white/90 border-b-2 border-transparent transition-colors cursor-pointer"
+          >
+            How It Works
+          </button>
+          <button
+            type="button"
+            data-tab-btn="incentives"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-incentives"
+            class="sidebar-tab-btn flex-1 px-2 py-3.5 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-white/60 hover:text-white/90 border-b-2 border-transparent transition-colors cursor-pointer"
+          >
+            Incentives
+          </button>
+          <button
+            type="button"
+            data-tab-btn="beyond"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-beyond"
+            class="sidebar-tab-btn flex-1 px-2 py-3.5 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-white/60 hover:text-white/90 border-b-2 border-transparent transition-colors cursor-pointer"
+          >
+            Beyond Numbers
+          </button>
+          <button
+            type="button"
+            data-tab-btn="bigger"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-panel-bigger"
+            class="sidebar-tab-btn flex-1 px-2 py-3.5 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-white/60 hover:text-white/90 border-b-2 border-transparent transition-colors cursor-pointer"
+          >
+            Bigger Picture
+          </button>
+        </div>
+
+        <!-- Panel: HOW IT WORKS (Revenue Formula) -->
+        <div
+          id="tab-panel-howitworks"
+          data-tab-panel="howitworks"
+          role="tabpanel"
+          class="lc-f-tab-panel p-6 lg:p-9"
+        >
+          <p class="text-evium-green font-semibold text-xs tracking-widest uppercase mb-2">How It Works</p>
+          <h3 class="text-xl lg:text-2xl font-black text-white leading-tight mb-5">Three levers. One clean revenue line.</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6">
+            Revenue is the product of how often the charger is used, what each session costs, and how many sessions happen each day. Evium gives you visibility and control over each lever.
+          </p>
+
+          <div class="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+          <!-- Formula visual -->
+          <div class="rounded-xl bg-evium-dark/50 border border-white/5 p-5 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-sm flex-shrink-0">U</div>
+              <div>
+                <p class="font-bold text-white text-sm">Utilization Rate</p>
+                <p class="text-white/50 text-xs leading-snug">% of time the charger is in use. Grows with EV market share.</p>
+              </div>
+            </div>
+            <div class="text-center text-white/25 text-base font-light leading-none">×</div>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-sm flex-shrink-0">P</div>
+              <div>
+                <p class="font-bold text-white text-sm">Session Price</p>
+                <p class="text-white/50 text-xs leading-snug">Per kWh or flat session rate. Dynamic pricing via portal.</p>
+              </div>
+            </div>
+            <div class="text-center text-white/25 text-base font-light leading-none">×</div>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/10 border border-evium-green/20 flex items-center justify-center text-evium-green font-black text-sm flex-shrink-0">V</div>
+              <div>
+                <p class="font-bold text-white text-sm">Daily Volume</p>
+                <p class="text-white/50 text-xs leading-snug">Sessions per day. Driven by traffic, charger count, visibility.</p>
+              </div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-white/10 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green flex items-center justify-center text-evium-dark font-black text-sm flex-shrink-0">$</div>
+              <div>
+                <p class="font-bold text-white text-sm">Monthly Revenue</p>
+                <p class="text-white/50 text-xs leading-snug">Reported in real time via Evium's owner portal.</p>
+              </div>
+            </div>
+          </div>
+
+          <ul class="space-y-3 text-white/55 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2 flex-shrink-0"></span>
+              <span>Dynamic pricing lets you charge peak rates during high-demand windows.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2 flex-shrink-0"></span>
+              <span>Load management prevents grid spikes and optimizes concurrent sessions.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-evium-green mt-2 flex-shrink-0"></span>
+              <span>Session logs and station-health data are available 24/7 in your portal.</span>
+            </li>
+          </ul>
+          </div>
+        </div>
+
+        <!-- Panel: BEYOND THE NUMBERS (3 platform upsides) -->
+        <div
+          id="tab-panel-beyond"
+          data-tab-panel="beyond"
+          role="tabpanel"
+          class="lc-f-tab-panel p-6 lg:p-9"
+          hidden
+        >
+          <p class="text-evium-green font-semibold text-xs tracking-widest uppercase mb-2">Beyond the Numbers</p>
+          <h3 class="text-xl lg:text-2xl font-black text-white leading-tight mb-5">More than just charging revenue.</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6">
+            The dollars on screen are only one piece. Every Evium deployment also unlocks three platform-level revenue layers.
+          </p>
+
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-black text-white text-sm mb-1">Grid Monetization</h4>
+                  <p class="text-white/55 text-xs leading-relaxed">Open ADR 2.0b grid services let your site participate in demand-response programs for additional revenue streams.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-black text-white text-sm mb-1">Carbon Credit Capture</h4>
+                  <p class="text-white/55 text-xs leading-relaxed">Eligible deployments qualify for LCFS credits and ESG reporting that strengthens your sustainability story.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-black text-white text-sm mb-1">Revenue Optimization</h4>
+                  <p class="text-white/55 text-xs leading-relaxed">Dynamic pricing, real-time analytics, and load management baked into the owner portal — maximize earnings without touching hardware.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel: THE BIGGER PICTURE (4 indirect upsides) -->
+        <div
+          id="tab-panel-bigger"
+          data-tab-panel="bigger"
+          role="tabpanel"
+          class="lc-f-tab-panel p-6 lg:p-9"
+          hidden
+        >
+          <p class="text-evium-green font-semibold text-xs tracking-widest uppercase mb-2">The Bigger Picture</p>
+          <h3 class="text-xl lg:text-2xl font-black text-white leading-tight mb-5">What this calculator doesn't show.</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-6">
+            Charging revenue is the most measurable number — but it's rarely the largest. The indirect impact often dwarfs the direct income.
+          </p>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">Tenant Acquisition & Retention</h4>
+                <p class="text-white/55 text-xs leading-relaxed">EV charging is now a leasing-decision factor. Properties with chargers close deals competitors can't.</p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">Property Value Appreciation</h4>
+                <p class="text-white/55 text-xs leading-relaxed">EV-ready commercial properties command higher appraisals and rent premiums in active markets.</p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">Rebates & Grants</h4>
+                <p class="text-white/55 text-xs leading-relaxed">NEVI, CEC, BPU, and utility incentives can offset 80%+ of capital costs. Evium handles every application.</p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">Compounding Adoption Curve</h4>
+                <p class="text-white/55 text-xs leading-relaxed">EV market share is rising every quarter. Today's utilization is the floor, not the ceiling.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-white/45 text-xs leading-relaxed mt-5 pt-5 border-t border-white/10">
+            One Oakmark client signed three new tenants in their first month after installation — citing EV charging as a deciding factor. That's the kind of upside a calculator can't predict.
+          </p>
+        </div>
+
+        <!-- Panel: GOVERNMENT INCENTIVES (rebates: NEVI / CEC / State & Utility) -->
+        <div
+          id="tab-panel-incentives"
+          data-tab-panel="incentives"
+          role="tabpanel"
+          class="lc-f-tab-panel p-6 lg:p-9"
+          hidden
+        >
+          <p class="text-evium-green font-semibold text-xs tracking-widest uppercase mb-2">Government Incentives</p>
+          <h3 class="text-xl lg:text-2xl font-black text-white leading-tight mb-5">Federal and state programs can eliminate your equipment costs entirely.</h3>
+          <p class="text-white/55 text-sm leading-relaxed mb-3">
+            Substantial rebates exist at the federal, state, and utility level. For investment-model clients, these programs can dramatically compress payback periods — or offset capital costs entirely.
+          </p>
+          <p class="text-white/55 text-sm leading-relaxed mb-6">
+            Evium handles every rebate application on your behalf. Deep experience with NEVI, CEC, BPU NJ, and utility incentive programs — you don't navigate the bureaucracy, we do.
+          </p>
+
+          <div class="grid sm:grid-cols-3 gap-3">
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">NEVI — National Electric Vehicle Infrastructure</h4>
+                <p class="text-white/55 text-xs leading-relaxed">Federal highway charging program covering up to 80% of eligible project costs. Evium is an experienced NEVI applicant with funded deployments.</p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">CEC Grant — California Energy Commission</h4>
+                <p class="text-white/55 text-xs leading-relaxed">Evium has received $6MM+ in CEC grant funding for EV infrastructure projects across eligible California sites.</p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-evium-dark/50 border border-white/10 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-evium-green/15 border border-evium-green/25 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm mb-1">State & Utility Rebates</h4>
+                <p class="text-white/55 text-xs leading-relaxed">BPU New Jersey, utility-specific incentives, and state-level EV programs available across Evium's operating footprint. Evium handles all applications.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /.lc-f-tabs -->
+
+      </div><!-- /.lc-console-wrap -->
+
+      <p class="text-center text-white/30 text-xs mt-6 max-w-3xl mx-auto leading-relaxed">
+        Estimates are illustrative and based on the inputs you provide. Actual revenue varies by location,
+        traffic, weather, EV adoption in your region, charger uptime, and pricing strategy. For a tailored
+        projection grounded in real Evium deployment data, request a personalized estimate.
+      </p>
+    </div>
+  </section>
+
+  <!-- (Section 4 "Revenue Formula" lifted into the calculator sidebar's
+        HOW IT WORKS tab — see section 2 above.)
+        (Section 5 "Projection Ranges" + Section 6 "Financial Models" merged
+        into the combined-tabs section 3 above.) -->
+
+  <!-- ═══════════════════════════════════════════════
+       9) THE NO-COST CASE — 3 consolidated cards in the same
+       premium glass treatment as the hero's old evidence cards
+       (gradient background, hairline border, hover lift, green
+       icon halo, ordinal numbers). The 6 prior cards merge into
+       3 thematic arguments because the original split was
+       redundant (two "passive income" cards, two "property
+       value" cards, two "market timing" cards). Section header
+       gets layered ambient glow + a green-glow accent on the
+       focal word to match the hero's design language.
+  ═══════════════════════════════════════════════ -->
+  <section class="profits-nocost relative py-28 lg:py-32 bg-evium-dark-light overflow-hidden">
+    <!-- Subtle grid (matches the hero) -->
+    <div
+      class="absolute inset-0 opacity-[0.03] pointer-events-none"
+      style="background-image: linear-gradient(#2DC856 1px, transparent 1px), linear-gradient(90deg, #2DC856 1px, transparent 1px); background-size: 64px 64px;"
+      aria-hidden="true"
+    ></div>
+    <!-- Ambient green wash, top-center, anchored behind the heading -->
+    <div
+      class="absolute pointer-events-none"
+      style="top: -10%; left: 50%; transform: translateX(-50%); width: clamp(540px, 60vw, 940px); height: clamp(360px, 40vw, 580px); border-radius: 9999px; opacity: 0.08; background: radial-gradient(ellipse at center, rgba(45, 200, 86, 0.6) 0%, rgba(45, 200, 86, 0.15) 38%, transparent 72%); filter: blur(10px);"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-14 lg:mb-20">
+        <p class="text-evium-green font-semibold text-xs tracking-[0.22em] uppercase mb-4">The No-Cost Case</p>
+        <h2 class="text-4xl lg:text-[3.4rem] font-black leading-[1.04] tracking-[-0.02em] mb-5">
+          Why <span class="profits-nocost-accent">10% of something</span><br class="hidden sm:block" />
+          beats 100% of nothing.
+        </h2>
+        <p class="text-white/55 text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto">
+          Skeptical about the revenue split? Three reasons the no-cost model still wins for property owners.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5 lg:gap-6">
+
+        <!-- Card 01 — Pure Passive Income (merges old "Pure Passive
+             Income" + "Passive by Design": concrete $150/mo at 10%
+             share + Evium handling all operations). -->
+        <article class="profits-nocost-card">
+          <span class="profits-nocost-card-ordinal" aria-hidden="true">01</span>
+          <div class="profits-nocost-card-icon">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="profits-nocost-card-title">Pure Passive Income</h3>
+          <p class="profits-nocost-card-body">
+            At medium utilization, a 10% share on a single fast charger generates <span class="text-evium-green font-semibold">~$150/month</span> — on infrastructure you paid zero to install. Evium handles install, software, maintenance, billing, and rebates. You collect revenue without managing operations.
+          </p>
+        </article>
+
+        <!-- Card 02 — Tenant Pull, Compounding (merges old "Tenant &
+             Customer Attraction" + "Rising Utilization Over Time":
+             the leasing-decision factor + the market tailwind). -->
+        <article class="profits-nocost-card">
+          <span class="profits-nocost-card-ordinal" aria-hidden="true">02</span>
+          <div class="profits-nocost-card-icon">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <h3 class="profits-nocost-card-title">Tenant Pull, Compounding</h3>
+          <p class="profits-nocost-card-body">
+            EV charging is increasingly a leasing requirement — one Evium owner closed <span class="text-evium-green font-semibold">three new tenants</span> in the first month after install. And EV adoption rises every quarter, meaning today's utilization is the floor, not the ceiling.
+          </p>
+        </article>
+
+        <!-- Card 03 — Property Value Lift (merges old "Property Value
+             Appreciation" + "Property Value Multiplier": higher
+             rents + appraisal premium + balance-sheet asset). -->
+        <article class="profits-nocost-card">
+          <span class="profits-nocost-card-ordinal" aria-hidden="true">03</span>
+          <div class="profits-nocost-card-icon">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h3 class="profits-nocost-card-title">Property Value Lift</h3>
+          <p class="profits-nocost-card-body">
+            EV-ready properties command higher rents and better occupancy in active commercial markets, and increasingly carry an <span class="text-evium-green font-semibold">appraisal premium</span> in real-estate valuations. Infrastructure that costs you nothing today creates lasting asset value on your balance sheet.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* No-Cost Case — premium card treatment matching the hero's
+       evidence cards (glass gradient bg, hairline border,
+       backdrop-blur, hover lift, ordinal numbers in the top-right,
+       icon tile with inner highlight + ambient green halo). */
+    .profits-nocost-accent {
+      color: #2DC856;
+      text-shadow:
+        0 2px 24px rgba(45, 200, 86, 0.38),
+        0 0 48px rgba(45, 200, 86, 0.14);
+    }
+    .profits-nocost-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 1.85rem 1.85rem 2rem;
+      background:
+        linear-gradient(
+          165deg,
+          rgba(20, 38, 52, 0.85) 0%,
+          rgba(13, 27, 34, 0.78) 100%
+        );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.15rem;
+      backdrop-filter: blur(12px) saturate(125%);
+      -webkit-backdrop-filter: blur(12px) saturate(125%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 10px 24px -10px rgba(0, 0, 0, 0.5);
+      transition:
+        transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 320ms ease,
+        background 320ms ease,
+        box-shadow 320ms ease;
+    }
+    .profits-nocost-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(45, 200, 86, 0.36);
+      background:
+        linear-gradient(
+          165deg,
+          rgba(24, 44, 58, 0.92) 0%,
+          rgba(15, 30, 38, 0.85) 100%
+        );
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        0 18px 36px -10px rgba(0, 0, 0, 0.55),
+        0 0 50px -10px rgba(45, 200, 86, 0.28);
+    }
+    .profits-nocost-card-ordinal {
+      position: absolute;
+      top: 1.4rem;
+      right: 1.6rem;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: rgba(255, 255, 255, 0.22);
+      transition: color 320ms ease;
+    }
+    .profits-nocost-card:hover .profits-nocost-card-ordinal {
+      color: rgba(45, 200, 86, 0.6);
+    }
+    .profits-nocost-card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      margin-bottom: 1.4rem;
+      background: linear-gradient(
+        155deg,
+        rgba(45, 200, 86, 0.22) 0%,
+        rgba(45, 200, 86, 0.05) 100%
+      );
+      border: 1px solid rgba(45, 200, 86, 0.32);
+      color: #2DC856;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 0 22px -2px rgba(45, 200, 86, 0.30);
+      transition:
+        background 320ms ease,
+        border-color 320ms ease,
+        box-shadow 320ms ease;
+    }
+    .profits-nocost-card:hover .profits-nocost-card-icon {
+      background: linear-gradient(
+        155deg,
+        rgba(45, 200, 86, 0.34) 0%,
+        rgba(45, 200, 86, 0.11) 100%
+      );
+      border-color: rgba(45, 200, 86, 0.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 0 30px -2px rgba(45, 200, 86, 0.46);
+    }
+    .profits-nocost-card-title {
+      font-size: 1.22rem;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      color: #ffffff;
+      margin: 0 0 0.7rem;
+    }
+    .profits-nocost-card-body {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.62);
+      margin: 0;
+    }
+  </style>
+
+  <!-- ═══════════════════════════════════════════════
+       10) OWNER PORTAL — narrative + 4 mini feature cards.
+       Vin Gureeno's testimonial moved up to the hero (right
+       column). Oakmark anecdote still lives in the BIGGER
+       PICTURE sidebar tab next to the calculator.
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Owner Portal</p>
+          <h2 class="text-4xl lg:text-5xl font-black leading-tight mb-6">
+            Real-time revenue data. Full transparency. Always.
+          </h2>
+          <p class="text-white/60 text-lg leading-relaxed mb-8">
+            Evium's owner portal isn't an afterthought — it's a revenue management tool. Every charging session is logged, every dollar is attributed, and every trend is visible so you can make informed decisions about your infrastructure.
+          </p>
+          <a href="/products" class="inline-flex items-center gap-2 text-evium-green font-semibold hover:gap-3 transition-all">
+            Explore the Platform
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-evium-dark-light rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Revenue Tracking</h4>
+            <p class="text-white/50 text-xs">Daily, weekly, and monthly revenue broken down by station, port, and time of day.</p>
+          </div>
+
+          <div class="bg-evium-dark-light rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Session Analytics</h4>
+            <p class="text-white/50 text-xs">Utilization trends, average session duration, peak usage windows, and driver return rates.</p>
+          </div>
+
+          <div class="bg-evium-dark-light rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Pricing Controls</h4>
+            <p class="text-white/50 text-xs">Set per-kWh or flat session rates. Adjust in real time without hardware changes.</p>
+          </div>
+
+          <div class="bg-evium-dark-light rounded-xl p-6 border border-white/10">
+            <svg class="w-6 h-6 text-evium-green mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h4 class="font-bold text-white mb-1">Load Management</h4>
+            <p class="text-white/50 text-xs">Automated demand balancing prevents grid spikes and keeps operating costs predictable.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       12) FAQ
+  ═══════════════════════════════════════════════ -->
+  <section class="py-28 bg-evium-dark">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-4">Common Questions</p>
+        <h2 class="text-4xl lg:text-5xl font-black leading-tight">Straight answers.</h2>
+      </div>
+
+      <div class="space-y-4">
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">How much can I realistically make from EV charging?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Based on Evium's deployment data, a single 180kW DC Fast charger generates between $900 and $2,100 per month depending on utilization. Over five years, that's $54,000 to $126,000 per charger. Properties with higher traffic and better visibility skew toward the upper range. A revenue estimate tailored to your property is available at no cost — we'll model it based on your location, traffic profile, and charger configuration.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">What does "no-cost" actually mean? What's the catch?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            No-cost means Evium covers 100% of hardware, installation, and ongoing operational costs — including maintenance, software, and rebate processing. There is no hidden fee or deferred cost. In exchange, gross charging revenue is split approximately 90/10 in Evium's favor — Evium retains ~90%, the host receives ~10% as passive income. That trade-off is the entire business model. If you want full revenue ownership, the investment model gives you that — but requires capital outlay.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">Can I switch financial models after deployment?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Yes, in many cases. Transitioning from a no-cost model to an investment model — effectively buying out the equipment — is something Evium has structured for existing clients. Terms depend on the original agreement, remaining contract period, and equipment value at the time of transition. Speak with your Evium account manager about a structured pathway if your goals change.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">How do I track my revenue and station performance?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Through Evium's owner portal, accessible via web browser or mobile app. The portal provides real-time session data, cumulative revenue by station and time period, charger health status, and utilization trend reports. Revenue settlements are processed according to your agreement terms, with full transaction logs available on demand.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">What if utilization is low — does it cost me anything?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Under the no-cost model, low utilization costs you nothing. Evium absorbs all operational costs regardless of session volume. Your 10% share simply reflects lower activity — but you're not out of pocket. In investment or leasing models, you carry more financial exposure, which is why Evium provides detailed pre-deployment revenue modeling to help you make an informed decision before committing capital.
+          </div>
+        </details>
+
+        <details class="group bg-evium-dark-light rounded-xl border border-white/10 overflow-hidden">
+          <summary class="flex items-center justify-between px-7 py-6 cursor-pointer list-none hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-white text-base pr-4">Is EV charging revenue taxable?</span>
+            <svg class="w-5 h-5 text-evium-green flex-shrink-0 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </summary>
+          <div class="px-7 pb-6 text-white/60 text-sm leading-relaxed border-t border-white/10 pt-5">
+            Generally, yes — revenue from EV charging sessions is taxable business income. However, equipment depreciation, rebates, and infrastructure investments may have favorable tax treatment depending on your structure and jurisdiction. Evium provides clear documentation of all revenue and grants for your accountant. We recommend consulting with your tax advisor as part of your pre-deployment planning.
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       13) FINAL CTA — opens the estimate modal
+  ═══════════════════════════════════════════════ -->
+  <section class="relative py-28 bg-evium-dark-light overflow-hidden">
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div
+        class="w-[800px] h-[450px] rounded-full opacity-[0.08]"
+        style="background: radial-gradient(ellipse at center, #2DC856 0%, transparent 70%);"
+      ></div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-8 text-center">
+      <p class="text-evium-green font-semibold text-sm tracking-widest uppercase mb-5">Ready for Real Numbers?</p>
+      <h2 class="text-4xl lg:text-6xl font-black leading-tight mb-6">
+        Get an estimate built<br class="hidden lg:block" />
+        on <span class="text-evium-green">your property's</span> data.
+      </h2>
+      <p class="text-white/55 text-xl leading-relaxed mb-12 max-w-2xl mx-auto">
+        Share your address and we'll model real revenue using local traffic, EV registrations,
+        and Evium's deployment data — typically within 48 hours, no commitment.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          type="button"
+          data-open-estimate
+          class="inline-flex items-center gap-2 bg-evium-green text-evium-dark font-bold text-base px-10 py-4 rounded-lg hover:bg-white transition-colors cursor-pointer"
+        >
+          Request a Custom Estimate
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </button>
+        <a
+          href="#calculator"
+          class="inline-flex items-center gap-2 border border-white/20 text-white font-semibold text-base px-8 py-4 rounded-lg hover:border-evium-green/50 hover:text-evium-green transition-colors"
+        >
+          Back to the Calculator
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       14) ESTIMATE REQUEST MODAL — pre-fills with current calc state
+  ═══════════════════════════════════════════════ -->
+  <div
+    id="estimate-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="estimate-title"
+    class="fixed inset-0 z-[60] hidden items-end sm:items-center justify-center"
+  >
+    <div
+      data-close-estimate
+      class="absolute inset-0 bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200"
+      id="estimate-backdrop"
+    ></div>
+
+    <div
+      id="estimate-panel"
+      class="relative w-full sm:max-w-2xl bg-evium-dark-light border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-black/60 max-h-[92vh] overflow-y-auto translate-y-8 sm:translate-y-4 opacity-0 transition-all duration-200 ease-out"
+    >
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-evium-green/60 to-transparent rounded-t-3xl"></div>
+      <div class="absolute -top-32 -right-32 w-80 h-80 rounded-full opacity-20 pointer-events-none"
+           style="background: radial-gradient(circle, #2DC856 0%, transparent 70%);"></div>
+
+      <button
+        type="button"
+        data-close-estimate
+        aria-label="Close"
+        class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 hover:border-white/30 transition-colors flex items-center justify-center cursor-pointer z-10"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div id="estimate-form-view" class="relative p-7 sm:p-10">
+        <div class="inline-flex items-center gap-2 bg-evium-green/10 border border-evium-green/30 rounded-full px-3 py-1 mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-evium-green animate-pulse"></span>
+          <span class="text-evium-green text-xs font-bold tracking-widest uppercase">Personalized Estimate</span>
+        </div>
+
+        <h2 id="estimate-title" class="text-3xl sm:text-4xl font-black leading-tight text-white mb-3">
+          Get a real number for<br /><span class="text-evium-green">your property.</span>
+        </h2>
+        <p class="text-white/55 text-sm sm:text-base leading-relaxed mb-7">
+          We'll model real revenue using local traffic, EV registrations, and Evium deployment data — typically within 48 hours. No commitment.
+        </p>
+
+        <div class="rounded-xl bg-evium-dark border border-white/10 p-5 mb-7">
+          <p class="text-evium-green/70 text-[10px] font-bold tracking-widest uppercase mb-3">Your Scenario</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">Sessions / port / day</p>
+              <p id="recap-sessions" class="text-white font-bold mt-0.5">—</p>
+            </div>
+            <div>
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">Ports</p>
+              <p id="recap-ports" class="text-white font-bold mt-0.5">—</p>
+            </div>
+            <div>
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">kWh / session</p>
+              <p id="recap-kwh" class="text-white font-bold mt-0.5">—</p>
+            </div>
+            <div>
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">Price / kWh</p>
+              <p id="recap-price" class="text-white font-bold mt-0.5">—</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+            <div>
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">Model</p>
+              <p id="recap-model" class="text-white font-bold mt-0.5">—</p>
+            </div>
+            <div class="text-right">
+              <p class="text-white/40 text-[11px] uppercase tracking-wider">Modeled monthly share</p>
+              <p id="recap-monthly" class="text-evium-green font-black text-lg mt-0.5">—</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="estimate-form" class="space-y-5" novalidate>
+          <input type="text" name="company_website" tabindex="-1" autocomplete="off"
+                 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;" />
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="ef-name" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Full Name</label>
+              <input id="ef-name" name="name" type="text" required autocomplete="name"
+                     class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all" />
+            </div>
+            <div>
+              <label for="ef-email" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Email</label>
+              <input id="ef-email" name="email" type="email" required autocomplete="email"
+                     class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all" />
+            </div>
+            <div>
+              <label for="ef-phone" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Phone</label>
+              <input id="ef-phone" name="phone" type="tel" autocomplete="tel"
+                     class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all" />
+            </div>
+            <div>
+              <label for="ef-property-type" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Property Type</label>
+              <select id="ef-property-type" name="property_type"
+                      class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all appearance-none bg-no-repeat"
+                      style="background-image: url(&quot;data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232DC856' stroke-width='2'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3e%3c/svg%3e&quot;); background-position: right 0.75rem center; background-size: 1.25rem;">
+                <option value="multifamily">Multifamily / Apartments</option>
+                <option value="commercial">Commercial / Office</option>
+                <option value="retail">Retail / Strip Center</option>
+                <option value="parking">Parking Lot</option>
+                <option value="medical">Medical Facility</option>
+                <option value="fleet">Fleet</option>
+                <option value="hospitality">Hospitality</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="ef-address" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Property Address</label>
+            <input id="ef-address" name="address" type="text" required autocomplete="street-address" placeholder="123 Main St, City, State"
+                   class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all" />
+          </div>
+
+          <div>
+            <label for="ef-notes" class="block text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">Anything else? <span class="text-white/30 font-normal normal-case">(optional)</span></label>
+            <textarea id="ef-notes" name="notes" rows="3" placeholder="Timeline, lot size, multiple properties, etc."
+                      class="w-full bg-evium-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-evium-green focus:ring-2 focus:ring-evium-green/20 transition-all resize-none"></textarea>
+          </div>
+
+          <p id="ef-error" class="hidden text-red-400 text-xs font-medium">Please complete the required fields.</p>
+
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+            <button
+              type="button"
+              data-close-estimate
+              class="px-6 py-3 rounded-lg text-white/60 font-semibold text-sm hover:text-white transition-colors cursor-pointer"
+            >Cancel</button>
+            <button
+              type="submit"
+              id="ef-submit"
+              class="inline-flex items-center justify-center gap-2 bg-evium-green text-evium-dark font-bold text-sm px-7 py-3 rounded-lg hover:bg-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            >
+              <span id="ef-submit-label">Send My Estimate Request</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="estimate-success-view" class="relative p-7 sm:p-10 hidden text-center">
+        <div class="w-16 h-16 rounded-full bg-evium-green/15 border border-evium-green/40 flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-evium-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mb-3">Request received.</h2>
+        <p class="text-white/60 text-base leading-relaxed max-w-md mx-auto mb-2">
+          Thanks — an Evium specialist will be in touch within <span class="text-evium-green font-semibold">48 hours</span> with a custom revenue model for your property.
+        </p>
+        <p class="text-white/40 text-sm leading-relaxed mb-8">
+          Need to talk sooner? Call <a href="tel:+13237022400" class="text-evium-green hover:underline">(323) 702-2400</a> or email <a href="mailto:david@eviumcharging.com" class="text-evium-green hover:underline">david@eviumcharging.com</a>.
+        </p>
+        <button
+          type="button"
+          data-close-estimate
+          class="inline-flex items-center gap-2 bg-evium-green text-evium-dark font-bold text-sm px-8 py-3 rounded-lg hover:bg-white transition-colors cursor-pointer"
+        >
+          Back to Calculator
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CALCULATOR + MODAL SCRIPT — copied from
+       /solutions/profit-calculator (same behavior)
+  ═══════════════════════════════════════════════ -->
+  <script>
+    type Result = {
+      gross: number;
+      monthly: number;
+      yearly: number;
+      fiveYr: number;
+      sessions: number;
+      energy: number;
+      share: number;
+    };
+
+    const fmtUSD = (n: number) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(
+        Math.max(0, Math.round(n))
+      );
+    const fmtNum = (n: number) =>
+      new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.max(0, Math.round(n)));
+
+    const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+
+    const sessionsEl = $<HTMLInputElement>('sessions');
+    const portsEl    = $<HTMLInputElement>('ports');
+    const kwhEl      = $<HTMLInputElement>('kwh');
+    const priceEl    = $<HTMLInputElement>('price');
+
+    const outMonthly  = $('result-monthly');
+    const outYearly   = $('result-yearly');
+    const out5yr      = $('result-5yr');
+    const outGross    = $('result-gross');
+    const outSessions = $('result-sessions');
+    const outEnergy   = $('result-energy');
+    const outShare    = $('result-share');
+    const outCaption  = $('result-caption');
+
+    /* Computes the owner's revenue share from the active model
+       radio. Default to ~10% (No-Cost) per the business-model doc
+       — this was a bug previously where it defaulted to 0.60.
+       The radio inputs themselves carry the correct values now
+       (0.10 / 1.00 / 0.50 / 1.00 for the four models). */
+    function computeShare(): number {
+      const checked = document.querySelector<HTMLInputElement>('input[name="model"]:checked');
+      return checked ? parseFloat(checked.value) : 0.10;
+    }
+
+    function calc(): Result {
+      const sessionsPerPortPerDay = Math.max(0, parseFloat(sessionsEl.value) || 0);
+      const ports                 = Math.max(0, parseFloat(portsEl.value)    || 0);
+      const kwhPerSession         = Math.max(0, parseFloat(kwhEl.value)      || 0);
+      const pricePerKwh           = Math.max(0, parseFloat(priceEl.value)    || 0);
+
+      const sessionsPerMonth = sessionsPerPortPerDay * ports * 30;
+      const energyPerMonth   = sessionsPerMonth * kwhPerSession;
+      const grossMonthly     = energyPerMonth * pricePerKwh;
+
+      const share   = computeShare();
+      const monthly = grossMonthly * share;
+      const yearly  = monthly * 12;
+      const fiveYr  = yearly * 5;
+
+      return { gross: grossMonthly, monthly, yearly, fiveYr, sessions: sessionsPerMonth, energy: energyPerMonth, share };
+    }
+
+    function render() {
+      const r = calc();
+      outMonthly.textContent  = fmtUSD(r.monthly);
+      outYearly.textContent   = fmtUSD(r.yearly);
+      out5yr.textContent      = fmtUSD(r.fiveYr);
+      outGross.textContent    = fmtUSD(r.gross);
+      outSessions.textContent = fmtNum(r.sessions);
+      outEnergy.textContent   = fmtNum(r.energy);
+      outShare.textContent    = `${Math.round(r.share * 100)}%`;
+      if (outCaption) outCaption.textContent = captionText();
+    }
+
+    /* The active-combo caption shown in the result panel
+       ("Multifamily L2 · Medium utilization · No-Cost"). Reads
+       the scenario + utilization state set by the picker below,
+       plus the checked financial model. */
+    function captionText(): string {
+      let scenario = 'Custom inputs';
+      if (activeScenario && activeScenario.dataset.scenario !== 'custom') {
+        const label = activeScenario.querySelector('.lc-scenario-label')?.textContent ?? '';
+        const type  = activeScenario.dataset.type ?? '';
+        scenario = `${label} ${type}`.trim();
+      }
+      const util = activeUtilization
+        ? activeUtilization[0].toUpperCase() + activeUtilization.slice(1) + ' utilization'
+        : 'Custom utilization';
+      const checked = document.querySelector<HTMLInputElement>('input[name="model"]:checked');
+      const modelLabel = checked
+        ? checked.closest('.lc-model-option')?.querySelector('.lc-model-label')?.textContent ?? ''
+        : '';
+      return `${scenario} · ${util} · ${modelLabel}`;
+    }
+
+    document.querySelectorAll<HTMLInputElement>('input[name="model"]').forEach(el => {
+      el.addEventListener('change', render);
+    });
+
+    /* ─────────────  Scenario + Utilization pill picker  ───────
+       Two-pill-row state machine:
+         · scenarioBtns: one of three property types (or none)
+         · utilizationBtns: one of low / medium / high (or none)
+       Picking a scenario sets ports/kwh/price + refreshes the
+       utilization rate labels for that scenario + resets the
+       sessions/port/day input to that scenario's "medium" rate.
+       Picking a utilization sets sessions/port/day to the active
+       scenario's matching rate.
+       Manual input edits (typing into ports/sessions/kwh/price)
+       deselect the corresponding pill row(s) — pills are presets,
+       not constraints. */
+    const scenarioBtns    = document.querySelectorAll<HTMLButtonElement>('[data-scenario]');
+    const utilizationBtns = document.querySelectorAll<HTMLButtonElement>('[data-utilization]');
+    const customScenarioBtn = document.querySelector<HTMLButtonElement>('[data-scenario="custom"]');
+    let activeScenario: HTMLButtonElement | null = null;
+    let activeUtilization: 'low' | 'medium' | 'high' | null = null;
+
+    const numFmt = (n: number) => {
+      // tighter rendering for the per-pill rate labels: "~2.5" or "~12"
+      const rounded = Math.round(n * 10) / 10;
+      return `~${rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)}`;
+    };
+
+    function setActiveScenario(btn: HTMLButtonElement | null) {
+      activeScenario = btn;
+      scenarioBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+    }
+    function setActiveUtilization(level: 'low' | 'medium' | 'high' | null) {
+      activeUtilization = level;
+      utilizationBtns.forEach(b => b.classList.toggle('is-active', b.dataset.utilization === level));
+    }
+
+    function refreshUtilLabels() {
+      utilizationBtns.forEach(btn => {
+        const level = btn.dataset.utilization as 'low' | 'medium' | 'high';
+        const rateEl = btn.querySelector<HTMLElement>('[data-util-rate]');
+        if (!rateEl) return;
+        // Only show a rate if the active scenario has utilization
+        // data attributes (the Custom scenario doesn't — it carries
+        // data-scenario="custom" but no util-low/medium/high).
+        const key = `util${level[0].toUpperCase()}${level.slice(1)}`;
+        const rateAttr = activeScenario?.dataset[key];
+        rateEl.textContent = rateAttr !== undefined ? numFmt(parseFloat(rateAttr)) : '—';
+      });
+    }
+
+    function applyScenario(btn: HTMLButtonElement, opts: { keepUtilization?: boolean } = {}) {
+      setActiveScenario(btn);
+      const isCustom = btn.dataset.scenario === 'custom';
+      if (!isCustom) {
+        // Real scenario — pre-fill the input fields + apply Medium utilization
+        portsEl.value = btn.dataset.ports ?? portsEl.value;
+        kwhEl.value   = btn.dataset.kwh   ?? kwhEl.value;
+        priceEl.value = btn.dataset.price ?? priceEl.value;
+        refreshUtilLabels();
+        const level = opts.keepUtilization && activeUtilization ? activeUtilization : 'medium';
+        applyUtilization(level);
+      } else {
+        // Custom — keep current input values, clear utilization
+        setActiveUtilization(null);
+        refreshUtilLabels();
+        render();
+      }
+    }
+
+    function applyUtilization(level: 'low' | 'medium' | 'high') {
+      setActiveUtilization(level);
+      if (activeScenario) {
+        const rate = parseFloat(activeScenario.dataset[`util${level[0].toUpperCase()}${level.slice(1)}`] || '0');
+        sessionsEl.value = String(rate);
+      }
+      render();
+    }
+
+    scenarioBtns.forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(btn));
+    });
+    utilizationBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const level = btn.dataset.utilization as 'low' | 'medium' | 'high';
+        applyUtilization(level);
+      });
+    });
+
+    /* Manual edits switch the visitor into "Custom" mode:
+       - sessions input edit → deselects utilization, leaves
+         scenario alone (sessions and utilization are 1:1 tied,
+         but ports/kwh/price still reflect the active scenario).
+       - ports/kwh/price input edit → auto-selects the Custom
+         scenario pill (the visitor has gone off-preset). */
+    sessionsEl.addEventListener('input', () => { setActiveUtilization(null); render(); });
+    sessionsEl.addEventListener('change', render);
+    [portsEl, kwhEl, priceEl].forEach(el => {
+      el.addEventListener('input', () => {
+        if (customScenarioBtn) {
+          setActiveScenario(customScenarioBtn);
+        } else {
+          setActiveScenario(null);
+        }
+        setActiveUtilization(null);
+        refreshUtilLabels();
+        render();
+      });
+      el.addEventListener('change', render);
+    });
+
+    // First-paint: pre-select the first real scenario (i.e. not
+    // the Custom pill, which is meant only for off-preset state)
+    // at Medium utilization so the calc opens with a coherent
+    // starting state rather than asking the visitor to decide
+    // before seeing any numbers.
+    const firstRealScenario = Array.from(scenarioBtns).find(b => b.dataset.scenario !== 'custom');
+    if (firstRealScenario) {
+      applyScenario(firstRealScenario);
+    } else {
+      render();
+    }
+
+    /* ─────────────  Estimate modal  ───────────── */
+    const modal       = $('estimate-modal');
+    const backdrop    = $('estimate-backdrop');
+    const panel       = $('estimate-panel');
+    const formView    = $('estimate-form-view');
+    const successView = $('estimate-success-view');
+    const form        = $<HTMLFormElement>('estimate-form');
+    const submitBtn   = $<HTMLButtonElement>('ef-submit');
+    const submitLabel = $('ef-submit-label');
+    const errorEl     = $('ef-error');
+
+    const recapSessions = $('recap-sessions');
+    const recapPorts    = $('recap-ports');
+    const recapKwh      = $('recap-kwh');
+    const recapPrice    = $('recap-price');
+    const recapModel    = $('recap-model');
+    const recapMonthly  = $('recap-monthly');
+
+    let lastFocus: HTMLElement | null = null;
+
+    function fillRecap() {
+      const r = calc();
+      recapSessions.textContent = sessionsEl.value || '—';
+      recapPorts.textContent    = portsEl.value    || '—';
+      recapKwh.textContent      = kwhEl.value      || '—';
+      recapPrice.textContent    = `$${parseFloat(priceEl.value || '0').toFixed(2)}`;
+      const checked = document.querySelector<HTMLInputElement>('input[name="model"]:checked');
+      /* Map the active model's data-model-id to a friendly recap
+         label. Falls back to "—" if nothing is selected. */
+      const modelId = checked?.dataset.modelId || '';
+      const modelLabelMap: Record<string, string> = {
+        'no-cost':    'No-Cost (~10%)',
+        'investment': 'Client Investment (100%)',
+        'hybrid':     'Hybrid (~50%)',
+        'leasing':    'Leasing (100%, ex. lease fee)',
+      };
+      recapModel.textContent = modelLabelMap[modelId] || '—';
+      recapMonthly.textContent = fmtUSD(r.monthly) + ' / mo';
+    }
+
+    function openModal() {
+      lastFocus = document.activeElement as HTMLElement;
+      fillRecap();
+      formView.classList.remove('hidden');
+      successView.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      submitBtn.disabled = false;
+      submitLabel.textContent = 'Send My Estimate Request';
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => {
+        backdrop.classList.add('opacity-100');
+        backdrop.classList.remove('opacity-0');
+        panel.classList.add('opacity-100', 'translate-y-0');
+        panel.classList.remove('opacity-0', 'translate-y-8', 'sm:translate-y-4');
+      });
+      setTimeout(() => $<HTMLInputElement>('ef-name').focus(), 120);
+    }
+
+    function closeModal() {
+      backdrop.classList.remove('opacity-100');
+      backdrop.classList.add('opacity-0');
+      panel.classList.remove('opacity-100', 'translate-y-0');
+      panel.classList.add('opacity-0', 'translate-y-8', 'sm:translate-y-4');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+        lastFocus?.focus?.();
+      }, 200);
+    }
+
+    document.querySelectorAll('[data-open-estimate]').forEach(el =>
+      el.addEventListener('click', openModal)
+    );
+    document.querySelectorAll('[data-close-estimate]').forEach(el =>
+      el.addEventListener('click', closeModal)
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.add('hidden');
+
+      const honeypot = (form.elements.namedItem('company_website') as HTMLInputElement | null)?.value;
+      if (honeypot) return;
+
+      const name    = (form.elements.namedItem('name')    as HTMLInputElement).value.trim();
+      const email   = (form.elements.namedItem('email')   as HTMLInputElement).value.trim();
+      const address = (form.elements.namedItem('address') as HTMLInputElement).value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!name || !emailOk || !address) {
+        errorEl.textContent = !emailOk && email
+          ? 'Please enter a valid email address.'
+          : 'Please complete name, email, and property address.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'Sending…';
+
+      // No backend yet — simulate the round-trip. When the API exists, replace
+      // this with a real fetch() to /api/estimate-request including the calc state.
+      await new Promise(resolve => setTimeout(resolve, 700));
+
+      formView.classList.add('hidden');
+      successView.classList.remove('hidden');
+      panel.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ─────────────  Sidebar tabs (next to calculator) ─────────────
+       3 tabs: HOW IT WORKS / BEYOND THE NUMBERS / BIGGER PICTURE.
+       Active tab gets a green underline + brighter text; panels are
+       toggled via the `hidden` attribute so screen readers see the
+       right one. */
+    const sidebarTabBtns = document.querySelectorAll<HTMLButtonElement>('[data-tab-btn]');
+    const sidebarPanels  = document.querySelectorAll<HTMLElement>('[data-tab-panel]');
+    function setSidebarTab(key: string) {
+      sidebarTabBtns.forEach(btn => {
+        const on = btn.dataset.tabBtn === key;
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.classList.toggle('text-evium-green', on);
+        btn.classList.toggle('!text-white', on);
+        btn.classList.toggle('border-evium-green', on);
+        btn.classList.toggle('border-transparent', !on);
+        btn.classList.toggle('bg-evium-green/[0.06]', on);
+      });
+      sidebarPanels.forEach(p => {
+        const on = p.dataset.tabPanel === key;
+        if (on) p.removeAttribute('hidden');
+        else    p.setAttribute('hidden', '');
+      });
+    }
+    sidebarTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => setSidebarTab(btn.dataset.tabBtn || ''));
+    });
+    setSidebarTab('howitworks');
+
+    /* ─────────────  Live Console — segmented-control enhancements  ───
+       The engine above toggles .is-active on the segment buttons and
+       :checked on the model radios. This block (1) slides each green
+       thumb by measuring the active segment and writing its width +
+       translateX inline — the base `transition: transform` animates
+       the slide — and (2) rewrites the live model-description card
+       when the financial model changes. A MutationObserver keeps the
+       thumbs correct even when state changes without a click (manual
+       input edits deselect the scenario + utilization); a resize
+       listener re-measures when a track reflows. */
+    (() => {
+      const consoleRoot = document.querySelector<HTMLElement>('.lc-layout-f');
+      if (!consoleRoot) return;
+      const segs = Array.from(consoleRoot.querySelectorAll<HTMLElement>('.lc-e-seg'));
+
+      const syncThumbs = () => {
+        segs.forEach(seg => {
+          const thumb = seg.querySelector<HTMLElement>('.lc-e-thumb');
+          if (!thumb) return;
+          let active: HTMLElement | null = null;
+          if (seg.classList.contains('lc-e-seg-model')) {
+            active = Array.from(seg.querySelectorAll<HTMLElement>('.lc-model-option'))
+              .find(o => o.querySelector<HTMLInputElement>('input')?.checked) || null;
+          } else {
+            active = seg.querySelector<HTMLElement>('.lc-e-seg-btn.is-active');
+          }
+          if (!active) { thumb.style.opacity = '0'; return; }
+          thumb.style.opacity = '';
+          thumb.style.width = active.offsetWidth + 'px';
+          thumb.style.transform = `translateX(${active.offsetLeft - thumb.offsetLeft}px)`;
+        });
+      };
+
+      /* Live model description card — copy is display-only, grounded
+         in the four canonical Evium financial models. */
+      const MODEL_DETAIL: Record<string, {
+        title: string; badge: string; detail: string;
+        capital: string; operations: string; revenue: string; term: string;
+      }> = {
+        'no-cost': {
+          title: 'No-Cost', badge: '~10% revenue share',
+          detail: 'Evium funds the capital and runs the site end to end — hardware, install, software, support, and the cost of every kilowatt sold. You contribute the location; revenue is shared, weighted in your favor.',
+          capital: 'Evium', operations: 'Evium', revenue: 'Shared, host-favored', term: '5 yr + 5',
+        },
+        'investment': {
+          title: 'Client Investment', badge: '100% revenue',
+          detail: 'You finance and own the entire installation, run it, and keep every dollar it earns. Evium’s role narrows to rebate processing and incentive capture — the best fit when you have the capital and an operations team.',
+          capital: 'You', operations: 'You', revenue: '100% yours', term: 'You own it',
+        },
+        'hybrid': {
+          title: 'Hybrid', badge: 'Negotiated split',
+          detail: 'A blend of No-Cost and Client Investment — you contribute part of the capital, and your share of revenue scales up with what you put in. Tuned site by site to land where you want on the risk-vs-upside curve.',
+          capital: 'Shared', operations: 'Evium', revenue: 'Scales with capital', term: 'Negotiated',
+        },
+        'leasing': {
+          title: 'Leasing', badge: '100% revenue',
+          detail: 'Evium finances the hardware as a lease. You make a fixed monthly payment, keep all gross revenue, and hold a buy-out option at term end — payment and term sized to your site’s projected throughput.',
+          capital: 'Evium-financed', operations: 'Negotiated', revenue: 'Gross − lease', term: 'Buy-out at end',
+        },
+      };
+      const mCard = consoleRoot.querySelector<HTMLElement>('[data-model-card]');
+      const mEls = mCard ? {
+        title:   mCard.querySelector<HTMLElement>('[data-model-title]'),
+        badge:   mCard.querySelector<HTMLElement>('[data-model-badge]'),
+        blurb:   mCard.querySelector<HTMLElement>('[data-model-blurb]'),
+        capital: mCard.querySelector<HTMLElement>('[data-spec-capital]'),
+        ops:     mCard.querySelector<HTMLElement>('[data-spec-ops]'),
+        revenue: mCard.querySelector<HTMLElement>('[data-spec-revenue]'),
+        term:    mCard.querySelector<HTMLElement>('[data-spec-term]'),
+      } : null;
+      const updateModelCard = (immediate?: boolean) => {
+        if (!mCard || !mEls) return;
+        const checked = consoleRoot.querySelector<HTMLInputElement>('input[name="model"]:checked');
+        const id = checked?.dataset.modelId;
+        const d = id ? MODEL_DETAIL[id] : null;
+        if (!d) return;
+        const apply = () => {
+          if (mEls.title)   mEls.title.textContent   = d.title;
+          if (mEls.badge)   mEls.badge.textContent   = d.badge;
+          if (mEls.blurb)   mEls.blurb.textContent   = d.detail;
+          if (mEls.capital) mEls.capital.textContent = d.capital;
+          if (mEls.ops)     mEls.ops.textContent     = d.operations;
+          if (mEls.revenue) mEls.revenue.textContent = d.revenue;
+          if (mEls.term)    mEls.term.textContent    = d.term;
+          mCard.classList.remove('is-swapping');
+        };
+        if (immediate) { apply(); return; }
+        mCard.classList.add('is-swapping');
+        window.setTimeout(apply, 150);
+      };
+
+      syncThumbs();
+      updateModelCard(true);
+      requestAnimationFrame(syncThumbs);
+      new MutationObserver(syncThumbs).observe(consoleRoot, {
+        subtree: true, attributes: true, attributeFilter: ['class'],
+      });
+      consoleRoot.addEventListener('change', (e) => {
+        const t = e.target;
+        if (t instanceof HTMLInputElement && t.name === 'model') {
+          syncThumbs();
+          updateModelCard();
+        }
+      });
+      window.addEventListener('resize', syncThumbs);
+    })();
+
+    /* Section-tabs JS removed — the "By the Numbers / Your Options"
+       tabbed section it controlled is gone. Utilization ranges are
+       now part of the scenario picker above; financial models are
+       Step 2 inside the calculator card. */
+  </script>
+
+</Layout>

@@ -1,0 +1,44 @@
+---
+/**
+ * /home-v4 — Home page, v4 (HeaderV5 testing sandbox).
+ * ─────────────────────────────────────────────────────
+ * Full decoupled copy of /home-v3, ONE difference: uses
+ * HeaderV5 (the experimental fork of v4 where the car-drag
+ * peek engine is being rebuilt) instead of HeaderV4. Body
+ * carries `page-home-v4` so HeaderV5 / v4-scene components
+ * can branch on it without touching home-v3.
+ *
+ * Every scene is a V4-cloned component (HeroHomeMainV4,
+ * HeroPortalSolutionsSceneV4, LocationsMapSectionV4,
+ * HomeFaqSectionV4, HomeAppDownloadSectionV4) so any
+ * peek-related CSS / DOM additions for the rail's
+ * "sticky-pin temporarily disabled during peek" behaviour
+ * (Option 2) live on V4 components only and can't leak
+ * back into the live home-v3 experience.
+ *
+ * SiteFooter stays sitewide-shared. ConsultationStickyTab
+ * now has a V4-only clone (ConsultationStickyTabV2) that
+ * uses the new V2 form in its drawer + a narrower edge
+ * tab + refined frosted-glass shading. Other surfaces
+ * keep the V1 sticky tab.
+ */
+import Layout from '../layouts/Layout.astro';
+import HeroHomeMainV4 from '../components/heroes/HeroHomeMainV4.astro';
+import HeroPortalSolutionsSceneV4 from '../components/heroes/HeroPortalSolutionsSceneV4.astro';
+import LocationsMapSectionV4 from '../components/LocationsMapSectionV4.astro';
+import HomeFaqSectionV4 from '../components/HomeFaqSectionV4.astro';
+import HomeAppDownloadSectionV4 from '../components/HomeAppDownloadSectionV4.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTabV2.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+<Layout title="Evium Charging — Home v4" headerVariant="v5" bodyClass="page-home-v4">
+  <HeroHomeMainV4 />
+  <HeroPortalSolutionsSceneV4 />
+  <LocationsMapSectionV4 />
+  <HomeFaqSectionV4 />
+  <HomeAppDownloadSectionV4 />
+  <SiteFooter />
+
+  <!-- Sticky right-edge tab + drawer. Same as on /home-v3. -->
+  <ConsultationStickyTab />
+</Layout>

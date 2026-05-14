@@ -1,0 +1,2754 @@
+---
+/**
+ * HeroHomeMainV3
+ * ──────────────
+ * Home hero v3 — decoupled clone of HeroHomeMainV2 reworked to use a
+ * 5-field consultation form as the primary CTA (v2 used an eligibility
+ * pill). Used by /home-v3.
+ *
+ * Layout (1440 × 900, all inside a 100vh-locked hero):
+ *   Row 1 : title  (full-width, GRAND, 7 rem peak)
+ *   Row 2 : sub    (full-width, 2 lines, hanging-headline offset)
+ *   Row 3 : form (LEFT, 400 max-width) | 3 side cards (RIGHT)
+ *   Row 4 : stats panel (full-width, lower-left aligned)
+ *
+ * The form is embedded inline here; once the form-component lift is
+ * done it'll become `<ConsultationForm />` so the same form can render
+ * inside the right-edge sticky-tab drawer too.
+ */
+/* V2 form is V4-only. Other surfaces (V3 hero, sticky-tab
+   drawer) still use the original ConsultationForm. */
+import ConsultationForm from '../ConsultationFormV2.astro';
+---
+
+<section class="home-hero" aria-label="Evium Charging — home hero">
+
+  <!-- Background photo + dark gradient overlay for text
+       legibility. Reverted to /home-v2's exact structure:
+       .hh-bg fills the hero (which is locked to 100vh),
+       and the seam + green glows are nested inside it so
+       they live at the hero's bottom = portal section's
+       top by construction. This is what makes the seam
+       handoff math work — the seam's bottom-edge color
+       matches the portal stage's top-edge color. -->
+  <div class="hh-bg" aria-hidden="true">
+    {/* Mobile-only background image, swapped in by the browser
+        at ≤860 px via the <picture> + <source media> mechanism.
+        Desktop continues to render the wide
+        Home-Hero-Logos-Added.png exactly as before — the
+        <img> below is the desktop rendered element when no
+        <source> matches. */}
+    <picture>
+      <source media="(max-width: 860px)" srcset="/images/heroes/home-hero-mobile.png" />
+      <img
+        src="/images/Home-Hero-Logos-Added.png"
+        alt=""
+        class="hh-bg-img"
+        draggable="false"
+        fetchpriority="high"
+      />
+    </picture>
+    <div class="hh-overlay"></div>
+    <!-- Seam bridge: continues the portal stage's radial gradient UPWARD
+         into the bottom of the hero. At the seam pixel this overlay paints
+         the exact color the portal stage paints at its own y=0 → the two
+         sides meet as one continuous gradient, no hard line. -->
+    <div class="hh-bottom-seam" aria-hidden="true"></div>
+    <div class="hh-accent" aria-hidden="true"></div>
+    <div class="hh-accent-right" aria-hidden="true"></div>
+  </div>
+
+  <!-- Content — GRID with grid-template-areas:
+         row 1 : title spans the full inner width so it
+                 can scale up to a /home-v2-class
+                 (4-5 rem) headline without being clamped
+                 by either column's width.
+         row 2 : LEFT  col = .hh-content-stack (sub →
+                              form → stats)
+                 RIGHT col = .hh-side-actions (3 cards
+                              beside the EVIUM-logo
+                              charger in the photo). -->
+  <div class="hh-inner">
+
+    <h1 class="hh-title">
+      Every property.<br />
+      <span class="hh-accent-word">Fully charged.</span>
+    </h1>
+
+    <!-- Sub lives OUTSIDE the .hh-content-stack so it can
+         span the full inner width (both grid columns)
+         and wrap to 2 lines. Constrained inside the
+         stack (≈ 460 px) it wrapped to 3 lines, which
+         felt cramped under the GRAND title. -->
+    <p class="hh-sub">
+      Evium designs, installs, and operates EV charging networks for
+      multifamily, fleet, retail, and highway — with zero upfront cost
+      and full revenue share.
+    </p>
+
+    <div class="hh-content-stack">
+
+    <!-- Consultation form — extracted to a shared
+         ConsultationForm component so the same form
+         can also render inside the right-edge sticky-
+         tab drawer. The inline form markup (5 fields +
+         submit + trust line) and ~250 lines of related
+         CSS used to live here. -->
+    <ConsultationForm formId="hh-form" />
+
+    </div><!-- /.hh-content-stack — moved closing tag UP so stats can live as a sibling -->
+
+    <!-- Stats panel — three credentials inline (number +
+         text next to each other, NOT stacked). Lifted OUT
+         of the .hh-content-stack so it can span the full
+         inner content width and let each stat block have
+         room to lay out horizontally without the unit
+         text overflowing the green divider. -->
+    <ul class="hh-stats" role="list">
+      <li class="hh-stat">
+        <span class="hh-stat-n">
+          <span class="hh-stat-num">500+</span>
+          <span class="hh-stat-unit">
+            <span>Chargers</span>
+            <span>Deployed</span>
+          </span>
+        </span>
+        <span class="hh-stat-l">Across multifamily, fleet, retail and highway sites.</span>
+      </li>
+      <li class="hh-stat">
+        <span class="hh-stat-n">
+          <span class="hh-stat-num">$25M+</span>
+          <span class="hh-stat-unit">
+            <span>Funding</span>
+            <span>Secured</span>
+          </span>
+        </span>
+        <span class="hh-stat-l">Public and private capital, including NEVI awards.</span>
+      </li>
+      <li class="hh-stat">
+        <span class="hh-stat-n">
+          <span class="hh-stat-num">18</span>
+          <span class="hh-stat-unit">
+            <span>States</span>
+            <span>Active</span>
+          </span>
+        </span>
+        <span class="hh-stat-l">Networks live from coast to coast and growing.</span>
+      </li>
+      <!-- 4th stat — mobile-only. At desktop the 3 stats read as a
+           balanced row; on phones they fall into a 2×2 grid and
+           without a 4th item the bottom-right cell was empty.
+           Hidden at desktop via `.hh-stat--mobile { display: none }`,
+           shown at ≤760px inside the mobile @media block. -->
+      <li class="hh-stat hh-stat--mobile">
+        <span class="hh-stat-n">
+          <span class="hh-stat-num">24/7</span>
+          <span class="hh-stat-unit">
+            <span>Live</span>
+            <span>Support</span>
+          </span>
+        </span>
+        <span class="hh-stat-l">Live monitoring and on-call help, every hour of every day.</span>
+      </li>
+    </ul>
+
+    <!-- Right-side action cluster — three premium glass
+         cards stacked vertically in the photo's right
+         deadspace. Replaces the earlier text-link row
+         (See how it works / Explore chargers / Owner
+         Portal) which:
+           1. "How it works" linked to an unfinished page
+              that's not safe to surface yet
+           2. "Owner Portal" duplicates the prominent
+              software/portal section below the hero
+           3. Read as low-effort tertiary text rather than
+              a deliberate secondary CTA cluster
+         New triplet maps to the strongest non-form paths
+         a first-time visitor cares about, and lives in
+         the right-side photo space (not as a row at the
+         bottom of the left column) so the left column
+         can focus on the read-down promise (title → sub
+         → form → stats) and the right side has a
+         deliberate companion stack instead of unused
+         photo background. -->
+    <aside class="hh-side-actions" aria-label="Other ways to explore Evium">
+      <a href="/services" class="hh-side-card">
+        <span class="hh-side-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.4"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.4"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.4"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.4"/>
+          </svg>
+        </span>
+        <span class="hh-side-body">
+          <span class="hh-side-title">Explore Services</span>
+          <span class="hh-side-sub">Multifamily · Fleet · Highway · Retail</span>
+        </span>
+        <svg class="hh-side-arrow" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <a href="/products-v2" class="hh-side-card">
+        <span class="hh-side-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2Z" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="hh-side-body">
+          <span class="hh-side-title">View Hardware</span>
+          <span class="hh-side-sub">Level 2 + DC Fast charger lineup</span>
+        </span>
+        <svg class="hh-side-arrow" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <a href="/contact" class="hh-side-card">
+        <span class="hh-side-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path d="M3 10h18M8 3v4M16 3v4"/>
+          </svg>
+        </span>
+        <span class="hh-side-body">
+          <span class="hh-side-title">Talk to an Expert</span>
+          <span class="hh-side-sub">Book a 30-min consultation</span>
+        </span>
+        <svg class="hh-side-arrow" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </aside>
+
+  </div><!-- /.hh-inner -->
+
+</section>
+
+<style>
+  /* ── Shell ───────────────────────────────────────────── */
+  .home-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 620px;
+    overflow: hidden;
+    background: #0d1a22;
+    color: #ffffff;
+    font-family: 'Maven Pro', sans-serif;
+  }
+
+  /* ── Background image + overlays ─────────────────────── */
+  /* Reverted to /home-v2's exact structure: .hh-bg fills
+     the entire hero. With the hero shell now locked to
+     100vh (see override below), .hh-bg = 100vh, the photo
+     fills it, and the seam + glows nested inside land at
+     the hero's bottom — which is where the portal section
+     begins, so the v2 seam math just works. */
+  .hh-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hh-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Match /home-v2's crop: shift the framing 12% past
+       center vertically so the parking-lot scene + chargers
+       sit in the visible window. */
+    object-position: center 62%;
+    user-select: none;
+    pointer-events: none;
+    /* Very subtle zoom-in on load — gives the shot life */
+    animation: hh-bg-zoom 18s ease-out forwards;
+  }
+  @keyframes hh-bg-zoom {
+    from { transform: scale(1.05); }
+    to   { transform: scale(1);    }
+  }
+  /* Dark gradient: stronger on the LEFT where the text lives, lighter on
+     the right so the parking-lot scene (car + charger stand) stays
+     readable. Bottom vertical fade lands on solid #0d1a22 at 100 % — the
+     portal section below mirrors this color with its own top fade, so
+     the seam between the two sections disappears. */
+  .hh-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        100deg,
+        rgba(13, 26, 34, 0.92) 0%,
+        rgba(13, 26, 34, 0.78) 28%,
+        rgba(13, 26, 34, 0.42) 55%,
+        rgba(13, 26, 34, 0.15) 80%,
+        rgba(13, 26, 34, 0.18) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(13, 26, 34, 0) 58%,
+        rgba(13, 26, 34, 0.35) 78%,
+        rgba(13, 26, 34, 0.80) 92%,
+        #0d1a22 100%
+      );
+  }
+  /* Seam bridge — continues the portal stage's radial gradient upward
+     into the hero's bottom zone. Math:
+       - Portal stage uses `ellipse 90% 80% at 50% 46%` on a 100vh box.
+         Those are the ellipse RADII (90%/80%), not diameters.
+       - Stage ellipse y-center is 46vh below its own top.
+       - Our overlay sits at the hero's bottom. We want the bottom pixel
+         of this overlay (= hero's bottom = stage's y=0) to paint the
+         exact color the stage paints at its own y=0.
+       - With overlay height = 35vh and stage height = 100vh, the stage's
+         ellipse center lives `overlay_h + 46vh` = 35vh + 46vh = 81vh
+         below the overlay's top → 81 / 35 = 231% in overlay coords.
+         The y-radius (80vh) becomes 80 / 35 = 229% in overlay coords.
+     The mask fades the overlay in from the top so the photo stays
+     visible above and the full gradient only lands near the bottom. */
+  .hh-bottom-seam {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 35vh;
+    background: radial-gradient(
+      ellipse 90% 229% at 50% 231%,
+      #2a4a5e 0%,
+      #1a2f3a 45%,
+      #081420 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to top, black 0%, black 30%, transparent 100%
+    );
+    mask-image: linear-gradient(
+      to top, black 0%, black 30%, transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Brand-green side glow — "Evium mark" in the lower-left corner.
+     Key layout: the element's BOTTOM edge sits exactly at the hero's
+     bottom (bottom: 0), and the element is sized so the radial's 0-stop
+     transparent ring lands at ~81% of the element — before the element's
+     own edge. That means the glow radial fades to fully transparent
+     WITHIN the hero, before any clipping, so there's no horizontal
+     endpoint line at the seam. The green blends seamlessly into the
+     teal of .hh-bottom-seam below. */
+  .hh-accent {
+    position: absolute;
+    left: -10%;
+    bottom: 0;
+    width: 60%;
+    height: 72%;
+    background: radial-gradient(
+      ellipse 42% 36% at 50% 62%,
+      rgba(45, 200, 86, 0.26) 0%,
+      rgba(45, 200, 86, 0.11) 38%,
+      rgba(45, 200, 86, 0.04) 65%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    filter: blur(22px);
+    pointer-events: none;
+  }
+  /* Mirror glow on the right — same self-contained falloff technique,
+     just smaller + subtler so it reads as a counterpoint, not a match. */
+  .hh-accent-right {
+    position: absolute;
+    right: -8%;
+    bottom: 0;
+    width: 46%;
+    height: 60%;
+    background: radial-gradient(
+      ellipse 40% 34% at 50% 60%,
+      rgba(45, 200, 86, 0.22) 0%,
+      rgba(45, 200, 86, 0.09) 38%,
+      rgba(45, 200, 86, 0.03) 65%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    /* Dialed down from full intensity so it doesn't re-tint the
+       right-hand portion of the photo that the overlay has
+       deliberately left clearer. */
+    opacity: 0.55;
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  /* ── Content ─────────────────────────────────────────── */
+  .hh-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding:
+      clamp(90px, 13vh, 140px)     /* top — clears the fixed nav */
+      clamp(24px, 5vw, 80px)
+      clamp(40px, 8vh, 80px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1200px;
+  }
+
+  /* ── Main headline — scaled up to fill the top of the content block
+       now that the eyebrow is gone. Big & bold, green accent on line 2. */
+  .hh-title {
+    margin: 0 0 clamp(20px, 2.4vw, 32px);
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 0.96;
+    letter-spacing: -0.032em;
+    color: #ffffff;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+  .hh-accent-word {
+    color: #2DC856;
+    /* Subtle green glow so the accent holds presence against the photo */
+    text-shadow:
+      0 2px 28px rgba(45, 200, 86, 0.45),
+      0 0 60px rgba(45, 200, 86, 0.15);
+  }
+
+  /* ── Subtitle ────────────────────────────────────────── */
+  .hh-sub {
+    margin: 0 0 clamp(28px, 3.2vw, 44px);
+    font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 54ch;
+  }
+
+  /* ── Prompt label — sits above the pill as a conversational cue.
+       Size lands between the subtitle and the tertiary micro-links, so it
+       reads as a friendly lead-in without competing with the subtitle's
+       full-sentence body copy. Uppercase + tracked so it echoes the
+       "SEE HOW IT WORKS" / "EXPLORE CHARGERS" links. */
+  .hh-prompt {
+    margin: 0 0 clamp(14px, 1.4vw, 18px);
+    font-size: clamp(0.84rem, 0.95vw, 0.95rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* ── Product-finder pill — primary hero interaction.
+       Two custom dropdowns + green CTA. Width is trimmed from the old
+       address-lookup pill (820–870 px) to stay tighter to the content
+       block so it no longer reaches toward the parking-lot photo. */
+  .hh-eligibility {
+    max-width: clamp(720px, 48vw, 780px);
+    margin: 0 0 clamp(18px, 2.2vw, 26px);
+  }
+  .hh-eligibility-row {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(8px, 0.8vw, 10px);
+    background: rgba(255, 255, 255, 0.96);
+    padding: clamp(6px, 0.55vw, 8px);
+    border-radius: 999px;
+    box-shadow:
+      0 14px 38px rgba(0, 0, 0, 0.32),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .hh-eligibility-row:focus-within {
+    box-shadow:
+      0 16px 42px rgba(45, 200, 86, 0.28),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 2px rgba(45, 200, 86, 0.65);
+  }
+  .hh-eligibility-field {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 0.8vw, 12px);
+    flex: 1 1 auto;
+    min-width: 0; /* allow input to shrink on narrow */
+    padding: 0 clamp(10px, 1vw, 16px);
+  }
+  .hh-eligibility-icon {
+    width: clamp(18px, 1.5vw, 22px);
+    height: clamp(18px, 1.5vw, 22px);
+    display: block;
+    color: rgba(13, 26, 34, 0.48);
+    flex-shrink: 0;
+  }
+  /* ── Select fields — segment + priority ──────────────────
+     Both fields use a custom popover dropdown (native <select> is
+     kept in the DOM for form semantics only). Field 1 (segment) has
+     no left border; field 2 (priority) carries a thin vertical
+     divider on its left edge as a subtle field separator.
+     Both fields share the remaining pill width evenly (flex: 1 1 0)
+     after the submit button reserves its own width on the right. */
+  .hh-eligibility-field--select {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    cursor: pointer;
+  }
+  .hh-eligibility-field--priority {
+    border-left: 1px solid rgba(13, 26, 34, 0.09);
+  }
+  /* Icon, caret, and hidden form control are all non-interactive — every
+     click lands on either the trigger button or the field's own click
+     handler, which opens the custom menu. */
+  .hh-eligibility-select-icon,
+  .hh-eligibility-caret {
+    pointer-events: none;
+  }
+  .hh-eligibility-select-icon {
+    position: absolute;
+    left: clamp(10px, 1vw, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  .hh-eligibility-dd-hidden {
+    /* Kept in DOM for form submission only; visually gone. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Trigger button — styled to look exactly like the old native select
+     text row. Stretches across the field so clicking anywhere opens
+     the menu. */
+  .hh-eligibility-dd-trigger {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.9rem, 1.05vw, 1.05rem);
+    font-weight: 500;
+    color: #0d1a22;
+    letter-spacing: 0.005em;
+    cursor: pointer;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    /* Reserve icon room on the left, caret room on the right. The
+       button itself extends under both via this padding so its click
+       hit area covers the full pill width. */
+    padding: clamp(10px, 1vw, 14px)
+             22px
+             clamp(10px, 1vw, 14px)
+             calc(clamp(18px, 1.5vw, 22px) + clamp(6px, 0.8vw, 12px));
+  }
+  .hh-eligibility-dd-label[data-placeholder] {
+    color: rgba(13, 26, 34, 0.45);
+    font-weight: 500;
+  }
+  .hh-eligibility-dd-label[data-selected] {
+    color: #0d1a22;
+    font-weight: 500;
+  }
+
+  .hh-eligibility-caret {
+    position: absolute;
+    right: clamp(10px, 1vw, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(14px, 1.2vw, 18px);
+    height: clamp(14px, 1.2vw, 18px);
+    color: rgba(13, 26, 34, 0.48);
+    transition: transform 0.22s ease, color 0.22s ease;
+  }
+  /* Caret flips on open — driven by data-open on the field */
+  .hh-eligibility-field--select[data-open] .hh-eligibility-caret {
+    transform: translateY(-50%) rotate(180deg);
+    color: #2DC856;
+  }
+
+  /* Custom menu — positioned below the pill with an 8px gap so it
+     never covers the trigger text (the core fix over native <select>
+     picker behavior). */
+  .hh-eligibility-dd-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: -1px;
+    right: -1px;
+    margin: 0;
+    padding: 6px 0;
+    background: #ffffff;
+    border: 1px solid rgba(13, 26, 34, 0.1);
+    border-radius: 14px;
+    box-shadow:
+      0 18px 48px rgba(6, 14, 18, 0.22),
+      0 4px 12px rgba(6, 14, 18, 0.08);
+    list-style: none;
+    z-index: 50;
+    max-height: 320px;
+    overflow-y: auto;
+    font-family: 'Maven Pro', sans-serif;
+    /* Subtle entrance animation matching the caret's timing */
+    transform-origin: top center;
+    animation: propdd-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hh-eligibility-dd-menu[hidden] { display: none; }
+  @keyframes propdd-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .hh-eligibility-dd-menu li {
+    padding: 11px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #0d1a22;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+    outline: none;
+  }
+  .hh-eligibility-dd-menu li:hover,
+  .hh-eligibility-dd-menu li:focus,
+  .hh-eligibility-dd-menu li[aria-selected="true"] {
+    background: rgba(45, 200, 86, 0.1);
+    color: #187a30;
+  }
+
+  .hh-eligibility-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    /* Horizontal padding max trimmed 26 → 22 so the button surrenders
+       ~8 px back to the address input when the pill hits its 870 px
+       cap. CHECK ELIGIBILITY still reads with plenty of air around it. */
+    padding: clamp(10px, 1.1vw, 14px) clamp(18px, 1.8vw, 22px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.72rem, 0.88vw, 0.88rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #0d1a22;
+    background: #2DC856;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px rgba(45, 200, 86, 0.35);
+    transition: background 0.18s ease, gap 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
+  }
+  .hh-eligibility-btn:hover {
+    background: #36e464;
+    gap: 12px;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(45, 200, 86, 0.48);
+  }
+  .hh-eligibility-btn:active {
+    transform: translateY(0);
+  }
+  /* ── Match card — appears inline below the pill after submit ──
+     Reuses the pill's white glassmorphism vocabulary so the card
+     reads as the pill's "answer." Photo on the left, copy + CTAs
+     on the right. Slides in with a short opacity + translateY
+     animation matching the dropdown's propdd-in timing. */
+  .hh-match {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 2vw, 28px);
+    max-width: clamp(720px, 48vw, 780px);
+    margin: clamp(16px, 1.8vw, 22px) 0 clamp(20px, 2.4vw, 28px);
+    padding: clamp(14px, 1.4vw, 20px) clamp(18px, 2vw, 26px);
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 26px;
+    box-shadow:
+      0 14px 38px rgba(0, 0, 0, 0.32),
+      0 4px 10px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform-origin: top left;
+    animation: hh-match-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hh-match[hidden] { display: none; }
+  @keyframes hh-match-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);     }
+  }
+  .hh-match-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(13, 26, 34, 0.06);
+    color: rgba(13, 26, 34, 0.55);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .hh-match-close svg { width: 14px; height: 14px; }
+  .hh-match-close:hover {
+    background: rgba(13, 26, 34, 0.12);
+    color: #0d1a22;
+  }
+  .hh-match-photo {
+    flex: 0 0 clamp(96px, 10vw, 128px);
+    height: clamp(96px, 10vw, 128px);
+    border-radius: 18px;
+    background: linear-gradient(160deg, #f4f6f8 0%, #e7ecef 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hh-match-photo img {
+    max-width: 84%;
+    max-height: 84%;
+    object-fit: contain;
+    user-select: none;
+  }
+  .hh-match-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* Reserve space for the absolute close button */
+    padding-right: 26px;
+  }
+  .hh-match-eyebrow {
+    font-size: clamp(0.62rem, 0.72vw, 0.72rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #187a30;
+  }
+  .hh-match-lead {
+    margin: 2px 0 0;
+    font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+    font-weight: 500;
+    color: rgba(13, 26, 34, 0.62);
+  }
+  .hh-match-title {
+    margin: 0;
+    font-size: clamp(1.1rem, 1.45vw, 1.45rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: #0d1a22;
+  }
+  .hh-match-copy {
+    margin: 4px 0 10px;
+    font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+    font-weight: 500;
+    line-height: 1.5;
+    color: rgba(13, 26, 34, 0.72);
+  }
+  .hh-match-copy span {
+    color: #0d1a22;
+    font-weight: 700;
+  }
+  .hh-match-actions {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.1vw, 14px);
+    flex-wrap: wrap;
+  }
+  .hh-match-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: clamp(9px, 1vw, 12px) clamp(16px, 1.6vw, 20px);
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.7rem, 0.82vw, 0.82rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #0d1a22;
+    background: #2DC856;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 6px 14px rgba(45, 200, 86, 0.35);
+    transition: background 0.18s ease, gap 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
+  }
+  .hh-match-primary:hover {
+    background: #36e464;
+    gap: 12px;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(45, 200, 86, 0.48);
+  }
+  .hh-match-primary svg { width: 1em; height: 1em; display: block; }
+  .hh-match-secondary {
+    font-family: 'Maven Pro', sans-serif;
+    font-size: clamp(0.7rem, 0.82vw, 0.82rem);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(13, 26, 34, 0.62);
+    text-decoration: none;
+    padding: 6px 4px;
+    transition: color 0.15s ease;
+  }
+  .hh-match-secondary:hover { color: #0d1a22; }
+
+  /* ── Tertiary action row — "See how it works" + "Explore chargers"
+       inline side by side, separated by a thin vertical divider. This
+       row replaces the old absolute bottom-center scroll cue that used
+       to collide with the stats strip once the match card opened and
+       pushed content down. Both links share the same uppercase / tracked
+       treatment so they read as a matched pair. */
+  .hh-actions-row {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(14px, 1.6vw, 22px);
+    margin: 0 0 clamp(30px, 4vw, 52px);
+    align-self: flex-start;
+  }
+  .hh-actions-row > a + a {
+    padding-left: clamp(14px, 1.6vw, 22px);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .hh-secondary-link,
+  .hh-scroll-link,
+  .hh-portal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: clamp(0.7rem, 0.85vw, 0.88rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    transition: color 0.18s ease, gap 0.18s ease;
+  }
+  .hh-secondary-link:hover,
+  .hh-scroll-link:hover,
+  .hh-portal-link:hover {
+    color: #2DC856;
+    gap: 12px;
+  }
+  .hh-secondary-arrow,
+  .hh-scroll-link-icon,
+  .hh-portal-link-icon {
+    width: 1em;
+    height: 1em;
+    display: block;
+    flex-shrink: 0;
+  }
+  /* Subtle bounce on the down-arrow keeps the "scroll down" affordance
+     the old absolute scroll cue had, just at tertiary-link scale. */
+  .hh-scroll-link-icon {
+    animation: hh-bounce 2.2s ease-in-out infinite;
+  }
+  /* Owner Portal arrow renders in brand green by default (inherits
+     from the original mobile-portal-cta treatment) so the link reads
+     as a branded external action alongside the two in-page links. */
+  .hh-portal-link-icon {
+    color: #2DC856;
+    transition: transform 0.18s ease;
+  }
+  .hh-portal-link:hover .hh-portal-link-icon {
+    transform: translateX(2px);
+  }
+  .hh-cta-arrow {
+    width: 1em;
+    height: 1em;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* ── Stats strip ─────────────────────────────────────────
+     Three stat blocks at desktop (500+ / $25M+ / 18 States) with
+     a sentence-case subtitle line under each. A 4th "24/7 Support"
+     block lives in the markup but is gated to mobile only via
+     .hh-stat--mobile so the desktop row keeps its original balanced
+     3-across rhythm. Top padding nudged down so the strip sits a
+     touch lower under the tertiary action row; number + subtitle
+     font sizes bumped a hair so the stats read with more presence. */
+  .hh-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(22px, 2.6vw, 44px);
+    margin: 0;
+    padding: clamp(28px, 2.8vw, 40px) 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    list-style: none;
+    max-width: 960px;
+  }
+  .hh-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 220px;   /* grow to fill, fall back to stacked at <220px */
+    max-width: 320px;  /* cap so three stats don't spread too wide */
+    min-width: 0;
+  }
+
+  /* 4th stat ("24/7 Live Support") — was previously gated to
+     mobile only via display: none. Now shown across all
+     viewports so the stats strip carries the round 4 stats
+     (Chargers / Funding / States / 24-7) at desktop too.
+     The class name is kept for backward compatibility but
+     no longer hides anything. */
+  .hh-stat-n {
+    display: inline-flex;     /* lets the stat sit as "number + stacked unit" */
+    align-items: center;      /* vertically center-align number vs stacked unit */
+    gap: 0.35em;              /* space between number and stacked unit words */
+    font-size: clamp(1.5rem, 2.1vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: #2DC856;
+    white-space: nowrap; /* keep the number line from wrapping */
+  }
+  /* Stacked unit words ("Chargers" / "Deployed") sit next to the big
+     number. 0.58em (was 0.5em) is the size where the two small words
+     read cleanly at every viewport without being distracting. Tight
+     line-height keeps the stack's total height close to the number's
+     so align-items: center on the parent reads as "side by side". */
+  /* "500+" number — bumped up relative to the stat block so a three-digit
+     count reads as confidently as a four-digit one next to the stacked unit. */
+  .hh-stat-num {
+    font-size: 1.28em;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+  .hh-stat-unit {
+    display: inline-flex;
+    flex-direction: column;
+    font-size: 0.58em;
+    line-height: 1;
+    letter-spacing: 0;   /* relax the negative tracking for smaller text */
+  }
+  .hh-stat-unit > span { display: block; }
+  .hh-stat-l {
+    font-size: clamp(0.8rem, 0.94vw, 0.94rem);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+    color: rgba(255, 255, 255, 0.62);
+    max-width: 30ch;      /* cap line width so subtitles wrap cleanly */
+    text-wrap: balance;   /* distribute words evenly across wrapped lines */
+  }
+
+  /* Down-arrow bounce — reused on the inline "Explore chargers" link. */
+  @keyframes hh-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.7; }
+    50%      { transform: translateY(3px); opacity: 1; }
+  }
+
+  /* ── Responsive — keep content readable on narrow screens ── */
+  @media (max-width: 760px) {
+    /* Title bump: at desktop the headline scales with viewport via
+       7vw, which on a 375-420 px phone lands at ~26-29 px — below
+       the 2.8rem min, so it clamps up to 2.8rem regardless. That
+       made the title feel small vs. the rest of the hero. On mobile
+       only, push the min/max range so the headline anchors the
+       hero's top half with more presence. Keeps wrapping behavior
+       (18ch max-width + text-wrap: balance) intact. */
+    .hh-title {
+      max-width: 100%;
+      font-size: clamp(3.1rem, 11.5vw, 3.8rem);
+    }
+
+    /* Anchor the content column to the top of the hero on mobile.
+       Desktop uses `justify-content: center` and generous top
+       padding (clamp(90px, 13vh, 140px)) which, combined with all
+       the stacked content below the headline, pushed the title far
+       down the viewport and left a big dead zone above it. On mobile
+       we want the title sitting right under the header, with the
+       rest of the hero flowing down from there. */
+    .hh-inner {
+      justify-content: flex-start;
+      padding-top: clamp(82px, 11vh, 100px);
+    }
+
+    /* Stats → predictable 2×2 grid on mobile. Prior flex-wrap
+       behavior with a 220 px basis produced a 2-col layout with
+       the 3rd stat alone on its own row — awkward gap. Showing
+       the mobile-only "24/7 Support" stat fills the 4th cell so
+       the grid lays out evenly. */
+    .hh-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 20px;
+    }
+    .hh-stat {
+      max-width: none;  /* let the grid cell govern width */
+    }
+    .hh-stat--mobile { display: flex; }
+    .hh-stat-n { white-space: normal; } /* allow wrap on narrow screens */
+
+    /* Compact stacked pill on mobile.
+       Why so many rules: the desktop pill layers padding in three
+       places (outer .hh-eligibility-row + per-field wrapper + each
+       .hh-eligibility-dd-trigger button). On desktop those layers
+       compose nicely into a generous single row. When the row
+       collapses into three stacked rows on mobile, that layered
+       padding *triples* into ~190 px of dead pill height that
+       covers most of the phone screen.
+       Fix: collapse the redundancy. The trigger button already owns
+       its tap-target height — so the field wrapper gives up its
+       vertical padding (becomes `padding: 0 10px`), the trigger
+       itself gets a tighter explicit 10/10 vertical padding (was
+       `clamp(10px, 1vw, 14px)`), and the CTA button drops from
+       `14px 16px` → `10px 16px`. Outer pill padding halves (`8px →
+       4px`) and the radius eases from pill-shaped `20px` → form-
+       card `14px`. Net result: ≈ 35% shorter pill, same visual
+       language, same dropdown behavior, same tap targets. */
+    .hh-eligibility-row {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 4px;
+      border-radius: 14px;
+      gap: 0;
+    }
+    .hh-eligibility-field { padding: 0 10px; }
+    .hh-eligibility-dd-trigger {
+      padding: 10px 22px 10px 32px;
+      font-size: 0.9rem;
+    }
+    .hh-eligibility-select-icon { left: 10px; }
+    .hh-eligibility-caret { right: 10px; width: 14px; height: 14px; }
+    /* When the row stacks, the divider between segment + priority
+       needs to flip from left-edge to top-edge — only the priority
+       field (2nd child) carries the divider at desktop, and it
+       should do the same stacked: a top border instead of a left. */
+    .hh-eligibility-field--priority {
+      border-left: 0;
+      border-top: 1px solid rgba(13, 26, 34, 0.09);
+    }
+    .hh-eligibility-btn {
+      justify-content: center;
+      padding: 10px 16px;
+      font-size: 0.72rem;
+    }
+
+    /* Match card stacks photo above copy on mobile */
+    .hh-match { flex-direction: column; align-items: stretch; padding: 18px; }
+    .hh-match-photo { width: 100%; height: 160px; flex: 0 0 auto; }
+    .hh-match-body  { padding-right: 0; }
+    .hh-match-actions .hh-match-primary,
+    .hh-match-actions .hh-match-secondary { flex: 1 1 auto; justify-content: center; text-align: center; }
+  }
+  @media (max-height: 620px) {
+    .hh-stats { display: none; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CONSULTATION FORM (replaces the v2 eligibility pill)
+     ───────────────────────────────────────────────────
+     2-COLUMN HERO LAYOUT
+       LEFT  column: headline + form (the conversion path)
+       RIGHT column: subhead + tertiary actions + stats
+                     (the supporting brief)
+
+     The .hh-inner becomes a CSS Grid. Each child .hh-col
+     wrapper is a flex column that stacks its own content
+     vertically. The form sits as a normal-flow block under
+     the headline in the left column — no absolute
+     positioning, no overlap math.
+
+     Right column is intentionally narrower so the focal
+     left column (with the form) earns more space. Right
+     column's content stays clear of the photo's middle-
+     right where the charger lives, but its own elements
+     can sit next to / over the photo edges.
+     ═══════════════════════════════════════════════════════════ */
+
+  .hh-inner {
+    /* GRID with template-areas (4 rows, UNTETHERED).
+       Stats spans both columns in row 4 BUT has its
+       own max-width (≈ 600 px) + `justify-self: start`,
+       so its visible right edge ends well short of the
+       cards' right edge. Stats and cards no longer
+       share an invisible right-rail.
+
+       Math at 1440 viewport:
+         Inner width    : 1200 (max-width, centered)
+         Padding-left   : 72
+         Padding-right  : 280
+         Inner content  : 232 → 1080 (848 wide)
+         Form col       : 400 px (form max-width)
+         Gap            : 28
+         Cards col      : 848 − 400 − 28 = 420
+         Cards END at   : 1080
+         Stats width    : capped at 600 px
+                          → right edge ≈ 832 (NOT 1080)
+                          → untethered from cards
+         Photo charger  : ≈ 1100 → 1300 (clear) */
+    display: grid !important;
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr) !important;
+    grid-template-areas:
+      "title title"
+      "sub   sub"
+      "info  cards"
+      "stats stats" !important;
+    column-gap: clamp(20px, 2.4vw, 32px) !important;
+    row-gap: clamp(14px, 2vw, 26px) !important;
+    align-items: center !important;
+    padding-top: clamp(32px, 5vh, 56px) !important;
+    padding-bottom: clamp(60px, 10vh, 96px) !important;
+    padding-right: clamp(140px, 14.5vw, 210px) !important;
+    /* Pull content slightly left so the title, sub, form,
+       and stats sit closer to the lefter rail. Was using
+       v2's base padding-left of clamp(24, 5vw, 80) = 72
+       at 1440, which made the title feel marginally
+       "inset" from the brand's left visual edge. Tighten
+       to ≈ 40 px so everything reads a touch more
+       confident against the hero's left side. */
+    padding-left: clamp(20px, 2.8vw, 44px) !important;
+    justify-content: flex-start !important;
+  }
+  .hh-title { grid-area: title; }
+  .hh-sub { grid-area: sub; }
+  .hh-content-stack { grid-area: info; }
+  .hh-side-actions { grid-area: cards; }
+  .hh-stats { grid-area: stats; }
+
+  /* Body-row left column — vertical stack of sub → form
+     → stats. Title is OUT of this stack now (lives in
+     its own grid row above), so this column's only job
+     is to host the conversion path. */
+  .hh-content-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(18px, 2.4vw, 32px);
+    min-width: 0;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  /* Hero shell uses /home-v2's exact behavior: locked
+     to 100vh + overflow: hidden. This is what makes the
+     seam transition between the hero photo and the
+     portal section land cleanly — the seam paints into
+     the bottom 35vh of the hero, and the bottom edge of
+     that seam IS the top edge of the portal section, so
+     the mathematically-matched gradients compose into
+     one continuous color flow.
+
+     For this to look right, all of the form-test hero's
+     content (title + sub + form + stats + actions) must
+     fit within 100vh. The compression overrides further
+     down (smaller title, no form-head, no stat
+     descriptors, tighter padding) get the stack to ≈
+     720 px, comfortably inside 900 px viewports. */
+  .home-hero {
+    /* Inherits v2's `height: 100vh; min-height: 620px;
+       overflow: hidden` from the base CSS; no overrides
+       needed here. Comment block kept so the dependency
+       on those base rules is explicit. */
+  }
+  /* ─── Right-side action cluster — premium glass cards ─
+     Three cards stacked vertically in the right grid
+     column. Each card is a 3-cell grid: icon (left) →
+     body (middle) → arrow (right). Hover lifts the card,
+     brightens the background, and slides the arrow.
+
+     Visual treatment is built to match the form-card's
+     vocabulary (glass surface, brand-green accents,
+     multi-layer shadow) so the hero reads as one
+     cohesive premium composition rather than a form on
+     one side and tertiary links on the other. */
+  .hh-side-actions {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 1.4vw, 16px);
+    width: 100%;
+    max-width: 380px;
+    /* CENTER-aligned vertically — cards sit at the same
+       vertical center as the form on the left, reading
+       as its visual peer. With the inner's right-padding
+       reserving space for the charger, the cards can
+       sit center-aligned without covering anything —
+       the layout reads as: form (left) ↔ cards (middle-
+       right) ↔ charger (far-right photo). */
+    justify-self: end;
+    align-self: center;
+  }
+  .hh-side-card {
+    display: grid;
+    grid-template-columns: clamp(44px, 4.6vw, 52px) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: clamp(13px, 1.5vw, 18px);
+    padding: clamp(16px, 1.9vw, 22px) clamp(18px, 2vw, 24px);
+    color: #ffffff;
+    text-decoration: none;
+    /* SWAPPED from stats — cards now wear a more
+       transparent treatment so the photo content
+       behind them (chargers / cars / trees) reads
+       through clearly. Lower opacity, lighter frost,
+       quieter shadows. */
+    background: rgba(13, 27, 34, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 4px 10px rgba(8, 18, 26, 0.16),
+      0 16px 36px rgba(8, 18, 26, 0.22);
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      background 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+    cursor: pointer;
+  }
+  .hh-side-card:hover {
+    transform: translateY(-2px);
+    background: rgba(13, 27, 34, 0.42);
+    border-color: rgba(45, 200, 86, 0.46);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 0 0 1px rgba(45, 200, 86, 0.28),
+      0 0 32px -4px rgba(45, 200, 86, 0.32),
+      0 6px 14px rgba(8, 18, 26, 0.22),
+      0 24px 56px rgba(8, 18, 26, 0.30);
+  }
+  .hh-side-card:focus-visible {
+    outline: 2px solid #2DC856;
+    outline-offset: 3px;
+  }
+  /* Icon — sits in a brand-green tinted square so it
+     reads as a deliberate visual anchor, not just a
+     decorative glyph. */
+  .hh-side-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(44px, 4.6vw, 52px);
+    height: clamp(44px, 4.6vw, 52px);
+    border-radius: 12px;
+    background: linear-gradient(
+      155deg,
+      rgba(45, 200, 86, 0.28) 0%,
+      rgba(45, 200, 86, 0.10) 100%
+    );
+    border: 1px solid rgba(45, 200, 86, 0.38);
+    color: #2DC856;
+    flex-shrink: 0;
+    /* Soft green halo around the icon at rest so the
+       branding reads even before hover. */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 0 18px -2px rgba(45, 200, 86, 0.30);
+    transition:
+      background 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+  .hh-side-card:hover .hh-side-icon {
+    background: linear-gradient(
+      155deg,
+      rgba(45, 200, 86, 0.40) 0%,
+      rgba(45, 200, 86, 0.18) 100%
+    );
+    border-color: rgba(45, 200, 86, 0.62);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 0 28px -2px rgba(45, 200, 86, 0.46);
+  }
+  .hh-side-icon svg {
+    width: clamp(22px, 2.3vw, 24px);
+    height: clamp(22px, 2.3vw, 24px);
+    display: block;
+  }
+  /* Body — title on top, subline below. */
+  .hh-side-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .hh-side-title {
+    font-size: clamp(1rem, 1.15vw, 1.15rem);
+    font-weight: 800;
+    letter-spacing: -0.008em;
+    line-height: 1.15;
+    color: #ffffff;
+  }
+  .hh-side-sub {
+    font-size: clamp(0.82rem, 0.9vw, 0.9rem);
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.66);
+    font-weight: 500;
+    letter-spacing: 0.005em;
+  }
+  /* Arrow — sits on the right of the card and slides
+     forward on hover, echoing the v2 button language. */
+  .hh-side-arrow {
+    width: clamp(16px, 1.4vw, 18px);
+    height: clamp(16px, 1.4vw, 18px);
+    color: rgba(45, 200, 86, 0.7);
+    flex-shrink: 0;
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 220ms ease;
+  }
+  .hh-side-card:hover .hh-side-arrow {
+    color: #2DC856;
+    transform: translateX(4px);
+  }
+  /* Title's v2 margin-bottom would compound with the
+     inner flex `gap`. Zero so the gap alone governs
+     vertical rhythm. */
+  .hh-title {
+    margin-bottom: 0 !important;
+  }
+  .hh-sub {
+    margin-bottom: 0 !important;
+  }
+
+  /* GRAND headline — pushed beyond /home-v2's scale
+     (7 rem peak, 7 vw growth rate). At 1440 viewport
+     the title lands at ≈ 100 px font (was 86 px), so
+     the hero opens with a noticeably grander
+     statement than the v2 reference.
+
+     Negative `margin-left` pulls ONLY the title (and
+     the sub below it via the same rule) further left
+     than the rest of the content — magazine-style
+     hanging-headline overhang. */
+  .hh-title {
+    font-size: clamp(3rem, 7vw, 7rem) !important;
+    margin-bottom: 0 !important;
+    margin-left: clamp(-72px, -5vw, -40px) !important;
+    max-width: none !important;
+    line-height: 0.96 !important;
+    letter-spacing: -0.034em !important;
+  }
+
+  /* Subhead — spans 2 lines under the GRAND title.
+     max-width tightened from 76ch to 58ch so the wrap
+     happens at a more natural break point. text-wrap:
+     balance evens the line lengths so neither line is
+     a stub. Negative margin-left mirrors the title's
+     offset so the sub hangs in line with the title's
+     left edge (visual cluster). */
+  .hh-sub {
+    margin: 0 !important;
+    margin-left: clamp(-72px, -5vw, -40px) !important;
+    font-size: clamp(1rem, 1.15vw, 1.18rem) !important;
+    line-height: 1.55 !important;
+    max-width: 58ch !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    text-wrap: balance !important;
+  }
+
+  .hh-form {
+    /* Form — sleek and minimal. Padding bumped from
+       22-28/20-24 → 26-30/24-28 so the card feels a
+       touch taller without forcing the stats panel
+       below to overflow the hero. The premium feel
+       still comes from minimal borders + confident
+       shadows, just with more interior negative space. */
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0;
+    padding: clamp(26px, 2.6vw, 30px) clamp(24px, 2.4vw, 28px) clamp(22px, 2.3vw, 26px);
+    border-radius: 16px;
+    /* Crisp white surface — no gradient (kept pure). */
+    background: #ffffff;
+    /* ONE hairline border. Dark-ink hairline at 0.08
+       opacity — visible enough to define the card's
+       edge against the photo, low enough to feel
+       restrained. */
+    border: 1px solid rgba(13, 27, 34, 0.08);
+    /* Three-layer shadow stack — that's it.
+         1. Close drop (depth)
+         2. Mid lift (float)
+         3. Very subtle green ambient halo far behind
+            (60 px blur at 0.15 opacity — barely-there
+            green tint that ties the card to the photo's
+            green orbs without painting a ring).
+         4. Tight top inset highlight (white) for the
+            glass-card top edge. */
+    box-shadow:
+      0 4px 12px rgba(8, 18, 26, 0.10),
+      0 20px 48px rgba(8, 18, 26, 0.22),
+      0 0 80px -10px rgba(45, 200, 86, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    text-align: left;
+    color: #0d1b22;
+  }
+
+  /* Header block (title + subhead). Tight stack, slightly
+     smaller than the hero title so it reads as a sub-element
+     not a competing headline. */
+  .hh-form-head {
+    margin-bottom: clamp(14px, 1.6vw, 18px);
+  }
+  .hh-form-title {
+    font-size: clamp(1.2rem, 1.5vw, 1.4rem);
+    font-weight: 900;
+    letter-spacing: -0.012em;
+    line-height: 1.15;
+    color: #0d1b22;
+    margin: 0 0 6px;
+  }
+  .hh-form-sub {
+    font-size: clamp(0.84rem, 0.92vw, 0.92rem);
+    line-height: 1.5;
+    color: rgba(13, 27, 34, 0.62);
+    margin: 0;
+  }
+
+  /* Form grid — single column. The earlier 2-col layout
+     (first/last name on a row, phone/zip on a row) was
+     useful when the form lived under the headline at
+     540 px, but in the new 380-400 px sidebar placement
+     each half-column would shrink below 170 px — too
+     narrow for the phone field's `+1` prefix to coexist
+     with the placeholder, which was the user-reported
+     "rendering glitch" (the placeholder got truncated
+     behind the prefix). Single-column = no truncation. */
+  .hh-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(10px, 1vw, 12px);
+  }
+
+  /* A field is a label container that holds the visually-hidden
+     label span + input. The label's text becomes a screen-
+     reader hint while the visible UI relies on placeholders +
+     focused-state icons. Cleaner than floating labels for a
+     short consult form. */
+  .hh-form-field {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+  .hh-form-label {
+    /* Visually hidden but kept in the DOM for screen readers. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Inputs — solid white pills with a hairline border and
+     soft inner shadow for depth. Brand-green focus ring. */
+  .hh-form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #0d1b22;
+    letter-spacing: -0.005em;
+    background: #ffffff;
+    border: 1px solid rgba(13, 27, 34, 0.14);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 2px rgba(13, 27, 34, 0.04);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .hh-form-input::placeholder {
+    color: rgba(13, 27, 34, 0.4);
+    font-weight: 500;
+  }
+  .hh-form-input:hover {
+    border-color: rgba(13, 27, 34, 0.24);
+  }
+  .hh-form-input:focus {
+    outline: none;
+    border-color: #2DC856;
+    box-shadow:
+      inset 0 1px 2px rgba(13, 27, 34, 0.04),
+      0 0 0 3px rgba(45, 200, 86, 0.18);
+  }
+
+  /* Phone field — non-interactive +1 prefix sits inside the
+     input visually. The input itself gets extra left padding
+     so the typed number doesn't overlap the prefix. */
+  .hh-form-field--phone .hh-form-input-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: rgba(13, 27, 34, 0.55);
+    pointer-events: none;
+    user-select: none;
+  }
+  .hh-form-input--with-prefix {
+    padding-left: 38px;
+  }
+
+  /* Select field — strip the native arrow and use our own
+     caret so the chevron always reads the same on Safari +
+     Chrome + Firefox. Padding-right reserves space. */
+  .hh-form-select {
+    padding-right: 36px;
+    cursor: pointer;
+    /* Default placeholder color when value is empty option. */
+    color: #0d1b22;
+  }
+  .hh-form-select:invalid,
+  .hh-form-select:has(option[value=""]:checked) {
+    color: rgba(13, 27, 34, 0.4);
+    font-weight: 500;
+  }
+  .hh-form-select-caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translateY(-50%);
+    color: rgba(13, 27, 34, 0.45);
+    pointer-events: none;
+  }
+
+  /* Submit — full-width brand-green pill with multi-layer
+     shadow stack so it reads as the primary action. Spans
+     the single column of the new 1-col grid. */
+  .hh-form-submit {
+    grid-column: 1 / -1;
+    margin-top: clamp(6px, 0.8vw, 10px);
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    width: 100%;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: -0.005em;
+    color: #ffffff;
+    background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+      0 1px 0 rgba(255, 255, 255, 0.42) inset,
+      0 4px 14px rgba(45, 200, 86, 0.40),
+      0 12px 28px rgba(45, 200, 86, 0.24),
+      0 20px 48px rgba(13, 28, 36, 0.18);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hh-form-submit:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.20) inset,
+      0 1px 0 rgba(255, 255, 255, 0.48) inset,
+      0 6px 18px rgba(45, 200, 86, 0.50),
+      0 16px 36px rgba(45, 200, 86, 0.30),
+      0 26px 60px rgba(13, 28, 36, 0.22);
+  }
+  .hh-form-submit:focus-visible {
+    outline: 2px solid #1a2f3a;
+    outline-offset: 3px;
+  }
+  .hh-form-submit-arrow {
+    width: 14px;
+    height: 14px;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hh-form-submit:hover .hh-form-submit-arrow {
+    transform: translateX(3px);
+  }
+  @media (max-width: 540px) {
+    .hh-form-submit { grid-column: span 1; }
+  }
+
+  /* Fineprint — small terms text below submit. (Hidden by
+     the override block below in this build; the markup
+     was removed so this rule is dead but kept here in case
+     fineprint is reintroduced.) */
+  .hh-form-fineprint {
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: rgba(13, 27, 34, 0.5);
+    text-align: center;
+  }
+  .hh-form-fineprint a {
+    color: rgba(13, 27, 34, 0.7);
+    text-decoration: underline;
+    text-decoration-color: rgba(13, 27, 34, 0.25);
+    text-underline-offset: 2px;
+  }
+  .hh-form-fineprint a:hover {
+    color: #2DC856;
+  }
+
+  /* Trust line — three guarantees separated by middots,
+     pulsing green dot at the start. Bottom-most element. */
+  .hh-form-trust {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: rgba(13, 27, 34, 0.66);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hh-form-trust-dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.7);
+    animation: hh-form-trust-pulse 2s ease-in-out infinite;
+  }
+  @keyframes hh-form-trust-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.55; transform: scale(0.85); }
+  }
+  .hh-form-trust-sep {
+    color: rgba(13, 27, 34, 0.28);
+    font-weight: 700;
+  }
+
+  /* The v2 hero used a `.hh-prompt` invitation line above
+     the pill. The form has its own header so we don't need
+     it; suppress any remaining instance to be safe. */
+  .hh-prompt { display: none !important; }
+
+  /* Form-head hidden — the hero title above the form
+     ("Every property. Fully charged.") already does the
+     "promise" job; the form's internal title would be
+     redundant AND adds 60+ px of vertical space the
+     stack can't afford in a 100vh hero. */
+  .hh-form-head { display: none !important; }
+  .hh-form-fineprint { display: none !important; }
+
+  /* Internal grid spacing — moderate bump so the form
+     reads as a touch taller / more confident, without
+     pushing the stats panel below into overflow. */
+  .hh-form-grid {
+    gap: 11px;
+  }
+  .hh-form-input {
+    padding: 12px 13px;
+    font-size: 0.93rem;
+  }
+  /* Phone input MUST keep its left padding for the +1
+     prefix. Was 38 in the base rule above; my padding
+     reset just above clobbered it back to 13, which is
+     the original "rendering glitch" — the prefix at
+     left:14 px sat on top of the placeholder text. The
+     prefix glyph (+1) is ~16 px wide and there's a
+     ~14 px gutter on each side, so 38 px of left
+     padding gives the placeholder a clean starting
+     point past the prefix. */
+  .hh-form-input--with-prefix {
+    padding-left: 38px;
+  }
+  /* Move the prefix slightly right of its base 14 px so
+     the visual gap before the placeholder feels even. */
+  .hh-form-field--phone .hh-form-input-prefix {
+    left: 13px;
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+  .hh-form-submit {
+    padding: 13px 22px;
+    font-size: 0.95rem;
+    margin-top: 4px;
+  }
+  .hh-form-trust {
+    margin-top: 6px;
+    font-size: 0.7rem;
+  }
+
+  /* ─── Stats: HORIZONTAL MODERN GLASS PANEL (refined) ─
+     Three credential blocks side-by-side inside one
+     glassmorphic card. Earlier versions used a single
+     3px green border-left as the brand accent — but with
+     only the LEFT edge tinted green, the right side of
+     the panel read as truncated/unfinished. This refined
+     version distributes the brand-green accent across
+     the whole panel:
+       - A green underbar under each number (32 px wide,
+         brand-green → fade — appears as a "metric track")
+       - Brand-green vertical dividers between stats
+         (replaces the old white hairlines)
+       - Subtle radial green inner glow (left + right
+         mirror) layered behind the dark glass
+       - Symmetric 1px white-hairline border (no
+         asymmetric green edge)
+     Net effect: the green theme is consistent across the
+     full panel width, the visual rhythm reads as
+     "metric · metric · metric" with green tracks under
+     each one, and the panel's left + right edges feel
+     like they belong to the same composition. */
+  .hh-stats {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: clamp(18px, 2vw, 24px) clamp(24px, 2.6vw, 32px) !important;
+    /* OVERHAULED — premium credentials panel background.
+       8-layer stack designed to ENHANCE THE TEXT, not
+       compete with it:
+         1. Edge vignette — radial gradient darker at
+            the rim, transparent at center. Pushes
+            visual focus inward toward the numbers.
+         2-4. Three positioned green halos at the
+              horizontal centers of each number (16%,
+              50%, 84%). Bakes a soft green spotlight
+              into the panel surface under each metric.
+         5. Diagonal refractive sheen (125°) — a thin
+            white band crossing the panel, the angle
+            real glass would catch from above.
+         6. Top sheen — bright white→transparent at
+            the top edge, the "glass top lit from
+            above" cue.
+         7. Bottom rim — green ambient bounce off the
+            surface from below.
+         8. Dark glass base — denser than before
+            (0.52) so text legibility is rock-solid
+            against the photo. */
+    background:
+      radial-gradient(
+        ellipse 95% 110% at 50% 50%,
+        transparent 38%,
+        rgba(8, 18, 26, 0.22) 100%
+      ),
+      radial-gradient(
+        ellipse 22% 90% at 12.5% 50%,
+        rgba(45, 200, 86, 0.13) 0%,
+        rgba(45, 200, 86, 0) 70%
+      ),
+      radial-gradient(
+        ellipse 22% 90% at 37.5% 50%,
+        rgba(45, 200, 86, 0.13) 0%,
+        rgba(45, 200, 86, 0) 70%
+      ),
+      radial-gradient(
+        ellipse 22% 90% at 62.5% 50%,
+        rgba(45, 200, 86, 0.13) 0%,
+        rgba(45, 200, 86, 0) 70%
+      ),
+      radial-gradient(
+        ellipse 22% 90% at 87.5% 50%,
+        rgba(45, 200, 86, 0.13) 0%,
+        rgba(45, 200, 86, 0) 70%
+      ),
+      linear-gradient(
+        125deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.05) 48%,
+        rgba(255, 255, 255, 0.015) 54%,
+        transparent 68%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, 0.02) 30%,
+        transparent 55%
+      ),
+      linear-gradient(
+        180deg,
+        transparent 60%,
+        rgba(45, 200, 86, 0.07) 100%
+      ),
+      rgba(13, 27, 34, 0.52) !important;
+    border: 1px solid rgba(45, 200, 86, 0.26) !important;
+    border-radius: 16px !important;
+    /* HEAVY frost so the photo behind reads as a
+       genuinely defocused backdrop, saturate cranks
+       the photo's ambient color through the glass,
+       contrast sharpens the frost edges. */
+    backdrop-filter: blur(20px) saturate(165%) contrast(108%);
+    -webkit-backdrop-filter: blur(20px) saturate(165%) contrast(108%);
+    /* Layered shadows + insets — 9 layers:
+         - Top inset white highlight (lit top edge)
+         - Side bevel hints (panel has tactile thickness)
+         - Bottom inset green rim light
+         - Inner brand hairline (1 px green)
+         - Inner vignette (push focus to center text)
+         - Close drop, mid lift, deep float
+         - Outer green halo (ties into the photo's
+           ambient green orbs) */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 1px 0 0 rgba(255, 255, 255, 0.04),
+      inset -1px 0 0 rgba(255, 255, 255, 0.04),
+      inset 0 -1px 0 rgba(45, 200, 86, 0.14),
+      inset 0 0 0 1px rgba(45, 200, 86, 0.08),
+      inset 0 0 60px -10px rgba(8, 18, 26, 0.32),
+      0 4px 12px rgba(8, 18, 26, 0.26),
+      0 22px 44px rgba(8, 18, 26, 0.30),
+      0 0 90px -16px rgba(45, 200, 86, 0.24) !important;
+    list-style: none !important;
+    /* Panel widened from 900 → 1080 px so the 4 stats
+       (Chargers / Funding / States / 24-7) breathe with
+       proper internal padding instead of crowding each
+       other. justify-self: center keeps the panel aligned
+       on the same horizontal axis as before — the extra
+       180 px just split evenly across the left and right
+       sides. The negative horizontal margin lets the panel
+       break out of .hh-inner's 210 px right padding (which
+       was reserved for the photo charger above) so the
+       wider panel doesn't get clipped. */
+    max-width: 1080px !important;
+    width: calc(100% + 200px) !important;
+    margin-left: -100px !important;
+    margin-right: -100px !important;
+    justify-self: center !important;
+    /* Margin-top pushes stats lower than its natural
+       grid position. Capped at 30 px so the panel
+       lands lower in the hero (closer to the seam)
+       without overflowing past the 900 px viewport
+       bottom. */
+    margin-top: clamp(18px, 2.4vw, 30px) !important;
+    width: 100%;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  /* ::before — subtle top panel accent (kept from the
+     previous build, fades from edges, peaks center). */
+  .hh-stats::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 14%;
+    right: 14%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0.55) 50%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    pointer-events: none;
+  }
+  /* The bottom-edge LED rail (with sweep) was rejected
+     as generic. New approach: NO horizontal accent at
+     all. Light emanates from the DATA itself — each
+     stat number gets:
+       1. Stronger neon-text glow (text-shadow stack)
+       2. A soft radial backlight directly BEHIND the
+          number (via .hh-stat-num::before)
+     Reads as if each metric is illuminated from within,
+     not painted with a separate decorative stripe. The
+     ::after pseudo is freed for use elsewhere — kept
+     here as no-op so the symmetric panel accent stays
+     two-line (top edge only is now the panel rule). */
+  .hh-stats::after {
+    content: none;
+  }
+  .hh-stat {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    /* CENTERED contents — each stat's number + unit
+       cluster sits in the middle of its block (was
+       flex-start, which left-aligned content and made
+       the panel feel ragged because each stat's number
+       width was different: "500+" wider than "18" so
+       the labels started at unequal x positions). With
+       center, every block reads as balanced regardless
+       of number length. */
+    justify-content: center !important;
+    gap: clamp(12px, 1.4vw, 18px) !important;
+    /* Equal padding on all stats — removed the
+       :first-child / :nth-last-child(2) overrides that
+       zeroed the outer padding on the first/last
+       blocks. Symmetric padding makes the dividers
+       between stats land at equal offsets from each
+       block's content and the panel feels balanced. */
+    padding: 0 clamp(16px, 1.8vw, 24px) !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    max-width: none !important;
+    /* Override v2 base `flex: 1 1 220px` (the 220 px
+       basis would force unequal block widths). Each
+       stat takes an equal third of the panel. */
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+  /* Brand-green vertical divider between stat blocks
+     (was a plain white hairline — bumped to a soft
+     green-tinted gradient line so the divider reads as
+     part of the panel's brand-green accent system rather
+     than as a structural separator). */
+  .hh-stat + .hh-stat {
+    border-left: 1px solid rgba(45, 200, 86, 0.22) !important;
+    box-shadow:
+      -1px 0 0 rgba(255, 255, 255, 0.04),
+      1px 0 0 rgba(45, 200, 86, 0.04) !important;
+  }
+  /* Number cluster — INLINE row: big green number on
+     the LEFT, unit text NEXT TO it on the right
+     (stacked words: "Chargers / Deployed"). The green
+     dash sits UNDER the number only (positioned
+     absolutely) so it no longer cuts through the unit
+     text the way it did when the cluster was
+     vertically stacked. */
+  .hh-stat-n {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: clamp(12px, 1.4vw, 18px) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+  /* Big green number — neon glow toned DOWN slightly
+     so the numbers sit in the new richer background
+     instead of fighting it. Still clearly luminous,
+     just less aggressive — opacity values pulled
+     from 0.55/0.45/0.32 to 0.45/0.36/0.24. */
+  .hh-stat-num {
+    display: block !important;
+    position: relative !important;
+    color: #2DC856 !important;
+    font-size: clamp(1.95rem, 2.5vw, 2.5rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.024em !important;
+    line-height: 1 !important;
+    padding-bottom: 0 !important;
+    z-index: 1 !important;
+    text-shadow:
+      0 0 5px rgba(45, 200, 86, 0.45),
+      0 0 12px rgba(45, 200, 86, 0.36),
+      0 0 26px rgba(45, 200, 86, 0.24),
+      0 1px 0 rgba(0, 0, 0, 0.22) !important;
+  }
+  /* Radial backlight BEHIND each number — toned DOWN
+     slightly so it pairs with the new panel background
+     (which has its own per-stat halos baked in) instead
+     of stacking too much green. Still a clear soft
+     halo, just softer than before. */
+  .hh-stat-num::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 220%;
+    height: 280%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      ellipse at center,
+      rgba(45, 200, 86, 0.32) 0%,
+      rgba(45, 200, 86, 0.10) 35%,
+      rgba(45, 200, 86, 0.03) 60%,
+      transparent 75%
+    );
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(6px);
+    /* Per-stat staggered breathing animations defined
+       on the .hh-stat nth-child selectors below so each
+       backlight has its own rhythm. */
+  }
+  /* Three staggered breathing rhythms — each backlight
+     breathes at a slightly different duration + phase
+     offset so the three numbers don't pulse in sync.
+     Reads as organic data activity, not a synchronized
+     blink. */
+  .hh-stat:nth-child(1) .hh-stat-num::before {
+    animation: hh-stat-glow 5.2s ease-in-out infinite;
+  }
+  .hh-stat:nth-child(2) .hh-stat-num::before {
+    animation: hh-stat-glow 6.4s ease-in-out infinite -1.6s;
+  }
+  .hh-stat:nth-child(3) .hh-stat-num::before {
+    animation: hh-stat-glow 4.8s ease-in-out infinite -2.8s;
+  }
+  .hh-stat:nth-child(4) .hh-stat-num::before {
+    animation: hh-stat-glow 5.6s ease-in-out infinite -3.7s;
+  }
+  @keyframes hh-stat-glow {
+    0%, 100% {
+      opacity: 0.72;
+      transform: translate(-50%, -50%) scale(0.94);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+  }
+  /* Reduced-motion — backlight stays at its mid state
+     without scaling/opacity animation. */
+  @media (prefers-reduced-motion: reduce) {
+    .hh-stat .hh-stat-num::before {
+      animation: none;
+    }
+  }
+  /* Unit label — sits INLINE to the right of the
+     number. Color toned down from 0.84 → 0.74 so the
+     labels read clearly without competing with the
+     green numbers or the new richer background. */
+  .hh-stat-unit {
+    display: flex !important;
+    flex-direction: column !important;
+    /* Center-align the stacked unit words within their
+       column. Most stat pairs are equal width
+       (CHARGERS/DEPLOYED, FUNDING/SECURED, STATES/ACTIVE)
+       so flex-start vs center reads identically — but for
+       the LIVE/SUPPORT pair where one word is meaningfully
+       shorter than the other, centering keeps the shorter
+       word from hanging off-axis. */
+    align-items: center !important;
+    text-align: center !important;
+    gap: 2px !important;
+    font-size: clamp(0.75rem, 0.84vw, 0.84rem) !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.12em !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    min-width: 0;
+  }
+  /* Descriptor stays HIDDEN even though the action row
+     is gone — the freed vertical space is meant for the
+     title + subhead + form to grow, not for an extra
+     line of micro-text inside the stats. The number +
+     unit cluster is enough credibility on its own and
+     reads cleaner without the per-stat sentence. */
+  .hh-stat-l {
+    display: none !important;
+  }
+  /* 4th stat ("24/7 Live Support") now ships on desktop too —
+     no longer a mobile-only block. Inherits the same flex-column
+     layout as the other three stats so it reads with the same
+     "number + stacked unit" composition. */
+
+  /* ─── Mobile / narrow-tablet fallback ─────────────────
+     Below 980px the 2-column grid collapses to a single
+     column. Right column's content (subhead, tertiary,
+     stats) re-orders below the left column's content.
+
+     Once stacked, the combined content of both columns
+     comfortably exceeds 100vh, so the v2 base height of
+     `100vh` with `overflow: hidden` would clip the stats
+     panel. Switch to natural sizing with a 100vh minimum
+     so the photo still fills the screen above the fold,
+     but content past the fold can scroll into view. */
+  @media (max-width: 980px) {
+    .home-hero {
+      height: auto !important;
+      min-height: 100vh !important;
+      overflow: visible !important;
+    }
+    .hh-inner {
+      grid-template-columns: 1fr !important;
+      row-gap: clamp(24px, 3vw, 36px) !important;
+    }
+    .hh-col--left {
+      align-items: stretch;
+    }
+    .hh-form {
+      max-width: 540px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     MOBILE OVERRIDE (≤ 860 px)
+     ───────────────────────────────────────────────────────────
+     Hero locks to exactly `calc(100dvh - 80px)` (below the
+     sticky 80 px mobile-header) and reflows all of the desktop
+     content — title, FORM, stats row, side-action buttons —
+     into that constrained space. Desktop (> 860 px) is left
+     completely untouched.
+
+     Layout strategy (top to bottom):
+       1. TITLE      — compact single-line, sits at the top
+       2. FORM       — narrowed (max-width 300 px) + centered
+                       so the mobile charger photo on the
+                       background shows on the LEFT + RIGHT
+                       sides of the form instead of being
+                       blocked by a form that runs wall-to-
+                       wall.
+       3. SIDE CARDS — 3 compact buttons in a HORIZONTAL row
+                       (icon + tight label, sub-copy hidden).
+       4. STATS      — 4 compact stat tiles in a HORIZONTAL
+                       row (number + unit; long descriptor
+                       hidden).
+
+     Subtitle (.hh-sub) stays hidden — its long paragraph
+     doesn't fit and the title already carries the read-down. */
+  @media (max-width: 860px) {
+    .home-hero {
+      height: calc(100dvh - 80px) !important;
+      min-height: 0 !important;
+      max-height: calc(100dvh - 80px) !important;
+    }
+    .hh-bg-img {
+      object-position: center center;
+      animation: none;
+    }
+
+    /* Mobile layout — 3-row GRID:
+         Row 1 (auto): TITLE spans the full width — gives
+                       the headline room to breathe at a
+                       grand font-size with the two
+                       sentences each on their own line.
+         Row 2 (1fr) : FORM in col 1 (left, anchored top),
+                       SIDE BUTTONS in col 2 (right,
+                       vertically centered → "much lower"
+                       than the previous row-1 position).
+                       The 1fr eats all remaining vertical
+                       space, dictated by the form's
+                       natural height.
+         Row 3 (auto): STATS span full width at the bottom.
+
+       Row 3 has a generous top-margin (80 px) so the
+       global scroll-hint widget (fixed-positioned at
+       bottom-left of the viewport) has clean dead space
+       to appear in WITHOUT covering the form or the
+       stats. */
+    .hh-inner {
+      display: grid !important;
+      flex-direction: column !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-rows: auto auto auto auto !important;
+      /* Cards are now ABSOLUTE-positioned in the upper-right of
+         the hero (above the photo's right-side EVIUM charger),
+         so the grid no longer carries a "cards" row. Sub takes
+         its place below the title — restoring the
+         title → sub → form read-down on mobile. */
+      grid-template-areas:
+        "title"
+        "sub"
+        "info"
+        "stats" !important;
+      row-gap: 10px !important;
+      align-items: start !important;
+      align-content: start !important;
+      justify-content: stretch !important;
+      /* 22 px left padding gives the title / sub their
+         clean left wall gap. The form below uses an extra
+         margin-left (see .hh-content-stack) to push itself
+         further right of this baseline without forcing the
+         GRAND title to wrap. */
+      padding: 14px 14px 14px 22px !important;
+    }
+
+    /* Mobile subtitle — small, dimmed, padded RIGHT so its
+       text doesn't run under the absolute-positioned cards
+       in the top-right corner. The full marketing line
+       reads on 3-4 wrapped lines at this size. */
+    .hh-sub {
+      display: block !important;
+      grid-area: sub !important;
+      margin: 0 !important;
+      margin-left: 0 !important;
+      padding-right: 100px !important;
+      font-size: 0.82rem !important;
+      line-height: 1.45 !important;
+      color: rgba(255, 255, 255, 0.78) !important;
+      max-width: none !important;
+      text-wrap: pretty !important;
+    }
+
+    /* Hide the form's masthead-subtitle on mobile only.
+       The cf-head's logo + "Free Site Consultation" title
+       stays. Hiding the subtitle saves ~30 px of form
+       height — the room we need to clear the
+       hint-animation zone between the form and the stats. */
+    :global(.home-hero .cf-head-sub) {
+      display: none !important;
+    }
+    /* No mobile cf-head-row override — the form uses its
+       natural ConsultationForm proportions (logo left,
+       "Free Site Consultation" title right via the
+       default 0 32px padding + space-between), matching
+       /contact, /products-v2, and other consultation form
+       placements across the site. */
+
+    /* Mobile title — GRAND now that it spans the full
+       width of row 1. Two sentences each on their own
+       line (the markup already has a <br /> between
+       them), each at ~3.6 rem so the headline feels
+       proper-hero scale on the phone. */
+    .hh-title {
+      grid-area: title !important;
+      max-width: 100% !important;
+      font-size: clamp(2.9rem, 12vw, 3.6rem) !important;
+      line-height: 1.02 !important;
+      margin: 0 !important;
+      text-align: left !important;
+    }
+
+    /* Form column — uses the form's TRUE natural
+       proportions (matching /contact, /products-v2, etc.).
+       max-width: 310px keeps the form at the slimmer
+       width that lays the masthead and trust line out
+       cleanly. margin-left: 10px shifts the whole form
+       left toward the wall so the cars + charger end on
+       the right side of the photo stay visible — internal
+       layout is untouched, only the form's horizontal
+       offset changes. margin-top adds breathing room
+       under the subtitle. */
+    .hh-content-stack {
+      grid-area: info !important;
+      width: 100% !important;
+      max-width: 310px !important;
+      margin: 0 !important;
+      margin-top: 12px !important;
+      margin-left: 10px !important;
+      align-self: start !important;
+      justify-self: start !important;
+      align-items: stretch !important;
+      gap: 0 !important;
+    }
+    /* Force the form's "Free assessment · No obligation ·
+       No upfront cost" trust line to stay on a SINGLE
+       row at this narrower mobile form width. The default
+       cf-trust uses flex-wrap: wrap, which lets the third
+       chip drop to a second line once the form is narrow
+       enough — overriding to nowrap (plus tighter gap +
+       per-span white-space: nowrap + slightly smaller
+       font) keeps all three on one line. */
+    :global(.home-hero .cf-trust) {
+      flex-wrap: nowrap !important;
+      gap: 5px !important;
+      font-size: 0.62rem !important;
+    }
+    :global(.home-hero .cf-trust > span) {
+      white-space: nowrap !important;
+    }
+
+    /* SIDE CARDS — ABSOLUTE-positioned vertical stack in
+       the upper-right corner of the hero, sitting ABOVE
+       the right-side EVIUM charger in the background
+       photo. Below the title row (top ≈ 119 px from
+       .hh-inner top = ~y=199 viewport) and ending well
+       before the charger's visible top edge (~y=343
+       viewport at 812 vh). Each card is icon-on-top,
+       short label below — compact enough that the 3-card
+       stack fits cleanly above the charger. */
+    .hh-side-actions {
+      position: absolute !important;
+      /* top: 130 lifts the stack higher in the hero so its
+         bottom edge stays well clear of the EVIUM charger's
+         visible top in the background photo. */
+      top: 130px !important;
+      /* right: 55 (was 70) nudges the stack a touch toward
+         the right wall — small shift right while still
+         keeping the cards comfortably off the right edge. */
+      right: 55px !important;
+      grid-area: unset !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 7px !important;
+      width: 88px !important;
+      max-width: 88px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      z-index: 4;
+    }
+    .hh-side-card {
+      flex: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      padding: 8px 5px !important;
+      min-width: 0 !important;
+      text-align: center !important;
+      border-radius: 10px !important;
+    }
+    .hh-side-icon {
+      width: 24px !important;
+      height: 24px !important;
+      flex-shrink: 0 !important;
+      border-radius: 7px !important;
+    }
+    .hh-side-icon svg {
+      width: 15px !important;
+      height: 15px !important;
+    }
+    .hh-side-body {
+      align-items: center !important;
+      text-align: center !important;
+      min-width: 0 !important;
+    }
+    .hh-side-title {
+      font-size: 0.58rem !important;
+      line-height: 1.05 !important;
+      letter-spacing: 0.01em !important;
+    }
+    .hh-side-sub,
+    .hh-side-arrow {
+      display: none !important;
+    }
+
+    /* STATS — single horizontal row of 4 compact tiles.
+       Big number + tight unit lines; long descriptor
+       (.hh-stat-l) hidden because there's no room. The
+       4th stat (.hh-stat--mobile) is shown so the row
+       fills cleanly with 4 items. */
+    .hh-stats {
+      grid-area: stats !important;
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 4px 8px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      /* Top margin pushes stats DOWN, opening a dead band
+         between the form bottom and the stats top where
+         the global scroll-hint (fixed at viewport bottom-
+         left, ~50 px tall) sits without colliding with
+         the form above OR the stats below. Trimmed from
+         50 → 18 px now that the mobile stack carries an
+         extra row (subtitle) above the form. */
+      margin: 18px 0 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
+    }
+    .hh-stat {
+      max-width: none !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      padding: 0 !important;
+      gap: 0 !important;
+      border-left: 0 !important;  /* kill any vertical divider */
+    }
+    .hh-stat--mobile { display: flex !important; }
+    .hh-stat-n {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 0 !important;
+      white-space: normal !important;
+    }
+    .hh-stat-num {
+      font-size: 1.05rem !important;
+      line-height: 1.05 !important;
+    }
+    .hh-stat-unit {
+      font-size: 0.55rem !important;
+      line-height: 1.1 !important;
+      /* The inner <span>s ("Live" / "Support") render as
+         stacked block lines via the desktop rule. Without
+         this the wider line (e.g. "Support") defines the
+         column width and the shorter line (e.g. "Live")
+         hangs left-aligned, which read as visually off —
+         especially obvious on 24/7 LIVE / SUPPORT where
+         the two words differ most in width. Centering
+         the inline-flex column lays each stacked word on
+         a shared vertical axis under the big number. */
+      align-items: center !important;
+      text-align: center !important;
+    }
+    .hh-stat-unit > span {
+      text-align: center !important;
+    }
+    .hh-stat-l { display: none !important; }
+  }
+
+  /* ════════════════════════════════════════════════════════
+     TRUE MOBILE (≤ 540 px) — phones / portrait handsets.
+     ────────────────────────────────────────────────────────
+     Mirrors the @media (max-width: 860px) "tablet" layout
+     above (skinny form on left + vertical card stack on
+     right, above the photo charger), but with all sizes /
+     positions / paddings retuned for the narrower handset
+     viewport. The 860px block's calibration was built for
+     ~600-860 px wide — at 375 px the form became crushed
+     and the cards crowded the masthead. This block keeps
+     the same composition but at handset-appropriate scales.
+     ════════════════════════════════════════════════════════ */
+  @media (max-width: 540px) {
+    .hh-inner {
+      grid-template-areas:
+        "title"
+        "sub"
+        "info"
+        "stats" !important;
+      padding: 14px 14px 14px 22px !important;
+    }
+
+    /* Title — handset-scale GRAND headline. */
+    .hh-title {
+      font-size: clamp(2.4rem, 10vw, 3rem) !important;
+      line-height: 1.0 !important;
+    }
+
+    /* Sub — fills the row below the title. Right padding
+       reserves clearance for the absolute card stack on
+       the right so the sub's text doesn't run under the
+       cards. */
+    .hh-sub {
+      padding-right: 86px !important;
+      font-size: 0.78rem !important;
+      line-height: 1.45 !important;
+    }
+
+    /* Form — skinnier than the natural 400 px cap so it
+       sits to the LEFT of the absolute card stack on the
+       right without overlapping. Combined with the 22 px
+       inner-left padding above, the form spans x=22→x=270. */
+    .hh-content-stack {
+      max-width: 248px !important;
+      margin-left: 0 !important;
+      margin-top: 10px !important;
+    }
+
+    /* Cards — vertical stack ABSOLUTE-positioned in the
+       upper-right of the hero, above the photo charger
+       (its visible top sits roughly mid-hero). */
+    .hh-side-actions {
+      position: absolute !important;
+      top: 140px !important;
+      right: 14px !important;
+      grid-area: unset !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+      width: 72px !important;
+      max-width: 72px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      z-index: 4;
+    }
+    .hh-side-card {
+      flex: none !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      padding: 6px 4px !important;
+      min-width: 0 !important;
+      text-align: center !important;
+      border-radius: 10px !important;
+    }
+    .hh-side-icon {
+      width: 20px !important;
+      height: 20px !important;
+      border-radius: 6px !important;
+    }
+    .hh-side-icon svg {
+      width: 13px !important;
+      height: 13px !important;
+    }
+    .hh-side-title {
+      font-size: 0.54rem !important;
+      line-height: 1.05 !important;
+      letter-spacing: 0.01em !important;
+    }
+    .hh-side-sub,
+    .hh-side-arrow {
+      display: none !important;
+    }
+
+    /* cf-head-row — very tight horizontal padding so the
+       logo + "Free Site / Consultation" title both fit
+       inside the narrow handset form without the title
+       wrapping to 3 lines. */
+    :global(.home-hero .cf-head-row) {
+      padding: 0 4px !important;
+    }
+    /* Slightly smaller cf-head-logo on the narrow handset
+       form — frees up width for the title to lay out on
+       its intended 2 lines ("Free Site" / "Consultation")
+       rather than wrapping further. */
+    :global(.home-hero .cf-head-logo) {
+      width: 72px !important;
+    }
+    /* Form field placeholders — smaller so the longer ones
+       ("Select your property type…", "Approx. # of parking
+       spaces") fit inside the narrow handset form's input
+       boxes without truncating mid-word. The cf-select has
+       a 36 px right-padding reserved for its caret, so its
+       usable text width is the tightest of all the fields
+       — sizing the placeholder font here ensures even
+       that field's text shows in full. */
+    :global(.home-hero .cf-input) {
+      font-size: 0.78rem !important;
+    }
+
+    /* Trust line — force one-line at the narrow form
+       width (same approach as the tablet block). Tighter
+       gap + smaller font than the tablet block so all
+       three chips fit cleanly inside the handset form. */
+    :global(.home-hero .cf-trust) {
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      font-size: 0.5rem !important;
+    }
+    :global(.home-hero .cf-trust > span) {
+      white-space: nowrap !important;
+    }
+  }
+</style>
+
+<script>
+  // ── Custom popover dropdowns (segment + priority) ───────
+  // Both pill fields share one behavior: hidden <select> is kept in
+  // the DOM for form semantics; all clicks (icon, trigger text,
+  // padding, caret) open a custom <ul> menu positioned 10px below
+  // the pill so it never covers the trigger text the way Safari's
+  // native <select> picker does.
+  //
+  // Wired per-field so both dropdowns operate independently. Each
+  // field carries its current value (li data-value) on its dataset
+  // so the submit handler can read without re-querying the menus.
+  const pilFields = Array.from(document.querySelectorAll<HTMLElement>('[data-propdd]'));
+  pilFields.forEach((field) => {
+    const trigger = field.querySelector<HTMLButtonElement>('[data-propdd-trigger]');
+    const label   = field.querySelector<HTMLElement>('[data-propdd-label]');
+    const menu    = field.querySelector<HTMLUListElement>('[data-propdd-menu]');
+    const hidden  = field.querySelector<HTMLSelectElement>('[data-propdd-select]');
+    if (!trigger || !label || !menu || !hidden) return;
+    const items = Array.from(menu.querySelectorAll<HTMLLIElement>('li[role="option"]'));
+    items.forEach((li) => li.setAttribute('tabindex', '-1'));
+
+    const open = () => {
+      // Close any other open dropdown first so only one is ever open.
+      pilFields.forEach((other) => {
+        if (other === field) return;
+        const otherMenu = other.querySelector<HTMLUListElement>('[data-propdd-menu]');
+        const otherTrig = other.querySelector<HTMLButtonElement>('[data-propdd-trigger]');
+        if (otherMenu && !otherMenu.hidden) {
+          otherMenu.hidden = true;
+          otherTrig?.setAttribute('aria-expanded', 'false');
+          other.removeAttribute('data-open');
+        }
+      });
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      field.setAttribute('data-open', '');
+      const active = menu.querySelector<HTMLLIElement>('li[aria-selected="true"]') || items[0];
+      active?.focus();
+    };
+    const close = (returnFocus = true) => {
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      field.removeAttribute('data-open');
+      if (returnFocus) trigger.focus();
+    };
+    const toggle = () => (menu.hidden ? open() : close());
+
+    field.addEventListener('click', (e) => {
+      // Bail when the click bubbled up from the menu (option selection
+       // handles itself) or from anywhere inside the trigger button —
+       // the trigger's own handler already toggled, so running toggle()
+       // again here would cancel it out. Using .contains covers clicks
+       // on the label <span> inside the trigger (the old `e.target ===
+       // trigger` check missed those, so clicking the text was a no-op).
+      if (menu.contains(e.target as Node)) return;
+      if (trigger.contains(e.target as Node)) return;
+      e.preventDefault();
+      toggle();
+    });
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle();
+    });
+
+    items.forEach((li) => {
+      li.addEventListener('click', () => {
+        const value = li.dataset.value || '';
+        const displayLabel = li.dataset.label || li.textContent || '';
+        hidden.value = value;
+        label.textContent = displayLabel;
+        label.removeAttribute('data-placeholder');
+        label.setAttribute('data-selected', '');
+        items.forEach((el) => el.removeAttribute('aria-selected'));
+        li.setAttribute('aria-selected', 'true');
+        // Cache the current pick on the field for the submit handler.
+        field.dataset.value = value;
+        field.dataset.label = displayLabel;
+        close();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menu.hidden && !field.contains(e.target as Node)) close(false);
+    });
+
+    trigger.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        open();
+      }
+    });
+    menu.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      const focused = document.activeElement as HTMLElement;
+      const idx = items.indexOf(focused as HTMLLIElement);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        items[Math.min(items.length - 1, idx + 1)]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        items[Math.max(0, idx - 1)]?.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        (focused as HTMLElement)?.click();
+      }
+    });
+  });
+
+  // ── Submit: compute + render the match card ─────────────
+  // No backend. Two selections map to a charger recommendation, a
+  // financial-model recommendation, and a destination URL. The match
+  // card already lives in the DOM (hidden); we populate its fields
+  // and un-hide it. Close button restores the default state with
+  // the user's selections preserved.
+  type ChargerSuggestion = { name: string; image: string; alt: string; productId: string };
+
+  // productId matches the `id={product.id}` anchor on each product card in
+  // /products (see src/pages/products/index.astro). Used to deep-link the
+  // "Get a quote" button to the exact recommended product.
+  const getCharger = (segment: string, priority: string): ChargerSuggestion => {
+    const needsDCFast =
+      priority === 'nevi' ||
+      segment === 'highway' ||
+      segment === 'fleets';
+    if (needsDCFast) {
+      return {
+        name: 'Evium DC Fast 180kW',
+        image: '/images/chargers/tellus/tellus-dc-fast-180kw.png',
+        alt: 'Evium DC Fast 180kW charger',
+        productId: 'evium-180kw',
+      };
+    }
+    if (segment === 'multifamily' || segment === 'parking') {
+      return {
+        name: 'EvoCharge Concealed Pedestal',
+        image: '/images/chargers/evocharge/evium-evocharge-l2-wallmount.png',
+        alt: 'EvoCharge Concealed Pedestal Level 2 charger',
+        productId: 'evocharge-pedestal',
+      };
+    }
+    return {
+      name: 'EvoCharge 40A Level 2',
+      image: '/images/chargers/evocharge/EVOCHARGE-40A-Level-2-Charging-Station-Spec-Sheet-1122.png',
+      alt: 'EvoCharge 40A Level 2 wall-mount charger',
+      productId: 'evocharge-40a',
+    };
+  };
+
+  const PROGRAMS: Record<string, string> = {
+    'zero-upfront': 'No-Cost',
+    'max-revenue':  'Investment',
+    'fast-install': 'Hybrid',
+    'nevi':         'NEVI-Funded Deployment',
+  };
+
+  const form = document.getElementById('hh-eligibility') as HTMLFormElement | null;
+  const card = document.getElementById('hh-match');
+  const segmentField  = document.querySelector<HTMLElement>('[data-propdd-kind="segment"]');
+  const priorityField = document.querySelector<HTMLElement>('[data-propdd-kind="priority"]');
+
+  if (form && card && segmentField && priorityField) {
+    const imgEl   = card.querySelector<HTMLImageElement>('[data-match-img]')!;
+    const eyebrow = card.querySelector<HTMLElement>('[data-match-eyebrow]')!;
+    const titleEl = card.querySelector<HTMLElement>('[data-match-title]')!;
+    const modelEl = card.querySelector<HTMLElement>('[data-match-model]')!;
+    const hrefEl  = card.querySelector<HTMLAnchorElement>('[data-match-href]')!;
+    const quoteEl = card.querySelector<HTMLAnchorElement>('[data-match-quote]')!;
+    const closeBtn = card.querySelector<HTMLButtonElement>('[data-match-close]')!;
+
+    const flashMissing = (field: HTMLElement) => {
+      field.animate(
+        [
+          { transform: 'translateX(0)' },
+          { transform: 'translateX(-4px)' },
+          { transform: 'translateX(4px)' },
+          { transform: 'translateX(-3px)' },
+          { transform: 'translateX(0)' },
+        ],
+        { duration: 260, easing: 'ease-out' },
+      );
+      (field.querySelector<HTMLButtonElement>('[data-propdd-trigger]'))?.focus();
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const segment  = segmentField.dataset.value  || '';
+      const segLabel = segmentField.dataset.label  || '';
+      const priority = priorityField.dataset.value || '';
+
+      if (!segment)  { flashMissing(segmentField);  return; }
+      if (!priority) { flashMissing(priorityField); return; }
+
+      const charger = getCharger(segment, priority);
+      const program = PROGRAMS[priority] || '';
+      const href = priority === 'nevi'
+        ? `/solutions/highway-fast-charging?priority=${priority}`
+        : `/solutions/${segment === 'highway' ? 'highway-fast-charging' : segment}?priority=${priority}`;
+
+      eyebrow.textContent = `For your ${segLabel}`;
+      titleEl.textContent = charger.name;
+      modelEl.textContent = program;
+      imgEl.src = charger.image;
+      imgEl.alt = charger.alt;
+      hrefEl.setAttribute('href', href);
+      // "Get a quote" — pass the matched segment + priority as query
+      // params so the /contact/quote page can pre-fill the property-
+      // type + related fields once it's wired up server-side.
+      quoteEl.setAttribute('href', `/contact/quote?segment=${segment}&priority=${priority}`);
+
+      // Restart the entrance animation even when re-submitting with
+      // a changed selection (card is already visible).
+      card.hidden = false;
+      card.style.animation = 'none';
+      // Force reflow so the animation restarts on the next tick.
+      void (card as HTMLElement).offsetWidth;
+      card.style.animation = '';
+    });
+
+    closeBtn.addEventListener('click', () => {
+      card.hidden = true;
+    });
+
+    // Escape closes the card if it's open and no dropdown is capturing.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || card.hidden) return;
+      const anyOpen = document.querySelector('[data-propdd][data-open]');
+      if (anyOpen) return;
+      card.hidden = true;
+    });
+  }
+</script>

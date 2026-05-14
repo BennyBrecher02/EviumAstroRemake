@@ -1,0 +1,773 @@
+---
+/**
+ * ConsultationFormV2
+ * ──────────────────
+ * V2 of the site-wide consultation form. Used ONLY by
+ * /home-v4 (via HeroHomeMainV4). All other surfaces
+ * (HeroHomeMainV3, ConsultationStickyTab on every page)
+ * continue to use the V1 ConsultationForm. Manager
+ * feedback on V1's masthead prompted V2; if the new chrome
+ * lands well we promote it sitewide.
+ *
+ * What's different from V1:
+ *   - No logo in the form header.
+ *   - Title "Free Site Consultation" is a single normal
+ *     line instead of V1's two-span stack ("Free Site"
+ *     on top of "Consultation" at different sizes).
+ *   - Narrower card (max-width 340 vs V1's 400) — same
+ *     hero placement (wrapper centers it), just less fat.
+ *   - Subtitle is one short line, no em-dashes:
+ *     "We'll reach out within 48 hours." (V1 was two
+ *     lines with an em-dash splitting clauses.)
+ *
+ * Everything else (fields, phone-input plugin, submit
+ * handler, trust line, scoped CSS class prefix `.cf-`)
+ * is identical to V1. Scoped CSS keeps the two components
+ * from colliding even if both render on the same page.
+ *
+ * Fields (in submission order):
+ *   1. Full name
+ *   2. Email
+ *   3. Phone (+1 prefix, US numeric format)
+ *   4. Property type — segments the lead (multifamily,
+ *      fleet, retail, highway, etc.)
+ *   5. Number of parking spaces — scopes the deployment
+ *      after the property type segments the lead
+ *
+ * Submit handler is currently a no-op stub. Wire-up to a
+ * real backend (HubSpot, Formspree, etc.) is a future task;
+ * the markup uses standard `name=` attributes so any
+ * endpoint can read the payload directly.
+ *
+ * Props:
+ *   formId  - HTML id for the <form> element. Required for
+ *             multiple instances on the same page (hero +
+ *             drawer) without conflicting ARIA targets.
+ */
+
+interface Props {
+  formId?: string;
+}
+
+const { formId = 'consult-form' } = Astro.props;
+---
+
+<form
+  id={formId}
+  class="cf-form"
+  autocomplete="on"
+  novalidate
+>
+  <!-- Form header (V2) — title on a single normal line,
+       short subtitle below. No logo. Compact masthead
+       that reads as a clean form header.
+       Copy v2: "Electrify Your Property" ties to Evium's
+       "Electrifying the future" tagline AND signals
+       this is about EV charging on a property, not a
+       generic website-audit "free consultation". -->
+  <header class="cf-head">
+    <h2 class="cf-head-title">Electrify Your Property</h2>
+    <p class="cf-head-sub">Free site assessment in 48 hours.</p>
+  </header>
+
+  <div class="cf-grid">
+
+    <label class="cf-field">
+      <span class="cf-label">Full name</span>
+      <input
+        type="text"
+        name="fullName"
+        class="cf-input"
+        placeholder="Full name"
+        required
+        autocomplete="name"
+      />
+    </label>
+
+    <label class="cf-field">
+      <span class="cf-label">Email</span>
+      <input
+        type="email"
+        name="email"
+        class="cf-input"
+        placeholder="you@company.com"
+        required
+        autocomplete="email"
+      />
+    </label>
+
+    <label class="cf-field cf-field--phone">
+      <span class="cf-label">Phone</span>
+      <input
+        type="tel"
+        name="phone"
+        id={`${formId}-phone`}
+        class="cf-input cf-phone-input"
+        placeholder="(555) 123-4567"
+        required
+        autocomplete="tel-national"
+        inputmode="tel"
+      />
+    </label>
+
+    <!-- Property type first so the visitor picks their
+         category before being asked to estimate scope. -->
+    <label class="cf-field">
+      <span class="cf-label">Property type</span>
+      <select name="propertyType" class="cf-input cf-select" required>
+        <option value="" disabled selected>Select your property type…</option>
+        <option value="multifamily">Multifamily residential</option>
+        <option value="commercial">Office or commercial</option>
+        <option value="retail">Retail / hotel / hospitality</option>
+        <option value="parking">Parking garage</option>
+        <option value="fleets">Fleet depot</option>
+        <option value="highway">Highway / travel center / gas station</option>
+        <option value="medical">Medical</option>
+      </select>
+      <svg class="cf-select-caret" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </label>
+
+    <label class="cf-field">
+      <span class="cf-label">Number of parking spaces</span>
+      <input
+        type="text"
+        name="parkingSpaces"
+        class="cf-input"
+        placeholder="Approx. # of parking spaces"
+        inputmode="numeric"
+        autocomplete="off"
+      />
+    </label>
+
+    <button type="submit" class="cf-submit">
+      <span>Get My Free Assessment</span>
+      <svg viewBox="0 0 16 16" aria-hidden="true" class="cf-submit-arrow">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </button>
+
+    <p class="cf-trust">
+      <span class="cf-trust-dot" aria-hidden="true"></span>
+      <span>Free assessment</span>
+      <span class="cf-trust-sep" aria-hidden="true">·</span>
+      <span>No obligation</span>
+      <span class="cf-trust-sep" aria-hidden="true">·</span>
+      <span>No upfront cost</span>
+    </p>
+
+  </div>
+</form>
+
+<style>
+  /* ── Form card (V2) — architectural chrome ──────────
+     Manager wanted to move away from the bubbly V1
+     rounded-corner look. Changes vs. V1:
+       • max-width 400 → 340 (less fat)
+       • border-radius 16 → 8 (uniform on all four
+         corners — same radius top + bottom + left +
+         right; no per-corner overrides anywhere in this
+         file so the form reads as a clean symmetric
+         rounded rectangle).
+       • Single architectural shadow stack instead of
+         V1's puffy multi-glow.
+     (The earlier green top-accent strip is gone —
+     manager flagged it as visually off and unrelated
+     to the rest of the chrome.) */
+  .cf-form {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    margin: 0;
+    padding: 14px clamp(18px, 1.8vw, 22px) 14px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid rgba(13, 27, 34, 0.10);
+    text-align: left;
+    color: #0d1b22;
+    font-family: 'Maven Pro', sans-serif;
+    box-sizing: border-box;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.95) inset,
+      0 2px 6px rgba(8, 18, 26, 0.06),
+      0 16px 32px rgba(8, 18, 26, 0.12),
+      0 40px 72px rgba(8, 18, 26, 0.14);
+  }
+
+  /* ── Form header (V2) — hierarchy fix ────────────────
+     Manager noted the V2-initial title and subtitle were
+     the same visual length and read as a single
+     undifferentiated block. The headline is now
+     decisively bigger (1.45rem at the upper end) and the
+     subtitle is more muted, so the eye reads them as
+     "headline + supporting line" rather than two equal
+     siblings. Divider removed — spacing alone separates
+     the masthead from the fields. */
+  .cf-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 6px 0 14px;
+    padding: 0;
+    text-align: center;
+  }
+  /* Headline — markedly bigger + heavier than the
+     subtitle so the hierarchy reads clearly. Tight
+     letter-spacing keeps it premium at this size. */
+  .cf-head-title {
+    margin: 0;
+    font-size: clamp(1.3rem, 1.45vw, 1.45rem);
+    font-weight: 800;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    color: #15252b;
+  }
+  /* Subtitle — short single line, no em-dash, muted
+     gray. Weight 500 keeps it distinctly secondary to
+     the 800-weight headline above. */
+  .cf-head-sub {
+    margin: 0;
+    font-size: clamp(0.78rem, 0.84vw, 0.84rem);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.005em;
+    color: rgba(21, 37, 43, 0.62);
+  }
+
+  /* ── Field grid ─────────────────────────────────── */
+  .cf-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  /* ── Field container ────────────────────────────── */
+  .cf-field {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+  .cf-label {
+    /* Visually hidden but kept for screen readers. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ── Input ──────────────────────────────────────── */
+  .cf-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 13px;
+    font-family: inherit;
+    font-size: 0.93rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #0d1b22;
+    letter-spacing: -0.005em;
+    background: #ffffff;
+    border: 1px solid rgba(13, 27, 34, 0.14);
+    border-radius: 6px;
+    box-shadow: inset 0 1px 2px rgba(13, 27, 34, 0.04);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .cf-input::placeholder {
+    color: rgba(13, 27, 34, 0.4);
+    font-weight: 500;
+  }
+  .cf-input:hover {
+    border-color: rgba(13, 27, 34, 0.24);
+  }
+  .cf-input:focus {
+    outline: none;
+    border-color: #2DC856;
+    box-shadow:
+      inset 0 1px 2px rgba(13, 27, 34, 0.04),
+      0 0 0 3px rgba(45, 200, 86, 0.18);
+  }
+
+  /* ── Phone field — international tel input ───────
+     The +1 prefix is now a clickable country selector
+     (flag + dial code) rendered by intl-tel-input. The
+     plugin wraps the <input> in a <div class="iti">.
+
+     ARCHITECTURE FIX: the border + focus ring lives on
+     the OUTER WRAPPER (`.iti`), not on the input. Both
+     the flag picker and the input are stripped of their
+     own borders and sit flush inside the wrapper. This
+     way the green focus ring wraps the WHOLE pill —
+     flag + input — when the input is focused, instead
+     of only ringing the input portion. */
+  .cf-field--phone :global(.iti) {
+    width: 100%;
+    display: block;
+    position: relative;
+    background: #ffffff;
+    border: 1px solid rgba(13, 27, 34, 0.14);
+    border-radius: 6px;
+    box-shadow: inset 0 1px 2px rgba(13, 27, 34, 0.04);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .cf-field--phone :global(.iti:hover) {
+    border-color: rgba(13, 27, 34, 0.24);
+  }
+  /* Focus ring on the WRAPPER via :focus-within — fires
+     when the input inside has focus, so the green ring
+     wraps the entire pill (flag + input combined). */
+  .cf-field--phone :global(.iti:focus-within) {
+    border-color: #2DC856;
+    box-shadow:
+      inset 0 1px 2px rgba(13, 27, 34, 0.04),
+      0 0 0 3px rgba(45, 200, 86, 0.18);
+  }
+  /* Input — no border, no shadow, no focus ring of its
+     own. Just typography and padding. The wrapper
+     handles all visual chrome. */
+  .cf-field--phone :global(.iti__tel-input) {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 13px;
+    /* The intl-tel-input library sets `padding-left`
+       inline at runtime, sized to the country-picker
+       button's width + a tiny default offset (~6px).
+       That offset is too tight visually — the
+       placeholder's opening "(" sits against the
+       separator line, reading as overlap. !important
+       overrides the library's inline value. 92px gives
+       a comfortable ~13px gap between the separator
+       and the first character: visibly clear, not so
+       far that the text feels orphaned in the field. */
+    padding-left: 92px !important;
+    font-family: inherit;
+    font-size: 0.93rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #0d1b22;
+    letter-spacing: -0.005em;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .cf-field--phone :global(.iti__tel-input::placeholder) {
+    color: rgba(13, 27, 34, 0.4);
+    font-weight: 500;
+  }
+  /* Country picker — no border of its own, just a
+     subtle hairline DIVIDER on its right edge. The
+     button is symmetrically padded so its content
+     (flag + arrow + dial code) doesn't end up biased
+     to one side. */
+  .cf-field--phone :global(.iti__country-container) {
+    padding: 0;
+  }
+  .cf-field--phone :global(.iti__selected-country) {
+    background: transparent;
+    border: 0;
+    border-right: 1px solid rgba(13, 27, 34, 0.08);
+    border-radius: 0;
+    padding: 0 12px;
+    height: 100%;
+    transition: border-color 180ms ease;
+  }
+  /* Kill the library's hover background on the primary
+     container — that's the off-center gray the user has
+     been seeing. */
+  .cf-field--phone :global(.iti__selected-country-primary),
+  .cf-field--phone :global(.iti__selected-country-primary:hover),
+  .cf-field--phone :global(.iti__selected-country:has(+ .iti__dropdown-content:hover) .iti__selected-country-primary) {
+    background-color: transparent !important;
+  }
+  /* The reaction halo: a radial gradient applied
+     directly to the button's background, with the
+     gradient's CENTER positioned exactly on the flag
+     (the flag sits ~22px from the button's left edge,
+     vertically centered). The gradient is transparent
+     by default and turns brand-green on hover/expanded.
+
+     This approach sidesteps the fight with the
+     library's box-shadow on .iti__flag and Astro's
+     pseudo-element parsing quirks — it's just a
+     property on the button, which we can override
+     cleanly. */
+  .cf-field--phone :global(.iti__selected-country) {
+    background-color: transparent;
+    background-image: radial-gradient(
+      ellipse 18px 14px at 22px center,
+      rgba(45, 200, 86, 0) 0%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    transition: background-image 180ms ease, border-color 180ms ease;
+  }
+  .cf-field--phone :global(.iti__selected-country:hover),
+  .cf-field--phone :global(.iti__selected-country[aria-expanded="true"]) {
+    background-color: transparent;
+    background-image: radial-gradient(
+      ellipse 18px 14px at 22px center,
+      rgba(45, 200, 86, 0.22) 0%,
+      rgba(45, 200, 86, 0.18) 60%,
+      rgba(45, 200, 86, 0) 100%
+    );
+    border-right-color: rgba(45, 200, 86, 0.30);
+  }
+  .cf-field--phone :global(.iti__selected-country-primary) {
+    padding: 0;
+    gap: 6px;
+  }
+  .cf-field--phone :global(.iti__selected-dial-code) {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: rgba(13, 27, 34, 0.75);
+    letter-spacing: -0.005em;
+  }
+  .cf-field--phone :global(.iti__arrow) {
+    border-top-color: rgba(13, 27, 34, 0.55);
+    margin-left: 4px;
+  }
+  /* Country dropdown list — premium card aesthetic to
+     match the form's chrome (white card, soft shadow,
+     same border-radius family as the inputs). */
+  .cf-field--phone :global(.iti__dropdown-content) {
+    border: 1px solid rgba(13, 27, 34, 0.10);
+    border-radius: 8px;
+    box-shadow:
+      0 4px 12px rgba(8, 18, 26, 0.10),
+      0 20px 48px rgba(8, 18, 26, 0.18);
+    background: #ffffff;
+    overflow: hidden;
+    margin-top: 4px;
+    z-index: 100;
+  }
+  /* Search input — left padding kept large enough to
+     make room for the magnifying-glass icon that the
+     library positions absolutely at left:10px (icon is
+     14px wide). My previous `padding: 12px 14px` only
+     left 14px of room on the left, so the icon and the
+     entered text both started in the same place. With
+     38px of left padding the text starts AFTER the
+     icon. 36px right padding leaves room for the clear
+     button that appears once you type. */
+  .cf-field--phone :global(.iti__search-input) {
+    padding: 12px 36px 12px 38px;
+    border: 0;
+    border-bottom: 1px solid rgba(13, 27, 34, 0.08);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #0d1b22;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .cf-field--phone :global(.iti__country-list) {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  /* Each country row is an INSET rounded pill — its
+     highlight no longer reaches the panel's edges, so
+     the flag at the left side now has natural breathing
+     room around it instead of being pinned to the gray
+     area's left edge. */
+  .cf-field--phone :global(.iti__country) {
+    padding: 8px 12px;
+    margin: 1px 0;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: #0d1b22;
+    transition: background 120ms ease;
+  }
+  .cf-field--phone :global(.iti__country:hover),
+  .cf-field--phone :global(.iti__country.iti__highlight) {
+    background: rgba(45, 200, 86, 0.10);
+  }
+  /* Selected country marker (the row marked
+     aria-selected="true") — slightly stronger so the
+     currently-active country reads clearly even without
+     keyboard focus. */
+  .cf-field--phone :global(.iti__country[aria-selected="true"]) {
+    background: rgba(45, 200, 86, 0.06);
+  }
+  .cf-field--phone :global(.iti__country[aria-selected="true"]:hover),
+  .cf-field--phone :global(.iti__country[aria-selected="true"].iti__highlight) {
+    background: rgba(45, 200, 86, 0.14);
+  }
+  .cf-field--phone :global(.iti__dial-code) {
+    color: rgba(13, 27, 34, 0.55);
+    font-weight: 600;
+  }
+
+  /* ── Select field ───────────────────────────────── */
+  .cf-select {
+    padding-right: 36px;
+    cursor: pointer;
+    color: #0d1b22;
+  }
+  .cf-select:invalid,
+  .cf-select:has(option[value=""]:checked) {
+    color: rgba(13, 27, 34, 0.4);
+    font-weight: 500;
+  }
+  .cf-select-caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translateY(-50%);
+    color: rgba(13, 27, 34, 0.45);
+    pointer-events: none;
+  }
+
+  /* ── Submit CTA — premium physical button ────────
+     Designed to read as a finely-machined component
+     rather than a glowing template pill. The look is
+     built from four pieces:
+
+       1. Two-stop brand-green gradient — primary green
+          at top, deeper green at bottom. Provides a
+          natural "lit from above" feel.
+       2. Inset top highlight + inset bottom shadow —
+          the two subtle inset lines together create the
+          impression of a physical button face with a
+          bevel/edge. The top highlight is bright; the
+          bottom inset is a deep brand-teal dark.
+       3. Tight 1px outline drop — defines the button's
+          edge against the white card without halo.
+       4. Three-layer ambient drop shadow — close
+          green-tinted halo (the brand glow, kept
+          subtle), then a mid neutral shadow, then a
+          deeper ambient. Together they read as a
+          confident elevation, not a glowing flare.
+
+     Padding bumped slightly for vertical heft. Letter-
+     spacing tightened — premium buttons use precise
+     spacing, not wide chunky tracking. */
+  /* Submit CTA — bright + professional compromise.
+     Earlier-V2 button was too deep (lost the pleasant
+     brightness V1 had). V1 was too glow-y (read as a
+     template button). This version keeps the V2
+     architectural skeleton (inset top highlight, inset
+     bottom-edge shadow, three-layer drop) but lifts
+     both gradient stops and increases the green-tinted
+     halo intensity so it reads as a vibrant brand
+     button without dissolving into a glow. */
+  .cf-submit {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    width: 100%;
+    padding: 13px 24px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.94rem;
+    font-weight: 700;
+    letter-spacing: -0.003em;
+    color: #ffffff;
+    /* Brighter top stop (#34d166 instead of #2DC856) and
+       a less-deep bottom stop (#23b04b instead of
+       #1ea848). Net: button is visibly cheerier while
+       still gradiated for shape. */
+    background: linear-gradient(180deg, #34d166 0%, #23b04b 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.46),
+      inset 0 -1px 0 rgba(13, 28, 36, 0.18),
+      0 1px 1px rgba(13, 28, 36, 0.08),
+      0 4px 10px rgba(45, 200, 86, 0.32),
+      0 10px 22px rgba(45, 200, 86, 0.14),
+      0 14px 28px rgba(13, 28, 36, 0.16);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                background 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cf-submit:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, #3ad96b 0%, #25b450 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.50),
+      inset 0 -1px 0 rgba(13, 28, 36, 0.18),
+      0 1px 1px rgba(13, 28, 36, 0.08),
+      0 6px 14px rgba(45, 200, 86, 0.40),
+      0 14px 28px rgba(45, 200, 86, 0.18),
+      0 18px 36px rgba(13, 28, 36, 0.20);
+  }
+  .cf-submit:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 1px 2px rgba(13, 28, 36, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.20),
+      0 1px 1px rgba(13, 28, 36, 0.08),
+      0 2px 6px rgba(45, 200, 86, 0.24);
+  }
+  .cf-submit:focus-visible {
+    outline: 2px solid #1a2f3a;
+    outline-offset: 3px;
+  }
+  .cf-submit-arrow {
+    width: 14px;
+    height: 14px;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cf-submit:hover .cf-submit-arrow {
+    transform: translateX(3px);
+  }
+
+  /* ── Trust line ─────────────────────────────────── */
+  .cf-trust {
+    grid-column: 1 / -1;
+    margin: 3px 0 0;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+    color: rgba(13, 27, 34, 0.66);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Single-line lock — manager wanted the three trust
+       phrases on one line. flex-wrap:nowrap stops the row
+       from breaking; white-space:nowrap on the spans keeps
+       each phrase intact (no mid-phrase wrap from
+       white-space rules inherited from .cf-form's text-
+       align:left). Font size dropped + gap tightened so
+       the line fits inside the 340px card without
+       overflowing. */
+    flex-wrap: nowrap;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .cf-trust-dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2DC856;
+    box-shadow: 0 0 6px rgba(45, 200, 86, 0.7);
+    animation: cf-trust-pulse 2s ease-in-out infinite;
+  }
+  @keyframes cf-trust-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.55; transform: scale(0.85); }
+  }
+  .cf-trust-sep {
+    color: rgba(13, 27, 34, 0.28);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  // ── International phone input ─────────────────────
+  // The +1 prefix is now a clickable country selector
+  // powered by intl-tel-input v28. Each phone input on
+  // the page gets initialized once; we tag the input
+  // with `_iti` so re-running this script (HMR) doesn't
+  // double-mount.
+  //
+  // We disable the library's built-in formatAsYouType
+  // (which uses libphonenumber-js's national format —
+  // for US that's "555 123-4567" without parens) and
+  // instead run our own NANP formatter below that
+  // produces the standard "(555) 123-4567" parens
+  // format as the user types. Non-NANP countries get
+  // their value left as-is (digits only).
+  import intlTelInput from 'intl-tel-input/intlTelInputWithUtils';
+  import 'intl-tel-input/styles';
+
+  // ── NANP (US/CA) live formatter ───────────────────
+  // Adds parens at digit 4, dash at digit 7. Preserves
+  // cursor position relative to digits typed so the
+  // formatting feels seamless even when the user clicks
+  // back into the middle and edits.
+  function formatNANPPhone(input: HTMLInputElement) {
+    const digits = input.value.replace(/\D/g, '').slice(0, 10);
+    let formatted: string;
+    if (digits.length === 0) formatted = '';
+    else if (digits.length <= 3) formatted = digits;
+    else if (digits.length <= 6) formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    else formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    if (input.value === formatted) return;
+
+    // Preserve cursor position by digit-index
+    const oldCursor = input.selectionStart ?? input.value.length;
+    const digitsBefore = input.value.slice(0, oldCursor).replace(/\D/g, '').length;
+
+    input.value = formatted;
+
+    let cursor = 0;
+    let counted = 0;
+    while (cursor < formatted.length && counted < digitsBefore) {
+      if (/\d/.test(formatted[cursor])) counted++;
+      cursor++;
+    }
+    input.setSelectionRange(cursor, cursor);
+  }
+
+  document.querySelectorAll<HTMLInputElement>('.cf-phone-input').forEach((input) => {
+    if ((input as any)._iti) return;
+    const iti = intlTelInput(input, {
+      initialCountry: 'us',
+      separateDialCode: true,
+      formatAsYouType: false,
+      countryOrder: ['us', 'ca', 'gb', 'au'],
+    });
+    (input as any)._iti = iti;
+
+    const isNANP = () => {
+      const iso = iti.getSelectedCountryData?.()?.iso2;
+      return iso === 'us' || iso === 'ca';
+    };
+
+    // Format on every keystroke for NANP. Non-NANP
+    // countries: leave the input alone.
+    input.addEventListener('input', () => {
+      if (isNANP()) formatNANPPhone(input);
+    });
+
+    // When the user switches country, strip non-digits
+    // (so previous US formatting doesn't leak into a
+    // different country's input), then re-format if the
+    // new country is NANP.
+    input.addEventListener('countrychange', () => {
+      input.value = input.value.replace(/\D/g, '');
+      if (isNANP()) formatNANPPhone(input);
+    });
+  });
+
+  // ── Submit handler ────────────────────────────────
+  // No-op submit stub — prevents a real submit until a
+  // backend (HubSpot / Formspree / etc.) is wired up.
+  // Replace this block when the endpoint is ready.
+  document.querySelectorAll<HTMLFormElement>('.cf-form').forEach((form) => {
+    if ((form as any)._submitWired) return;
+    (form as any)._submitWired = true;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      // Pull the full E.164 number from intl-tel-input if available
+      const phoneInput = form.querySelector<HTMLInputElement>('.cf-phone-input');
+      if (phoneInput && (phoneInput as any)._iti) {
+        (data as any).phoneE164 = (phoneInput as any)._iti.getNumber();
+      }
+      // eslint-disable-next-line no-console
+      console.log('[ConsultationForm submit]', data);
+    });
+  });
+</script>

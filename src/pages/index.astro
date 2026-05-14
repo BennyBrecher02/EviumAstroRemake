@@ -2,31 +2,37 @@
 /**
  * / — Default landing page.
  * ─────────────────────────
- * Renders the v3 stack so visitors hitting the bare root
- * URL land on the current production-intent home page. The
- * legacy v1 home is preserved at /home-v1; v2 is at
- * /home-v2; v3 also lives at /home-v3. This file just
- * mirrors v3's stack so the canonical URL is /.
+ * Renders the v4 stack so visitors hitting the bare root
+ * URL land on the current production-intent home page
+ * (HeaderV5 rail + V4 scene components). The legacy homes
+ * are preserved at their version-specific routes:
+ *   /home-v1, /home-v2, /home-v3, /home-v4.
+ * This file just mirrors v4's stack so the canonical URL
+ * is /.
  *
- * (When you're ready to fully retire v1/v2, this file can
- * stay as-is and only the version-specific routes need to
- * change.)
+ * Mirrors /home-v4 exactly — same components, same
+ * headerVariant="v5", same bodyClass="page-home-v4" — so
+ * HeaderV5 and the V4 scene components branch identically
+ * whether the visitor lands on / or /home-v4. (The V4
+ * Portal/Solutions scene's `/#solutions` smooth-scroll
+ * handler is gated on `pathname === '/'`, so it activates
+ * correctly here on the canonical root.)
  */
 import Layout from '../layouts/Layout.astro';
-import HeroHomeMainV3 from '../components/heroes/HeroHomeMainV3.astro';
-import HeroPortalSolutionsSceneV3 from '../components/heroes/HeroPortalSolutionsSceneV3.astro';
-import LocationsMapSectionV3 from '../components/LocationsMapSectionV3.astro';
-import HomeFaqSectionV3 from '../components/HomeFaqSectionV3.astro';
-import HomeAppDownloadSectionV3 from '../components/HomeAppDownloadSectionV3.astro';
-import ConsultationStickyTab from '../components/ConsultationStickyTab.astro';
+import HeroHomeMainV4 from '../components/heroes/HeroHomeMainV4.astro';
+import HeroPortalSolutionsSceneV4 from '../components/heroes/HeroPortalSolutionsSceneV4.astro';
+import LocationsMapSectionV4 from '../components/LocationsMapSectionV4.astro';
+import HomeFaqSectionV4 from '../components/HomeFaqSectionV4.astro';
+import HomeAppDownloadSectionV4 from '../components/HomeAppDownloadSectionV4.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTabV2.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 ---
-<Layout title="Evium Charging" headerVariant="v4" bodyClass="page-home-v3">
-  <HeroHomeMainV3 />
-  <HeroPortalSolutionsSceneV3 />
-  <LocationsMapSectionV3 />
-  <HomeFaqSectionV3 />
-  <HomeAppDownloadSectionV3 />
+<Layout title="Evium Charging" headerVariant="v5" bodyClass="page-home-v4">
+  <HeroHomeMainV4 />
+  <HeroPortalSolutionsSceneV4 />
+  <LocationsMapSectionV4 />
+  <HomeFaqSectionV4 />
+  <HomeAppDownloadSectionV4 />
   <SiteFooter />
 
   <!-- Sticky right-edge tab + drawer. Shows AFTER the

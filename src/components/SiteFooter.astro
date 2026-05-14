@@ -33,9 +33,9 @@ const footerCols = [
       { label: 'Multifamily',          href: '/service-testing/multifamily-v4' },
       { label: 'Fleets',               href: '/service-testing/fleets-v2'      },
       { label: 'Highway / fast lane',  href: '/service-testing/highway-v3'     },
-      { label: 'Retail & hospitality', href: '/solutions/retail'               },
-      { label: 'Parking garages',      href: '/solutions/parking'              },
-      { label: 'Medical',              href: '/solutions/medical'              },
+      { label: 'Retail & hospitality', href: '/solutions/retail',              wip: true },
+      { label: 'Parking garages',      href: '/solutions/parking',             wip: true },
+      { label: 'Medical',              href: '/solutions/medical',             wip: true },
     ],
   },
   {
@@ -53,7 +53,7 @@ const footerCols = [
     links: [
       { label: 'How it works',         href: '/how-it-works'                    },
       { label: 'Services',             href: '/services'                        },
-      { label: 'Electrician partners', href: '/solutions/electrician-partners'  },
+      { label: 'Electrician partners', href: '/solutions/electrician-partners' },
       { label: 'Referral program',     href: '/contact/referral'                },
       { label: 'Blog',                 href: '/blog-v5'                         },
       { label: 'Contact',              href: '/contact'                         },
@@ -136,7 +136,14 @@ const socials = [
             <h3 class="ev-col-title">{col.title}</h3>
             <ul class="ev-col-list" role="list">
               {col.links.map((link) => (
-                <li><a href={link.href} class="ev-col-link">{link.label}</a></li>
+                <li>
+                  <a
+                    href={link.href}
+                    class:list={['ev-col-link', link.wip && 'pointer-events-none']}
+                    aria-disabled={link.wip ? 'true' : undefined}
+                    tabindex={link.wip ? -1 : undefined}
+                  >{link.label}</a>
+                </li>
               ))}
             </ul>
           </div>

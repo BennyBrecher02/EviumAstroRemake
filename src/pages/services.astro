@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import ConsultationStickyTab from '../components/ConsultationStickyTab.astro';
+import ConsultationStickyTab from '../components/ConsultationStickyTabV2.astro';
 
 // Service-card images live in /public/images/old-service-images/. They
 // were originally hot-linked from Google's AIDA CDN (aida-public/...);
@@ -32,13 +32,14 @@ const topCards = [
   },
 ];
 
-const sideTopCards = [
-  {
-    code: 'PARTNER-CERT',
-    title: 'Electrician Partners',
-    href: '/solutions/electrician-partners',
-    image: '/images/old-service-images/electrician-partners.jpg',
-  },
+// Bento middle rows — TRUE bento (NOT uniform 2×2). Varied
+// sizes for visual rhythm + restored "Under Construction"
+// veil overlay (centered pill + dark wash) on each WIP card:
+//   Commercial = col-2 row-2 TALL (anchors left of right side)
+//   Retail     = col-4 row-1 WIDE (top right)
+//   Parking    = col-2 row-1
+//   Medical    = col-2 row-1
+const profitRowSideCards = [
   {
     code: 'CORP-OFFICE-01',
     title: 'Commercial',
@@ -46,9 +47,6 @@ const sideTopCards = [
     image: '/images/old-service-images/commercial.jpg',
     wip: true,
   },
-];
-
-const sideBottomCards = [
   {
     code: 'COMM-SITE-5',
     title: 'Retail',
@@ -56,6 +54,16 @@ const sideBottomCards = [
     image: '/images/old-service-images/retail.jpg',
     wip: true,
   },
+];
+
+const electricianFeaturedCard = {
+  code: 'PARTNER NETWORK',
+  title: 'Electrician Partners',
+  href: '/solutions/electrician-partners',
+  image: '/images/old-service-images/electrician-partners.jpg',
+};
+
+const electricianRowSideCards = [
   {
     code: 'PK-INFRA-G',
     title: 'Parking',
@@ -69,6 +77,67 @@ const sideBottomCards = [
     href: '/solutions/medical',
     image: '/images/old-service-images/medical.jpg',
     wip: true,
+  },
+];
+
+// ════════════════════════════════════════════════════════════
+// REBATES & INCENTIVES — decoupled copy from /how-it-works
+// section 04 (programs + backedLogos data + structure). Lives
+// in services hub between Strategic Delivery Model and the
+// final CTA. Re-uses the same data shape but the CSS is
+// independently namespaced (.services-rebates-*) so the
+// services page doesn't pull anything from /how-it-works.
+// ════════════════════════════════════════════════════════════
+const rebatesBackedLogos = [
+  '/images/logos/government/cec.png',
+  '/images/logos/government/cal-evip.webp',
+  '/images/logos/government/nj-bpu.png',
+  '/images/logos/government/nm-dot.png',
+  '/images/logos/government/colorado-cdot.png',
+  '/images/logos/industry/con-edison.webp',
+  '/images/logos/industry/ev-gateway.webp',
+];
+
+interface RebatesProgram {
+  logo: string;
+  name: string;
+  agency: string;
+  status: string;
+  desc: string;
+}
+// Program data verified against official sources:
+// • NEVI:    afdc.energy.gov/laws/12744 (FHWA Formula Program, $5B over FY22-26)
+// • REACH 2.0: energy.ca.gov/solicitations/2023-04 (CEC GFO-22-614)
+// • NJBPU:   afdc.energy.gov/laws (NJ Board of Public Utilities EV grants)
+// • CALeVIP: calevip.org/about-calevip (CEC-funded, administered by CSE)
+const rebatesPrograms: RebatesProgram[] = [
+  {
+    logo: '/images/logos/government/nm-dot.png',
+    name: 'NEVI Formula Program',
+    agency: 'FHWA + State DOTs',
+    status: 'Awarded',
+    desc: "Evium is a qualified charge point operator under the $5B federal NEVI program. Awarded a New Mexico NEVI corridor site in partnership with EV Gateway; actively pursuing additional corridor awards in OR, TX, and CT.",
+  },
+  {
+    logo: '/images/logos/government/cec.png',
+    name: 'REACH 2.0',
+    agency: 'California Energy Commission',
+    status: 'Active applicant',
+    desc: "Reliable, Equitable, and Accessible Charging for Multi-family Housing — a CEC Clean Transportation Program grant funding EV charging for multifamily residents with priority for low-income and disadvantaged communities.",
+  },
+  {
+    logo: '/images/logos/government/nj-bpu.png',
+    name: 'NJ EV Infrastructure Grants',
+    agency: 'NJ Board of Public Utilities',
+    status: 'Awarded',
+    desc: "Grants from the New Jersey Board of Public Utilities covering DC fast charger and Level 2 deployments. Evium structures these awards into zero-cost installations for qualifying NJ property owners.",
+  },
+  {
+    logo: '/images/logos/government/cal-evip.webp',
+    name: 'CALeVIP Rebates',
+    agency: 'CEC + Center for Sustainable Energy',
+    status: 'Active participant',
+    desc: "California per-charger rebates funded by the California Energy Commission and administered by the Center for Sustainable Energy. Evium handles the full application and compliance stack on behalf of property owners.",
   },
 ];
 
@@ -103,11 +172,11 @@ const standards = [
 <Layout
   title="Services — Evium Charging"
   description="Explore Evium Charging's service verticals across multifamily, fleets, highway fast charging, commercial, retail, parking, medical, and more."
-  headerVariant="v4"
+  headerVariant="v5"
   bodyClass="page-services"
 >
   <main class="services-page text-[#182126]">
-    <section class="services-hero relative overflow-hidden pt-28 md:pt-36">
+    <section class="services-hero relative overflow-hidden pt-20 md:pt-24">
       <div class="absolute inset-0 hero-base-bg"></div>
 
       <!-- Refined ambient lighting -->
@@ -195,124 +264,74 @@ const standards = [
       <!-- Top edge light streak -->
       <div class="hero-edge-light"></div>
 
-      <div class="relative mx-auto max-w-[1440px] px-4 pb-28 md:px-8 md:pb-36">
-      <div class="grid items-end gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(18rem,24rem)]">
-        <div>
-          <div class="mb-6 flex items-center gap-3">
-            <span class="h-px w-12 bg-[#2DC856]/65"></span>
-            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7DDEA1]">
-              Service Architecture v2.4
-            </span>
-          </div>
-
-          <h1 class="max-w-[9ch] text-[3.5rem] font-black leading-[0.9] tracking-[-0.055em] text-white md:text-[5.75rem]">
-            Infrastructure as a Service
-          </h1>
-
-          <p class="mt-8 max-w-xl text-lg leading-8 text-white/64">
-            Evium deploys and operates charging ecosystems for real estate, fleets, public corridors, and commercial sites without pushing owners into hardware, permitting, or operational complexity.
-          </p>
+      <div class="services-hero-stage relative mx-auto max-w-[1100px] px-4 pb-32 md:px-8 md:pb-40">
+        <!-- Eyebrow — multi-piece editorial detail: a brand-
+             green gradient dash, the uppercase section label,
+             a tiny dot separator, and a faint right-side
+             auxiliary label. Reads as a refined masthead rather
+             than the plain dash + word pattern used elsewhere. -->
+        <div class="services-hero-eyebrow mb-9 inline-flex items-center gap-3">
+          <span class="services-hero-eyebrow-dash" aria-hidden="true"></span>
+          <span class="services-hero-eyebrow-text">Services Hub</span>
+          <span class="services-hero-eyebrow-dot" aria-hidden="true"></span>
+          <span class="services-hero-eyebrow-aux">Turnkey delivery model</span>
         </div>
 
-        <div class="flex flex-col items-start gap-4 md:items-end">
-          <div class="uptime-panel w-full max-w-[24rem] border border-white/12 px-7 py-6">
-            <div class="flex items-center justify-between gap-4">
-              <div class="text-[10px] font-medium uppercase tracking-[0.16em] text-white/44">
-                Network Reliability
-              </div>
-              <div class="w-[8.9rem] text-center text-[10px] font-medium uppercase tracking-[0.16em] text-white/34">
-                Status
-              </div>
-            </div>
-
-            <div class="mt-7 grid grid-cols-[minmax(0,1fr)_8.9rem] gap-8 items-center">
-              <div class="flex min-w-0 flex-col items-center">
-                <div class="meter-track" aria-hidden="true">
-                  <svg viewBox="0 0 180 108" class="meter-svg" role="presentation">
-                    <defs>
-                      <linearGradient id="eviumReliabilityArc" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#7f2f35" />
-                        <stop offset="18%" stop-color="#b04937" />
-                        <stop offset="40%" stop-color="#d87d32" />
-                        <stop offset="58%" stop-color="#e2c233" />
-                        <stop offset="78%" stop-color="#7cb446" />
-                        <stop offset="100%" stop-color="#2DC856" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M24 86 A66 66 0 0 1 156 86"
-                      fill="none"
-                      stroke="rgba(255,255,255,0.08)"
-                      stroke-width="18"
-                      stroke-linecap="round"
-                      opacity="0.35"
-                    />
-                    <path
-                      d="M24 86 A66 66 0 0 1 156 86"
-                      fill="none"
-                      stroke="url(#eviumReliabilityArc)"
-                      stroke-width="14"
-                      stroke-linecap="round"
-                    />
-                    <line x1="90" y1="86" x2="154" y2="64" stroke="#ecf6ef" stroke-width="3.5" stroke-linecap="round" />
-                    <circle cx="90" cy="86" r="6.5" fill="#ecf6ef" />
-                    <circle cx="90" cy="86" r="2.4" fill="#1A2F3A" />
-                  </svg>
-                </div>
-                <span class="uptime-value mt-1 block text-[2.7rem] leading-none text-white">99.2%</span>
-                <span class="mt-2 block text-center text-[11px] font-medium uppercase tracking-[0.14em] text-white/38">
-                  Rolling 30-day uptime
-                </span>
-              </div>
-
-              <div class="border-l border-white/10 pl-6">
-                <div class="space-y-3 text-left">
-                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/66">
-                    <span class="status-light status-green is-on"></span>
-                    Online
-                  </span>
-                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/42">
-                    <span class="status-light status-yellow is-off"></span>
-                    Under Maintenance
-                  </span>
-                  <span class="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/42">
-                    <span class="status-light status-red is-off"></span>
-                    Offline
-                  </span>
-                </div>
-
-                <div class="mt-5 border-t border-white/10 pt-4">
-                  <div class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Current State</div>
-                  <div class="mt-1 text-sm font-semibold tracking-[0.01em] text-white/76">Nominal</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-7 h-px w-full bg-white/10"></div>
-
-            <dl class="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-left">
-              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Monitoring</dt>
-              <dd class="text-sm font-semibold text-right text-white/72">24/7 active</dd>
-
-              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Last outage</dt>
-              <dd class="text-sm font-semibold text-right text-white/72">17 days ago</dd>
-
-              <dt class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/30">Open exceptions</dt>
-              <dd class="text-sm font-semibold text-right text-white/72">0</dd>
-            </dl>
-          </div>
-          <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/40">
-            Est. 2024 Precision Unit
+        <!-- Headline — concrete two-line services promise.
+             Line 1 names the visitor's role (they own a
+             property); line 2 names Evium's role (we run the
+             charging on it). The green accent on line 2 carries
+             the "what Evium delivers" half of the propositioning,
+             matching the brand's recurring two-tone-line headline
+             pattern (e.g. "Grow Your Business. / Power the
+             Future.") but with copy specific to the services hub. -->
+        <h1 class="services-hero-title">
+          <span class="services-hero-title-line">You own the property.</span>
+          <span class="services-hero-title-line services-hero-title-accent">
+            We run the charging.
           </span>
-        </div>
-      </div>
+        </h1>
+
+        <!-- Subhead — editorial-lede treatment: a brand-green
+             marker dash anchors the paragraph's left edge,
+             "Evium" gets a brand-green tinted strong, the four
+             vertical phrases get a brighter / heavier inline
+             treatment, and the trailing "complexity" caveat
+             gets a low-contrast muting so the eye lands on the
+             value-prop first and the caveat second. -->
+        <p class="services-hero-sub mt-9 max-w-[36rem]">
+          <span class="services-hero-sub-mark" aria-hidden="true"></span><strong class="services-hero-sub-brand">Evium</strong> deploys and operates charging ecosystems for <span class="services-hero-sub-em">real estate, fleets, public corridors, and commercial sites</span> <span class="services-hero-sub-mute">without pushing owners into hardware, permitting, or operational complexity.</span>
+        </p>
       </div>
 
-      <div class="services-transition-panel pointer-events-none absolute inset-x-0 bottom-[-1px] h-32"></div>
+      <div class="services-transition-panel pointer-events-none absolute inset-x-0 bottom-[-1px] h-56 md:h-[28rem]"></div>
     </section>
 
-    <section class="relative z-10 mx-auto -mt-10 max-w-[1440px] px-4 pb-24 md:-mt-14 md:px-8 md:pb-32">
-      <div class="services-content-shell rounded-t-[2rem] bg-[#f7f7f4] px-0 pt-6 shadow-[0_-24px_60px_rgba(12,20,28,0.08)] md:rounded-t-[2.5rem] md:pt-8">
+    <!-- Three-tone cohesive surface system:
+         •  Shade A (hill / polygon / chart silhouette) =
+            #eceae3   — light warm gray, blends into the dark
+            hero from below.
+         •  Shade B (shell)                            =
+            #faf8f2   — bright warm cream, the featured
+            container the cards live in. Visibly brighter than
+            its surroundings on ALL four edges (rounded-all
+            corners + internal padding so the shell color
+            shows around every card).
+         •  Shade C (body bg + standards section)      =
+            #e2dfd4   — warm mid-light gray, the ambient
+            "page" tone the shell sits on. Reads as a half-
+            step settled-down from the polygon, so the eye
+            travels: hero(dark) → A(hill) → B(shell pop) →
+            C(settled body) without any abrupt color jumps.
+
+         Cards "peek out" via the restored -mt-16 / md:-mt-24
+         overlap — same magnitude as the original stylistic
+         peek, just now with a chart polygon (h-44, taller
+         than before) tuned so the rising-hill silhouette is
+         fully visible ABOVE the peeking shell on both mobile
+         and desktop. -->
+    <section class="relative z-10 mx-auto -mt-16 max-w-[1440px] px-4 pb-24 md:-mt-24 md:px-8 md:pb-32">
+      <div class="services-content-shell rounded-[1.75rem] p-3 md:rounded-[2.25rem] md:p-5">
       <div class="grid grid-cols-1 gap-4 md:grid-cols-12 md:auto-rows-[255px]">
         {topCards.map((card) => (
           <a
@@ -337,92 +356,275 @@ const standards = [
           </a>
         ))}
 
+        <!-- ════════════════════════════════════════════════════
+             PROFITABILITY TERMINAL — compact, single-row card
+             (md:row-span-1 now, was row-span-2). Content
+             reorganized into a 2-column grid that fills the
+             ~255px slot tightly:
+               LEFT:  inline icon+eyebrow row → 1-line headline
+                      → 1-line subtext → 4-column inputs strip
+               RIGHT: small sparkline w/ trend badge → CTA
+             ════════════════════════════════════════════════════ -->
         <a
           href="/solutions/profit-calculator"
-          class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white px-6 py-7 shadow-[0_28px_60px_rgba(10,20,28,0.08)] md:col-span-6 md:row-span-2 md:px-10 md:py-9"
+          class="profit-card group relative overflow-hidden rounded-2xl bg-white p-5 shadow-[0_28px_60px_rgba(10,20,28,0.08)] md:col-span-6 md:row-span-1 md:p-6"
         >
-          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#ededec] text-[#a7aaaa] transition-colors duration-300 group-hover:bg-[#dfe8e1] group-hover:text-[#17883c] md:right-8 md:top-8 md:h-16 md:w-16">
-            <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" aria-hidden="true">
-              <rect x="5" y="4.5" width="14" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"></rect>
-              <path d="M8.5 8h7M8.5 11.5h2.2M13.2 11.5h2.3M8.5 15h2.2M13.2 15h2.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
-            </svg>
-          </div>
+          <!-- Decorative gridlines — subtle dashboard backdrop -->
+          <div class="profit-card-grid" aria-hidden="true"></div>
 
-          <div class="max-w-md">
-            <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
-              Profitability Terminal
-            </span>
-            <h2 class="mt-5 text-[2.1rem] font-bold leading-[1.02] tracking-[-0.04em] text-[#11181d] md:text-[2.45rem]">
-              Calculate Generated Profits
-            </h2>
-
-            <div class="mt-9 max-w-sm space-y-8">
-              <div>
-                <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
-                  <span>Station Count</span>
-                  <span class="font-bold text-[#182126]">12 Units</span>
-                </div>
-                <div class="mt-3 h-[2px] overflow-hidden bg-[#dce1de]">
-                  <div class="h-full w-[34%] bg-[#17883c]"></div>
-                </div>
+          <div class="relative z-10 grid h-full gap-x-6 gap-y-4 md:grid-cols-[minmax(0,1fr)_auto]">
+            <!-- ── LEFT column: header text + inputs strip ── -->
+            <div class="flex min-w-0 flex-col">
+              <!-- Eyebrow row: icon and "Profitability Terminal"
+                   text inline on the same row, comfortable gap. -->
+              <div class="inline-flex items-center gap-2.5">
+                <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-[#eef3ef] text-[#17883c] transition-colors duration-200 group-hover:bg-[#d9ecde]">
+                  <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+                    <rect x="5" y="4.5" width="14" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"></rect>
+                    <path d="M8.5 8h7M8.5 11.5h2.2M13.2 11.5h2.3M8.5 15h2.2M13.2 15h2.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                  </svg>
+                </span>
+                <span class="text-[10px] font-medium uppercase tracking-[0.18em] text-[#7a8a8f]">
+                  Profitability Terminal
+                </span>
               </div>
 
-              <div>
-                <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
-                  <span>Average Utilization</span>
-                  <span class="font-bold text-[#182126]">4.5 Hrs / Day</span>
+              <!-- Headline — forced onto a single line via
+                   md:whitespace-nowrap so it never wraps. -->
+              <h2 class="mt-2.5 text-[1.55rem] font-bold leading-tight tracking-[-0.03em] text-[#11181d] md:whitespace-nowrap md:text-[1.85rem]">
+                Calculate Generated Profits
+              </h2>
+
+              <!-- Compact subtext — one short line at desktop. -->
+              <p class="mt-1.5 text-[12px] leading-snug text-[#4f5b60] md:text-[13px]">
+                5-year revenue projection in seconds — tune your site profile.
+              </p>
+
+              <!-- Inputs grid — 2×2 (mobile) AND 2×2 (desktop):
+                   per user request, NOT laid out as 4
+                   horizontal. Two rows of two inputs each so
+                   each cell has room to breathe. mt-auto pins
+                   the grid at the bottom of the left column. -->
+              <dl class="profit-card-inputs mt-auto grid grid-cols-2 gap-x-4 gap-y-3 md:gap-x-6">
+                <div>
+                  <dt class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Stations</dt>
+                  <dd class="mt-0.5 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold leading-none text-[#11181d]">12</span>
+                    <span class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Units</span>
+                  </dd>
+                  <div class="mt-1.5 h-[2.5px] overflow-hidden rounded-full bg-[#e5e8e6]">
+                    <div class="h-full w-[34%] rounded-full bg-gradient-to-r from-[#17883c] to-[#2DC856]"></div>
+                  </div>
                 </div>
-                <div class="mt-3 h-[2px] overflow-hidden bg-[#dce1de]">
-                  <div class="h-full w-[64%] bg-[#17883c]"></div>
+
+                <div>
+                  <dt class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Utilization</dt>
+                  <dd class="mt-0.5 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold leading-none text-[#11181d]">4.5</span>
+                    <span class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Hrs/Day</span>
+                  </dd>
+                  <div class="mt-1.5 h-[2.5px] overflow-hidden rounded-full bg-[#e5e8e6]">
+                    <div class="h-full w-[64%] rounded-full bg-gradient-to-r from-[#17883c] to-[#2DC856]"></div>
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <dt class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Tier</dt>
+                  <dd class="mt-0.5 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold leading-none text-[#11181d]">L3</span>
+                    <span class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">180 kW</span>
+                  </dd>
+                  <div class="mt-1.5 h-[2.5px] overflow-hidden rounded-full bg-[#e5e8e6]">
+                    <div class="h-full w-[82%] rounded-full bg-gradient-to-r from-[#17883c] to-[#2DC856]"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <dt class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">Site</dt>
+                  <dd class="mt-0.5 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold leading-none text-[#11181d]">A</span>
+                    <span class="text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">High</span>
+                  </dd>
+                  <div class="mt-1.5 h-[2.5px] overflow-hidden rounded-full bg-[#e5e8e6]">
+                    <div class="h-full w-[72%] rounded-full bg-gradient-to-r from-[#17883c] to-[#2DC856]"></div>
+                  </div>
+                </div>
+              </dl>
             </div>
-          </div>
 
-          <div class="mt-12 flex flex-col gap-6 border-t border-[#e5e8e6] pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
-                Est. Annual Net Revenue
+            <!-- ── RIGHT column: sparkline shifted DOWN
+                 noticeably via pt-20 (80px padding-top),
+                 CTA pinned to bottom via justify-between.
+                 Sparkline now sits well below the top of
+                 the right column, with a meaningful vertical
+                 gap above the Run Simulation button. -->
+            <div class="flex flex-col items-stretch justify-between gap-3 md:items-end md:pt-20">
+              <figure class="profit-card-spark hidden flex-col gap-1.5 md:flex">
+                <figcaption class="flex items-center justify-between gap-3 text-[9px] font-medium uppercase tracking-[0.14em] text-[#7a8a8f]">
+                  <span>5-yr Projection</span>
+                  <span class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.12em] text-[#17883c]">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#2DC856]"></span>
+                    +18%
+                  </span>
+                </figcaption>
+                <svg viewBox="0 0 160 56" class="h-14 w-40" role="presentation" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="profitSparkFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#2DC856" stop-opacity="0.9" />
+                      <stop offset="100%" stop-color="#17883c" stop-opacity="0.5" />
+                    </linearGradient>
+                  </defs>
+                  <line x1="0" y1="54" x2="160" y2="54" stroke="#e5e8e6" stroke-width="1" />
+                  <rect x="8"   y="38" width="22" height="16" rx="2" fill="url(#profitSparkFill)" />
+                  <rect x="40"  y="30" width="22" height="24" rx="2" fill="url(#profitSparkFill)" />
+                  <rect x="72"  y="20" width="22" height="34" rx="2" fill="url(#profitSparkFill)" />
+                  <rect x="104" y="10" width="22" height="44" rx="2" fill="url(#profitSparkFill)" />
+                  <rect x="136" y="2"  width="22" height="52" rx="2" fill="url(#profitSparkFill)" />
+                </svg>
+              </figure>
+
+              <span class="inline-flex flex-shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#12191e] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition-colors duration-200 group-hover:bg-[#17883c]">
+                Run Simulation
+                <svg viewBox="0 0 16 16" class="h-3 w-3 flex-shrink-0" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </span>
-              <span class="mt-2 block text-[2.15rem] font-black tracking-[-0.05em] text-[#11181d]">$142,800.00</span>
             </div>
-            <span class="inline-flex items-center justify-center rounded-[4px] bg-[#12191e] px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white">
-              Run Simulation
-            </span>
           </div>
         </a>
 
-        {sideTopCards.map((card) => (
-          <a
-            href={card.href}
-            class:list={[
-              'group relative overflow-hidden rounded-2xl md:col-span-3',
-              card.wip && 'pointer-events-none',
-            ]}
-            aria-disabled={card.wip ? 'true' : undefined}
-            tabindex={card.wip ? -1 : undefined}
-          >
-            <img
-              src={card.image}
-              alt={card.title}
-              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.16))]"></div>
-            <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
-            {card.wip && (
-              <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#404952]/55 backdrop-blur-[1.5px]" aria-hidden="true">
-                <span class="rounded bg-black/45 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/95">Under Construction</span>
-              </div>
-            )}
-            <div class="relative flex h-full flex-col justify-between p-5">
-              <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{card.code}</span>
-              <h2 class="max-w-[12ch] text-[1.65rem] font-bold leading-none tracking-[-0.03em] text-white">{card.title}</h2>
+        <!-- ROW 2 RIGHT — bento with VARIED sizes (NOT 2×2):
+             Commercial = col-2 row-2 TALL (left edge of right
+                          side, anchors the row 2-3 area)
+             Retail     = col-4 row-1 WIDE (fills row 2 right
+                          right area)
+             "Under Construction" veil overlay restored — dark
+             wash + centered pill on each WIP card. -->
+        <a
+          href={profitRowSideCards[0].href}
+          class:list={[
+            'group relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2',
+            profitRowSideCards[0].wip && 'pointer-events-none',
+          ]}
+          aria-disabled={profitRowSideCards[0].wip ? 'true' : undefined}
+          tabindex={profitRowSideCards[0].wip ? -1 : undefined}
+        >
+          <img
+            src={profitRowSideCards[0].image}
+            alt={profitRowSideCards[0].title}
+            class="absolute inset-0 h-full w-full object-cover object-[center_30%] transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.88),rgba(16,24,29,0.18))]"></div>
+          <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+          {profitRowSideCards[0].wip && (
+            <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#404952]/55 backdrop-blur-[1.5px]" aria-hidden="true">
+              <span class="rounded bg-black/45 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white/95">Under Construction</span>
             </div>
-          </a>
-        ))}
+          )}
+          <div class="relative flex h-full flex-col justify-between p-5">
+            <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{profitRowSideCards[0].code}</span>
+            <h2 class="text-[1.45rem] font-bold leading-tight tracking-[-0.03em] text-white">{profitRowSideCards[0].title}</h2>
+          </div>
+        </a>
 
-        {sideBottomCards.map((card) => (
+        <a
+          href={profitRowSideCards[1].href}
+          class:list={[
+            'group relative overflow-hidden rounded-2xl md:col-span-4',
+            profitRowSideCards[1].wip && 'pointer-events-none',
+          ]}
+          aria-disabled={profitRowSideCards[1].wip ? 'true' : undefined}
+          tabindex={profitRowSideCards[1].wip ? -1 : undefined}
+        >
+          <img
+            src={profitRowSideCards[1].image}
+            alt={profitRowSideCards[1].title}
+            class="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.16))]"></div>
+          <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+          {profitRowSideCards[1].wip && (
+            <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#404952]/55 backdrop-blur-[1.5px]" aria-hidden="true">
+              <span class="rounded bg-black/45 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/95">Under Construction</span>
+            </div>
+          )}
+          <div class="relative flex h-full flex-col justify-between p-5">
+            <span class="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{profitRowSideCards[1].code}</span>
+            <h2 class="max-w-[12ch] text-[1.7rem] font-bold leading-none tracking-[-0.03em] text-white">{profitRowSideCards[1].title}</h2>
+          </div>
+        </a>
+
+        <!-- ROW 3 LEFT — ELECTRICIAN PARTNERS feature card.
+             Distinct visual style from the standard service
+             cards: brand-green accent strip on the left edge,
+             editorial left-to-right gradient (not the usual
+             bottom-to-top), brand-green "Partner Network"
+             badge in top-right, headline + supporting text,
+             and a primary brand-green CTA button + stat line.
+             Reads as a "feature card" rather than a basic
+             service tile. -->
+        <a
+          href={electricianFeaturedCard.href}
+          class="electrician-card group relative overflow-hidden rounded-2xl md:col-span-6 md:row-span-1"
+        >
+          <img
+            src={electricianFeaturedCard.image}
+            alt={electricianFeaturedCard.title}
+            class="absolute inset-0 h-full w-full object-cover object-[center_15%] transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+          <!-- Editorial left-to-right gradient: heavy on the
+               left where the text panel lives, soft on the
+               right so the image breathes through. -->
+          <div class="absolute inset-0 bg-[linear-gradient(110deg,rgba(13,26,34,0.93)_0%,rgba(13,26,34,0.78)_38%,rgba(13,26,34,0.45)_62%,rgba(13,26,34,0.22)_100%)]"></div>
+          <div class="absolute inset-0 ring-1 ring-inset ring-white/10"></div>
+
+          <div class="relative flex h-full flex-col justify-between p-6 md:p-7">
+            <!-- Top: icon + eyebrow on same row (mirroring the
+                 Profit-Terminal card's icon+eyebrow pattern,
+                 but with a shield-check icon to signal
+                 "certified" — fitting for partner network). -->
+            <div class="inline-flex items-center gap-2.5">
+              <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-[#2DC856]/18 text-[#6FE891] ring-1 ring-[#2DC856]/30">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <!-- Shield with checkmark — certified partner -->
+                  <path d="M12 3 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-3z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </span>
+              <span class="text-[10px] font-medium uppercase tracking-[0.18em] text-white/85">
+                {electricianFeaturedCard.code}
+              </span>
+            </div>
+
+            <!-- Bottom: headline + descriptive subhead + CTA. -->
+            <div class="max-w-[28rem]">
+              <h2 class="text-[1.85rem] font-bold leading-[1.04] tracking-[-0.03em] text-white md:text-[2.15rem]">
+                {electricianFeaturedCard.title}
+              </h2>
+              <p class="mt-2 text-[12.5px] leading-snug text-white/76 md:text-[13.5px]">
+                Become an Evium-certified electrician — access deployment projects, hands-on training, dedicated technical support, and exclusive partner pricing to grow your installation business.
+              </p>
+              <div class="mt-4">
+                <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-md bg-[#2DC856] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#0d1a22] transition-colors duration-200 group-hover:bg-[#6FE891]">
+                  Join Network
+                  <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" aria-hidden="true">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- ROW 3 RIGHT — Parking + Medical at col-2 each.
+             Together with TALL Commercial (col-2 row-2)
+             already covering cols 7-8 of row 3, they fill
+             cols 9-12 of row 3. Restored "Under Construction"
+             veil overlay (dark wash + centered pill). -->
+        {electricianRowSideCards.map((card) => (
           <a
             href={card.href}
             class:list={[
@@ -435,7 +637,7 @@ const standards = [
             <img
               src={card.image}
               alt={card.title}
-              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              class="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
               loading="lazy"
             />
             <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,24,29,0.84),rgba(16,24,29,0.12))]"></div>
@@ -455,7 +657,29 @@ const standards = [
       </div>
     </section>
 
-    <section class="bg-[#efefed] py-24 md:py-32">
+    {/* ═══════════════════════════════════════════════════════════════
+        BACKED BY — logos strip placed between the bento and the
+        Strategic Delivery Model section. Government + utility +
+        industry partners that fund / back Evium's deployments.
+        Hairline borders top + bottom provide visual separation
+        without using a colored band.
+        ═══════════════════════════════════════════════════════════ */}
+    <section class="services-backed-by">
+      <div class="services-backed-by-container">
+        <p class="services-backed-by-label">
+          <span class="services-backed-by-bar"></span>
+          Backed by
+          <span class="services-backed-by-bar"></span>
+        </p>
+        <div class="services-backed-by-row">
+          {rebatesBackedLogos.map((src) => (
+            <img src={src} alt="" class="services-backed-by-logo" loading="lazy" />
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-[#eef1f5] py-24 md:py-32">
       <div class="mx-auto max-w-[1440px] px-4 md:px-8">
         <div class="mb-16">
           <span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#496b56]">
@@ -468,7 +692,7 @@ const standards = [
 
         <div class="grid gap-4 md:grid-cols-2">
           {standards.map((item) => (
-            <div class="bg-[#f8f8f7] p-5 shadow-[0_18px_45px_rgba(10,20,28,0.03)] md:p-8">
+            <div class="bg-[#e2dfd4] p-5 shadow-[0_18px_45px_rgba(10,20,28,0.03)] md:p-8">
               <div class="relative aspect-[1.7/1] overflow-hidden rounded-lg bg-[#dfdfdd]">
                 <img
                   src={item.image}
@@ -496,6 +720,58 @@ const standards = [
                 </ul>
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ═══════════════════════════════════════════════════════════════
+        REBATES & INCENTIVES — decoupled copy of the section originally
+        in /how-it-works (section 04). Light-panel palette break with
+        backed-by logos strip + program detail cards. CSS classes
+        namespaced .services-rebates-* so the section is fully
+        self-contained.
+        ═══════════════════════════════════════════════════════════ */}
+    <section class="services-rebates">
+      <div class="services-rebates-container">
+        <!-- HEAD: left-aligned single-column editorial header.
+             Kicker → big headline → sub copy stacked. Better
+             for skimming + reads more authoritative than the
+             previous 2-column split. -->
+        <div class="services-rebates-head">
+          <p class="services-rebates-kicker">Rebates &amp; Incentives</p>
+          <h2 class="services-rebates-title">
+            We write the grants,
+            <span class="services-rebates-accent">so you don&rsquo;t have to.</span>
+          </h2>
+          <p class="services-rebates-sub">
+            Federal and state dollars fund most EV deployments today. Evium operates as a qualified CPO across these programs — we identify what your site is eligible for, author every application, and handle compliance for the full award period.
+          </p>
+        </div>
+
+        <!-- (Backed-by logos strip moved to its own section
+             between the bento and Strategic Delivery — see
+             <section class="services-backed-by"> above.) -->
+
+        <!-- PROGRAM CARDS — refined editorial layout.
+             Each card: logo at top, hairline divider, then
+             program name + small refined status label inline
+             with name, agency line below, then body
+             description. 2x2 forced grid on desktop. -->
+        <div class="services-rebates-programs">
+          {rebatesPrograms.map((p) => (
+            <article class="services-rebates-program">
+              <div class="services-rebates-program-logo-wrap">
+                <img src={p.logo} alt={`${p.name} logo`} class="services-rebates-program-logo" loading="lazy" />
+              </div>
+              <span class="services-rebates-program-divider" aria-hidden="true"></span>
+              <div class="services-rebates-program-head">
+                <h3 class="services-rebates-program-name">{p.name}</h3>
+                <span class="services-rebates-program-status">{p.status}</span>
+              </div>
+              <p class="services-rebates-program-agency">{p.agency}</p>
+              <p class="services-rebates-program-desc">{p.desc}</p>
+            </article>
           ))}
         </div>
       </div>
@@ -570,16 +846,28 @@ const standards = [
 
 <style>
   .services-page {
-    background: #f7f7f4;
+    /* Body bg unified with the Rebates section panel color
+       (#eef1f5) so the Strategic Delivery Model section, the
+       bento side margins, and the Rebates section all read
+       as one continuous backdrop — only the card shell
+       inside the bento (which keeps its own gradient bg)
+       and the Rebates program cards (white) stand out as
+       discrete surfaces. */
+    background: #eef1f5;
   }
 
   .services-hero::after {
     content: "";
     position: absolute;
     inset: 0;
+    /* Removed the heavy dark overlay that was darkening the
+       polygon to fake a gray-tone visual — the polygon now
+       carries its own gray-to-cream gradient natively in CSS
+       (see .services-transition-panel below). Only the
+       subtle top-left white sheen remains, for the hero's
+       overall depth on the dark teal bg. */
     background:
-      linear-gradient(112deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.018) 24%, transparent 30%),
-      linear-gradient(180deg, rgba(6,14,20,0) 48%, rgba(6,14,20,0.12) 82%, rgba(6,14,20,0.18) 100%);
+      linear-gradient(112deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.018) 24%, transparent 30%);
     pointer-events: none;
   }
 
@@ -588,25 +876,439 @@ const standards = [
   }
 
   .services-transition-panel {
-    background: #f7f7f4;
-    clip-path: polygon(0 100%, 0 62%, 18% 54%, 34% 60%, 53% 42%, 71% 51%, 86% 32%, 100% 18%, 100% 100%);
+    /* Polygon = the chart silhouette. Cool desaturated gray
+       with internal gradient for dynamic shading, plus a
+       horizontal edge fade so its left/right side strips
+       dissolve smoothly into the body bg (mirroring the
+       shell's side blend). Without the horizontal fade, the
+       polygon side strips (visible at viewports wider than
+       the shell) end against the body bg in a hard vertical
+       line at the panel sides.
+
+       Stack:
+         1. HORIZONTAL edge fade — body bg at very edges
+            (0–4% and 96–100% x), transparent in middle.
+         2. VERTICAL silhouette gradient — gray at hill
+            peaks, fades to cream at panel bottom (meeting
+            line with shell). */
+    background:
+      /* Wider horizontal side fade — body bg at edges,
+         dissolving inward over 14% of panel width on each
+         side, so the polygon's hill silhouette doesn't
+         leave a visible cream "halo" past where the shell
+         ends. */
+      linear-gradient(90deg,
+        #eef1f5 0%,
+        rgba(238, 241, 245, 0.7) 6%,
+        rgba(238, 241, 245, 0) 14%,
+        rgba(238, 241, 245, 0) 86%,
+        rgba(238, 241, 245, 0.7) 94%,
+        #eef1f5 100%),
+      linear-gradient(180deg in oklch,
+        #c5c6c1 0%,
+        #cccdc8 35%,
+        #d2d3ce 65%,
+        #d8d9d4 78%,
+        #f7f7f1 100%);
+    filter: drop-shadow(0 -1px 4px rgba(45, 200, 86, 0.22))
+            drop-shadow(0 -10px 28px rgba(45, 200, 86, 0.08));
+    /* Mobile clip-path — valleys dip BELOW the shell area,
+       Hill 3 raised further by the bigger panel.
+       Hill 2 left slope: valley point at x=44% raised from
+       y=66% → y=58% so the approach is a gentle climb and
+       the climb-to-peak is genuinely less steep. Mirrors
+       the desktop change. */
+    clip-path: polygon(
+      0 100%,
+      0 68%,
+      7% 58%,
+      14% 34%,
+      18% 60%,
+      30% 70%,
+      44% 58%,
+      58% 22%,
+      66% 60%,
+      78% 68%,
+      85% 16%,
+      92% 4%,
+      96% 28%,
+      100% 36%,
+      100% 100%
+    );
+  }
+  @media (min-width: 768px) {
+    .services-transition-panel {
+      /* Desktop clip-path — Hill 2 LOWERED, Hill 3 raised
+         further. Panel grew from h-96 (384px) to h-[28rem]
+         (448px) for the additional Hill 3 raise.
+
+         Panel 448 + pb-40 (160) → subhead bottom in panel =
+         (448-160)/448 ≈ 64.3%. Hill 1 (in subhead range) must
+         clear y > 64.3%.
+
+         Shell top in panel = (448-96)/448 = 78.6%.
+
+           HILL 1:  peak (14%, 65%)  ← just clears subhead 64.3%
+                                       (abs viewport position stable)
+           valley:  18% → 76%        ← above shell (78.6%), visible
+           valley:  30% → 86%        ← BELOW shell ✓ (left valley dips in)
+           valley:  44% → 82%        ← BELOW shell ✓
+           HILL 2:  peak (58%, 50%) ← LOWERED from y=12 to y=50
+                                       (now sits well below Hill 3
+                                       at midway through the panel)
+           valley:  66% → 70%        ← ABOVE shell ✓
+           valley:  78% → 64%        ← ABOVE shell ✓
+           HILL 3 buildup: 85% → 10%
+           HILL 3 peak:   92% → 0%   ← touches new panel top,
+                                       RAISED 64px more vs h-96
+           fall:     96% → 22% */
+      /* Left edge raised from 88% → 72%: the shell-top sits
+         at 78.3% of the panel, so an 88% left-edge point
+         left a transparent gap (88% > 78.3%) where the
+         hero's dark teal showed through the shell's rounded
+         top-left corner. At 72%, the polygon fully fills
+         behind the shell's top-left corner — the rounded
+         corner now sits on the polygon's light tone, not
+         dark teal. The side strip (panel-x 0–6%) is masked
+         by the horizontal body-bg fade anyway, so the
+         visible hill silhouette (panel-x 6%+) is unchanged:
+         (7%,76%) and (14%,65%) stops are untouched. */
+      clip-path: polygon(
+        0 100%,
+        0 72%,
+        7% 76%,
+        14% 65%,
+        18% 76%,
+        30% 86%,
+        44% 76%,
+        58% 50%,
+        66% 70%,
+        78% 64%,
+        85% 10%,
+        92% 0%,
+        96% 22%,
+        100% 32%,
+        100% 100%
+      );
+    }
   }
 
+  /* Shell — true "glue" surface using radial halos.
+     ───────────────────────────────────────────────────────
+     Previous attempts used solid Shade C + 4 thin edge
+     fades. The result looked like a panel with painted-on
+     edge stripes — not a real blend. This pass uses radial
+     halos that bleed FAR into the shell, so the entire
+     surface is a continuous gradient field with no detectable
+     "solid center" zone:
+       •  TOP halo  (large ellipse anchored above center) →
+          Shade A, blending the entire upper half of the shell
+          into the chart silhouette tone above.
+       •  BOTTOM halo (large ellipse anchored below center) →
+          Shade B, blending the entire lower half into body.
+       •  LEFT/RIGHT halos (tall narrow ellipses anchored at
+          horizontal edges) → Shade B, pulling the side strips
+          into body tone.
+       •  Base color #e2dfd4 (Shade C) shows only at the
+          INTERSECTION ZONE — the spot where all four halos
+          have faded out — typically the middle horizontal
+          band, where the cards float against the in-between
+          tone.
+     Cumulative effect: every pixel of the shell is a mix of
+     the surrounding tones, no flat zone, all 4 edges
+     dissolve smoothly into their neighbors. The cards float
+     on what reads as a single continuous tonal field. */
   .services-content-shell {
     position: relative;
+    /* SHELL surface.
+       ──────────────────────────────────────────────────────
+       Vertical gradient only: continues from the polygon at
+       the meeting line (#d8d9d4 at 0%) into bright cream
+       (#f7f7f1 by 11.6%), then holds cream all the way down
+       — the bento cards float on a clean, consistent cream
+       surface.
+
+       Edge blending is handled by a soft DROP SHADOW, not a
+       color fade. A horizontal color fade washed the cream
+       out at the narrow visible side-padding strip, so the
+       shell lost its surface identity at the edges and the
+       blend read as muddy. A real shadow gives the shell
+       genuine depth — its left, right, and bottom edges
+       settle into the body bg the way a professionally-
+       designed elevated card does.
+
+       Two-shadow stack:
+       1. MAIN shadow — y-offset (22) = blur (44) + spread
+          (-22) → casts ZERO shadow above the shell, so the
+          seamless polygon→shell top blend is preserved. It
+          gives the left/right/bottom edges their depth.
+       2. CORNER-SOFTENING shadow — a tight, very faint
+          all-direction halo (0 2px 10px -2px @ 0.055α). Its
+          only job is to soften the rounded CORNER edges so
+          they don't read as crisp geometric clips. Its
+          upward reach is just ~6px at 0.055α — far too faint
+          to register as a line along the seamless top edge,
+          but enough to feather the corner curves. */
+    background:
+      /* Horizontal edge fade — CALIBRATED to align with the
+         polygon's horizontal fade at the same absolute x.
+         The polygon panel (x=80–1440, 1360 wide) fades:
+         body-bg 0% → 0.7α 6% → transparent 14%. The shell
+         (x=112–1408, 1296 wide) sits inside it, so its fade
+         stops are remapped to the same absolute x positions:
+           shell 0%      (x=112)   = polygon 2.35% ≈ 0.88α
+           shell 3.83%   (x=161.6) = polygon 6%    = 0.70α
+           shell 12.2%   (x=270)   = polygon 14%   = 0α
+         …mirrored on the right edge. Result: along the
+         entire polygon↔shell meeting line the two surfaces
+         are color-identical at every x — the center stays
+         #d8d9d4 (matching the polygon's center), and the
+         corners converge to body bg (matching the polygon's
+         faded side strips). The 3-way corner (polygon +
+         shell + body bg) now blends consistently — all three
+         dissolve to body bg at the corner point. */
+      linear-gradient(90deg,
+        rgba(238, 241, 245, 0.88) 0%,
+        rgba(238, 241, 245, 0.70) 3.83%,
+        rgba(238, 241, 245, 0) 12.2%,
+        rgba(238, 241, 245, 0) 87.8%,
+        rgba(238, 241, 245, 0.70) 96.17%,
+        rgba(238, 241, 245, 0.88) 100%),
+      /* Vertical gradient — continues from the polygon at the
+         meeting line (#d8d9d4) into cream where the cards
+         float, held cream all the way down. */
+      linear-gradient(180deg in oklch,
+        #d8d9d4 0%,
+        #f7f7f1 11.6%,
+        #f7f7f1 100%);
+    box-shadow:
+      0 22px 44px -22px rgba(13, 22, 30, 0.13),
+      0 2px 10px -2px rgba(13, 22, 30, 0.055);
   }
 
-  .services-content-shell::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: 100%;
+  /* ═══════════════════════════════════════════════════════════
+     SERVICES HERO TYPOGRAPHY — premium typographic system
+     ═══════════════════════════════════════════════════════════
+     Replaces the earlier plain dash+label eyebrow and uniform
+     headline with an editorial masthead system: a multi-piece
+     eyebrow (gradient dash + section label + bullet + aux),
+     a two-line display headline with a green-gradient italic
+     accent on the second line (Evium's role in the
+     proposition), and a refined subhead with carefully tuned
+     contrast and line-length.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Eyebrow row — multi-piece editorial detail. */
+  .services-hero-eyebrow {
+    /* min-width:0 helps it collapse cleanly on very narrow
+       phones; flex-wrap protects the aux label from punching
+       the layout. */
+    flex-wrap: wrap;
+    min-width: 0;
+    /* Nudged down 1.85rem via relative offset (not margin)
+       so the eyebrow text clears the background light-dot it
+       was overlapping — relative positioning shifts only the
+       eyebrow visually, leaving the headline + everything
+       below in their original flow positions. */
+    position: relative;
+    top: 1.85rem;
+  }
+  /* Eyebrow dash — gradient (transparent → brand green → brand
+     green) so it fades in from the left edge like a director's
+     bar, not a uniform 1px line. */
+  .services-hero-eyebrow-dash {
+    display: inline-block;
     height: 1px;
-    background: linear-gradient(90deg, rgba(17,24,29,0.04), rgba(17,24,29,0.12), rgba(17,24,29,0.04));
+    width: 3rem;
+    background: linear-gradient(90deg, rgba(45, 200, 86, 0) 0%, rgba(45, 200, 86, 0.7) 60%, #2DC856 100%);
+    flex-shrink: 0;
+  }
+  /* Primary eyebrow label — uppercase, wide-tracked, brand-
+     green-tinged. */
+  .services-hero-eyebrow-text {
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #7DDEA1;
+    line-height: 1;
+  }
+  /* Tiny bullet between primary and auxiliary labels. */
+  .services-hero-eyebrow-dot {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+  }
+  /* Auxiliary right-side label — muted, lighter, gives the
+     eyebrow row an editorial duo-column feel. */
+  .services-hero-eyebrow-aux {
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.50);
+    line-height: 1;
   }
 
-  .uptime-panel {
-    background: rgba(255, 255, 255, 0.035);
+  /* Display headline — fluid sizing via clamp, deep negative
+     tracking for editorial-display feel, font-weight 900 for
+     gravitas. Slight text-shadow to lift the type a half-step
+     off the gradient background without ringing as a "drop
+     shadow". */
+  .services-hero-title {
+    margin: 0;
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 900;
+    /* Line-height bumped to 1.2 (was 1.08) AND padding-bottom
+       to 0.34em (was 0.18em) so the italic accent line's
+       descenders (the 'g' tail in "charging" especially)
+       have enough room inside the line box. The background-
+       clip:text rendering on the accent line clips glyphs
+       to the element's content box — without sufficient
+       line-height + padding-bottom, the bottom of italic
+       descenders gets visibly cut off. */
+    line-height: 1.2;
+    letter-spacing: -0.045em;
+    color: #ffffff;
+    font-size: clamp(2.75rem, 7.2vw, 6.25rem);
+    text-shadow: 0 1px 0 rgba(13, 27, 34, 0.18), 0 12px 32px rgba(13, 27, 34, 0.18);
+    padding-bottom: 0.34em;
+    overflow: visible;
+  }
+  .services-hero-title-line {
+    display: block;
+  }
+  /* Brand-green accent line — gradient-filled type (not flat
+     green) with a soft italic for editorial contrast against
+     the bold roman of line 1. The gradient runs brand-green →
+     lighter green → brand-green at 135° so the line catches
+     light unevenly like a polished metal nameplate. */
+  .services-hero-title-accent {
+    background: linear-gradient(135deg, #2DC856 0%, #6FE891 45%, #2DC856 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.038em;
+    /* The italic + lighter weight optical-trick of the green
+       line pairs against the bold roman of line 1 so the eye
+       reads them as two distinct voices in the same sentence,
+       not just "two lines of the same headline". */
+    /* Drop-shadow glow REMOVED — the user's descender-clip
+       complaint kept persisting because the glow halo
+       extended visually below the descender, which the eye
+       interpreted as a soft-cut at the glyph tail. With the
+       glow gone, the green-gradient italic text is striking
+       on its own (the gradient catches enough light to feel
+       lit) and the descender has crisp clean boundaries. */
+    filter: none;
+  }
+
+  /* Subhead — premium editorial-lede treatment.
+     Bigger fluid size, refined leading, inline emphasis on
+     the brand mention + scope phrases, and a left-rail green
+     marker that anchors the paragraph's start the way the
+     eyebrow's dash anchors the masthead row above. The marker
+     is a left-side ::before pseudo-element so it scales with
+     the first line of text instead of competing with inline
+     flow. */
+  .services-hero-sub {
+    position: relative;
+    margin: 0;
+    padding-left: clamp(0.95rem, 1.3vw, 1.2rem);
+    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(1.08rem, 1.38vw, 1.28rem);
+    line-height: 1.66;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.82);
+    letter-spacing: 0.002em;
+    text-shadow: 0 1px 0 rgba(13, 27, 34, 0.24);
+  }
+  /* Brand-green left-rail marker — a thin 2px vertical hairline
+     that anchors the paragraph's left edge. Uses a top-anchored
+     gradient that fades downward so the marker doesn't compete
+     with descender space on the last line. Slight glow extends
+     the brand-green vibe from the eyebrow + headline accent
+     down into the subhead, creating a vertical green spine
+     that runs the length of the hero copy block. */
+  .services-hero-sub::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.32em;
+    bottom: 0.32em;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #2DC856 0%, rgba(45, 200, 86, 0.4) 70%, rgba(45, 200, 86, 0.1) 100%);
+    box-shadow: 0 0 12px rgba(45, 200, 86, 0.28);
+  }
+  /* Visual marker span — present for accessibility / future-
+     proofing (some assistive contexts strip ::before content);
+     visually identical to the ::before rail. */
+  .services-hero-sub-mark {
+    display: none;
+  }
+  /* Brand mention — "Evium" rendered in brand green with
+     a small drop-shadow glow so the eye anchors on the
+     brand even when reading at a glance. (The earlier
+     attempt to split "Ev" green / "ium" white was reverted
+     per user feedback — single-color reads cleaner.) */
+  .services-hero-sub-brand {
+    font-weight: 700;
+    color: #6FE891;
+    letter-spacing: -0.005em;
+    filter: drop-shadow(0 0 10px rgba(45, 200, 86, 0.22));
+  }
+  /* Scope phrases — the four vertical names. Slight weight +
+     contrast boost so the eye recognises these as the answer
+     to "what kinds of property does Evium serve?" while still
+     reading as part of the paragraph's flow. */
+  .services-hero-sub-em {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.96);
+    letter-spacing: 0.001em;
+  }
+  /* Caveat clause — muted by a touch so the value-prop above
+     reads first. Still readable, just lower-contrast so the
+     eye lands on the scope phrases before reaching the
+     "without pushing owners into..." tail. */
+  .services-hero-sub-mute {
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     PROFITABILITY TERMINAL CARD — dashboard-grid backdrop
+     ═══════════════════════════════════════════════════════════
+     Subtle 1px dotted-grid overlay that gives the white card a
+     "live dashboard" feel without dominating. Sits absolutely
+     positioned at low opacity behind the card's content (which
+     bumps z-10). Mask-image fades the grid out toward the right
+     side so it doesn't compete with the calculator-icon glyph
+     up there. */
+  .profit-card-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle, rgba(17, 24, 29, 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: 0 0;
+    -webkit-mask-image: linear-gradient(135deg, #000 0%, #000 55%, transparent 90%);
+    mask-image: linear-gradient(135deg, #000 0%, #000 55%, transparent 90%);
+    opacity: 0.7;
+  }
+  /* Z-index lift the card's children so they paint above the
+     dashboard-grid backdrop. */
+  .profit-card > *:not(.profit-card-grid) {
+    position: relative;
+    z-index: 1;
   }
 
   .hero-base-bg {
@@ -669,66 +1371,204 @@ const standards = [
     filter: blur(0.5px);
   }
 
-  .meter-track {
-    width: 11rem;
-    height: 5.5rem;
+  /* (Network-reliability panel CSS lived here previously —
+     extracted to NetworkReliabilityPanel.astro as a self-
+     contained component. Drop it from this page since the
+     hero no longer renders the panel.) */
+
+  /* ═══════════════════════════════════════════════════════════════
+     REBATES & INCENTIVES — premium light panel. Two-column
+     editorial header + logos strip + program cards with
+     brand-green left accent strip. mix-blend-mode neutralizes
+     any white backgrounds embedded in the source logo files.
+     ═══════════════════════════════════════════════════════════════ */
+  .services-rebates {
+    background: #eef1f5;
+    color: #1A2F3A;
+    padding: clamp(100px, 13vh, 150px) 0;
+    border-top: 4px solid #2DC856;
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .services-rebates-container {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 80px);
+    position: relative; z-index: 1;
+  }
+  /* HEAD: left-aligned single-column. Kicker → big headline
+     → sub. Headline now wraps naturally instead of being
+     forced into 24ch — better visual fit for the section. */
+  .services-rebates-head {
+    margin-bottom: clamp(56px, 6.5vw, 80px);
+    max-width: 64ch;
+  }
+  .services-rebates-kicker {
+    margin: 0 0 18px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.28em;
+    text-transform: uppercase; color: #2DC856;
+  }
+  .services-rebates-title {
+    margin: 0 0 22px;
+    font-size: clamp(2.1rem, 4vw, 3.6rem);
+    font-weight: 900; line-height: 1.04; letter-spacing: -0.028em;
+    color: #1A2F3A;
+    max-width: 18ch;
+  }
+  .services-rebates-accent { color: #2DC856; }
+  .services-rebates-sub {
+    margin: 0;
+    font-size: clamp(1rem, 1.12vw, 1.12rem);
+    line-height: 1.62;
+    color: rgba(26, 47, 58, 0.7);
+    max-width: 58ch;
   }
 
-  .meter-svg {
+  /* ═══════════════════════════════════════════════════════════════
+     BACKED BY — standalone strip placed between the bento
+     and the Strategic Delivery Model section. Same body bg
+     (#eef1f5) so the strip blends visually; hairline borders
+     at top and bottom give it discrete separation without a
+     colored band. Logos render with transparent backgrounds
+     (stripped programmatically via PIL).
+     ═══════════════════════════════════════════════════════════════ */
+  .services-backed-by {
+    padding: clamp(48px, 6vw, 72px) 0;
+    border-top: 1px solid rgba(26, 47, 58, 0.12);
+    border-bottom: 1px solid rgba(26, 47, 58, 0.12);
+    font-family: 'Maven Pro', sans-serif;
+  }
+  .services-backed-by-container {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 80px);
+  }
+  .services-backed-by-label {
+    margin: 0 0 clamp(28px, 3vw, 40px);
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.28em;
+    text-transform: uppercase; color: rgba(26, 47, 58, 0.48);
+    text-align: center;
+  }
+  .services-backed-by-bar {
+    display: inline-block; width: 40px; height: 1px;
+    background: rgba(26, 47, 58, 0.28);
+  }
+  .services-backed-by-row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: clamp(32px, 4vw, 56px) clamp(28px, 3.5vw, 48px);
+  }
+  .services-backed-by-logo {
+    max-height: 48px; width: auto;
+    filter: saturate(0.92);
+    opacity: 0.88;
+    transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  }
+  .services-backed-by-logo:hover {
+    filter: saturate(1);
+    opacity: 1; transform: translateY(-2px);
+  }
+
+  /* PROGRAM CARDS — refined professional layout.
+     ────────────────────────────────────────────────────────
+     Each card has a clean vertical rhythm:
+       1. Logo (top, isolated, allowed breathing room)
+       2. Hairline divider (separates logo from textual info)
+       3. Header row: program name (left) + small status
+          label (right, refined, no colored pill)
+       4. Agency line (small, muted, single line)
+       5. Description body
+     Forced 2-column grid on desktop, single column on mobile.
+     Generous padding throughout for premium feel. */
+  .services-rebates-programs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(20px, 2.4vw, 26px);
+  }
+  @media (min-width: 760px) {
+    .services-rebates-programs { grid-template-columns: 1fr 1fr; }
+  }
+  .services-rebates-program {
+    background: #ffffff;
+    border: 1px solid rgba(26, 47, 58, 0.09);
+    border-radius: 14px;
+    padding: clamp(28px, 3vw, 36px);
+    box-shadow: 0 1px 0 rgba(26, 47, 58, 0.02);
+    transition:
+      border-color 0.25s ease,
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .services-rebates-program:hover {
+    border-color: rgba(26, 47, 58, 0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(26, 47, 58, 0.07);
+  }
+
+  /* Logo zone — isolated at top, generous height for impact. */
+  .services-rebates-program-logo-wrap {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    margin-bottom: clamp(22px, 2.4vw, 28px);
+  }
+  .services-rebates-program-logo {
+    max-height: 56px;
+    max-width: 200px;
+    width: auto;
+  }
+
+  /* Hairline divider between logo zone and textual info —
+     creates a clean editorial break. */
+  .services-rebates-program-divider {
     display: block;
-    width: 100%;
-    height: 100%;
+    height: 1px;
+    background: rgba(26, 47, 58, 0.08);
+    margin-bottom: clamp(20px, 2.2vw, 26px);
   }
 
-  .status-light {
-    display: inline-block;
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 999px;
-    position: relative;
+  /* Header row: name (flex-1) + small refined status label
+     (right, no colored pill — just small uppercase text in
+     a discrete framed strip). */
+  .services-rebates-program-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 6px;
   }
-
-  .status-green {
-    background: #2DC856;
-    color: #2DC856;
+  .services-rebates-program-name {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(1.18rem, 1.35vw, 1.42rem);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    color: #1A2F3A;
+    line-height: 1.22;
   }
-
-  .status-yellow {
-    background: #E0B84F;
-    color: #E0B84F;
+  .services-rebates-program-status {
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(26, 47, 58, 0.55);
+    white-space: nowrap;
   }
-
-  .status-red {
-    background: #B64A4A;
-    color: #B64A4A;
+  .services-rebates-program-agency {
+    margin: 0 0 18px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(26, 47, 58, 0.6);
+    line-height: 1.4;
   }
-
-  .status-light.is-on {
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.28),
-      inset 0 -1px 2px rgba(0,0,0,0.24),
-      0 0 0 1px rgba(255,255,255,0.06),
-      0 0 12px color-mix(in srgb, currentColor 45%, transparent);
-    filter: saturate(1.15) brightness(1.08);
+  .services-rebates-program-desc {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.62;
+    color: rgba(26, 47, 58, 0.72);
   }
-
-  .status-light.is-off {
-    opacity: 0.95;
-    background-image:
-      radial-gradient(circle at 30% 28%, rgba(255,255,255,0.26), rgba(255,255,255,0.08) 26%, transparent 42%),
-      radial-gradient(circle at 50% 58%, color-mix(in srgb, currentColor 52%, #0d1419 48%) 0%, color-mix(in srgb, currentColor 32%, #0d1419 68%) 55%, rgba(6,10,14,0.88) 100%);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.14),
-      inset 0 -1px 2px rgba(0,0,0,0.38),
-      0 0 0 1px rgba(255,255,255,0.05);
-    filter: saturate(0.92) brightness(0.76);
-  }
-
-  .uptime-value {
-    font-family: "Maven Pro", ui-sans-serif, system-ui, sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.05em;
-    font-variant-numeric: tabular-nums lining-nums;
+  @media (max-width: 460px) {
+    .services-rebates-program-head { flex-direction: column; align-items: flex-start; gap: 6px; }
   }
 
   /* ═══════════════════════════════════════════════════════════════

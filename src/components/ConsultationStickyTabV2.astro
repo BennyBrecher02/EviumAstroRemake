@@ -1,0 +1,806 @@
+---
+/**
+ * ConsultationStickyTabV2
+ * ────────────────────────
+ * V2 of the right-edge sticky-tab + drawer. Used ONLY by
+ * /home-v4 for now (mirrors the V2 form rollout — refined
+ * here first, promoted sitewide if it lands).
+ *
+ * What's different from V1:
+ *
+ *   • Narrower tab. Padding tightened from 14px/9px to
+ *     14px/6px; letter-spacing eased from 0.14em to
+ *     0.12em; font size dropped 0.74rem → 0.70rem. Net:
+ *     the tab takes ~6-7px less horizontal width and
+ *     visually hugs the wall more tightly. Same
+ *     vertical height + same brand-green styling so the
+ *     reading affordance is unchanged.
+ *
+ *   • Drawer renders ConsultationFormV2 (the new
+ *     consultation form) instead of the V1 form.
+ *
+ *   • Improved frosted-glass shading. Three refinements
+ *     layered on top of V1's chrome:
+ *       1. SVG-noise overlay via ::before with mix-
+ *          blend-mode:overlay at very low opacity —
+ *          simulates the micro-grain of etched/frosted
+ *          glass. Real frosted glass has a tactile
+ *          surface that scatters light unevenly at
+ *          microscale; without it the pane reads as
+ *          smooth digital glass instead of physical
+ *          glass.
+ *       2. Strengthened left-edge fresnel highlight.
+ *          The drawer's left edge is the one the viewer
+ *          sees most directly, so it catches the most
+ *          light (Fresnel: reflectance rises at grazing
+ *          angles). Peak boosted ~24% on the leftmost
+ *          highlight layer.
+ *       3. Subsurface volume glow. A very soft, large
+ *          radial in the center of the pane at minimal
+ *          opacity — simulates light entering the glass
+ *          and scattering inside its volume. Adds the
+ *          "thickness has presence" feel that flat
+ *          digital glass lacks.
+ *
+ *     Data attributes namespaced cst → cs2 so a future
+ *     mixed page with both V1 and V2 tabs doesn't run
+ *     scripts on each other's DOM.
+ *
+ * Visibility logic and drawer mechanics are identical
+ * to V1 (IntersectionObserver on .home-hero; backdrop +
+ * drawer with focus trap; Esc/click-out/close-button to
+ * dismiss; body scroll lock).
+ *
+ * Self-contained: no required props, no slots.
+ */
+
+import ConsultationForm from './ConsultationFormV2.astro';
+
+interface Props {
+  /**
+   * When true, the tab is visible from page load and
+   * doesn't wait for the hero to scroll out of view.
+   * Use on pages that don't have a `.home-hero` element
+   * and where the conversion CTA should be a permanent
+   * affordance (e.g. /products-v2).
+   */
+  alwaysVisible?: boolean;
+}
+
+const { alwaysVisible = false } = Astro.props;
+---
+
+<!-- Right-edge tab — minimal text-only vertical pill,
+     matching the Clozetivity reference (no extra icons,
+     no dots, no arrows). Hidden via [hidden]; JS reveals
+     it once the hero leaves the viewport (or immediately,
+     when data-cs2-always-visible is set). -->
+<button
+  type="button"
+  class="cst-tab"
+  data-cs2-tab
+  data-cs2-always-visible={alwaysVisible ? 'true' : 'false'}
+  aria-label="Open free consultation form"
+  aria-controls="cst-drawer"
+  aria-expanded="false"
+  hidden
+>
+  <span class="cst-tab-label">Free Consultation</span>
+</button>
+
+<!-- Drawer + backdrop. role=dialog so screen readers
+     announce it; aria-modal=true ensures focus stays
+     trapped inside while it's open. -->
+<div
+  class="cst-drawer-root"
+  data-cs2-root
+  hidden
+>
+  <button
+    type="button"
+    class="cst-backdrop"
+    data-cs2-backdrop
+    aria-label="Close consultation form"
+    tabindex="-1"
+  ></button>
+
+  <aside
+    id="cst-drawer"
+    class="cst-drawer"
+    data-cs2-drawer
+    role="dialog"
+    aria-modal="true"
+    aria-label="Free site consultation"
+  >
+    <!-- Drawer chrome — a slim, dedicated top header
+         bar that holds the close button, so the close
+         affordance lives in its own space and never
+         overlaps the form below. The bar has no border
+         and minimal padding; it reads as a clean
+         "title bar" of the glass pane. -->
+    <header class="cst-drawer-bar">
+      <button
+        type="button"
+        class="cst-close"
+        data-cs2-close
+        aria-label="Close consultation form"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M7 7l10 10M17 7L7 17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.65"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </header>
+
+    <div class="cst-drawer-body">
+      <ConsultationForm formId="cst-drawer-form" />
+    </div>
+  </aside>
+</div>
+
+<style>
+  /* ─── Right-edge tab (V2 — reverted to V1 dims) ───
+     The earlier V2 squash (padding 14/6, smaller font,
+     tighter letter-spacing) was undone — manager
+     preferred V1's original tab footprint. Tab is
+     identical in dimensions to V1; the V2-specific
+     work lives in the DRAWER (V2 form inside, refined
+     glass shading, namespaced data attrs). */
+  .cst-tab {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 9px;
+    margin: 0;
+    border-radius: 8px 0 0 8px;
+    border: 0;
+    background: linear-gradient(180deg, #2DC856 0%, #25b349 100%);
+    color: #ffffff;
+    font-family: 'Maven Pro', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    min-height: 170px;
+    transform: translate(0, -50%);
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 280ms ease;
+    box-shadow:
+      inset 1px 0 0 rgba(255, 255, 255, 0.28),
+      0 4px 12px rgba(45, 200, 86, 0.32),
+      0 10px 22px rgba(13, 28, 36, 0.28),
+      -2px 0 10px rgba(45, 200, 86, 0.24);
+  }
+  .cst-tab[hidden] {
+    display: none;
+  }
+  /* Hover state: INVERTS the tab — white background,
+     brand-green text + a white halo glow instead of the
+     green halo. Reads as a deliberate "press me" affordance
+     and stands out distinctly from the resting state. */
+  .cst-tab:hover {
+    background: #ffffff;
+    color: #2DC856;
+    transform: translate(-3px, -50%);
+    box-shadow:
+      inset 1px 0 0 rgba(45, 200, 86, 0.18),
+      0 4px 16px rgba(255, 255, 255, 0.5),
+      0 14px 28px rgba(13, 28, 36, 0.32),
+      -2px 0 22px rgba(255, 255, 255, 0.6);
+  }
+  .cst-tab:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+  }
+
+  .cst-tab-label {
+    white-space: nowrap;
+  }
+
+  /* Faded-in state — controlled via data attribute by
+     the IntersectionObserver. */
+  .cst-tab[data-cs2-visible="false"] {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+  .cst-tab[data-cs2-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Drawer-open state — hide the tab WHILE the drawer
+     is open AND through the close animation. Without
+     this, the tab peeked out from behind the drawer
+     during the 320 ms slide-close transition. The JS
+     clears this flag only AFTER the drawer is fully
+     hidden again. */
+  .cst-tab[data-cs2-drawer-open="true"] {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+
+  /* ─── Drawer root ──────────────────────────────────
+     Wraps backdrop + drawer aside. Hidden initially;
+     `[open]` (or removing [hidden]) shows it. */
+  .cst-drawer-root {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: block;
+  }
+  .cst-drawer-root[hidden] {
+    display: none;
+  }
+
+  /* Backdrop — dim + blur the page behind the drawer. */
+  .cst-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(8, 18, 26, 0.55);
+    backdrop-filter: blur(6px) saturate(70%);
+    -webkit-backdrop-filter: blur(6px) saturate(70%);
+    cursor: pointer;
+    /* Fade in via transition when drawer opens. */
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+  .cst-drawer-root[data-cs2-open="true"] .cst-backdrop {
+    opacity: 1;
+  }
+
+  /* Drawer aside — slides in from the right edge.
+     Background: REAL WHITE-ISH GLASS, with DIRECTIONAL
+     lighting (top + left lit, right + bottom in soft
+     shadow). The previous version had all four edges
+     equally bright which read as "painted-on borders".
+     This version commits to a single light source in
+     the upper-left, the way real glass actually behaves.
+
+     Soft, refractive, NOT framed. No crisp white lines.
+     Every highlight has a gentle gradient falloff so the
+     edges read as glass thickness catching light, not
+     as a stroke drawn around the pane. */
+  .cst-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(440px, 100%);
+    background:
+      /* LEFT-EDGE HORIZONTAL GRADIENT (V2 round 5 —
+         continuous emphasis).
+         Earlier rounds used two discrete radial pearls
+         at the left corners, but the eye still read
+         "two points overemphasized" rather than a
+         coherent edge. This is a single horizontal
+         linear gradient that runs from the LEFT edge
+         (bright) to about the middle (transparent),
+         producing a continuous lit vertical band along
+         the visible left edge. No discrete spots — the
+         whole edge is the emphasis. Peak modest (0.22)
+         so the band reads as ambient room light
+         catching the glass edge, not a strong
+         spotlight. */
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.14) 8%,
+        rgba(255, 255, 255, 0.06) 22%,
+        rgba(255, 255, 255, 0.02) 40%,
+        transparent 60%
+      ),
+      /* TOP-LEFT CORNER ACCENT — small radial that adds
+         a touch more brightness right at the top-left
+         corner, on TOP of the horizontal gradient
+         above. Reads as a natural extension of the
+         lit edge that catches a bit more at the corner
+         where the top edge meets the left edge — not as
+         a separate spot. Centered AT the corner with
+         tight falloff so it stays a corner accent, not
+         a pearl. */
+      radial-gradient(
+        ellipse 30% 22% at 0% 0%,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.06) 45%,
+        rgba(255, 255, 255, 0) 80%
+      ),
+      /* BOTTOM-LEFT CORNER ACCENT — vertical mirror of
+         the top-left accent. Same tight falloff, same
+         peak. Together with the horizontal gradient
+         these accents form: bright at top-left corner →
+         slightly less bright along the middle of the
+         left edge → bright again at bottom-left corner.
+         Continuous, not discrete. */
+      radial-gradient(
+        ellipse 30% 22% at 0% 100%,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.06) 45%,
+        rgba(255, 255, 255, 0) 80%
+      ),
+      /* 4. UPPER-RIGHT FILL PEARL — bounced room fill,
+         softened from 0.26 → 0.16. */
+      radial-gradient(
+        ellipse 40% 30% at 96% 2%,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(255, 255, 255, 0) 72%
+      ),
+      /* 5. WET-GLASS HOTSPOT — subtle specular peak
+         in the upper-third (softened to 0.12). */
+      radial-gradient(
+        ellipse 34% 24% at 38% 16%,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0) 78%
+      ),
+      /* 5.5. SUBSURFACE VOLUME GLOW — NEW in V2.
+         A very large, very soft radial centered in
+         the pane at minimal opacity. Simulates the
+         light that ENTERS the glass and scatters
+         inside its volume (subsurface scattering) —
+         not a surface reflection like the layers
+         above, but a tiny luminescence coming from
+         within. Real architectural frosted glass has
+         this when lit from one side: the pane itself
+         appears to "glow" subtly, with the brightness
+         peak in the middle and falloff to the edges.
+         Slight warm tint (255,252,248) instead of
+         pure white so the volume reads as warm-lit. */
+      radial-gradient(
+        ellipse 70% 55% at 50% 45%,
+        rgba(255, 252, 248, 0.12) 0%,
+        rgba(255, 252, 248, 0.06) 38%,
+        rgba(255, 252, 248, 0) 75%
+      ),
+      /* DIAGONAL SHEEN (135°) REMOVED in V2 round 4.
+         The 135° gradient peaked at the upper-LEFT of
+         the pane and faded to the lower-RIGHT, which
+         broke the symmetric upper-left + lower-left
+         pearl pair (the diagonal sheen biased the
+         visible edge UP toward the top, partially
+         undoing the symmetry). With the diagonal gone,
+         the two left-corner pearls are the only major
+         highlights on the visible side and they're
+         vertically symmetric. */
+      /* 7. INTERNAL GREEN BLEED — faint ghost of the
+         submit button caught inside the glass, softened
+         to 0.06. */
+      radial-gradient(
+        ellipse 75% 28% at 50% 100%,
+        rgba(45, 200, 86, 0.06) 0%,
+        rgba(45, 200, 86, 0) 72%
+      ),
+      /* 8. BOTTOM-RIGHT COOL POOL — temperature shift
+         (top warmer, bottom cooler — real lit glass). */
+      radial-gradient(
+        ellipse 58% 52% at 100% 100%,
+        rgba(220, 234, 245, 0.20) 0%,
+        rgba(220, 234, 245, 0) 72%
+      ),
+      /* 9. BASE TRANSLUCENT WHITE — ~32% opacity.
+         Low enough that backdrop-filter does real
+         refractive work; high enough that the glass
+         reads WHITE, not colorless. */
+      linear-gradient(
+        180deg,
+        rgba(252, 254, 255, 0.32) 0%,
+        rgba(246, 250, 254, 0.36) 100%
+      );
+    color: #1a2f3a;
+    /* REFRACTION ENGINE — same as before, this part
+       is doing the right thing. */
+    backdrop-filter: blur(15px) saturate(195%) contrast(115%) brightness(110%);
+    -webkit-backdrop-filter: blur(15px) saturate(195%) contrast(115%) brightness(110%);
+    /* SHADOW STACK — depth without painted bevels.
+       The trick: big-blur + negative-spread inset
+       shadows. They produce SOFT INNER GLOWS that fade
+       inward from the edge, instead of crisp 1 px
+       strokes that read as painted-on borders.
+         • inner top glow — soft white falling from
+           above, blurred 90 px, spread -50 so it
+           hugs the top zone with no hard edge. Reads
+           as light entering through the polished top
+           of the pane.
+         • inner left glow — same treatment from the
+           lit side (where the brand-green rail meets
+           the glass).
+         • inner bottom darkness — subtle seated cue,
+           also soft (no bottom border).
+         • brand-green LEFT hairline + halo bleed
+         • close / mid / deep drops */
+    /* Inset corner glows REMOVED in V2 round 3. They
+       were the box-shadow equivalent of the linear top
+       + left edge highlights — wide soft white inset
+       glows that peaked AT the corner, compounding the
+       corner brightness. With the linear edge
+       highlights gone too, removing these is the
+       structural fix for the top-left corner reading
+       as artificial. The radial pearl now lights the
+       corner alone, the way a single light source
+       would in real life.
+       Inset bottom darkness stays (seated cue, no
+       corner stacking). Brand-green left hairline +
+       halo stay (defining edge against the page). */
+    box-shadow:
+      inset 0 -8px 30px -8px rgba(13, 27, 34, 0.06),
+      -2px 0 0 0 rgba(45, 200, 86, 0.55),
+      -14px 0 40px rgba(45, 200, 86, 0.22),
+      -4px 0 16px rgba(8, 18, 26, 0.18),
+      -18px 0 44px rgba(8, 18, 26, 0.28),
+      -40px 0 88px rgba(8, 18, 26, 0.38);
+    transform: translateX(100%);
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Stacking context so ::before / ::after sit above
+       the multi-gradient background but below the
+       drawer's child content (close bar + form). */
+    isolation: isolate;
+  }
+  /* FROSTED-GRAIN OVERLAY — NEW in V2.
+     A SVG turbulence filter generates fractal noise,
+     tiled across the drawer surface at very low
+     opacity with mix-blend-mode:overlay. This adds
+     the micro-scale surface scattering that distinguishes
+     etched/frosted glass from smooth digital glass.
+     Real frosted glass has a tactile etched face that
+     breaks up reflections at microscale; without that
+     texture the pane reads as a polished plastic sheet.
+     Opacity is intentionally tiny (~5%) — visible only
+     under close inspection but enough to give the glass
+     a "physical surface" feel. Marked z-index:1 so it
+     paints OVER the background gradients but UNDER the
+     drawer body content. */
+  .cst-drawer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+  }
+  /* Children of the drawer that need to paint above the
+     noise overlay get z-index:2. (The close-bar and
+     form body don't otherwise specify z-index; without
+     this they'd render underneath the overlay because
+     the overlay's z-index:1 puts it above the
+     unindexed default.) */
+  .cst-drawer > * {
+    position: relative;
+    z-index: 2;
+  }
+  .cst-drawer-root[data-cs2-open="true"] .cst-drawer {
+    transform: translateX(0);
+  }
+
+  /* Drawer top bar — slim, no border, holds the close
+     button in the upper-right of the drawer. Lives ABOVE
+     the form so the X never overlaps form content; the
+     form below gets the entire remaining height to
+     center itself in. */
+  .cst-drawer-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 18px 8px;
+  }
+
+  /* Close button — brushed-metal rounded square (V1).
+     The V2 smoked-glass experiment was rolled back per
+     manager feedback. Same brushed-aluminum cool-gray
+     gradient + multi-layer chrome shadow stack as V1.
+
+       • SHAPE: rounded square, 10px radius.
+       • COLOR: cool gray gradient (#eef2f4 → #d8dee2)
+         — reads as brushed metal / polished granite.
+       • ICON: dark teal X (#15252b), 1.65px stroke.
+       • DEPTH: inset top highlight, inset bottom
+         seated edge, hairline outer ring, four-tier
+         drop shadow.
+       • HOVER: brand-green wake — X turns green, face
+         brightens, ring picks up green, button lifts. */
+  .cst-close {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(180deg, #eef2f4 0%, #d8dee2 100%);
+    color: #15252b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(13, 27, 34, 0.08),
+      inset 0 0 0 1px rgba(13, 27, 34, 0.06),
+      0 1px 2px rgba(8, 18, 26, 0.06),
+      0 4px 10px -2px rgba(8, 18, 26, 0.08),
+      0 12px 24px -6px rgba(8, 18, 26, 0.10);
+    transition:
+      color 240ms ease,
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms ease,
+      background 280ms ease;
+  }
+  /* ::before pseudo-element kept as a no-op for now
+     (was previously a radial-gradient halo that read
+     as "circle inside a box" because its border-radius
+     didn't match the button's). The new hover effect is
+     pure box-shadow, which respects the button's actual
+     border-radius and produces a halo that hugs the
+     button's rounded-square outline exactly. */
+  .cst-close::before {
+    content: none;
+  }
+  /* Hover — premium layered green glow that hugs the
+     button's 10px rounded-square outline (box-shadow
+     always conforms to the element's border-radius).
+     The halo is built from four shadow tiers, each
+     respecting the button shape:
+       1. A 1px crisp green outline ring sitting tight
+          to the button edge — defines the shape sharply.
+       2. A close warm halo (2-8px blur) — the "buttery
+          green glow" hugging the button.
+       3. A wider soft halo (8-22px blur) — ambient
+          bloom extending outward, still rounded-square.
+       4. A deep neutral drop (24-48px blur) — anchors
+          the button to the drawer with depth.
+     Plus the existing inset chrome details (top
+     highlight, bottom green hairline, inset green ring)
+     that came from V1 styling.
+     All halo edges follow the button's rounded-square
+     border-radius — no shape mismatch. */
+  .cst-close:hover {
+    color: #2DC856;
+    background: linear-gradient(180deg, #f3f7f8 0%, #dee5e7 100%);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(45, 200, 86, 0.12),
+      inset 0 0 0 1px rgba(45, 200, 86, 0.32),
+      0 0 0 1px rgba(45, 200, 86, 0.22),
+      0 2px 6px rgba(45, 200, 86, 0.22),
+      0 6px 14px rgba(45, 200, 86, 0.20),
+      0 14px 28px rgba(45, 200, 86, 0.16),
+      0 26px 48px -8px rgba(8, 18, 26, 0.14);
+  }
+  .cst-close:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(45, 200, 86, 0.14),
+      inset 0 0 0 1px rgba(45, 200, 86, 0.42),
+      0 0 0 1px rgba(45, 200, 86, 0.28),
+      0 2px 6px rgba(45, 200, 86, 0.24),
+      0 6px 14px rgba(45, 200, 86, 0.18);
+  }
+  /* X icon — absolute-positioned at the button's exact
+     center via top: 50% / left: 50% + translate(-50%,
+     -50%). This GUARANTEES the icon stays centered
+     regardless of flex quirks, pseudo-elements, or any
+     other layout influence. The SVG path itself draws
+     the X symmetric across both axes within the 24×24
+     viewBox, so visual center matches geometric center. */
+  .cst-close svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translate(-50%, -50%);
+    display: block;
+    z-index: 1;
+  }
+  .cst-close:focus-visible {
+    outline: 2px solid #2DC856;
+    outline-offset: 4px;
+  }
+
+  /* Drawer body — flex column that VERTICALLY centers
+     the form within the available height. Combined with
+     the slim top bar above, the form sits in the middle
+     of the drawer (about 32% from top to balance with
+     the bar's weight up top), so the empty space above
+     and below reads as deliberate breathing room. */
+  .cst-drawer-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Form sizing inside the drawer (V2). V1 stretched
+     to 100% (too fat); V2-initial capped at 300px
+     (too small — wasted glass real estate). Sweet spot
+     360px: comfortably above the form's natural
+     desktop max (340) so it uses available width
+     without crowding the drawer's edges. Glass gutter
+     comes out to ~26px each side — a deliberate
+     "card embedded in glass panel" feel without
+     starving the form of space. */
+  .cst-drawer-body :global(.cf-form) {
+    max-width: 360px;
+  }
+
+  /* ─── Body scroll lock helper ──────────────────────
+     When the drawer is open, the document gets a class
+     on <html> that disables overflow so the page behind
+     doesn't scroll. JS toggles this class. */
+  :global(html.cs2-locked) {
+    overflow: hidden;
+  }
+
+  /* ─── HeaderV4 menu coexistence ────────────────────
+     When HeaderV4's full-screen list menu is open
+     (body gets `.lv4-menu-open`), the page content is
+     replaced by the menu overlay. The sticky tab and
+     drawer would otherwise float on TOP of that
+     overlay, which reads as messy / unprofessional.
+     Hide both temporarily; CSS transitions handle the
+     fade so the tab smoothly disappears as the menu
+     opens and smoothly reappears when it closes. */
+  :global(body.lv4-menu-open) .cst-tab {
+    opacity: 0;
+    transform: translate(40px, -50%);
+    pointer-events: none;
+  }
+  :global(body.lv4-menu-open) .cst-drawer-root {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  /* ─── Reduced motion ───────────────────────────────
+     Drawer slide is a discrete action (not ambient)
+     so it stays. The minimal tab has no animations
+     to disable. */
+</style>
+
+<script>
+  // ─── State refs ─────────────────────────────────
+  const tab        = document.querySelector<HTMLButtonElement>('[data-cs2-tab]');
+  const drawerRoot = document.querySelector<HTMLElement>('[data-cs2-root]');
+  const drawer     = document.querySelector<HTMLElement>('[data-cs2-drawer]');
+  const backdrop   = document.querySelector<HTMLButtonElement>('[data-cs2-backdrop]');
+  const closeBtn   = document.querySelector<HTMLButtonElement>('[data-cs2-close]');
+
+  // ─── Open / close drawer ────────────────────────
+  let lastFocused: Element | null = null;
+
+  function openDrawer() {
+    if (!drawerRoot || !drawer || !tab) return;
+    lastFocused = document.activeElement;
+    drawerRoot.hidden = false;
+    // Hide the tab IMMEDIATELY so it doesn't peek out
+    // from behind the drawer as it slides in or out.
+    tab.setAttribute('data-cs2-drawer-open', 'true');
+    // Defer to next frame so the [hidden] removal lands
+    // before we flip the [data-cs2-open] flag — that way
+    // the CSS transition (transform + opacity) plays.
+    requestAnimationFrame(() => {
+      drawerRoot.setAttribute('data-cs2-open', 'true');
+    });
+    tab.setAttribute('aria-expanded', 'true');
+    document.documentElement.classList.add('cs2-locked');
+    // Focus the close button so keyboard users can Esc /
+    // tab back through the form.
+    const firstFocusable = drawer.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    firstFocusable?.focus();
+  }
+
+  function closeDrawer() {
+    if (!drawerRoot || !tab) return;
+    drawerRoot.setAttribute('data-cs2-open', 'false');
+    tab.setAttribute('aria-expanded', 'false');
+    document.documentElement.classList.remove('cs2-locked');
+    // Wait for the drawer slide-out transition (320ms)
+    // to finish before re-hiding the root AND restoring
+    // the tab. If we restored the tab earlier, it would
+    // pop into view while the drawer is still mid-slide,
+    // which reads as a glitch.
+    setTimeout(() => {
+      drawerRoot.hidden = true;
+      tab.setAttribute('data-cs2-drawer-open', 'false');
+    }, 320);
+    // Return focus to whatever triggered the open.
+    if (lastFocused instanceof HTMLElement) {
+      lastFocused.focus();
+    }
+  }
+
+  tab?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawerRoot && drawerRoot.getAttribute('data-cs2-open') === 'true') {
+      e.preventDefault();
+      closeDrawer();
+    }
+  });
+
+  // ─── Tab visibility ─────────────────────────────
+  // Three modes, in priority order:
+  //
+  //   1. ALWAYS-VISIBLE: when the component is rendered
+  //      with `alwaysVisible` (data-cs2-always-visible
+  //      attribute on the tab is "true"), the tab is
+  //      shown from page load and stays visible — no
+  //      hero-watching, no scroll threshold. Used on
+  //      pages where the consultation CTA should be a
+  //      permanent affordance (e.g. /products-v2).
+  //
+  //   2. HERO OBSERVER: when a `.home-hero` element is
+  //      present, an IntersectionObserver watches it.
+  //      The tab is hidden while the hero is in view
+  //      (the hero's own form is the primary CTA there)
+  //      and revealed once the hero leaves view.
+  //
+  //   3. SCROLL FALLBACK: no hero on the page. Tab
+  //      becomes visible after the user scrolls past
+  //      80 vh.
+  function setTabVisible(visible: boolean) {
+    if (!tab) return;
+    tab.hidden = false;
+    tab.setAttribute('data-cs2-visible', visible ? 'true' : 'false');
+  }
+
+  const alwaysVisible = tab?.getAttribute('data-cs2-always-visible') === 'true';
+
+  if (alwaysVisible) {
+    setTabVisible(true);
+  } else {
+    const heroEl = document.querySelector('.home-hero');
+    if (heroEl) {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          setTabVisible(entry.intersectionRatio < 0.1);
+        },
+        { threshold: [0, 0.1, 0.5, 1] }
+      );
+      io.observe(heroEl);
+      setTabVisible(false);
+    } else {
+      setTabVisible(false);
+      let scrollHandlerRunning = false;
+      window.addEventListener('scroll', () => {
+        if (scrollHandlerRunning) return;
+        scrollHandlerRunning = true;
+        requestAnimationFrame(() => {
+          const past = window.scrollY > window.innerHeight * 0.8;
+          setTabVisible(past);
+          scrollHandlerRunning = false;
+        });
+      }, { passive: true });
+    }
+  }
+</script>
